@@ -105,7 +105,7 @@ public class Layer {
 				this.nextAnimation = null;
 			} else {
 				if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
-					this.animationPlayer.getAnimation().end(entitypatch, Animations.DUMMY_ANIMATION, true);
+					this.animationPlayer.getAnimation().end(entitypatch, Animations.DUMMY_ANIMATION.get(), true);
 				} else {
 					this.off(entitypatch);
 				}
@@ -229,7 +229,7 @@ public class Layer {
 		public void disableLayer(Priority priority) {
 			Layer layer = this.compositeLayers.get(priority);
 			layer.disabled = true;
-			Animations.DUMMY_ANIMATION.putOnPlayer(layer.animationPlayer);
+			Animations.DUMMY_ANIMATION.get().putOnPlayer(layer.animationPlayer);
 		}
 		
 		public Layer getLayer(Priority priority) {

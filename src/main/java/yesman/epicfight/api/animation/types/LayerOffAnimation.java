@@ -58,6 +58,6 @@ public class LayerOffAnimation extends DynamicAnimation {
 	
 	@Override
 	public DynamicAnimation getRealAnimation() {
-		return Animations.DUMMY_ANIMATION;
+		return Animations.DUMMY_ANIMATION.get();
 	}
 }

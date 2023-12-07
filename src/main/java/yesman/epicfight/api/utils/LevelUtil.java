@@ -235,7 +235,7 @@ public class LevelUtil {
 					float damage = (float)(radius * 2.0D * Math.min(damageInflict, 1.0D));
 					EpicFightDamageSources damageSources = EpicFightDamageSources.of(entity.level());
 					entity.hurt(damageSources.shockwave(caster)
-										     .setAnimation(Animations.DUMMY_ANIMATION)
+										     .setAnimation(Animations.DUMMY_ANIMATION.get())
 									         .setInitialPosition(center)
 						                     .addTag(SourceTags.FINISHER)
 						                     .setStunType(StunType.KNOCKDOWN)

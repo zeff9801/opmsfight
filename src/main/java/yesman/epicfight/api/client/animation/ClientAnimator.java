@@ -124,7 +124,7 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public StaticAnimation getCompositeLivingMotion(LivingMotion motion) {
-		return this.compositeLivingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION);
+		return this.compositeLivingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION.get());
 	}
 	
 	@Override

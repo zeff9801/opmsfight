@@ -70,7 +70,7 @@ public abstract class DynamicAnimation {
 	
 	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		if (!entitypatch.isLogicalClient()) {
-			pose1 = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
+			pose1 = Animations.DUMMY_ANIMATION.get().getPoseByTime(entitypatch, 0.0F, 1.0F);
 		}
 		
 		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;

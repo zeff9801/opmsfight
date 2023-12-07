@@ -19,7 +19,7 @@ public class OffAnimation extends StaticAnimation {
 				entitypatch.getClientAnimator().getCompositeLayer(this.getPriority()).off(entitypatch);
 			}
 		} else {
-			entitypatch.getAnimator().playAnimation(Animations.DUMMY_ANIMATION, 0.0F);
+			entitypatch.getAnimator().playAnimation(Animations.DUMMY_ANIMATION.get(), 0.0F);
 		}
 	}
 	

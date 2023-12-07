@@ -2,6 +2,7 @@ package yesman.epicfight.gameasset;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
@@ -9,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -36,6 +38,10 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegistryBuilder;
+import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -53,29 +59,8 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
-import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.AimAnimation;
-import yesman.epicfight.api.animation.types.AirSlashAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
-import yesman.epicfight.api.animation.types.DashAttackAnimation;
-import yesman.epicfight.api.animation.types.DodgeAnimation;
-import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.api.animation.types.GuardAnimation;
-import yesman.epicfight.api.animation.types.HitAnimation;
-import yesman.epicfight.api.animation.types.InvincibleAnimation;
-import yesman.epicfight.api.animation.types.KnockdownAnimation;
-import yesman.epicfight.api.animation.types.LinkAnimation;
-import yesman.epicfight.api.animation.types.LongHitAnimation;
-import yesman.epicfight.api.animation.types.MirrorAnimation;
-import yesman.epicfight.api.animation.types.MountAttackAnimation;
-import yesman.epicfight.api.animation.types.MovementAnimation;
-import yesman.epicfight.api.animation.types.OffAnimation;
-import yesman.epicfight.api.animation.types.RangedAttackAnimation;
-import yesman.epicfight.api.animation.types.ReboundAnimation;
-import yesman.epicfight.api.animation.types.SelectiveAnimation;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.grappling.GrapplingAttackAnimation;
 import yesman.epicfight.api.animation.types.grappling.GrapplingTryAnimation;
 import yesman.epicfight.api.animation.types.procedural.EnderDragonActionAnimation;
@@ -130,7 +115,13 @@ import org.joml.Quaternionf;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
-	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
+	public static DeferredRegister<StaticAnimation> ANIMATIONS = DeferredRegister.create(new ResourceLocation(EpicFightMod.MODID, "magics"), EpicFightMod.MODID);
+	public static Supplier<IForgeRegistry<StaticAnimation>> registry = ANIMATIONS.makeRegistry(RegistryBuilder::new);
+
+
+	public static final RegistryObject<StaticAnimation> DUMMY_ANIMATION = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"dummy_animation").getPath(), () -> new StaticAnimation());
+
+	//public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
 	public static StaticAnimation BIPED_RUN;
@@ -152,7 +143,8 @@ public class Animations {
 	public static StaticAnimation BIPED_DIG_OFFHAND;
 	public static StaticAnimation BIPED_DIG;
 	public static StaticAnimation BIPED_RUN_SPEAR;
-	public static StaticAnimation BIPED_HOLD_GREATSWORD;
+	public static  final RegistryObject<StaticAnimation> BIPED_HOLD_GREATSWORD = ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "hold_greatsword").getPath(), () -> new StaticAnimation(true, "biped/living/hold_greatsword", Armatures.BIPED));
+	//public static StaticAnimation BIPED_HOLD_GREATSWORD;
 	public static StaticAnimation BIPED_HOLD_UCHIGATANA_SHEATHING;
 	public static StaticAnimation BIPED_HOLD_UCHIGATANA;
 	public static StaticAnimation BIPED_HOLD_TACHI;
@@ -577,7 +569,7 @@ public class Animations {
 		BIPED_JUMP = new StaticAnimation(0.083F, false, "biped/living/jump", biped);
 		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", biped);
 		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mirror", biped);
-		BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
+	//	BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
 		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", biped);
 		BIPED_HOLD_UCHIGATANA = new StaticAnimation(true, "biped/living/hold_uchigatana", biped);
 		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);

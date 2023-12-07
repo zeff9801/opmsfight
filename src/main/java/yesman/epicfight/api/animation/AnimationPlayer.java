@@ -16,7 +16,7 @@ public class AnimationPlayer {
 	private DynamicAnimation play;
 	
 	public AnimationPlayer() {
-		this.setPlayAnimation(Animations.DUMMY_ANIMATION);
+		this.setPlayAnimation(Animations.DUMMY_ANIMATION.get());
 	}
 	
 	public void tick(LivingEntityPatch<?> entitypatch) {
@@ -122,6 +122,6 @@ public class AnimationPlayer {
 	}
 	
 	public boolean isEmpty() {
-		return this.play == Animations.DUMMY_ANIMATION;
+		return this.play == Animations.DUMMY_ANIMATION.get();
 	}
 }

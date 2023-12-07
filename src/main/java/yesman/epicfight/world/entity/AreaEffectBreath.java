@@ -76,7 +76,7 @@ public class AreaEffectBreath extends AreaEffectCloud {
 							this.victims.put(livingentity, this.tickCount + 3);
 							livingentity.invulnerableTime = 0;
 							EpicFightDamageSources damageSources = EpicFightDamageSources.of(livingentity.level());
-							EpicFightDamageSource damageSource = damageSources.indirectMagic(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION).setStunType(StunType.SHORT);
+							EpicFightDamageSource damageSource = damageSources.indirectMagic(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION.get()).setStunType(StunType.SHORT);
 							damageSource.setInitialPosition(this.initialFirePosition);
 							damageSource.setImpact(2.0F);
 							livingentity.hurt(damageSource, 3.0F);

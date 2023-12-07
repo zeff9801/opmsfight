@@ -74,11 +74,11 @@ public class ServerAnimator extends Animator {
 		this.animationPlayer.getAnimation().tick(this.entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {
-			DynamicAnimation nextAnimation = this.nextPlaying == null ? Animations.DUMMY_ANIMATION : this.nextPlaying;
+			DynamicAnimation nextAnimation = this.nextPlaying == null ? Animations.DUMMY_ANIMATION.get() : this.nextPlaying;
 			this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, true);
 			
 			if (this.nextPlaying == null) {
-				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer);
+				Animations.DUMMY_ANIMATION.get().putOnPlayer(this.animationPlayer);
 				this.pause = true;
 			} else {
 				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextPlaying instanceof LinkAnimation)) {

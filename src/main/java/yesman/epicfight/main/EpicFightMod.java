@@ -42,6 +42,7 @@ import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootTables;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -123,6 +124,7 @@ public class EpicFightMod {
         EpicFightBlockEntities.BLOCK_ENTITIES.register(bus);
 		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
 		EpicFightSounds.SOUNDS.register(bus);
+		Animations.ANIMATIONS.register(bus);
 		EpicFightDataSerializers.VEC.register(bus);
         EpicFightSkills.registerSkills();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
