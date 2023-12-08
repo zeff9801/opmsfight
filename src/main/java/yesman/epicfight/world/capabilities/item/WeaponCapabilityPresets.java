@@ -304,8 +304,8 @@ public class WeaponCapabilityPresets {
 			.constructor(GloveCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
-			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
-			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
+			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE.get())
+			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK.get())
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_BOW_AIM)
 			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
 			
@@ -323,8 +323,8 @@ public class WeaponCapabilityPresets {
 			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
 	
 	public static final Function<Item, CapabilityItem.Builder> TRIDENT = (item) -> RangedWeaponCapability.builder()
-			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
-			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
+			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE.get())
+			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK.get())
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_JAVELIN_AIM)
 			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_JAVELIN_THROW)
 			.constructor(TridentCapability::new)

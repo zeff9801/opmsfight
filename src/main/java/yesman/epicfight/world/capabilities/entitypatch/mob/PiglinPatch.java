@@ -73,7 +73,7 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	@Override
 	public void processSpawnData(ByteBuf buf) {
 		ClientAnimator animator = this.getClientAnimator();
-		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_RUN);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_RUN.get());
 		animator.setCurrentMotionsAsDefault();
 	}
 	

@@ -33,9 +33,9 @@ public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	@Override
 	public void processSpawnData(ByteBuf buf) {
 		ClientAnimator animator = this.getClientAnimator();
-		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		animator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE.get());
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
+		animator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK.get());
 		animator.setCurrentMotionsAsDefault();
 	}
 	

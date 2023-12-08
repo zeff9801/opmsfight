@@ -17,9 +17,9 @@ public class PillagerPatch extends AbstractIllagerPatch<Pillager> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE.get());
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
+		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);

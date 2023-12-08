@@ -101,11 +101,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
 		/* Living Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE.get());
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
+		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN.get());
+		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK.get());
+		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM.get());
 		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
 		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);

@@ -88,7 +88,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		super.cancelOnClient(executer, args);
 		executer.resetSkillCharging();
-		executer.playAnimationSynchronized(Animations.BIPED_IDLE, 0.0F);
+		executer.playAnimationSynchronized(Animations.BIPED_IDLE.get(), 0.0F);
 	}
 
 	@Override

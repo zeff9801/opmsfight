@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 
@@ -42,7 +43,7 @@ public class StaticAnimation extends DynamicAnimation {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final ResourceLocation resourceLocation;
-	protected final Armature armature;
+	protected final Supplier<Armature> armature;
 	protected final int namespaceId;
 	protected final int animationId;
 	
@@ -56,11 +57,11 @@ public class StaticAnimation extends DynamicAnimation {
 		this.armature = null;
 	}
 	
-	public StaticAnimation(boolean repeatPlay, String path, Armature armature) {
+	public StaticAnimation(boolean repeatPlay, String path, Supplier<Armature> armature) {
 		this(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path, armature);
 	}
 	
-	public StaticAnimation(float convertTime, boolean isRepeat, String path, Armature armature) {
+	public StaticAnimation(float convertTime, boolean isRepeat, String path, Supplier<Armature> armature) {
 		super(convertTime, isRepeat);
 		
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
@@ -79,7 +80,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.armature = armature;
 	}
 	
-	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Supplier<Armature> armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
 		
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
@@ -90,7 +91,7 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	/* Multilayer Constructor */
-	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Supplier<Armature> armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
 		
 		this.namespaceId = baseAnimPath.getNamespace().hashCode();
@@ -151,7 +152,7 @@ public class StaticAnimation extends DynamicAnimation {
 					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
 					double modid = Double.longBitsToDouble((long)this.namespaceId);
 					double animid = Double.longBitsToDouble((long)this.animationId);
-					double jointId = Double.longBitsToDouble((long)this.armature.searchJointByName(trailInfo.joint).getId());
+					double jointId = Double.longBitsToDouble((long)this.armature.get().searchJointByName(trailInfo.joint).getId());
 					double index = Double.longBitsToDouble((long)idx++);
 					
 					if (trailInfo.hand != null) {
@@ -312,7 +313,7 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	public Armature getArmature() {
-		return this.armature;
+		return this.armature.get();
 	}
 	
 	@Override

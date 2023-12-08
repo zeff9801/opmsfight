@@ -4,12 +4,14 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.function.Supplier;
+
 public class MovementAnimation extends StaticAnimation {
-	public MovementAnimation(boolean isRepeat, String path, Armature armature) {
+	public MovementAnimation(boolean isRepeat, String path, Supplier<Armature> armature) {
 		super(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, isRepeat, path, armature);
 	}
 	
-	public MovementAnimation(float convertTime, boolean isRepeat, String path, Armature armature) {
+	public MovementAnimation(float convertTime, boolean isRepeat, String path, Supplier<Armature> armature) {
 		super(convertTime, isRepeat, path, armature);
 	}
 	
