@@ -134,7 +134,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	protected final void commonMobAnimatorInit(ClientAnimator clientAnimator) {
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE.get());
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
@@ -144,7 +144,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE.get());
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK.get());
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();

@@ -25,7 +25,7 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_ZOMBIFIED_IDLE);
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_ZOMBIFIED_WALK);
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_ZOMBIFIED_CHASE);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();

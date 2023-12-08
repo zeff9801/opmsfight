@@ -40,7 +40,7 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();

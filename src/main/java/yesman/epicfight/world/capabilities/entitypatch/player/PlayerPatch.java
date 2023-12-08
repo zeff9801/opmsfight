@@ -106,18 +106,18 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN.get());
 		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM.get());
-		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT.get());
+		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL.get());
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
-		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
+		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING.get());
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
 		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
 		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING.get());
+		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE.get());
 
 		/* Mix Animations */
 		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);

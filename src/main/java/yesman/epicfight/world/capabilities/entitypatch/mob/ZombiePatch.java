@@ -51,7 +51,7 @@ public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ZOMBIE_IDLE);
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ZOMBIE_WALK);
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.ZOMBIE_CHASE);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
