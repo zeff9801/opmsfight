@@ -51,7 +51,7 @@ public abstract class Animator {
 	}
 	
 	public void playDeathAnimation() {
-		this.playAnimation(Animations.BIPED_DEATH, 0);
+		this.playAnimation(Animations.BIPED_DEATH.get(), 0);
 	}
 	
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {

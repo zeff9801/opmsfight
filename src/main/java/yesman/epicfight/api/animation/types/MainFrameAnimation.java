@@ -10,8 +10,10 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.entity.eventlistener.ActionEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
+import java.util.function.Supplier;
+
 public class MainFrameAnimation extends StaticAnimation {
-	public MainFrameAnimation(float convertTime, String path, Armature armature) {
+	public MainFrameAnimation(float convertTime, String path, Supplier<Armature> armature) {
 		super(convertTime, false, path, armature);
 	}
 	

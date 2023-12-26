@@ -3,8 +3,10 @@ package yesman.epicfight.api.animation.types;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.model.Armature;
 
+import java.util.function.Supplier;
+
 public class LongHitAnimation extends ActionAnimation {
-	public LongHitAnimation(float convertTime, String path, Armature armature) {
+	public LongHitAnimation(float convertTime, String path, Supplier<Armature> armature) {
 		super(convertTime, path, armature);
 		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
 		

@@ -34,7 +34,7 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH.get());
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ILLAGER_IDLE);
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ILLAGER_WALK);
 		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.WITCH_DRINKING);

@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
@@ -25,11 +26,11 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ActionAnimation extends MainFrameAnimation {
-	public ActionAnimation(float convertTime, String path, Armature armature) {
+	public ActionAnimation(float convertTime, String path, Supplier<Armature> armature) {
 		this(convertTime, Float.MAX_VALUE, path, armature);
 	}
 	
-	public ActionAnimation(float convertTime, float postDelay, String path, Armature armature) {
+	public ActionAnimation(float convertTime, float postDelay, String path, Supplier<Armature> armature) {
 		super(convertTime, path, armature);
 		
 		this.stateSpectrumBlueprint.clear()

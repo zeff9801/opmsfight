@@ -109,11 +109,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT.get());
 		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL.get());
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT.get());
+		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT.get());
 		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING.get());
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH.get());
+		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP.get());
 		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
 		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
 		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING.get());

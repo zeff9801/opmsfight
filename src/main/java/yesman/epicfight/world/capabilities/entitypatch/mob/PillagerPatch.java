@@ -21,8 +21,8 @@ public class PillagerPatch extends AbstractIllagerPatch<Pillager> {
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL.get());
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT.get());
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH.get());
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	

@@ -123,31 +123,33 @@ public class Animations {
 	public static final RegistryObject<StaticAnimation> DUMMY_ANIMATION = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"dummy_animation").getPath(), StaticAnimation::new);
 
 	//public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
-	public static RegistryObject<StaticAnimation> BIPED_IDLE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_idle").getPath(), () -> new StaticAnimation(true, "biped/living/idle", ()-> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_WALK = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_walk").getPath(), () -> new MovementAnimation(true, "biped/living/walk", ()-> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_RUN = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_run").getPath(), () -> new MovementAnimation(true, "biped/living/run", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_SNEAK = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_sneak").getPath(), () -> new MovementAnimation(true, "biped/living/sneak", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_SWIM = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_swim").getPath(),() -> new MovementAnimation(true, "biped/living/swim", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_FLOAT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_float").getPath(), () -> new StaticAnimation(true, "biped/living/float", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_KNEEL = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_kneel").getPath(), () -> new StaticAnimation(true, "biped/living/kneel", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_FALL = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_fall").getPath(), () -> new StaticAnimation(true, "biped/living/fall", ()-> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_FLYING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_flying").getPath(), () -> new StaticAnimation(true, "biped/living/fly", () -> Armatures.BIPED));
-	public static RegistryObject<StaticAnimation> BIPED_CREATIVE_IDLE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_creative_idle").getPath(), () ->new StaticAnimation(true, "biped/living/creative_idle", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_IDLE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_idle").getPath(), () -> new StaticAnimation(true, "biped/living/idle", ()-> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_WALK = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_walk").getPath(), () -> new MovementAnimation(true, "biped/living/walk", ()-> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_RUN = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_run").getPath(), () -> new MovementAnimation(true, "biped/living/run", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_SNEAK = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_sneak").getPath(), () -> new MovementAnimation(true, "biped/living/sneak", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_SWIM = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_swim").getPath(),() -> new MovementAnimation(true, "biped/living/swim", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_FLOAT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_float").getPath(), () -> new StaticAnimation(true, "biped/living/float", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_KNEEL = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_kneel").getPath(), () -> new StaticAnimation(true, "biped/living/kneel", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_FALL = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_fall").getPath(), () -> new StaticAnimation(true, "biped/living/fall", ()-> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_FLYING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_flying").getPath(), () -> new StaticAnimation(true, "biped/living/fly", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_CREATIVE_IDLE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_creative_idle").getPath(), () ->new StaticAnimation(true, "biped/living/creative_idle", () -> Armatures.BIPED));
 
-	public static StaticAnimation BIPED_CREATIVE_FLYING_FORWARD;
-	public static StaticAnimation BIPED_CREATIVE_FLYING_BACKWARD;
-	public static RegistryObject<StaticAnimation> BIPED_CREATIVE_FLYING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_creative_flying").getPath(),() -> new SelectiveAnimation((entitypatch) -> {
+	public static final RegistryObject<StaticAnimation> BIPED_CREATIVE_FLYING_FORWARD = ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "biped_fly_forward").getPath(), () -> new MovementAnimation(true, "biped/living/creative_fly", () -> Armatures.BIPED).addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION));
+
+	public static final RegistryObject<StaticAnimation> BIPED_CREATIVE_FLYING_BACKWARD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_fly_backward").getPath(), ()-> new MovementAnimation(true, "biped/living/creative_fly_backward", () -> Armatures.BIPED)
+			.addProperty(StaticAnimationProperty.POSE_MODIFIER, ReusableSources.FLYING_CORRECTION2));
+	public static final RegistryObject<StaticAnimation> BIPED_CREATIVE_FLYING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID,"biped_creative_flying").getPath(),() -> new SelectiveAnimation((entitypatch) -> {
 		Vec3 view = entitypatch.getOriginal().getViewVector(1.0F);
 		Vec3 move = entitypatch.getOriginal().getDeltaMovement();
 
 		double dot = view.dot(move);
 
 		return dot < 0.0D ? 1 : 0;
-	}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD));
-	public static StaticAnimation BIPED_MOUNT;
-	public static StaticAnimation BIPED_SIT;
-	public static StaticAnimation BIPED_JUMP;
-	public static StaticAnimation BIPED_DEATH;
+	}, BIPED_CREATIVE_FLYING_FORWARD.get(), BIPED_CREATIVE_FLYING_BACKWARD.get()));
+	public static final RegistryObject<StaticAnimation> BIPED_MOUNT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_mount").getPath(), () ->  new StaticAnimation(true, "biped/living/mount", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_SIT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_sit").getPath(), () -> new StaticAnimation(true, "biped/living/sit", () -> Armatures.BIPED));
+	public static final RegistryObject<StaticAnimation> BIPED_JUMP = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_jump").getPath(), () -> new StaticAnimation(0.083F, false, "biped/living/jump", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_DEATH = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_death").getPath(), () -> new LongHitAnimation(0.16F, "biped/living/death", () -> Armatures.BIPED));
 	public static StaticAnimation BIPED_DIG_MAINHAND;
 	public static StaticAnimation BIPED_DIG_OFFHAND;
 	public static StaticAnimation BIPED_DIG;
@@ -489,26 +491,6 @@ public class Animations {
 		HoglinArmature hoglin = Armatures.HOGLIN;
 		DragonArmature dragon = Armatures.DRAGON;
 		WitherArmature wither = Armatures.WITHER;
-		
-		//BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
-		//BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
-		//BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
-		//BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", biped);
-
-		BIPED_CREATIVE_FLYING_FORWARD = new MovementAnimation(true, "biped/living/creative_fly", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION);
-
-		BIPED_CREATIVE_FLYING_BACKWARD = new MovementAnimation(true, "biped/living/creative_fly_backward", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION2);
-
-		/*BIPED_CREATIVE_FLYING = new SelectiveAnimation((entitypatch) -> {
-					Vec3 view = entitypatch.getOriginal().getViewVector(1.0F);
-					Vec3 move = entitypatch.getOriginal().getDeltaMovement();
-
-					double dot = view.dot(move);
-
-					return dot < 0.0D ? 1 : 0;
-				}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);*/
 
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
 		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
@@ -524,14 +506,8 @@ public class Animations {
 		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
 		
-		//BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
-		//BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
-		//BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);
-		//BIPED_FLOAT = new StaticAnimation(true, "biped/living/float", biped);
-		//BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
-		//BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
-		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
-		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
+
+
 		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
 		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
 		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == InteractionHand.OFF_HAND ? 1 : 0, BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);
@@ -574,7 +550,6 @@ public class Animations {
 		BIPED_CROSSBOW_AIM = new AimAnimation(false, "biped/combat/crossbow_aim_mid", "biped/combat/crossbow_aim_up", "biped/combat/crossbow_aim_down", "biped/combat/crossbow_aim_lying", biped);
 		BIPED_CROSSBOW_SHOT = new ReboundAnimation(false, "biped/combat/crossbow_shot_mid", "biped/combat/crossbow_shot_up", "biped/combat/crossbow_shot_down", "biped/combat/crossbow_shot_lying", biped);
 		BIPED_CROSSBOW_RELOAD = new StaticAnimation(false, "biped/combat/crossbow_reload", biped);
-		BIPED_JUMP = new StaticAnimation(0.083F, false, "biped/living/jump", biped);
 		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", biped);
 		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mirror", biped);
 	//	BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
@@ -1054,7 +1029,6 @@ public class Animations {
 		BIPED_HIT_ON_MOUNT = new LongHitAnimation(0.08F, "biped/combat/hit_on_mount", biped);
 		BIPED_LANDING = new LongHitAnimation(0.03F, "biped/living/landing", biped);
 		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, 2.1F, "biped/combat/knockdown", biped);
-		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 		
 		CREEPER_HIT_SHORT = new HitAnimation(0.05F, "creeper/hit_short", creeper);
 		CREEPER_HIT_LONG = new LongHitAnimation(0.08F, "creeper/hit_long", creeper);

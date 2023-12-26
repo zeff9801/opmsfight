@@ -19,7 +19,7 @@ public abstract class AbstractIllagerPatch<T extends PathfinderMob> extends Huma
 	public void initAnimator(ClientAnimator clientAnimator) {
 		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ILLAGER_IDLE);
 		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ILLAGER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH.get());
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 }
