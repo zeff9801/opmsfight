@@ -1,18 +1,18 @@
 package yesman.epicfight.compat;
 
 import net.minecraftforge.eventbus.api.IEventBus;
+import yesman.epicfight.api.client.model.armor.AzureArmorGeoArmor;
 import yesman.epicfight.api.client.model.armor.CustomModelBakery;
-import yesman.epicfight.api.client.model.armor.GeoArmor;
 
-public class GeckolibCompat implements ICompatModule {
+public class AzureLibArmorCompat implements ICompatModule {
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
-		CustomModelBakery.registerNewTransformer(new GeoArmor());
+		CustomModelBakery.registerNewTransformer(new AzureArmorGeoArmor());
 	}
 	
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
-		eventBus.addListener(GeoArmor::getGeoArmorTexturePath);
+		eventBus.addListener(AzureArmorGeoArmor::getGeoArmorTexturePath);
 	}
 	
 	@Override

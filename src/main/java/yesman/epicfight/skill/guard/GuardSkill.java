@@ -50,7 +50,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.SourceTags;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
@@ -190,6 +190,8 @@ public class GuardSkill extends Skill {
 				
 				if (sourceLocation != null) {
 					Vec3 viewVector = event.getPlayerPatch().getOriginal().getViewVector(1.0F);
+					viewVector = viewVector.subtract(0, viewVector.y, 0).normalize();
+					
 					Vec3 toSourceLocation = sourceLocation.subtract(event.getPlayerPatch().getOriginal().position()).normalize();
 					
 					if (toSourceLocation.dot(viewVector) > 0.0D) {
@@ -202,7 +204,7 @@ public class GuardSkill extends Skill {
 					float knockback = 0.25F;
 					
 					if (event.getDamageSource() instanceof EpicFightDamageSource epicfightDamageSource) {
-						if (epicfightDamageSource.hasTag(SourceTags.GUARD_PUNCTURE)) {
+						if (epicfightDamageSource.is(EpicFightDamageType.GUARD_PUNCTURE)) {
 							return;
 						}
 
@@ -223,7 +225,7 @@ public class GuardSkill extends Skill {
 			event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 			ServerPlayer serveerPlayer = event.getPlayerPatch().getOriginal();
 			EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(serveerPlayer.serverLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, serveerPlayer, damageSource.getDirectEntity());
-
+			
 			if (damageSource.getDirectEntity() instanceof LivingEntity livingEntity) {
 				knockback += EnchantmentHelper.getKnockbackBonus(livingEntity) * 0.1F;
 			}
@@ -354,7 +356,13 @@ public class GuardSkill extends Skill {
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && !damageSource.is(DamageTypeTags.IS_PROJECTILE) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !damageSource.is(DamageTypes.MAGIC) && !damageSource.is(DamageTypeTags.IS_FIRE);
+		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+				&& !damageSource.is(EpicFightDamageType.PARTIAL_DAMAGE)
+				&& !damageSource.is(DamageTypeTags.BYPASSES_ARMOR)
+				&& !damageSource.is(DamageTypeTags.IS_PROJECTILE)
+				&& !damageSource.is(DamageTypeTags.IS_EXPLOSION)
+				&& !damageSource.is(DamageTypes.MAGIC)
+				&& !damageSource.is(DamageTypeTags.IS_FIRE);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

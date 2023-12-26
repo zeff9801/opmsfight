@@ -591,7 +591,7 @@ public class RenderEngine {
 			if (playerpatch != null) {
 				boolean isBattleMode = playerpatch.isBattleMode();
 				
-				if (isBattleMode || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue()) {
+				if (isBattleMode || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue()) {
 					if (event.getHand() == InteractionHand.MAIN_HAND) {
 						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
 								event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
@@ -608,7 +608,6 @@ public class RenderEngine {
 					event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
-			
 			/**
 			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
 				renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());
