@@ -1,12 +1,24 @@
 package yesman.epicfight.network;
 
+import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
+import com.google.common.collect.Lists;
+
+import io.netty.buffer.Unpooled;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.PacketDistributor.PacketTarget;
+import net.minecraftforge.network.simple.IndexedMessageCodec;
 import net.minecraftforge.network.simple.SimpleChannel;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.client.CPChangePlayerMode;
@@ -83,6 +95,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);
 		INSTANCE.registerMessage(id++, CPModifySkillData.class, CPModifySkillData::toBytes, CPModifySkillData::fromBytes, CPModifySkillData::handle);
+		
 		INSTANCE.registerMessage(id++, SPChangeSkill.class, SPChangeSkill::toBytes, SPChangeSkill::fromBytes, SPChangeSkill::handle);
 		INSTANCE.registerMessage(id++, SPSkillExecutionFeedback.class, SPSkillExecutionFeedback::toBytes, SPSkillExecutionFeedback::fromBytes, SPSkillExecutionFeedback::handle);
 		INSTANCE.registerMessage(id++, SPSpawnData.class, SPSpawnData::toBytes, SPSpawnData::fromBytes, SPSpawnData::handle);
@@ -106,5 +119,86 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPFracture.class, SPFracture::toBytes, SPFracture::fromBytes, SPFracture::handle);
 		INSTANCE.registerMessage(id++, SPUpdatePlayerInput.class, SPUpdatePlayerInput::toBytes, SPUpdatePlayerInput::fromBytes, SPUpdatePlayerInput::handle);
 		INSTANCE.registerMessage(id++, SPAddOrRemoveSkillData.class, SPAddOrRemoveSkillData::toBytes, SPAddOrRemoveSkillData::fromBytes, SPAddOrRemoveSkillData::handle);
+	}
+	
+	public static void testDec(NetworkEvent networkEvent, FriendlyByteBuf payload, int payloadIndex, IndexedMessageCodec messageCodec) {
+		if (networkEvent instanceof NetworkEvent.ChannelRegistrationChangeEvent) {
+			return;
+		}
+		
+		short usgnbt = payload.readUnsignedByte();
+		payload.resetReaderIndex();
+		
+		Field indicesField;
+		
+		try {
+			indicesField = IndexedMessageCodec.class.getDeclaredField("indicies");
+			indicesField.setAccessible(true);
+			Object ind = ((Short2ObjectArrayMap<?>)indicesField.get(messageCodec)).get(usgnbt);
+			
+			try {
+				Field fld = ind.getClass().getDeclaredField("decoder");
+				fld.setAccessible(true);
+				
+				try {
+					Object decoder = fld.get(ind);
+					
+					FriendlyByteBuf copiedBuf = copy(payload);
+					copiedBuf.readUnsignedByte();
+					Object message = ((Optional<Function>)decoder).get().apply(copiedBuf);
+					
+					EpicFightMod.LOGGER.info("DECbytesarray " + usgnbt + " " + bytes(payload) +" "+ message.getClass());
+					
+				} catch (Exception e) {
+					payload.resetReaderIndex();
+					EpicFightMod.LOGGER.info("DECbytesarray " + usgnbt + " " + bytes(payload) +"\n but failed "+ e.getLocalizedMessage());
+				} finally {
+					payload.resetReaderIndex();
+				}
+				
+			} catch (NoSuchFieldException | SecurityException e) {
+				EpicFightMod.LOGGER.info("Debug Packet Exception2 " + e.getLocalizedMessage());
+				e.printStackTrace();
+			}
+		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+			EpicFightMod.LOGGER.info("Debug Packet Exception3 " + e.getLocalizedMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	public static void testEncode(Object message, FriendlyByteBuf target, IndexedMessageCodec indexCodex) {
+		if ((message instanceof SPUpdatePlayerInput)) {
+			return;
+		}
+		
+		target.resetReaderIndex();
+		short usgnbt = target.readUnsignedByte();
+		target.resetReaderIndex();
+		
+		EpicFightMod.LOGGER.info("ENCbytesarray " + usgnbt +" "+ bytes(target) +" "+ message.getClass());
+	}
+	
+	public static FriendlyByteBuf copy(FriendlyByteBuf org) {
+		FriendlyByteBuf copied = new FriendlyByteBuf(Unpooled.buffer());
+		
+		while (org.isReadable()) {
+			copied.writeByte(org.readByte());
+		}
+		
+		org.resetReaderIndex();
+		
+		return copied;
+	}
+	
+	public static List<Byte> bytes(FriendlyByteBuf buf) {
+		List<Byte> blist = Lists.newArrayList();
+		
+		while (buf.isReadable()) {
+			blist.add(buf.readByte());
+		}
+		
+		buf.resetReaderIndex();
+		
+		return blist;
 	}
 }

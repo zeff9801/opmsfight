@@ -19,7 +19,8 @@
 		"MixinMob",
 		"MixinPlayer",
 		"MixinServerPlayer",
-		"MixinThrownTrident"
+		"MixinThrownTrident",
+		"MixinNetwork"
 	],
 	"injector": {
 		"defaultRequire": 1

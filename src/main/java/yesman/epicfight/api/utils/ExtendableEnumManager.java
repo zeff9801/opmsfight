@@ -65,6 +65,8 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		int lastOrdinal = this.lastOrdinal;
 		String enumName = value.toString().toLowerCase(Locale.ROOT);
 		
+		EpicFightMod.LOGGER.debug("Assign enum " + value + " as " + lastOrdinal + " in " + this.enumName);
+		
 		if (this.enumMapByName.containsKey(enumName)) {
 			throw new IllegalArgumentException("Enum name " + enumName + " already exists in " + this.enumName);
 		}
@@ -78,7 +80,9 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 	
 	public T get(int id) {
 		if (!this.enumMapByOrdinal.containsKey(id)) {
-			throw new IllegalArgumentException("Enum id " + id + " does not exist in " + this.enumName);
+			//throw new IllegalArgumentException(
+			EpicFightMod.LOGGER.error("Enum id " + id + " does not exist in " + this.enumName);
+			//(new Exception()).printStackTrace();
 		}
 		
 		return this.enumMapByOrdinal.get(id);
@@ -88,7 +92,8 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		String key = name.toLowerCase(Locale.ROOT);
 		
 		if (!this.enumMapByName.containsKey(key)) {
-			throw new IllegalArgumentException("Enum name " + key + " does not exist in " + this.enumName);
+			//throw new IllegalArgumentException(
+			EpicFightMod.LOGGER.error("Enum name " + key + " does not exist in " + this.enumName);
 		}
 		
 		return this.enumMapByName.get(key);

@@ -12,6 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPModifySkillData;
 import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
@@ -249,10 +250,16 @@ public class SkillDataManager {
 			SkillDataKey<V> key = new SkillDataKey<>(valueType, id, syncAllClients);
 			KEYS.put(id, key);
 			
+			EpicFightMod.LOGGER.info("SkillDataKey Registered " + id + " ValueType : " + valueType.getClass().getSimpleName() + " called by " + (new Exception()).getStackTrace()[2].getClassName() +":"+ (new Exception()).getStackTrace()[2].getLineNumber());
+			
 			return key;
 		}
 		
 		public static SkillDataKey<?> findById(int id) {
+			if (!KEYS.containsKey(id)) {
+				EpicFightMod.LOGGER.info("No Skill data key: " + id);
+			}
+			
 			return KEYS.get(id);
 		}
 		
