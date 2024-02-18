@@ -20,7 +20,7 @@ public class ClientConfig {
 	public final BooleanValue enableAimHelper;
 	public final BooleanValue cameraAutoSwitch;
 	public final BooleanValue autoPreparation;
-	public final BooleanValue offBloodEffects;
+	public final BooleanValue bloodEffects;
 	public final BooleanValue noMiningInCombat;
 	
 	public final ConfigValue<List<? extends String>> battleAutoSwitchItems;
@@ -54,12 +54,12 @@ public class ClientConfig {
 		this.longPressCountConfig = config.defineInRange("ingame.long_press_count", 2, 1, 10);
 		this.healthBarShowOption = config.defineEnum("ingame.health_bar_show_option", HealthBarShowOptions.HURT);
 		this.showTargetIndicator = config.define("ingame.show_target_indicator", () -> true);
-		this.filterAnimation = config.define("ingame.filter_animation", () -> true);
+		this.filterAnimation = config.define("ingame.filter_animation", () -> false);
 		this.aimHelperColor = config.defineInRange("ingame.laser_pointer_color", 0.328125D, 0.0D, 1.0D);
 		this.enableAimHelper = config.define("ingame.enable_laser_pointer", () -> true);
 		this.cameraAutoSwitch = config.define("ingame.camera_auto_switch", () -> false);
 		this.autoPreparation = config.define("ingame.auto_preparation", () -> false);
-		this.offBloodEffects = config.define("ingame.off_gore", () -> false);
+		this.bloodEffects = config.define("ingame.blood_effects", () -> true);
 		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {

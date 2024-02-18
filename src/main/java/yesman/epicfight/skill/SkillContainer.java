@@ -1,5 +1,7 @@
 package yesman.epicfight.skill;
 
+import java.util.Set;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -46,7 +48,11 @@ public class SkillContainer {
 	}
 	
 	public boolean setSkill(Skill skill) {
-		if (this.containingSkill == skill) {
+		return this.setSkill(skill, false);
+	}
+	
+	public boolean setSkill(Skill skill, boolean initialize) {
+		if (this.containingSkill == skill && !initialize) {
 			return false;
 		}
 		
@@ -60,15 +66,25 @@ public class SkillContainer {
 		
 		this.containingSkill = skill;
 		this.resetValues();
-		this.skillDataManager.reset();
+		this.skillDataManager.clearData();
 		
 		if (skill != null) {
 			skill.onInitiate(this);
 			this.setMaxResource(skill.consumption);
 			this.setMaxDuration(skill.maxDuration);
+			
+			Set<SkillDataKey<?>> datakeys = SkillDataKey.getSkillDataKeyMap().get(skill.getClass());
+			
+			if (datakeys != null) {
+				datakeys.forEach(this.skillDataManager::registerData);
+			}
 		}
 		
 		this.stack = 0;
+		
+		if (initialize) {
+			this.setDisabled(false);
+		}
 		
 		return true;
 	}

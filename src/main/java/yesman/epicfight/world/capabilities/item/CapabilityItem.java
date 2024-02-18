@@ -336,7 +336,7 @@ public class CapabilityItem {
 	}
 	
 	public enum WeaponCategories implements WeaponCategory {
-		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, UCHIGATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
+		NOT_WEAPON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, UCHIGATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
 		
 		final int id;
 		
@@ -348,10 +348,6 @@ public class CapabilityItem {
 		public int universalOrdinal() {
 			return this.id;
 		}
-	}
-	
-	public enum HoldingOption {
-		TWO_HANDED, MAINHAND_ONLY, ONE_HANDED
 	}
 	
 	public enum Styles implements Style {
