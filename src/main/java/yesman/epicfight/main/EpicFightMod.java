@@ -25,6 +25,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.NewRegistryEvent;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -45,6 +46,7 @@ import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
+import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Armatures;
@@ -85,11 +87,13 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 	2. make all version to use resource location format for weapon type in datapack
 	
-	3. Wrathful Thunder doesn't stun the entity and unable to guard
+	3. Wrathful Thunder doesn't stun the entity and unable to guard (solved)
 	
-	4. attack , speed bonus are not applied to tooltip (also check the real value)
+	4. attack , speed bonus are not applied to tooltip (solved)
 	
-	5. Rushing Tempo doesn't work if server requires any resource packs
+	5. Rushing Tempo doesn't work if server requires any resource packs (solved)
+	
+	6. Fixed weapon type datapack loading issue in dedicated server
  * @author yesman
  *
  */
@@ -117,6 +121,7 @@ public class EpicFightMod {
     	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
+		bus.addListener(this::event);
 		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
@@ -146,7 +151,9 @@ public class EpicFightMod {
 		EpicFightSounds.SOUNDS.register(bus);
 		Animations.ANIMATIONS.register(bus);
 		EpicFightDataSerializers.VEC.register(bus);
+		EpicFightConditions.CONDITIONS.register(bus);
 		SkillDataKeys.DATA_KEYS.register(bus);
+		
         EpicFightSkills.registerSkills();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         
@@ -168,6 +175,10 @@ public class EpicFightMod {
 			}
 		});
 	}
+    
+    private void event(NewRegistryEvent event) {
+    	//System.out.println( EpicFightConditions.REGISTRY.get() );
+    }
     
     private void constructMod(final FMLConstructModEvent event) {
     	LivingMotion.ENUM_MANAGER.loadEnum();
