@@ -390,7 +390,7 @@ public class EntityEvents {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LivingEntityPatch.class);
 		
 		if (entitypatch != null) {
-			entitypatch.playAnimationSynchronized(Animations.BIPED_HIT_SHIELD, 0.0F);
+			entitypatch.playAnimationSynchronized(Animations.BIPED_HIT_SHIELD.get(), 0.0F);
 		}
 	}
 	

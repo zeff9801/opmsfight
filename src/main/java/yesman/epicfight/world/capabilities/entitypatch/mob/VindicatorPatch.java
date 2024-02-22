@@ -45,7 +45,7 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 		this.weaponLivingMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(
 			CapabilityItem.Styles.TWO_HAND, Set.of(
 				Pair.of(LivingMotions.WALK, Animations.ILLAGER_WALK),
-				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
+				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND.get())
 			)
 		));
 		

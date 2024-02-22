@@ -114,16 +114,16 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING.get());
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH.get());
 		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP.get());
-		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING.get());
+		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING.get());
 		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING.get());
 		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE.get());
 
 		/* Mix Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
-		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
+		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG.get());
+		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM.get());
+		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT.get());
+		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK.get());
 		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
 		clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
 

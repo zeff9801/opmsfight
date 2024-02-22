@@ -76,8 +76,8 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		this.weaponLivingMotions = Maps.newHashMap();
 		this.weaponLivingMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(
 			CapabilityItem.Styles.TWO_HAND, Set.of(
-				Pair.of(LivingMotions.WALK, Animations.BIPED_WALK_TWOHAND),
-				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
+				Pair.of(LivingMotions.WALK, Animations.BIPED_WALK_TWOHAND.get()),
+				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND.get())
 			)
 		));
 		

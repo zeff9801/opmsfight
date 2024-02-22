@@ -22,15 +22,15 @@ public class MapCapability extends CapabilityItem {
 		
 		if (hand == InteractionHand.MAIN_HAND) {
 			if (playerpatch.getOriginal().getOffhandItem().isEmpty()) {
-				holdAnimation = Animations.BIPED_HOLD_MAP_TWOHAND;
-				holdMoveAnimation = Animations.BIPED_HOLD_MAP_TWOHAND_MOVE;
+				holdAnimation = Animations.BIPED_HOLD_MAP_TWOHAND.get();
+				holdMoveAnimation = Animations.BIPED_HOLD_MAP_TWOHAND_MOVE.get();
 			} else {
-				holdAnimation = Animations.BIPED_HOLD_MAP_MAINHAND;
-				holdMoveAnimation = Animations.BIPED_HOLD_MAP_MAINHAND_MOVE;
+				holdAnimation = Animations.BIPED_HOLD_MAP_MAINHAND.get();
+				holdMoveAnimation = Animations.BIPED_HOLD_MAP_MAINHAND_MOVE.get();
 			}
 		} else {
-			holdAnimation = Animations.BIPED_HOLD_MAP_OFFHAND;
-			holdMoveAnimation = Animations.BIPED_HOLD_MAP_OFFHAND_MOVE;
+			holdAnimation = Animations.BIPED_HOLD_MAP_OFFHAND.get();
+			holdMoveAnimation = Animations.BIPED_HOLD_MAP_OFFHAND_MOVE.get();
 		}
 		
 		livingModifier.put(LivingMotions.IDLE, holdAnimation);

@@ -10,11 +10,13 @@ import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.function.Supplier;
+
 public class MirrorAnimation extends StaticAnimation {
 	public StaticAnimation original;
 	public StaticAnimation mirror;
 	
-	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Armature armature) {
+	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Supplier armature) {
 		super(0.0F, false, path1, armature);
 		
 		this.original = new StaticAnimation(convertTime, repeatPlay, path1, armature);

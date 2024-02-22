@@ -1,17 +1,10 @@
 package yesman.epicfight.gameasset;
 
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import org.joml.Quaternionf;
-
 import com.google.common.collect.Lists;
-import com.ibm.icu.text.ArabicShaping;
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,11 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.level.ClipContext;
@@ -45,13 +34,9 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
-import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
+import org.joml.Quaternionf;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationEvent.Side;
 import yesman.epicfight.api.animation.property.AnimationEvent.TimePeriodEvent;
@@ -66,35 +51,16 @@ import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.grappling.GrapplingAttackAnimation;
 import yesman.epicfight.api.animation.types.grappling.GrapplingTryAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonAttackAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDeathAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
-import yesman.epicfight.api.animation.types.procedural.IKInfo;
+import yesman.epicfight.api.animation.types.procedural.*;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.HitEntityList;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
 import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.api.utils.TimePairList;
-import yesman.epicfight.api.utils.math.MathUtils;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.QuaternionUtils;
-import yesman.epicfight.api.utils.math.ValueModifier;
-import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.model.armature.CreeperArmature;
-import yesman.epicfight.model.armature.DragonArmature;
-import yesman.epicfight.model.armature.EndermanArmature;
-import yesman.epicfight.model.armature.HoglinArmature;
-import yesman.epicfight.model.armature.HumanoidArmature;
-import yesman.epicfight.model.armature.IronGolemArmature;
-import yesman.epicfight.model.armature.PiglinArmature;
-import yesman.epicfight.model.armature.RavagerArmature;
-import yesman.epicfight.model.armature.SpiderArmature;
-import yesman.epicfight.model.armature.VexArmature;
-import yesman.epicfight.model.armature.WitherArmature;
+import yesman.epicfight.model.armature.*;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlots;
@@ -107,12 +73,12 @@ import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDra
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.PatchedPhases;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.EpicFightDamageSources;
-import yesman.epicfight.world.damagesource.EpicFightDamageType;
-import yesman.epicfight.world.damagesource.ExtraDamageInstance;
-import yesman.epicfight.world.damagesource.StunType;
+import yesman.epicfight.world.damagesource.*;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
@@ -150,45 +116,49 @@ public class Animations {
 	public static final RegistryObject<StaticAnimation> BIPED_SIT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_sit").getPath(), () -> new StaticAnimation(true, "biped/living/sit", () -> Armatures.BIPED));
 	public static final RegistryObject<StaticAnimation> BIPED_JUMP = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_jump").getPath(), () -> new StaticAnimation(0.083F, false, "biped/living/jump", () -> Armatures.BIPED));
 	public static RegistryObject<StaticAnimation> BIPED_DEATH = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_death").getPath(), () -> new LongHitAnimation(0.16F, "biped/living/death", () -> Armatures.BIPED));
-	public static StaticAnimation BIPED_DIG_MAINHAND;
-	public static StaticAnimation BIPED_DIG_OFFHAND;
-	public static StaticAnimation BIPED_DIG;
-	public static StaticAnimation BIPED_RUN_SPEAR;
-	public static  final RegistryObject<StaticAnimation> BIPED_HOLD_GREATSWORD = ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "hold_greatsword").getPath(), () -> new StaticAnimation(true, "biped/living/hold_greatsword", () -> Armatures.BIPED));
-	public static StaticAnimation BIPED_HOLD_UCHIGATANA_SHEATHING;
-	public static StaticAnimation BIPED_HOLD_UCHIGATANA;
-	public static StaticAnimation BIPED_HOLD_TACHI;
-	public static StaticAnimation BIPED_HOLD_LONGSWORD;
-	public static StaticAnimation BIPED_HOLD_LIECHTENAUER;
-	public static StaticAnimation BIPED_HOLD_SPEAR;
-	public static StaticAnimation BIPED_HOLD_DUAL_WEAPON;
-	public static StaticAnimation BIPED_HOLD_CROSSBOW;
-	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND;
-	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND;
-	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND;
-	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND_MOVE;
-	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND_MOVE;
-	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND_MOVE;
-	public static StaticAnimation BIPED_WALK_GREATSWORD;
-	public static StaticAnimation BIPED_WALK_SPEAR;
-	public static StaticAnimation BIPED_WALK_UCHIGATANA_SHEATHING;
-	public static StaticAnimation BIPED_WALK_UCHIGATANA;
-	public static StaticAnimation BIPED_WALK_TWOHAND;
-	public static StaticAnimation BIPED_WALK_LONGSWORD;
-	public static StaticAnimation BIPED_WALK_LIECHTENAUER;
-	public static StaticAnimation BIPED_RUN_GREATSWORD;
-	public static StaticAnimation BIPED_RUN_UCHIGATANA;
-	public static StaticAnimation BIPED_RUN_UCHIGATANA_SHEATHING;
-	public static StaticAnimation BIPED_RUN_DUAL;
-	public static StaticAnimation BIPED_RUN_LONGSWORD;
-	public static StaticAnimation BIPED_UCHIGATANA_SCRAP;
-	public static StaticAnimation BIPED_LIECHTENAUER_READY;
-	public static StaticAnimation BIPED_HIT_SHIELD;
-	public static StaticAnimation BIPED_CLIMBING;
-	public static StaticAnimation BIPED_SLEEPING;
-	public static StaticAnimation BIPED_BOW_AIM;
-	public static StaticAnimation BIPED_BOW_SHOT;
-	public static StaticAnimation BIPED_DRINK;
+	public static RegistryObject<StaticAnimation> BIPED_DIG_MAINHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "dig_mainhand").getPath(), () ->new StaticAnimation(0.11F, true, "biped/living/dig", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_DIG_OFFHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "dig_offhand").getPath(), () -> new StaticAnimation(0.11F, true, "biped/living/dig_offhand", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_DIG =  ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "dig").getPath(), () -> new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == InteractionHand.OFF_HAND ? 1 : 0, BIPED_DIG_MAINHAND.get(), BIPED_DIG_OFFHAND.get()));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_SPEAR = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "biped_run_spear").getPath(), () -> new MovementAnimation(true, "biped/living/run_spear", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_GREATSWORD = ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "hold_greatsword").getPath(), () -> new StaticAnimation(true, "biped/living/hold_greatsword", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_UCHIGATANA_SHEATHING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_uchigatana_sheath").getPath(),() -> new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", () ->Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_UCHIGATANA = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_uchigatana").getPath(), () -> new StaticAnimation(true, "biped/living/hold_uchigatana", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_TACHI = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_tachi").getPath(), () -> new StaticAnimation(true, "biped/living/hold_tachi", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_LONGSWORD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_longsword").getPath(), () -> new StaticAnimation(true, "biped/living/hold_longsword", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_LIECHTENAUER = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_liechtenauer").getPath(), () -> new StaticAnimation(true, "biped/living/hold_liechtenauer", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_SPEAR = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_spear").getPath(), () -> new StaticAnimation(true, "biped/living/hold_spear", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_DUAL_WEAPON = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_dual").getPath(), () -> new StaticAnimation(true, "biped/living/hold_dual", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_CROSSBOW = ANIMATIONS.register( new ResourceLocation(EpicFightMod.MODID, "hold_dual").getPath(),() -> new StaticAnimation(true, "biped/living/hold_crossbow", ()-> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_TWOHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_twohand").getPath() ,() -> new StaticAnimation(true, "biped/living/hold_map_twohand", () -> Armatures.BIPED).addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_OFFHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_offhand").getPath(), () -> new StaticAnimation(true, "biped/living/hold_map_offhand", () -> Armatures.BIPED).addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_MAINHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_mainhand").getPath(), () -> new StaticAnimation(true, "biped/living/hold_map_mainhand", () -> Armatures.BIPED).addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_TWOHAND_MOVE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_twohand_move").getPath(), () -> new StaticAnimation(true, "biped/living/hold_map_twohand_move", () -> Armatures.BIPED)
+			.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_OFFHAND_MOVE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_offhand_move").getPath(), () -> new StaticAnimation(true, "biped/living/hold_map_offhand_move", () -> Armatures.BIPED).addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_HOLD_MAP_MAINHAND_MOVE = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hold_map_mainhand_move").getPath(), () -> new StaticAnimation(true, "biped/living/hold_map_mainhand_move", () -> Armatures.BIPED)
+			.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_GREATSWORD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_greatsword").getPath(), () -> new MovementAnimation(true, "biped/living/walk_greatsword", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_SPEAR = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_spear").getPath(), () -> new MovementAnimation(true, "biped/living/walk_spear", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_UCHIGATANA_SHEATHING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_uchigatana_sheath").getPath(), () -> new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_UCHIGATANA = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_uchigatana").getPath(), () ->  new MovementAnimation(true, "biped/living/walk_uchigatana", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_TWOHAND = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_twohand").getPath(), () -> new MovementAnimation(true, "biped/living/walk_twohand", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_LONGSWORD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_longsword").getPath(), () -> new MovementAnimation(true, "biped/living/walk_longsword", () ->Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_WALK_LIECHTENAUER = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "walk_liechtenauer").getPath(), ()-> new MovementAnimation(true, "biped/living/walk_liechtenauer", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_GREATSWORD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "run_greatsword").getPath(), () -> new MovementAnimation(true, "biped/living/run_greatsword", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_UCHIGATANA = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "run_uchigatana").getPath(), () -> new MovementAnimation(true, "biped/living/run_uchigatana", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_UCHIGATANA_SHEATHING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "run_uchigatana_sheath").getPath(), () ->  new MovementAnimation(true, "biped/living/run_uchigatana_sheath", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_DUAL = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "run_dual").getPath(), () -> new MovementAnimation(true, "biped/living/run_dual", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_RUN_LONGSWORD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "run_longsword").getPath(), () -> new MovementAnimation(true, "biped/living/run_longsword", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_UCHIGATANA_SCRAP = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "uchigatana_scrap").getPath(), () -> new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", () -> Armatures.BIPED)
+			.addEvents(TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN.get())));
+	public static RegistryObject<StaticAnimation> BIPED_LIECHTENAUER_READY = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "liechtenauer_ready").getPath(), () -> new StaticAnimation(0.1F, false, "biped/living/liechtenauer_ready", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_HIT_SHIELD = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "hit_shield").getPath(), () -> new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mirror",  () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_CLIMBING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "climb").getPath(), () -> new MovementAnimation(0.16F, true, "biped/living/climb", () -> Armatures.BIPED)
+			.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE));
+	public static RegistryObject<StaticAnimation> BIPED_SLEEPING = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "climb").getPath(), () ->  new StaticAnimation(0.16F, true, "biped/living/sleep", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_BOW_AIM = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "bow_aim").getPath(),  () -> new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_BOW_SHOT = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "bow_shoot").getPath(), () -> new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", () -> Armatures.BIPED));
+	public static RegistryObject<StaticAnimation> BIPED_DRINK = ANIMATIONS.register(new ResourceLocation(EpicFightMod.MODID, "drink").getPath(), () -> new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_offhand", () -> Armatures.BIPED;));
 	public static StaticAnimation BIPED_EAT;
 	public static StaticAnimation BIPED_SPYGLASS_USE;
 	public static StaticAnimation BIPED_CROSSBOW_AIM;
@@ -492,27 +462,6 @@ public class Animations {
 		DragonArmature dragon = Armatures.DRAGON;
 		WitherArmature wither = Armatures.WITHER;
 
-		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
-		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped)
-				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		
-
-
-		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
-		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
-		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == InteractionHand.OFF_HAND ? 1 : 0, BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);
-		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
-		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", biped);
 		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_offhand", biped);
 		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_offhand", biped);
 		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_offhand", biped)
@@ -550,41 +499,7 @@ public class Animations {
 		BIPED_CROSSBOW_AIM = new AimAnimation(false, "biped/combat/crossbow_aim_mid", "biped/combat/crossbow_aim_up", "biped/combat/crossbow_aim_down", "biped/combat/crossbow_aim_lying", biped);
 		BIPED_CROSSBOW_SHOT = new ReboundAnimation(false, "biped/combat/crossbow_shot_mid", "biped/combat/crossbow_shot_up", "biped/combat/crossbow_shot_down", "biped/combat/crossbow_shot_lying", biped);
 		BIPED_CROSSBOW_RELOAD = new StaticAnimation(false, "biped/combat/crossbow_reload", biped);
-		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", biped);
 		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mirror", biped);
-	//	BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
-		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", biped);
-		BIPED_HOLD_UCHIGATANA = new StaticAnimation(true, "biped/living/hold_uchigatana", biped);
-		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);
-		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
-		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
-		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
-		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
-
-		BIPED_WALK_GREATSWORD = new MovementAnimation(true, "biped/living/walk_greatsword", biped);
-		BIPED_WALK_SPEAR = new MovementAnimation(true, "biped/living/walk_spear", biped);
-		BIPED_WALK_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", biped);
-		BIPED_WALK_UCHIGATANA = new MovementAnimation(true, "biped/living/walk_uchigatana", biped);
-		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
-		BIPED_WALK_LONGSWORD = new MovementAnimation(true, "biped/living/walk_longsword", biped);
-		BIPED_WALK_LIECHTENAUER = new MovementAnimation(true, "biped/living/walk_liechtenauer", biped);
-
-		BIPED_RUN_GREATSWORD = new MovementAnimation(true, "biped/living/run_greatsword", biped);
-		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", biped);
-		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", biped);
-		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
-
-		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", biped);
-		
-		BIPED_UCHIGATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", biped)
-				.addEvents(TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN.get()));
-		BIPED_LIECHTENAUER_READY = new StaticAnimation(0.1F, false, "biped/living/liechtenauer_ready", biped);
-
-		BIPED_HIT_SHIELD = new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mirror", biped);
-
-		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
-		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 		
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
 		BIPED_JAVELIN_THROW = new ReboundAnimation(0.08F, false, "biped/combat/javelin_throw_mid", "biped/combat/javelin_throw_up", "biped/combat/javelin_throw_down", "biped/combat/javelin_throw_lying", biped);

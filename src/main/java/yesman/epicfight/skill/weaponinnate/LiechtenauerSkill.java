@@ -138,7 +138,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 			super.executeOnServer(executer, args);
 			executer.getSkill(this).activate();
 			executer.modifyLivingMotionByCurrentItem();
-			executer.playAnimationSynchronized(Animations.BIPED_LIECHTENAUER_READY, 0.0F);
+			executer.playAnimationSynchronized(Animations.BIPED_LIECHTENAUER_READY.get(), 0.0F);
 		}
 	}
 	

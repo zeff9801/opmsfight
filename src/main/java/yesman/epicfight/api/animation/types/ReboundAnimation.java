@@ -4,8 +4,10 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.function.Supplier;
+
 public class ReboundAnimation extends AimAnimation {
-	public ReboundAnimation(float convertTime, boolean repeatPlay, String path1, String path2, String path3, String path4, Armature armature) {
+	public ReboundAnimation(float convertTime, boolean repeatPlay, String path1, String path2, String path3, String path4, Supplier armature) {
 		super(convertTime, repeatPlay, path1, path2, path3, path4, armature);
 		
 		this.stateSpectrumBlueprint.clear()
@@ -17,7 +19,7 @@ public class ReboundAnimation extends AimAnimation {
 			.addState(EntityState.INACTION, true);
 	}
 	
-	public ReboundAnimation(boolean repeatPlay, String path1, String path2, String path3, String path4, Armature armature) {
+	public ReboundAnimation(boolean repeatPlay, String path1, String path2, String path3, String path4, Supplier armature) {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path1, path2, path3, path4, armature);
 	}
 	
