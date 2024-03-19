@@ -50,7 +50,7 @@ public class BloodParticle extends SpriteTexturedParticle {
 			particle.yd = (0.9F - mass) * 0.4F;
 			particle.setSize(mass, mass);
 			particle.pickSprite(this.spriteSet);
-			float yellow = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects.getValue() ? MathHelper.clamp(random.nextFloat(), 0.6F, 0.4F) : 0.0F;
+			float yellow = EpicFightMod.CLIENT_CONFIGS.offBloodEffects.getValue() ? MathHelper.clamp(random.nextFloat(), 0.6F, 0.4F) : 0.0F;
 			particle.setColor(MathHelper.clamp(random.nextFloat(), 0.6F, 0.4F), yellow, 0.0F);
 			return particle;
 		}

@@ -584,7 +584,7 @@ public class RenderEngine {
 			if (playerpatch != null) {
 				boolean isBattleMode = playerpatch.isBattleMode();
 				
-				if (isBattleMode || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue()) {
+				if (isBattleMode || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue()) {
 					if (event.getHand() == Hand.MAIN_HAND) {
 						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
 								event.getBuffers(), event.getMatrixStack(), event.getLight(), event.getPartialTicks());

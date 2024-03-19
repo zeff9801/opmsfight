@@ -112,16 +112,16 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void setCurrentMotionsAsDefault() {
-		this.livingAnimations.forEach(this.defaultLivingAnimations::put);
-		this.compositeLivingAnimations.forEach(this.defaultCompositeLivingAnimations::put);
+		this.defaultLivingAnimations.putAll(this.livingAnimations);
+		this.defaultCompositeLivingAnimations.putAll(this.compositeLivingAnimations);
 	}
 	
 	@Override
 	public void resetMotions() {
 		super.resetMotions();
 		this.compositeLivingAnimations.clear();
-		this.defaultLivingAnimations.forEach(this.livingAnimations::put);
-		this.defaultCompositeLivingAnimations.forEach(this.compositeLivingAnimations::put);
+        this.livingAnimations.putAll(this.defaultLivingAnimations);
+        this.compositeLivingAnimations.putAll(this.defaultCompositeLivingAnimations);
 	}
 	
 	public StaticAnimation getLivingMotion(LivingMotion motion) {

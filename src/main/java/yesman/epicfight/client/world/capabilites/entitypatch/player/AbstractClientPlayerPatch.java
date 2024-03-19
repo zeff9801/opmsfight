@@ -208,7 +208,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 	
 	@Override
 	public boolean shouldSkipRender() {
-		return !this.isBattleMode() && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+		return !this.isBattleMode() && EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

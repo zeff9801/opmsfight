@@ -1,5 +1,6 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -73,8 +74,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	protected void renderLayer(LivingRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLightIn, float partialTicks) {
-		List<LayerRenderer<E, M>> layers = Lists.newArrayList();
-		renderer.layers.forEach(layers::add);
+		List<LayerRenderer<E, M>> layers = new ArrayList<>(renderer.layers);
 		Iterator<LayerRenderer<E, M>> iter = layers.iterator();
 		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
         float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);

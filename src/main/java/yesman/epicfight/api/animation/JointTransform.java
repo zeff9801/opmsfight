@@ -62,10 +62,8 @@ public class JointTransform {
 		this.translation.set(newV.x, newV.y, newV.z);
 		MathUtils.setQuaternion(this.rotation, newQ.i(), newQ.j(), newQ.k(), newQ.r());
 		this.scale.set(newS.x, newS.y, newS.z);
-		
-		for (Map.Entry<String, TransformEntry> entry : jt.entries.entrySet()) {
-			this.entries.put(entry.getKey(), entry.getValue());
-		}
+
+        this.entries.putAll(jt.entries);
 		
 		return this;
 	}

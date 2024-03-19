@@ -19,7 +19,7 @@ import yesman.epicfight.main.EpicFightMod;
 public class TargetIndicator extends EntityIndicator {
 	@Override
 	public boolean shouldDraw(ClientPlayerEntity player, LivingEntity entityIn) {
-		if (!EpicFightMod.CLIENT_INGAME_CONFIG.showTargetIndicator.getValue()) {
+		if (!EpicFightMod.CLIENT_CONFIGS.showTargetIndicator.getValue()) {
 			return false;
 		} else {
 			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();

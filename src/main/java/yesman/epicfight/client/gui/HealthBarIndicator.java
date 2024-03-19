@@ -28,7 +28,7 @@ import yesman.epicfight.world.effect.VisibleMobEffect;
 public class HealthBarIndicator extends EntityIndicator {
 	@Override
 	public boolean shouldDraw(ClientPlayerEntity player, LivingEntity entityIn) {
-		if (!EpicFightMod.CLIENT_INGAME_CONFIG.showHealthIndicator.getValue()) {
+		if (!EpicFightMod.CLIENT_CONFIGS.showHealthIndicator.getValue()) {
 			return false;
 		} else if (!entityIn.canChangeDimensions() || entityIn.isInvisible() || entityIn == player.getVehicle()) {
 			return false;

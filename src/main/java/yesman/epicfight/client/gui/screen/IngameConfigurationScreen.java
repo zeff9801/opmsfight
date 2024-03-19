@@ -32,15 +32,15 @@ public class IngameConfigurationScreen extends Screen {
 	
 	@Override
 	protected void init() {
-		Option<Boolean> showHealthIndicator = EpicFightMod.CLIENT_INGAME_CONFIG.showHealthIndicator;
-		Option<Boolean> showTargetIndicator = EpicFightMod.CLIENT_INGAME_CONFIG.showTargetIndicator;
-		Option<Boolean> filterAnimation = EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation;
-		Option<Integer> longPressCounter = EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount;
-		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_INGAME_CONFIG.enableAimHelperPointer;
-		Option<Double> aimHelperColor = EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor;
-		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
-		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
-		Option<Boolean> offBlood = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects;
+		Option<Boolean> showHealthIndicator = EpicFightMod.CLIENT_CONFIGS.showHealthIndicator;
+		Option<Boolean> showTargetIndicator = EpicFightMod.CLIENT_CONFIGS.showTargetIndicator;
+		Option<Boolean> filterAnimation = EpicFightMod.CLIENT_CONFIGS.filterAnimation;
+		Option<Integer> longPressCounter = EpicFightMod.CLIENT_CONFIGS.longPressCount;
+		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer;
+		Option<Double> aimHelperColor = EpicFightMod.CLIENT_CONFIGS.aimHelperColor;
+		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch;
+		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_CONFIGS.autoPreparation;
+		Option<Boolean> offBlood = EpicFightMod.CLIENT_CONFIGS.offBloodEffects;
 		
 		Button longPressCounterButton = this.addButton(new RewindableButton(this.width / 2 - 165, this.height / 4 - 32, 160, 20,
 			new TranslationTextComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))),
@@ -138,15 +138,15 @@ public class IngameConfigurationScreen extends Screen {
 	        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslationTextComponent("gui.epicfight.export_custom_armor.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 		}));
 		
-		this.addButton(new ColorSlider(this.width / 2 - 150, this.height / 4 + 108, 300, 20, new TranslationTextComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+		this.addButton(new ColorSlider(this.width / 2 - 150, this.height / 4 + 108, 300, 20, new TranslationTextComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_CONFIGS.aimHelperColor));
 			
 		this.addButton(new Button(this.width / 2 + 90, this.height / 4 + 150, 48, 20, DialogTexts.GUI_DONE, (button) -> {
-			EpicFightMod.CLIENT_INGAME_CONFIG.save();
+			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
 		}));
 		
 		this.addButton(new Button(this.width / 2 + 140, this.height / 4 + 150, 48, 20, new TranslationTextComponent("controls.reset"), (button) -> {
-			EpicFightMod.CLIENT_INGAME_CONFIG.resetSettings();
+			EpicFightMod.CLIENT_CONFIGS.resetSettings();
 			filterAnimationButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
 			longPressCounterButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))));
 			showHealthIndicatorButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".health_indicator." + (showHealthIndicator.getValue() ? "on" : "off")));

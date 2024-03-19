@@ -18,7 +18,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	private int currentBehaviorPointer;
 	
 	protected CombatBehaviors(CombatBehaviors.Builder<T> builder, T mobpatch) {
-		builder.behaviorSeriesList.stream().map((behaviorSeriesBuilder) -> behaviorSeriesBuilder.build()).forEach(this.behaviorSeriesList::add);
+		builder.behaviorSeriesList.stream().map(BehaviorSeries.Builder::build).forEach(this.behaviorSeriesList::add);
 		this.mobpatch = mobpatch;
 		this.currentBehaviorPointer = -1;
 	}
@@ -166,7 +166,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private boolean loopFinished;
 		
 		private BehaviorSeries(BehaviorSeries.Builder<T> builder) {
-			builder.behaviors.stream().map((motionBuilder) -> motionBuilder.build()).forEach(this.behaviors::add);
+			builder.behaviors.stream().map(Behavior.Builder::build).forEach(this.behaviors::add);
 			this.looping = builder.looping;
 			this.canBeInterrupted = builder.canBeInterrupted;
 			this.weight = builder.weight;

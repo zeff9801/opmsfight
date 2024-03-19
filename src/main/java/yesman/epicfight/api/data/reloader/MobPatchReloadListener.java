@@ -220,15 +220,13 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		String predicateType = tag.getString("predicate");
 		EpicFightPredicates<Entity> predicate = null;
 		List<String[]> loggerNote = Lists.newArrayList();
-		
-		switch (predicateType) {
-		case "has_tags":
-			if (!tag.contains("tags", 9)) {
-				loggerNote.add(new String[] {"has_tags", "tags", "string list"});
-			}
-			predicate = new EpicFightPredicates.HasTag(tag.getList("tags", 8));
-			break;
-		}
+
+        if (predicateType.equals("has_tags")) {
+            if (!tag.contains("tags", 9)) {
+                loggerNote.add(new String[]{"has_tags", "tags", "string list"});
+            }
+            predicate = new EpicFightPredicates.HasTag(tag.getList("tags", 8));
+        }
 		
 		for (String[] formatArgs : loggerNote) {
 			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]", (Object[])formatArgs));

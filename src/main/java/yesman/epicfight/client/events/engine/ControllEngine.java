@@ -175,7 +175,7 @@ public class ControllEngine {
 				this.mouseLeftPressCounter = 0;
 			} else {
 				if (EpicFightKeyMappings.SPECIAL_SKILL.getKey().equals(this.options.keyAttack.getKey())) {
-					if (this.mouseLeftPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
+					if (this.mouseLeftPressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 						if (!this.playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch, this.packets)) {
 							if (!this.player.isSpectator()) {
 								this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
@@ -226,7 +226,7 @@ public class ControllEngine {
 				this.sneakPressToggle = false;
 				this.sneakPressCounter = 0;
 			} else {
-				if (this.sneakPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
+				if (this.sneakPressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 					this.sneakPressToggle = false;
 					this.sneakPressCounter = 0;
 				} else {

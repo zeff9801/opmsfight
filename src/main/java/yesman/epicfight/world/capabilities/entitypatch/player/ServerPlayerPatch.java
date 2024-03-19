@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -139,10 +140,9 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		this.getAnimator().resetMotions();
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
-		Map<LivingMotion, StaticAnimation> motionModifier = Maps.newHashMap();
-		
-		offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND).forEach(motionModifier::put);
-		mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND).forEach(motionModifier::put);
+
+		Map<LivingMotion, StaticAnimation> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
+		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND));
 		
 		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
 			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());

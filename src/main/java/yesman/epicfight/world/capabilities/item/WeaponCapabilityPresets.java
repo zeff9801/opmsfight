@@ -344,7 +344,7 @@ public class WeaponCapabilityPresets {
 		
 		WeaponCapabilityPresetRegistryEvent weaponCapabilityPresetRegistryEvent = new WeaponCapabilityPresetRegistryEvent(typeEntry);
 		ModLoader.get().postEvent(weaponCapabilityPresetRegistryEvent);
-		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
+        PRESETS.putAll(weaponCapabilityPresetRegistryEvent.getTypeEntry());
 	}
 	
 	public static Function<Item, CapabilityItem.Builder> get(String typeName) {

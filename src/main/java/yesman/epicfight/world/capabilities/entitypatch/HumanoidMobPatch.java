@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -179,10 +180,9 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
-		Map<LivingMotion, StaticAnimation> motionModifier = Maps.newHashMap();
-		
-		offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND).forEach(motionModifier::put);
-		mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND).forEach(motionModifier::put);
+
+		Map<LivingMotion, StaticAnimation> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
+		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND));
 		
 		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
 			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());

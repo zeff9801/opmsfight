@@ -39,14 +39,14 @@ public class EditSwitchingItemScreen extends Screen {
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
 			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems);
+				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems);
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
 		
 		if (this.miningAutoSwitchItems == null) {
 			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems);
+				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems);
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}
@@ -57,15 +57,11 @@ public class EditSwitchingItemScreen extends Screen {
 		this.children.add(this.miningAutoSwitchItems);
 		
 		this.children.add(new Button(this.width / 2 - 80, this.height - 28, 160, 20, DialogTexts.GUI_DONE, (button) -> {
-			EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.clear();
-			EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.clear();
-			this.battleAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.add(item);
-			});
-			this.miningAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.add(item);
-			});
-			EpicFightMod.CLIENT_INGAME_CONFIG.save();
+			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.clear();
+			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.clear();
+			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.addAll(this.battleAutoSwitchItems.toList());
+			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.addAll(this.miningAutoSwitchItems.toList());
+			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
 		}));
 	}

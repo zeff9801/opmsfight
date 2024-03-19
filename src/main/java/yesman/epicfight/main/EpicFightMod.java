@@ -74,7 +74,7 @@ public class EpicFightMod {
 	public static final String MODID = "epicfight";
 	public static final String CONFIG_FILE_PATH = EpicFightMod.MODID + ".toml";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
-	public static ConfigurationIngame CLIENT_INGAME_CONFIG;
+	public static ConfigurationIngame CLIENT_CONFIGS;
 	private static EpicFightMod instance;
 	
 	public static EpicFightMod getInstance() {
@@ -126,7 +126,7 @@ public class EpicFightMod {
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
     	
-    	CLIENT_INGAME_CONFIG = new ConfigurationIngame();
+    	CLIENT_CONFIGS = new ConfigurationIngame();
         this.animatorProvider = ClientAnimator::getAnimator;
         this.model = ClientModels.LOGICAL_CLIENT;
     	
