@@ -83,7 +83,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				poseStack.pushPose();
 				float head = 0.0F;
 				
-				if (originalRenderer.getParentModel().getHead() != null && originalRenderer.getParentModel().getHead().cubes.size() > 0) {
+				if (originalRenderer.getParentModel().getHead() != null && !originalRenderer.getParentModel().getHead().cubes.isEmpty()) {
 					ModelBox headCube = originalRenderer.getParentModel().getHead().cubes.get(0);
 					head = headCube.maxX - headCube.minY - 12.0F;
 				}

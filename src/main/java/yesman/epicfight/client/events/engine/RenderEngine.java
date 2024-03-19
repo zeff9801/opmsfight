@@ -459,7 +459,7 @@ public class RenderEngine {
 						for (int i = 0; i < tooltip.size(); i++) {
 							ITextComponent textComp = tooltip.get(i);
 							
-							if (textComp.getSiblings().size() > 0) {
+							if (!textComp.getSiblings().isEmpty()) {
 								ITextComponent sibling = textComp.getSiblings().get(0);
 								
 								if (sibling instanceof TranslationTextComponent) {

@@ -192,7 +192,7 @@ public class AttackAnimation extends ActionAnimation {
 		float poseTime = state.attacking() ? elapsedTime : phase.contact;
 		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
 		
-		if (list.size() > 0) {
+		if (!list.isEmpty()) {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
 			boolean flag1 = true;
 			int maxStrikes = this.getMaxStrikes(entitypatch, phase);

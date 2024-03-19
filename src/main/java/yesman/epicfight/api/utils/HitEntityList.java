@@ -23,7 +23,7 @@ public class HitEntityList {
 	
 	public boolean next() {
 		this.index++;
-		return this.hitEntites.size() > this.index ? true : false;
+		return this.hitEntites.size() > this.index;
 	}
 	
 	public static enum Priority {

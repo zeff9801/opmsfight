@@ -319,7 +319,7 @@ public class CustomModelBakery {
 				animatedVertices.add(pos0);
 				animatedVertices.add(pos1);
 				
-				if (vertexWeights.size() > 0) {
+				if (!vertexWeights.isEmpty()) {
 					for (VertexWeight vertexWeight : vertexWeights) {
 						float distance = pos2.pos.y() - pos1.pos.y();
 						float textureV = pos1.v + (pos2.v - pos1.v) * ((vertexWeight.yClipCoord - pos1.pos.y()) / distance);
