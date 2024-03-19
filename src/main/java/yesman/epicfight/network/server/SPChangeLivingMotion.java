@@ -101,23 +101,24 @@ public class SPChangeLivingMotion {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			Entity entity = mc.player.level.getEntity(msg.entityId);
-			
+
 			if (entity != null) {
-				LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-				ClientAnimator animator = entitypatch.getClientAnimator();
-				animator.resetMotions();
-				animator.resetCompositeMotion();
-				
-				for (int i = 0; i < msg.count; i++) {
-					entitypatch.getClientAnimator().addLivingAnimation(msg.motionList.get(i), msg.animationList.get(i));
-				}
-				
-				if (msg.setChangesAsDefault) {
-					animator.setCurrentMotionsAsDefault();
+				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof LivingEntityPatch<?> entitypatch) {
+					ClientAnimator animator = entitypatch.getClientAnimator();
+					animator.resetMotion();
+					animator.resetCompositeMotion();
+
+					for (int i = 0; i < msg.count; i++) {
+						entitypatch.getClientAnimator().addLivingAnimation(msg.motionList.get(i), msg.animationList.get(i));
+					}
+
+					if (msg.setChangesAsDefault) {
+						animator.setCurrentMotionsAsDefault();
+					}
 				}
 			}
 		});
-		
+
 		ctx.get().setPacketHandled(true);
 	}
 }

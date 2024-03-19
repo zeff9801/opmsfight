@@ -11,9 +11,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPExecuteSkill {
-	private int skillSlot;
-	private boolean active;
-	private PacketBuffer buffer;
+	private final int skillSlot;
+	private final boolean active;
+	private final PacketBuffer buffer;
 
 	public CPExecuteSkill() {
 		this(0);
@@ -64,7 +64,7 @@ public class CPExecuteSkill {
 	public static void handle(CPExecuteSkill msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			ServerPlayerEntity serverPlayer = ctx.get().getSender();
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
 
 			if (msg.active) {
 				playerpatch.getSkill(msg.skillSlot).requestExecute(playerpatch, msg.getBuffer());

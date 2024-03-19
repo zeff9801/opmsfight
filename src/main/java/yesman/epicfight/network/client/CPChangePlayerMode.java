@@ -12,30 +12,30 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPChangePlayerMode {
-	private PlayerPatch.PlayerMode mode;
-	
+	private final PlayerPatch.PlayerMode mode;
+
 	public CPChangePlayerMode(PlayerPatch.PlayerMode mode) {
 		this.mode = mode;
 	}
 
-	public static CPChangePlayerMode fromBytes(PacketBuffer buf) {
+	public static CPChangePlayerMode fromBytes(PacketBuffer  buf) {
 		return new CPChangePlayerMode(PlayerPatch.PlayerMode.values()[buf.readInt()]);
 	}
 
-	public static void toBytes(CPChangePlayerMode msg, PacketBuffer buf) {
+	public static void toBytes(CPChangePlayerMode msg, PacketBuffer  buf) {
 		buf.writeInt(msg.mode.ordinal());
 	}
-	
+
 	public static void handle(CPChangePlayerMode msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			ServerPlayerEntity player = ctx.get().getSender();
-			
+			ServerPlayerEntity  player = ctx.get().getSender();
+
 			if (player != null) {
-				ServerPlayerPatch playerpatch = (ServerPlayerPatch) player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-				
+				ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+
+
 				if (playerpatch != null) {
 					playerpatch.toMode(msg.mode, false);
-					
 					EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPChangePlayerMode(player.getId(), playerpatch.getPlayerMode()), player);
 				}
 			}

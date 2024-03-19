@@ -48,7 +48,7 @@ public class EditSwitchingItemScreen extends Screen {
 		
 		if (this.miningAutoSwitchItems == null) {
 			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-					new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), new ArrayList<>(EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems));
+					new TranslationTextComponent(EpicFightMod.MODID+".gui.to_mining_mode"), new ArrayList<>(EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems));
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}

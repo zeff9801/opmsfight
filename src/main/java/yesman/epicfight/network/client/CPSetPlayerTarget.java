@@ -11,7 +11,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPSetPlayerTarget {
-	private int entityId;
+	private final int entityId;
 
 	public CPSetPlayerTarget() {
 		this.entityId = 0;
@@ -34,8 +34,8 @@ public class CPSetPlayerTarget {
 			ServerPlayerEntity player = ctx.get().getSender();
 			
 			if (player != null) {
-				ServerPlayerPatch entitypatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-				
+				ServerPlayerPatch entitypatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+
 				if (entitypatch != null) {
 					Entity entity = entitypatch.getOriginal().level.getEntity(msg.entityId);
 					

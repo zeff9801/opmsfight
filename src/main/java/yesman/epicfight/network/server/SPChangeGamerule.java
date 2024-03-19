@@ -9,9 +9,9 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class SPChangeGamerule {
-	private SynchronizedGameRules gamerule;
-	private int gameruleId;
-	private Object object;
+	private final SynchronizedGameRules gamerule;
+	private final int gameruleId;
+	private final Object object;
 	
 	public SPChangeGamerule(SynchronizedGameRules gamerule, Object object) {
 		this.gamerule = gamerule;

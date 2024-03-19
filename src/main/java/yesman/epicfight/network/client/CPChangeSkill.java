@@ -11,10 +11,10 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPChangeSkill {
-	private int skillSlotIndex;
-	private int itemSlotIndex;
-	private String skillName;
-	private boolean consumeXp;
+	private final int skillSlotIndex;
+	private final int itemSlotIndex;
+	private final String skillName;
+	private final boolean consumeXp;
 	
 	public CPChangeSkill() {
 		this(0, -1, "", false);
@@ -42,7 +42,7 @@ public class CPChangeSkill {
 	public static void handle(CPChangeSkill msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			ServerPlayerEntity serverPlayer = ctx.get().getSender();
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
 			
 			if (playerpatch != null) {
 				Skill skill = Skills.getSkill(msg.skillName);

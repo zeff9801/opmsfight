@@ -13,10 +13,10 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPPlayAnimation {
 	private int namespaceId;
-	private int animationId;
-	private float modifyTime;
+	private final int animationId;
+	private final float modifyTime;
 	private boolean isClientSideAnimation;
-	private boolean resendToSender;
+	private final boolean resendToSender;
 	
 	public CPPlayAnimation() {
 		this.animationId = 0;
@@ -51,7 +51,7 @@ public class CPPlayAnimation {
 	public static void handle(CPPlayAnimation msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()-> {
 			ServerPlayerEntity serverPlayer = ctx.get().getSender();
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
 			if (!msg.isClientSideAnimation) {
 				playerpatch.getAnimator().playAnimation(msg.namespaceId, msg.animationId, msg.modifyTime);
 			}
