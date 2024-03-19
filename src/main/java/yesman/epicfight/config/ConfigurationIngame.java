@@ -1,6 +1,9 @@
 package yesman.epicfight.config;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
@@ -24,8 +27,8 @@ public class ConfigurationIngame {
 	public final Option<Boolean> cameraAutoSwitch;
 	public final Option<Boolean> autoPreparation;
 	public final Option<Boolean> offBloodEffects;
-	public final List<Item> battleAutoSwitchItems;
-	public final List<Item> miningAutoSwitchItems;
+	public final Set<Item> battleAutoSwitchItems;
+	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
 	
 	public ConfigurationIngame() {
@@ -40,12 +43,17 @@ public class ConfigurationIngame {
 		this.cameraAutoSwitch = new Option<Boolean>(config.cameraAutoSwitch.get());
 		this.autoPreparation = new Option<Boolean>(config.autoPreparation.get());
 		this.offBloodEffects = new Option<Boolean>(config.offBloodEffects.get());
-		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
-			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
-		);
-		this.miningAutoSwitchItems = Lists.newArrayList(config.miningAutoSwitchItems.get().stream().map((itemName) ->
-			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
-		);
+		this.battleAutoSwitchItems = new HashSet<>(config.battleAutoSwitchItems.get().stream()
+				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet()));
+
+		this.miningAutoSwitchItems = new HashSet<>(config.miningAutoSwitchItems.get().stream()
+				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet()));
+
+
 	}
 	
 	public void resetSettings() {

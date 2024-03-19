@@ -1,5 +1,6 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -39,14 +40,15 @@ public class EditSwitchingItemScreen extends Screen {
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
 			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems);
+			new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), new ArrayList<>(EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems));
+
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
 		
 		if (this.miningAutoSwitchItems == null) {
 			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslationTextComponent(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems);
+					new TranslationTextComponent(EpicFightMod.MODID+".gui.to_battle_mode"), new ArrayList<>(EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems));
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}
