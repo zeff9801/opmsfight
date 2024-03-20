@@ -101,21 +101,19 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(this.getRootJointIndex()).getAnimatedTransform());
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 
-		//Store a reference to the un-transformed matrixstack to push for layers that we do not want to get influenced by the body's pose
-		MatrixStack backupPoseStack = poseStack;
-		
+		//Very bootleg but i need Head Layers to render separately from the other layers
+		layers.forEach((layer) -> {
+			if (layer instanceof HeadLayer) layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+		});
+
 		poseStack.pushPose();
 		MathUtils.translateStack(poseStack, modelMatrix);
 		MathUtils.rotateStack(poseStack, transpose);
 		poseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		//Apply the same usual transformations to the back-up pose
-		backupPoseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
-		backupPoseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			if (layer instanceof HeadLayer) layer.render(backupPoseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
-			else layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+			if (!(layer instanceof HeadLayer)) layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
 		});
 		
 		poseStack.popPose();
