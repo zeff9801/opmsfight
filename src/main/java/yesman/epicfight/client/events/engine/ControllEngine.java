@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import net.minecraft.entity.Pose;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Maps;
@@ -95,6 +96,7 @@ public class ControllEngine {
 	}
 	
 	private void attackKeyPressed(KeyBinding key, int action) {
+		if (player.getPose() == Pose.SWIMMING) return;
 		if (action == 1 && this.playerpatch.isBattleMode()) {
 			this.setKeyBind(key, false);
 			while (key.consumeClick());
