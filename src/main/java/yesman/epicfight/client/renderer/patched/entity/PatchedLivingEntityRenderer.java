@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -95,19 +96,26 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 				return val;
 			});
 		}
-		
+
 		OpenMatrix4f modelMatrix = new OpenMatrix4f();
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(this.getRootJointIndex()).getAnimatedTransform());
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
+
+		//Store a reference to the un-transformed matrixstack to push for layers that we do not want to get influenced by the body's pose
+		MatrixStack backupPoseStack = poseStack;
 		
 		poseStack.pushPose();
 		MathUtils.translateStack(poseStack, modelMatrix);
 		MathUtils.rotateStack(poseStack, transpose);
 		poseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
+		//Apply the same usual transformations to the back-up pose
+		backupPoseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
+		backupPoseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+			if (layer instanceof HeadLayer) layer.render(backupPoseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+			else layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
 		});
 		
 		poseStack.popPose();
