@@ -84,7 +84,15 @@ public class MathUtils {
 		double cos = (a.x * b.x + a.y * b.y + a.z * b.z);
 		return Math.acos(cos);
 	}
-	
+	public static double getXRotOfVector(Vector3d vec) {
+		Vector3d normalized = vec.normalize();
+		return -(Math.atan2(normalized.y, (float)Math.sqrt(normalized.x * normalized.x + normalized.z * normalized.z)) * (180D / Math.PI));
+	}
+
+	public static double getYRotOfVector(Vector3d vec) {
+		Vector3d normalized = vec.normalize();
+		return Math.atan2(normalized.z, normalized.x) * (180D / Math.PI) - 90.0F;
+	}
 	private static Quaternion getQuaternionFromMatrix(OpenMatrix4f mat) {
 		float w, x, y, z;
 		float diagonal = mat.m00 + mat.m11 + mat.m22;

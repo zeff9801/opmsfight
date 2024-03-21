@@ -2,6 +2,8 @@ package yesman.epicfight.api.animation.types;
 
 import net.minecraft.util.EntityDamageSource;
 import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.EpicFightDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 
 public class KnockdownAnimation extends LongHitAnimation {
@@ -9,16 +11,17 @@ public class KnockdownAnimation extends LongHitAnimation {
 		super(convertTime, path, model);
 
 		this.stateSpectrumBlueprint
-			.addState(EntityState.KNOCKDOWN, true)
-			.addState(EntityState.INVULNERABILITY_PREDICATE, (damagesource) -> {
-				if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
-					if (damagesource instanceof ExtendedDamageSource) {
-						return !((ExtendedDamageSource)damagesource).isFinisher();
-					} else {
-						return true;
+				.addState(EntityState.KNOCKDOWN, true)
+				.addState(EntityState.ATTACK_RESULT, (damagesource) -> {
+					if (damagesource.getEntity() != null && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
+						if (damagesource instanceof EpicFightDamageSource) {
+							return ((EpicFightDamageSource)damagesource).isFinisher() ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED;
+						} else {
+							return AttackResult.ResultType.BLOCKED;
+						}
 					}
-				}
-				return false;
-			});
+
+					return AttackResult.ResultType.SUCCESS;
+				});
 	}
 }

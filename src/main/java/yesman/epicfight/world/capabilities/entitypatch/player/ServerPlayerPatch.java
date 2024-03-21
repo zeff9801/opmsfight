@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -137,7 +136,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 			return;
 		}
 		
-		this.getAnimator().resetMotions();
+		this.getAnimator().resetLivingAnimations();
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
 

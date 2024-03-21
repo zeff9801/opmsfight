@@ -24,6 +24,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -141,13 +142,23 @@ public class StaticAnimation extends DynamicAnimation {
 			}
 		});
 	}
-	
+
 	@Override
-	public final EntityState getState(float time) {
-		return this.stateSpectrum.bindStates(time);
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return new EntityState(this.getStatesMap(entitypatch, time));
 	}
-	
+
 	@Override
+	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.stateSpectrum.getStateMap(entitypatch, time);
+	}
+
+	@Override
+	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.stateSpectrum.getSingleState(stateFactor, entitypatch, time);
+	}
+
+		@Override
 	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
 		if (!super.isJointEnabled(entitypatch, joint)) {
 			return false;

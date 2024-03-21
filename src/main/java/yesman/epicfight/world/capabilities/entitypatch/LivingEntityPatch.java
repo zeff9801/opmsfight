@@ -41,6 +41,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.EpicFightDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -61,7 +62,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public static final DataParameter<Float> MAX_STUN_SHIELD = new DataParameter<Float> (252, DataSerializers.FLOAT);
 	
 	private float stunTimeReduction;
-	protected EntityState state = EntityState.DEFAULT;
+	protected LivingEntity grapplingTarget;
+
+	protected EntityState state = EntityState.DEFAULT_STATE;
 	protected Animator animator;
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
@@ -162,7 +165,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public ExtendedDamageSource getDamageSource(StunType stunType, StaticAnimation animation, Hand hand) {
 		return ExtendedDamageSource.causeMobDamage(this.original, stunType, animation);
 	}
-	
+
 	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, Hand hand) {
 		float damage = 0;
 		
@@ -176,18 +179,15 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		
 		return damage;
 	}
-	
+
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
-		if (this.getEntityState().invulnerableTo(damageSource)) {
-			return new AttackResult(AttackResult.ResultType.FAILED, amount);
-		}
-		
-		return new AttackResult(AttackResult.ResultType.SUCCESS, amount);
+		return AttackResult.of(this.getEntityState().attackResult(damageSource), amount);
 	}
-	
-	public AttackResult tryHarm(Entity target, ExtendedDamageSource damagesource, float amount) {
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)target.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt((DamageSource)damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
+
+	public AttackResult tryHarm(Entity target, EpicFightDamageSource damagesource, float amount) {
+		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(target, LivingEntityPatch.class);
+		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
+
 		return result;
 	}
 	
@@ -520,7 +520,28 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		
 		return this.original.isAlliedTo(entityIn) && this.original.getTeam() != null && !this.original.getTeam().isAllowFriendlyFire();
 	}
-	
+	public boolean canPush(Entity entity) {
+		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
+
+		if (entitypatch != null) {
+			EntityState state = entitypatch.getEntityState();
+
+			if (state.inaction()) {
+				return false;
+			}
+		}
+
+		EntityState thisState = this.getEntityState();
+
+		return !thisState.inaction() && !entity.is(this.grapplingTarget);
+	}
+	public LivingEntity getGrapplingTarget() {
+			return this.grapplingTarget;
+	}
+
+	public void setGrapplingTarget(LivingEntity grapplingTarget) {
+		this.grapplingTarget = grapplingTarget;
+	}
 	public Vector3d getLastAttackPosition() {
 		return this.lastAttackPosition;
 	}

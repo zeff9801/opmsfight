@@ -16,6 +16,7 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -116,9 +117,17 @@ public abstract class DynamicAnimation {
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return null;
 	}
-	
-	public EntityState getState(float time) {
-		return EntityState.DEFAULT;
+
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return EntityState.DEFAULT_STATE;
+	}
+
+	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return new TypeFlexibleHashMap<> (false);
+	}
+
+	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return stateFactor.defaultValue();
 	}
 	
 	public Map<String, TransformSheet> getTransfroms() {

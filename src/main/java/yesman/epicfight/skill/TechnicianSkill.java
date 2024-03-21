@@ -33,16 +33,16 @@ public class TechnicianSkill extends PassiveSkill {
 			if (executer.getAnimator().getPlayerFor(null).getAnimation() instanceof DodgeAnimation) {
 				DamageSource damageSource = event.getDamageSource();
 				
-				if (executer.getEntityState().invulnerableTo(damageSource)) {
+				//if (executer.getEntityState().invulnerableTo(damageSource)) {
 					if (!container.getDataManager().getDataValue(CURRENTLY_ACTIVATED)) {
 						float consumption = Formulars.getStaminarConsumePenalty(executer.getWeight(), executer.getSkill(SkillCategories.DODGE).containingSkill.getConsumption(), executer);
 						executer.setStamina(executer.getStamina() + consumption);
 						container.getDataManager().setData(CURRENTLY_ACTIVATED, true);
 						event.setCanceled(true);
-						event.setResult(AttackResult.ResultType.FAILED);
+						event.setResult(AttackResult.ResultType.MISSED);
 					}
 				}
-			}
+			//}
 		});
 	}
 	

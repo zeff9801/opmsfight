@@ -5,6 +5,7 @@ import java.util.Map;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class LinkAnimation extends DynamicAnimation {
@@ -28,10 +29,20 @@ public class LinkAnimation extends DynamicAnimation {
 			}
 		}
 	}
-	
+
 	@Override
-	public EntityState getState(float time) {
-		return this.nextAnimation.getState(0.0F);
+	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getStatesMap(entitypatch, time);
+	}
+
+	@Override
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getState(entitypatch, 0.0F);
+	}
+
+	@Override
+	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getState(stateFactor, entitypatch, 0.0F);
 	}
 	
 	@Override

@@ -33,6 +33,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -40,6 +41,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.AttackResult.ResultType;
+import yesman.epicfight.api.utils.EpicFightDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -201,7 +203,7 @@ public class WitherPatch extends MobPatch<WitherEntity> {
 				this.original.level.levelEvent((PlayerEntity) null, 1022, this.original.blockPosition(), 0);
 			}
 		}
-		
+
 		if (this.blockedNow) {
 			if (this.blockingCount < 0) {
 				this.playAnimationSynchronized(Animations.WITHER_NEUTRALIZED, 0.0F);
@@ -211,11 +213,12 @@ public class WitherPatch extends MobPatch<WitherEntity> {
 			} else {
 				if (this.original.tickCount % 4 == (this.blockingStartTick - 1) % 4) {
 					if (this.original.position().distanceToSqr(this.blockingEntity.getOriginal().position()) < 9.0D) {
-						ExtendedDamageSource extendedSource = this.getDamageSource(StunType.KNOCKDOWN, Animations.WITHER_CHARGE, Hand.MAIN_HAND);
+
+						EpicFightDamageSource extendedSource = (EpicFightDamageSource) this.getDamageSource(StunType.SHORT, Animations.WITHER_CHARGE, Hand.MAIN_HAND);
 						extendedSource.setImpact(4.0F);
 						extendedSource.setInitialPosition(this.lastAttackPosition);
 						AttackResult attackResult = this.tryHarm(this.blockingEntity.getOriginal(), extendedSource, blockingCount);
-						
+
 						if (attackResult.resultType == AttackResult.ResultType.SUCCESS) {
 							this.blockingEntity.getOriginal().hurt((DamageSource)extendedSource, 4.0F);
 							this.blockedNow = false;
@@ -265,7 +268,7 @@ public class WitherPatch extends MobPatch<WitherEntity> {
 			Entity entity = damageSource.getDirectEntity();
 			
 			if (entity instanceof AbstractArrowEntity) {
-				return new AttackResult(ResultType.FAILED, 0.0F);
+				return new AttackResult(ResultType.MISSED, 0.0F);
 			}
 		}
 		

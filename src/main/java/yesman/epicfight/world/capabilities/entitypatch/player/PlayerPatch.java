@@ -199,7 +199,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	
 	public float getAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
 		AttackSpeedModifyEvent event = new AttackSpeedModifyEvent(this, itemCapability, baseSpeed);
-		this.eventListeners.triggerEvents(EventType.ATTACK_SPEED_MODIFY_EVENT, event);
+		this.eventListeners.triggerEvents(EventType.MODIFY_ATTACK_SPEED_EVENT, event);
 		
 		return Formulars.getAttackSpeedPenalty(this.getWeight(), event.getAttackSpeed(), this);
 	}

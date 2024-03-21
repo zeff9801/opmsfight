@@ -24,6 +24,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -115,13 +116,13 @@ public class ClientAnimator extends Animator {
 		this.defaultLivingAnimations.putAll(this.livingAnimations);
 		this.defaultCompositeLivingAnimations.putAll(this.compositeLivingAnimations);
 	}
-	
+
 	@Override
-	public void resetMotions() {
-		super.resetMotions();
+	public void resetLivingAnimations() {
+		super.resetLivingAnimations();
 		this.compositeLivingAnimations.clear();
-        this.livingAnimations.putAll(this.defaultLivingAnimations);
-        this.compositeLivingAnimations.putAll(this.defaultCompositeLivingAnimations);
+		this.defaultLivingAnimations.forEach(this::addLivingAnimation);
+		this.defaultCompositeLivingAnimations.forEach(this::addLivingAnimation);
 	}
 	
 	public StaticAnimation getLivingMotion(LivingMotion motion) {
@@ -211,7 +212,7 @@ public class ClientAnimator extends Animator {
 			composedPose.putJointData(transformEntry.getKey(), transformEntry.getValue());
 		}
 		
-		for (Layer.Priority priority : this.baseLayer.baserLayerPriority.uppers()) {
+		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.uppers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
 			
 			if (!compositeLayer.isDisabled()) {
@@ -322,6 +323,11 @@ public class ClientAnimator extends Animator {
 		
 		return this.baseLayer.animationPlayer;
 	}
+	public void offAllLayers() {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			layer.off(this.entitypatch);
+		}
+	}
 	
 	public LivingEntityPatch<?> getOwner() {
 		return this.entitypatch;
@@ -329,6 +335,18 @@ public class ClientAnimator extends Animator {
 	
 	@Override
 	public EntityState getEntityState() {
-		return this.baseLayer.animationPlayer.getAnimation().getState(this.baseLayer.animationPlayer.getElapsedTime());
+		TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = new TypeFlexibleHashMap<> (false);
+
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (!layer.disabled) {
+				stateMap.putAll(layer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, layer.animationPlayer.getElapsedTime()));
+			}
+
+			if (layer.priority == this.baseLayer.baseLayerPriority) {
+				stateMap.putAll(this.baseLayer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, this.baseLayer.animationPlayer.getElapsedTime()));
+			}
+		}
+
+		return new EntityState(stateMap);
 	}
 }

@@ -15,6 +15,6 @@ public class LongHitAnimation extends ActionAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
-			.addState(EntityState.HURT,	true);
+			.addState(EntityState.HURT_LEVEL,1);
 	}
 }

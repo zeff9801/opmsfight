@@ -60,7 +60,7 @@ public abstract class Animator {
 		return this.livingAnimations.entrySet();
 	}
 	
-	public void resetMotions() {
+	public void resetLivingAnimations() {
 		this.livingAnimations.clear();
 	}
 	

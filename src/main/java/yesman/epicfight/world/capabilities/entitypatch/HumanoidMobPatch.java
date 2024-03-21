@@ -176,8 +176,8 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 	}
 	
 	public void modifyLivingMotionByCurrentItem() {
-		this.getAnimator().resetMotions();
-		
+		this.getAnimator().resetLivingAnimations();
+
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
 

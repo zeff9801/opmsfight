@@ -22,7 +22,7 @@ public class BerserkerSkill extends PassiveSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		PlayerEventListener listener = container.getExecuter().getEventListener();
-		listener.addEventListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID, (event) -> {
+		listener.addEventListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID, (event) -> {
 			PlayerEntity player = event.getPlayerPatch().getOriginal();
 			float health = player.getHealth();
 			float maxHealth = player.getMaxHealth();
@@ -45,7 +45,7 @@ public class BerserkerSkill extends PassiveSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.getExecuter().getEventListener().removeListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID);
 	}
 	
