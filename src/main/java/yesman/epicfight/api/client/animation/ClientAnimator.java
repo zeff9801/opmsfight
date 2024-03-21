@@ -21,8 +21,8 @@ import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.Layer.Priority;
+import yesman.epicfight.api.client.animation.JointMask;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -201,90 +201,89 @@ public class ClientAnimator extends Animator {
 	public Layer getCompositeLayer(Layer.Priority priority) {
 		return this.baseLayer.compositeLayers.get(priority);
 	}
-	
+
 	public Pose getComposedLayerPose(float partialTicks) {
 		Pose composedPose = new Pose();
-		Pose currentBasePose = this.baseLayer.animationPlayer.getCurrentPose(this.entitypatch, partialTicks);;
+		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, partialTicks);
 		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
-		layerPoses.put(Layer.Priority.LOWEST, Pair.of(this.baseLayer.animationPlayer.getAnimation(), currentBasePose));
-		
-		for (Map.Entry<String, JointTransform> transformEntry : currentBasePose.getJointTransformData().entrySet()) {
-			composedPose.putJointData(transformEntry.getKey(), transformEntry.getValue());
-		}
-		
+
+		composedPose.putJointData(baseLayerPose);
+
 		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.uppers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
-			
+
+			if (priority == Layer.Priority.LOWEST && this.baseLayer.animationPlayer.getAnimation().isMainFrameAnimation()) {
+				continue;
+			}
+
 			if (!compositeLayer.isDisabled()) {
-				Pose layerPose = compositeLayer.animationPlayer.getCurrentPose(this.entitypatch, compositeLayer.paused ? 1.0F : partialTicks);
+				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, partialTicks);
 				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
-				
-				for (Map.Entry<String, JointTransform> transformEntry : layerPose.getJointTransformData().entrySet()) {
-					composedPose.getJointTransformData().put(transformEntry.getKey(), transformEntry.getValue());
-				}
+				composedPose.putJointData(layerPose);
 			}
 		}
-		
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy();
-		this.applyBindModifier(composedPose, rootJoint, layerPoses);
-		
+
+		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy(); //TODO change
+		applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
+
 		return composedPose;
 	}
-	
+
 	public Pose getComposedLayerPoseBelow(Layer.Priority priorityLimit, float partialTicks) {
-		Pose composedPose = this.baseLayer.animationPlayer.getCurrentPose(this.entitypatch, partialTicks);
+		Pose composedPose = this.baseLayer.getEnabledPose(this.entitypatch, partialTicks);
+		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, partialTicks);
 		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
-		
+
 		for (Layer.Priority priority : priorityLimit.lowers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
-			
+
+			if (priority == Layer.Priority.LOWEST && this.baseLayer.animationPlayer.getAnimation().isMainFrameAnimation()) {
+				continue;
+			}
+
 			if (!compositeLayer.isDisabled()) {
-				Pose layerPose = compositeLayer.animationPlayer.getCurrentPose(this.entitypatch, compositeLayer.paused ? 1.0F : partialTicks);
+				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, partialTicks);
 				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
-				
-				for (Map.Entry<String, JointTransform> transformEntry : layerPose.getJointTransformData().entrySet()) {
-					composedPose.getJointTransformData().put(transformEntry.getKey(), transformEntry.getValue());
-				}
+				composedPose.putJointData(layerPose);
 			}
 		}
-		
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy();
-		this.applyBindModifier(composedPose, rootJoint, layerPoses);
-		
+
+		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy(); //TODO change
+
+		if (!layerPoses.isEmpty()) {
+			applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
+		}
+
 		return composedPose;
 	}
-	
-	public void applyBindModifier(Pose result, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses) {
+
+	public static void applyBindModifier(LivingEntityPatch<?> entitypatch, Pose basePose, Pose result, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses) {
 		List<Priority> list = Lists.newArrayList(poses.keySet());
 		Collections.reverse(list);
-		
+
 		for (Layer.Priority priority : list) {
 			DynamicAnimation nowPlaying = poses.get(priority).getFirst();
-			
-			if (nowPlaying.isJointEnabled(this.entitypatch, joint.getName())) {
-				BindModifier bindModifier = nowPlaying.getBindModifier(this.entitypatch, joint.getName());
-				
+
+			if (nowPlaying.isJointEnabled(entitypatch, priority, joint.getName())) {
+				JointMask.BindModifier bindModifier = nowPlaying.getBindModifier(entitypatch, priority, joint.getName());
+
 				if (bindModifier != null) {
-					bindModifier.modify(this, result, priority, joint, poses);
+					bindModifier.modify(entitypatch, basePose, result, priority, joint, poses);
 				}
-				
+
 				break;
 			}
 		}
-		
+
 		for (Joint subJoints : joint.getSubJoints()) {
-			this.applyBindModifier(result, subJoints, poses);
+			applyBindModifier(entitypatch, basePose, result, subJoints, poses);
 		}
 	}
-	
+
+
 	public boolean compareMotion(LivingMotion motion) {
-		boolean flag = this.currentMotion == motion;
-		
-		if (flag) {
-			this.currentMotion = motion;
-		}
-		
-		return flag;
+
+        return this.currentMotion == motion;
 	}
 	
 	public boolean compareCompositeMotion(LivingMotion motion) {

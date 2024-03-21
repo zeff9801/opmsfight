@@ -16,6 +16,7 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;
@@ -113,8 +114,16 @@ public abstract class DynamicAnimation {
 	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.jointTransforms.containsKey(joint);
 	}
+	@OnlyIn(Dist.CLIENT)
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		return this.jointTransforms.containsKey(joint);
+	}
 	
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
+		return null;
+	}
+	@OnlyIn(Dist.CLIENT)
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		return null;
 	}
 

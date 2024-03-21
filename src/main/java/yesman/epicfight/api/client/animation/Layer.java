@@ -57,7 +57,13 @@ public class Layer {
 		entitypatch.updateEntityState();
 		this.nextAnimation = null;
 	}
+	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
+		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
+		DynamicAnimation animation = this.animationPlayer.getAnimation();
+		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
 
+		return pose;
+	}
 	public void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 		nextAnimation.setLinkAnimation(lastPose, convertTimeModifier, entitypatch, this.linkAnimationStorage);
 	}

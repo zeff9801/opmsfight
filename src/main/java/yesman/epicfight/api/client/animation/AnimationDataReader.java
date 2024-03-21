@@ -82,19 +82,13 @@ public class AnimationDataReader {
 	}
 	
 	private static List<JointMask> getJointMaskEntry(String type) {
-		switch (type) {
-		case "none":
-			return JointMaskEntry.NONE;
-		case "arms":
-			return JointMaskEntry.BIPED_ARMS;
-		case "upper_joints":
-			return JointMaskEntry.BIPED_UPPER_JOINTS;
-		case "root_upper_joints":
-			return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
-		case "wings":
-			return JointMaskEntry.WINGS;
-		default:
-			return JointMaskEntry.NONE;
-		}
+        return switch (type) {
+            case "none" -> JointMaskEntry.NONE;
+            case "arms" -> JointMaskEntry.BIPED_ARMS;
+            case "upper_joints" -> JointMaskEntry.BIPED_UPPER_JOINTS;
+            case "root_upper_joints" -> JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
+            case "wings" -> JointMaskEntry.WINGS;
+            default -> JointMaskEntry.ALL;
+        };
 	}
 }
