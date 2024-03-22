@@ -24,10 +24,7 @@ import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.gameasset.Skills;
-import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SkillCategory;
-import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -60,11 +57,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
-		
+
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(Skills.BASIC_ATTACK);
-		skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(Skills.AIR_ATTACK);
-		skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(Skills.KNOCKDOWN_WAKEUP);
+		skillCapability.skillContainers[SkillSlots.BASIC_ATTACK.universalOrdinal()].setSkill(Skills.BASIC_ATTACK);
+		skillCapability.skillContainers[SkillSlots.AIR_ATTACK.universalOrdinal()].setSkill(Skills.AIR_ATTACK);
+		skillCapability.skillContainers[SkillSlots.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(Skills.KNOCKDOWN_WAKEUP);
 		this.tickSinceLastAction = 0;
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
@@ -109,7 +106,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 			container.setExecuter(this);
 			Skill oldone = oldSkill.skillContainers[i].getSkill();
 			
-			if (oldone != null && oldone.getCategory().shouldSynchronized()) {
+			if (oldone != null && oldone.getCategory().shouldSynchronize()) {
 				container.setSkill(oldSkill.skillContainers[i].getSkill());
 			}
 			i++;

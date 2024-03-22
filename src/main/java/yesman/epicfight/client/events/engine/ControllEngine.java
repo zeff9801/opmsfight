@@ -146,9 +146,9 @@ public class ControllEngine {
 	private void specialSkillKeyPressed(KeyBinding key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode()) {
 			if (key.getKey().getValue() != 0) {
-				if (!this.playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch, this.packets)) {
+				if (!this.playerpatch.getSkill(SkillCategories.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this.packets)) {
 					if (!this.player.isSpectator()) {
-						this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
+						this.reserveKey(SkillCategories.WEAPON_INNATE);
 					}
 				} else {
 					this.lockHotkeys();
@@ -178,9 +178,9 @@ public class ControllEngine {
 			} else {
 				if (EpicFightKeyMappings.SPECIAL_SKILL.getKey().equals(this.options.keyAttack.getKey())) {
 					if (this.mouseLeftPressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
-						if (!this.playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch, this.packets)) {
+						if (!this.playerpatch.getSkill(SkillCategories.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this.packets)) {
 							if (!this.player.isSpectator()) {
-								this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
+								this.reserveKey(SkillCategories.WEAPON_INNATE);
 							}
 						} else {
 							this.lockHotkeys();

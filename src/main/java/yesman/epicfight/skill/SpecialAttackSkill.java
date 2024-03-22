@@ -34,7 +34,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public abstract class SpecialAttackSkill extends Skill {
 	public static Skill.Builder<? extends SpecialAttackSkill> createBuilder(ResourceLocation resourceLocation) {
-		return (new Skill.Builder<SpecialAttackSkill>(resourceLocation)).setCategory(SkillCategories.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
+		return (new Skill.Builder<SpecialAttackSkill>(resourceLocation)).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.SPECIAL_GAUAGE);
 	}
 	
 	protected List<Map<AttackPhaseProperty<?>, Object>> properties;

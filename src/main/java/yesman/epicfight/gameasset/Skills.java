@@ -61,12 +61,8 @@ public class Skills {
 		} else {
 			rl = new ResourceLocation(EpicFightMod.MODID, name);
 		}
-		
-		if (SKILLS.containsKey(rl)) {
-			return SKILLS.get(rl);
-		} else {
-			return null;
-		}
+
+        return SKILLS.getOrDefault(rl, null);
 	}
 	
 	public static Collection<ResourceLocation> getLearnableSkillNames() {

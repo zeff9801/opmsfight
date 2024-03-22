@@ -112,7 +112,7 @@ public class BattleModeGui extends ModIngameGui {
 			SkillContainer container = playerpatch.getSkill(i);
 			if (container != null && !container.isEmpty()) {
 				SkillCategory slot = container.getSkill().getCategory();
-				if (slot == SkillCategories.WEAPON_SPECIAL_ATTACK) {
+				if (slot == SkillCategories.WEAPON_INNATE) {
 					this.drawSpecialAttack(playerpatch, container, matStack, partialTicks);
 				} else {
 					RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

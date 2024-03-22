@@ -136,7 +136,7 @@ public class CapabilityItem {
 		Skill specialSkill = this.getSpecialAttack(playerpatch);
 		String skillName = "";
 		SPChangeSkill.State state = SPChangeSkill.State.ENABLE;
-		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK);
+		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_INNATE);
 		
 		if (specialSkill != null) {
 			if (specialSkillContainer.getSkill() != specialSkill) {
@@ -149,7 +149,7 @@ public class CapabilityItem {
 		}
 		
 		specialSkillContainer.setDisabled(specialSkill == null);
-		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_SPECIAL_ATTACK.universalOrdinal(), skillName, state), (ServerPlayerEntity)playerpatch.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_INNATE.universalOrdinal(), skillName, state), (ServerPlayerEntity)playerpatch.getOriginal());
 		
 		Skill skill = this.getPassiveSkill();
 		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_PASSIVE);

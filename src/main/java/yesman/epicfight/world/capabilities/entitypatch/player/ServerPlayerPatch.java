@@ -47,7 +47,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		
 		for (SkillContainer skill : skillCapability.skillContainers) {
-			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronized()) {
+			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronize()) {
 				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().universalOrdinal(), skill.getSkill().toString(), SPChangeSkill.State.ENABLE), this.original);
 			}
 		}
@@ -75,13 +75,13 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {
 		if (source.isBasicAttack()) {
-			SkillContainer container = this.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK);
+			SkillContainer container = this.getSkill(SkillCategories.WEAPON_INNATE);
 			
 			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getSpecialAttack(this))) {
 				float value = container.getResource() + amount;
 				
 				if (value > 0.0F) {
-					this.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).getSkill().setConsumptionSynchronize(this, value);
+					this.getSkill(SkillCategories.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
 				}
 			}
 		}

@@ -4,7 +4,7 @@ import yesman.epicfight.api.utils.ExtendableEnum;
 import yesman.epicfight.api.utils.ExtendableEnumManager;
 
 public interface Style extends ExtendableEnum {
-	public static final ExtendableEnumManager<Style> ENUM_MANAGER = new ExtendableEnumManager<> ();
-	
-	public boolean canUseOffhand();
+	ExtendableEnumManager<Style> ENUM_MANAGER = new ExtendableEnumManager<> ("style");
+
+	boolean canUseOffhand();
 }

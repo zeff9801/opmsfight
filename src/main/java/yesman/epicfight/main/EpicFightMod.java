@@ -2,6 +2,7 @@ package yesman.epicfight.main;
 
 import java.util.function.Function;
 
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -52,6 +53,8 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
+import yesman.epicfight.skill.SkillSlot;
+import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -91,7 +94,8 @@ public class EpicFightMod {
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
     	
     	IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-    	bus.addListener(this::doClientStuff);
+		bus.addListener(this::constructMod);
+		bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
@@ -99,11 +103,12 @@ public class EpicFightMod {
     	bus.addListener(Animations::registerAnimations);
     	bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
     	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
-    	
-    	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
-    	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
-    	Style.ENUM_MANAGER.loadPreemptive(Styles.class);
-    	WeaponCategory.ENUM_MANAGER.loadPreemptive(WeaponCategories.class);
+
+		LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
+		SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
+		SkillSlot.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillSlots.class);
+		Style.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, Styles.class);
+		WeaponCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, WeaponCategories.class);
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
@@ -122,7 +127,13 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> IngameConfigurationScreen::new);
     }
-    
+	private void constructMod(final FMLConstructModEvent event) {
+		LivingMotion.ENUM_MANAGER.loadEnum();
+		SkillCategory.ENUM_MANAGER.loadEnum();
+		SkillSlot.ENUM_MANAGER.loadEnum();
+		Style.ENUM_MANAGER.loadEnum();
+		WeaponCategory.ENUM_MANAGER.loadEnum();
+	}
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
     	
