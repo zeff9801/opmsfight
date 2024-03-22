@@ -2,7 +2,7 @@ package yesman.epicfight.api.animation;
 
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -21,7 +21,7 @@ public class AnimationPlayer {
 	
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
-		this.elapsedTime += ConfigurationIngame.A_TICK * this.getAnimation().getPlaySpeed(entitypatch) *
+		this.elapsedTime += EpicFightOptions.A_TICK * this.getAnimation().getPlaySpeed(entitypatch) *
 				(this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F); 
 		
 		if (this.elapsedTime >= this.play.getTotalTime()) {

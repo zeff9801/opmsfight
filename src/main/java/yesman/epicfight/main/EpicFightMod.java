@@ -38,7 +38,7 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.config.ConfigManager;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
 import yesman.epicfight.events.CapabilityEvent;
 import yesman.epicfight.events.EntityEvents;
@@ -77,7 +77,7 @@ public class EpicFightMod {
 	public static final String MODID = "epicfight";
 	public static final String CONFIG_FILE_PATH = EpicFightMod.MODID + ".toml";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
-	public static ConfigurationIngame CLIENT_CONFIGS;
+	public static EpicFightOptions CLIENT_CONFIGS;
 	private static EpicFightMod instance;
 	
 	public static EpicFightMod getInstance() {
@@ -137,7 +137,7 @@ public class EpicFightMod {
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
     	
-    	CLIENT_CONFIGS = new ConfigurationIngame();
+    	CLIENT_CONFIGS = new EpicFightOptions();
         this.animatorProvider = ClientAnimator::getAnimator;
         this.model = ClientModels.LOGICAL_CLIENT;
     	

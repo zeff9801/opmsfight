@@ -14,10 +14,10 @@ import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.config.Option.DoubleOption;
 import yesman.epicfight.config.Option.IntegerOption;
 
-public class ConfigurationIngame {
+public class EpicFightOptions {
 	public static final float A_TICK = 0.05F;
 	public static final float GENERAL_ANIMATION_CONVERT_TIME = 0.15F;
-	
+
 	public final IntegerOption longPressCount;
 	public final Option<Boolean> filterAnimation;
 	public final Option<Boolean> showHealthIndicator;
@@ -30,8 +30,8 @@ public class ConfigurationIngame {
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
-	
-	public ConfigurationIngame() {
+
+	public EpicFightOptions() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		this.longPressCount = new IntegerOption(config.longPressCountConfig.get(), 1, 10);
 		this.filterAnimation = new Option<Boolean>(config.filterAnimation.get());
@@ -55,7 +55,7 @@ public class ConfigurationIngame {
 
 
 	}
-	
+
 	public void resetSettings() {
 		this.longPressCount.setDefaultValue();
 		this.filterAnimation.setDefaultValue();
@@ -68,7 +68,7 @@ public class ConfigurationIngame {
 		this.offBloodEffects.setDefaultValue();
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 	}
-	
+
 	public void save() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		config.longPressCountConfig.set(this.longPressCount.getValue());

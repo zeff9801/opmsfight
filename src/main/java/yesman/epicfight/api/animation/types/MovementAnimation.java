@@ -2,12 +2,12 @@ package yesman.epicfight.api.animation.types;
 
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MovementAnimation extends StaticAnimation {
 	public MovementAnimation(boolean isRepeat, String path, Model model) {
-		super(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, isRepeat, path, model);
+		super(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, isRepeat, path, model);
 	}
 	
 	public MovementAnimation(float convertTime, boolean isRepeat, String path, Model model) {

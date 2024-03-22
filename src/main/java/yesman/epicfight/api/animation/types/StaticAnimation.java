@@ -25,7 +25,7 @@ import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -48,7 +48,7 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	public StaticAnimation(boolean repeatPlay, String path, Model model) {
-		this(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path, model);
+		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path, model);
 	}
 	
 	public StaticAnimation(float convertTime, boolean isRepeat, String path, Model model) {

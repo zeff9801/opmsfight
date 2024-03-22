@@ -19,7 +19,7 @@ import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.server.SPSetSkillValue;
@@ -184,7 +184,7 @@ public abstract class Skill {
 		
 		if (this.resource == Resource.COOLDOWN) {
 			if (container.stack < container.containingSkill.maxStackSize) {
-				container.setResource(container.resource + this.getCooldownRegenPerSecond(executer) * ConfigurationIngame.A_TICK);
+				container.setResource(container.resource + this.getCooldownRegenPerSecond(executer) * EpicFightOptions.A_TICK);
 			}
 		}
 		
