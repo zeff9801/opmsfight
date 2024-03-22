@@ -22,7 +22,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	private String modid;
 	private int namespaceHash;
 	private int counter = 0;
-	
+
 	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
 		if (this.animationById.containsKey(namespaceId)) {
 			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
@@ -32,21 +32,21 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		}
 		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
 	}
-	
+
 	public StaticAnimation findAnimationByPath(String resourceLocation) {
 		ResourceLocation rl = new ResourceLocation(resourceLocation);
-		
+
 		if (this.animationByName.containsKey(rl)) {
 			return this.animationByName.get(rl);
 		}
-		
+
 		throw new IllegalArgumentException("Unable to find animation: " + rl);
 	}
-	
+
 	public void registerAnimations() {
 		Map<String, Runnable> registryMap = Maps.newHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
-		
+
 		registryMap.entrySet().forEach((entry) -> {
 			this.modid = entry.getKey();
 			this.namespaceHash = this.modid.hashCode();
@@ -55,7 +55,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 			entry.getValue().run();
 		});
 	}
-	
+
 	public void loadAnimationsInit(IResourceManager resourceManager) {
 		this.animationById.values().forEach((map) -> {
 			map.values().forEach((animation) -> {
@@ -64,7 +64,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 			});
 		});
 	}
-	
+
 	@Override
 	protected Map<Integer, Map<Integer, StaticAnimation>> prepare(IResourceManager resourceManager, IProfiler profilerIn) {
 		if (EpicFightMod.isPhysicalClient()) {
@@ -75,10 +75,10 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 			});
 		}
 		Animations.buildClient();
-		
+
 		return this.animationById;
 	}
-	
+
 	@Override
 	protected void apply(Map<Integer, Map<Integer, StaticAnimation>> objectIn, IResourceManager resourceManager, IProfiler profilerIn) {
 		objectIn.values().forEach((map) -> {
@@ -87,42 +87,45 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 			});
 		});
 	}
-	
+
 	private void setAnimationProperties(IResourceManager resourceManager, StaticAnimation animation) {
 		if (resourceManager == null) {
 			return;
 		}
+
 		ResourceLocation location = animation.getLocation();
 		String path = location.getPath();
 		int last = location.getPath().lastIndexOf('/');
+
 		if (last > 0) {
 			ResourceLocation dataLocation = new ResourceLocation(location.getNamespace(), String.format("%s/data%s.json", path.substring(0, last), path.substring(last)));
+
 			if (resourceManager.hasResource(dataLocation)) {
 				try {
-					AnimationDataReader.readAndApply(animation, resourceManager.getResource(dataLocation));
+					AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-	
+
 	public String getModid() {
 		return this.modid;
 	}
-	
+
 	public int getNamespaceHash() {
 		return this.namespaceHash;
 	}
-	
+
 	public int getIdCounter() {
 		return this.counter++;
 	}
-	
+
 	public Map<Integer, StaticAnimation> getIdMap() {
 		return this.animationById.get(this.namespaceHash);
 	}
-	
+
 	public Map<ResourceLocation, StaticAnimation> getNameMap() {
 		return this.animationByName;
 	}

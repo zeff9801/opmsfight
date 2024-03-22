@@ -137,21 +137,25 @@ public class ActionAnimation extends MainFrameAnimation {
 			return true;
 		}
 	}
-	
+
 	@Override
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		JointTransform jt = pose.getOrDefaultTransform("Root");
-		Vec3f jointPosition = jt.translation();
-		OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
-		OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
-		Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
-		worldPosition.x = 0.0F;
-		worldPosition.y = (this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
-		worldPosition.z = 0.0F;
-		OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
-		jointPosition.x = worldPosition.x;
-		jointPosition.y = worldPosition.y;
-		jointPosition.z = worldPosition.z;
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+		if (this.getProperty(ActionAnimationProperty.COORD).isEmpty()) {
+			JointTransform jt = pose.getOrDefaultTransform("Root");
+			Vec3f jointPosition = jt.translation();
+			OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
+			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
+			worldPosition.x = 0.0F;
+			worldPosition.y = (this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
+			worldPosition.z = 0.0F;
+			OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
+			jointPosition.x = worldPosition.x;
+			jointPosition.y = worldPosition.y;
+			jointPosition.z = worldPosition.z;
+		}
+
+		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
 	}
 	
 	@Override

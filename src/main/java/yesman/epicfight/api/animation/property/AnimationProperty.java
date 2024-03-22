@@ -36,9 +36,14 @@ public abstract class AnimationProperty<T> {
 		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ();
 		
 		/**
-		 * This property will move entity's coord of y axis according to animation's coord if true.
+		 * This property will move entity's coord of y-axis according to animation's coord if true.
 		 */
 		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * Coord of action animation
+		 */
+		public static final ActionAnimationProperty<TransformSheet> COORD = new ActionAnimationProperty<TransformSheet> ();
 		
 		/**
 		 * This property determines whether to move the entity in link animation or not.

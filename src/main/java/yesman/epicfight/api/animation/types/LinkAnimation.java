@@ -61,10 +61,10 @@ public class LinkAnimation extends DynamicAnimation {
 		
 		return super.getPoseByTime(entitypatch, time, partialTicks);
 	}
-	
+
 	@Override
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		this.nextAnimation.modifyPose(pose, entitypatch, time);
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+		this.nextAnimation.modifyPose(this, pose, entitypatch, time, partialTicks);
 	}
 	
 	@Override

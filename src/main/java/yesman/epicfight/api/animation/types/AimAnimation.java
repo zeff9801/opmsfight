@@ -2,10 +2,9 @@ package yesman.epicfight.api.animation.types;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
-import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -42,39 +41,43 @@ public class AimAnimation extends StaticAnimation {
 			layer.pause();
 		}
 	}
-	
+
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		if (!entitypatch.isFirstPerson()) {
-			if (entitypatch.getOriginal().isVisuallySwimming() || entitypatch.getOriginal().isFallFlying() || entitypatch.getOriginal().isAutoSpinAttack()) {
+			LivingMotion livingMotion = entitypatch.getCurrentLivingMotion();
+
+			if (livingMotion == LivingMotions.SWIM || livingMotion == LivingMotions.FLY || livingMotion == LivingMotions.CREATIVE_FLY) {
 				Pose pose = this.lying.getPoseByTime(entitypatch, time, partialTicks);
-				this.modifyPose(pose, entitypatch, time);
+				this.modifyPose(this, pose, entitypatch, time, partialTicks);
+
 				return pose;
 			} else {
 				float pitch = entitypatch.getOriginal().getViewXRot(Minecraft.getInstance().getFrameTime());
 				StaticAnimation interpolateAnimation;
 				interpolateAnimation = (pitch > 0) ? this.lookDown : this.lookUp;
-				Pose pose1 = super.getPoseByTime(entitypatch, time, partialTicks);	
+				Pose pose1 = super.getPoseByTime(entitypatch, time, partialTicks);
 				Pose pose2 = interpolateAnimation.getPoseByTime(entitypatch, time, partialTicks);
-				this.modifyPose(pose2, entitypatch, time);
+				this.modifyPose(this, pose2, entitypatch, time, partialTicks);
 				Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, (Math.abs(pitch) / 90.0F));
+
 				return interpolatedPose;
 			}
 		}
-		
+
 		return super.getPoseByTime(entitypatch, time, partialTicks);
 	}
-	
+
 	@Override
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		if (!entitypatch.isFirstPerson()) {
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			JointTransform head = pose.getOrDefaultTransform("Head");
 			float f = 90.0F;
 			float ratio = (f - Math.abs(entitypatch.getOriginal().xRot)) / f;
-			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().yRot : entitypatch.getOriginal().yBodyRot;
-			MathUtils.mulQuaternion(Vector3f.YP.rotationDegrees((yawOffset - entitypatch.getOriginal().yRot) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees((entitypatch.getOriginal().yRot - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginFront);
+			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
+			MathUtils.mulQuaternion(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
+			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginFront);
 		}
 	}
 	

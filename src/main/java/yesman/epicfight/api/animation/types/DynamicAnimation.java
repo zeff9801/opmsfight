@@ -51,24 +51,23 @@ public abstract class DynamicAnimation {
 		}
 		return pose;
 	}
-	
+
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = new Pose();
-		
+
 		for (String jointName : this.jointTransforms.keySet()) {
-			if (!entitypatch.isLogicalClient() || this.isJointEnabled(entitypatch, jointName)) {
-				pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
-			}
+			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
 		}
-		
-		this.modifyPose(pose, entitypatch, time);
-		
+
+		this.modifyPose(this, pose, entitypatch, time, partialTicks);
+
 		return pose;
 	}
+
 	
 	/** Modify the pose which also modified in link animation. **/
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		;
+
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 	}
 	
 	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
@@ -109,8 +108,12 @@ public abstract class DynamicAnimation {
 	public void begin(LivingEntityPatch<?> entitypatch) {}
 	public void tick(LivingEntityPatch<?> entitypatch) {}
 	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {}
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
+
 	public void linkTick(LivingEntityPatch<?> entitypatch, LinkAnimation linkAnimation) {};
-	
+	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
+
+
 	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.jointTransforms.containsKey(joint);
 	}

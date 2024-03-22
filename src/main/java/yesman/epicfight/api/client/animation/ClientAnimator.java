@@ -71,18 +71,37 @@ public class ClientAnimator extends Animator {
 		this.baseLayer.paused = false;
 		this.baseLayer.nextAnimation = nextAnimation;
 	}
-	
+
 	@Override
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
 		Layer.LayerType layerType = animation.getLayerType();
-		
-		switch (layerType) {
-		case BASE_LAYER:
-			this.addBaseLivingAnimation(livingMotion, animation);
-			break;
-		case COMPOSITE_LAYER:
-			this.addCompositeLivingAnimation(livingMotion, animation);
-			break;
+		boolean isBaseLayer = (layerType == Layer.LayerType.BASE_LAYER);
+
+		Map<LivingMotion, StaticAnimation> storage = layerType == Layer.LayerType.BASE_LAYER ? this.livingAnimations : this.compositeLivingAnimations;
+		LivingMotion compareMotion = layerType == Layer.LayerType.BASE_LAYER ? this.currentMotion : this.currentCompositeMotion;
+		Layer layer = layerType == Layer.LayerType.BASE_LAYER ? this.baseLayer : this.baseLayer.compositeLayers.get(animation.getPriority());
+		storage.put(livingMotion, animation);
+
+		if (livingMotion == compareMotion) {
+			EntityState state = this.getEntityState();
+
+			if (!state.inaction()) {
+				layer.playLivingAnimation(animation, this.entitypatch);
+			}
+		}
+
+		if (isBaseLayer) {
+			animation.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent(multilayerAnimation -> {
+				this.compositeLivingAnimations.put(livingMotion, multilayerAnimation);
+
+				if (livingMotion == this.currentCompositeMotion) {
+					EntityState state = getEntityState();
+
+					if (!state.inaction()) {
+						layer.playLivingAnimation(multilayerAnimation, this.entitypatch);
+					}
+				}
+			});
 		}
 	}
 	
@@ -124,11 +143,11 @@ public class ClientAnimator extends Animator {
 		this.defaultLivingAnimations.forEach(this::addLivingAnimation);
 		this.defaultCompositeLivingAnimations.forEach(this::addLivingAnimation);
 	}
-	
+
 	public StaticAnimation getLivingMotion(LivingMotion motion) {
-		return this.livingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION);
+		return this.livingAnimations.getOrDefault(motion, this.livingAnimations.get(LivingMotions.IDLE));
 	}
-	
+
 	public StaticAnimation getCompositeLivingMotion(LivingMotion motion) {
 		return this.compositeLivingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION);
 	}
