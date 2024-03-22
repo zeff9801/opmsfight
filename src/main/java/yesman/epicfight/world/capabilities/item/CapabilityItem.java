@@ -72,42 +72,42 @@ public class CapabilityItem {
 	}
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<ITextComponent> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		if (!this.getStyle(entitypatch).canUseOffhand()) {
-			itemTooltip.add(1, new StringTextComponent(" ").append(new TranslationTextComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(TextFormatting.DARK_GRAY)));
-		}
-		
-		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
-		
-		if (attribute != null) {
-			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
-			Attribute impact = EpicFightAttributes.IMPACT.get();
-			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
-			
-			if (attribute.containsKey(armorNegation)) {
-				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
-				if (value > 0.0D) {
-					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-				}
-			}
-			
-			if (attribute.containsKey(impact)) {
-				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
-				if (value > 0.0D) {
-					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
-					value *= (1.0F + i * 0.12F);
-					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-				}
-			}
-			
-			if (attribute.containsKey(maxStrikes)) {
-				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
-				if (value > 0.0D) {
-					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-				}
-			} else {
-				itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
-			}
-		}
+//		if (!this.getStyle(entitypatch).canUseOffhand()) {
+//			itemTooltip.add(1, new StringTextComponent(" ").append(new TranslationTextComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(TextFormatting.DARK_GRAY)));
+//		}
+//
+//		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
+//
+//		if (attribute != null) {
+//			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
+//			Attribute impact = EpicFightAttributes.IMPACT.get();
+//			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
+//
+//			if (attribute.containsKey(armorNegation)) {
+//				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
+//				if (value > 0.0D) {
+//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+//				}
+//			}
+//
+//			if (attribute.containsKey(impact)) {
+//				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
+//				if (value > 0.0D) {
+//					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
+//					value *= (1.0F + i * 0.12F);
+//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+//				}
+//			}
+//
+//			if (attribute.containsKey(maxStrikes)) {
+//				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
+//				if (value > 0.0D) {
+//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+//				}
+//			} else {
+//				itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
+//			}
+//		}
 	}
 	
 	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
