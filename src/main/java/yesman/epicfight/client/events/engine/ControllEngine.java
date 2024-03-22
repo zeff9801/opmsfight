@@ -66,7 +66,6 @@ public class ControllEngine {
 		this.keyFunctions = Maps.newHashMap();
 		this.keyFunctions.put(this.options.keyAttack, this::attackKeyPressed);
 		this.keyFunctions.put(this.options.keySwapOffhand, this::swapHandKeyPressed);
-		this.keyFunctions.put(EpicFightKeyMappings.SWITCH_MODE, this::switchModeKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.DODGE, this::dodgeKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.SPECIAL_SKILL, this::specialSkillKeyPressed);
 		
