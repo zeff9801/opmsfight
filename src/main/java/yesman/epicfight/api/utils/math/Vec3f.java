@@ -1,6 +1,7 @@
 package yesman.epicfight.api.utils.math;
 
 import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -115,6 +116,17 @@ public class Vec3f extends Vec2f {
 	public float distanceSqr(Vec3f opponent) {
 		return new Vec3f(this.x - opponent.x, this.y - opponent.y, this.z - opponent.z).lengthSqr();
 	}
+	public void rotate(float degree, Vec3f axis) {
+		rotate(degree, axis, this, this);
+	}
+
+	public static Vec3f rotate(float degree, Vec3f axis, Vec3f src, Vec3f dest) {
+		if (dest == null) {
+			dest = new Vec3f();
+		}
+
+		return OpenMatrix4f.transform3v(OpenMatrix4f.createRotatorDeg(degree, axis), src, dest);
+	}
 	
 	public static float dot(Vec3f left, Vec3f right) {
 		return left.x * right.x + left.y * right.y + left.z * right.z;
@@ -171,8 +183,14 @@ public class Vec3f extends Vec2f {
 	public Vector3f toMojangVector() {
 		return new Vector3f(this.x, this.y, this.z);
 	}
+	public Vector3d toDoubleVector() {
+		return new Vector3d(this.x, this.y, this.z);
+	}
 	
 	public static Vec3f fromMojangVector(Vector3f vec3) {
 		return new Vec3f(vec3.x(), vec3.y(), vec3.z());
+	}
+	public static Vec3f fromDoubleVector(Vector3d vec3) {
+		return new Vec3f((float)vec3.x(), (float)vec3.y(), (float)vec3.z());
 	}
 }
