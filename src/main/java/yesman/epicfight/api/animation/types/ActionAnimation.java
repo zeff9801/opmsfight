@@ -19,7 +19,7 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -61,7 +61,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
 		}
 		
-		ActionAnimationCoordSetter actionCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
+		MoveCoordSetter actionCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
 			transformSheet.readFrom(self.jointTransforms.get("Root"));
 		});
 		
@@ -192,12 +192,12 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		if (this.getProperty(ActionAnimationProperty.COORD_SET_TICK).isPresent()) {
-			ActionAnimationCoordSetter actionAnimationCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null);
+			MoveCoordSetter moveCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null);
 			
 			if (animation instanceof LinkAnimation) {
-				actionAnimationCoordSetter.set(animation, entitypatch, animation.jointTransforms.get("Root"));
+				moveCoordSetter.set(animation, entitypatch, animation.jointTransforms.get("Root"));
 			} else {
-				entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionAnimationCoordSetter);
+				entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, moveCoordSetter);
 			}
 		}
 		

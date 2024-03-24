@@ -58,12 +58,12 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<ActionAnimationCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<ActionAnimationCoordSetter> ();
+		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<MoveCoordSetter> ();
 		
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<ActionAnimationCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<ActionAnimationCoordSetter> ();
+		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<MoveCoordSetter> ();
 		
 		/**
 		 * This property determines if the speed effect will increase the move distance.
@@ -77,7 +77,7 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	@FunctionalInterface
-	public interface ActionAnimationCoordSetter {
+	public interface MoveCoordSetter {
 		public void set(DynamicAnimation self, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	

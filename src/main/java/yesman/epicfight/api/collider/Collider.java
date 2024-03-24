@@ -25,7 +25,7 @@ public abstract class Collider {
 	protected final AxisAlignedBB outerAABB;
 	protected Vector3d worldCenter;
 
-		public Collider(Vector3d center, @Nullable AxisAlignedBB outerAABB) {
+	public Collider(Vector3d center, @Nullable AxisAlignedBB outerAABB) {
 		this.modelCenter = center;
 		this.outerAABB = outerAABB;
 		this.worldCenter = new Vector3d(0, 0, 0);

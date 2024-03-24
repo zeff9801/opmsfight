@@ -1,6 +1,6 @@
 package yesman.epicfight.api.animation;
 
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
@@ -67,8 +67,8 @@ public class AnimationPlayer {
 		this.play = animation;
 	}
 	
-	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, ActionAnimationCoordSetter actionAnimationCoordSetter) {
-		actionAnimationCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
+	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, MoveCoordSetter moveCoordSetter) {
+		moveCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
 	}
 	
 	public TransformSheet getActionAnimationCoord() {

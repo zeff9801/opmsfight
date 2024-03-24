@@ -30,7 +30,7 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
@@ -58,7 +58,7 @@ import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class AttackAnimation extends ActionAnimation {
-	protected static final ActionAnimationCoordSetter COMMON_COORD_SETTER = (self, entitypatch, transformSheet) -> {
+	protected static final MoveCoordSetter COMMON_COORD_SETTER = (self, entitypatch, transformSheet) -> {
 		LivingEntity attackTarget = entitypatch.getTarget();
 
 		if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
