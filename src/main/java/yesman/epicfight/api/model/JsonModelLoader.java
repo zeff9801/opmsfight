@@ -265,7 +265,7 @@ public class JsonModelLoader {
 			root = false;
 		}
 	}
-	
+
 	public void loadStaticAnimationBothSide(StaticAnimation animation) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean root = true;
@@ -306,32 +306,30 @@ public class JsonModelLoader {
 	
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {
 		List<Keyframe> keyframeList = new ArrayList<Keyframe> ();
-		
+
 		for (int i = 0; i < times.length; i++) {
 			float timeStamp = times[i];
 			if (timeStamp < 0) {
 				continue;
 			}
-			
+
 			float[] matrixElements = new float[16];
-			for (int j = 0; j < 16; j++) {
-				matrixElements[j] = trasnformMatrix[i*16 + j];
-			}
-			
+
+            System.arraycopy(trasnformMatrix, i * 16, matrixElements, 0, 16);
+
 			OpenMatrix4f matrix = new OpenMatrix4f().load(FloatBuffer.wrap(matrixElements));
 			matrix.transpose();
-			
+
 			if (correct) {
 				matrix.mulFront(CORRECTION);
 			}
-			
+
 			matrix.mulFront(invLocalTransform);
-			
+
 			JointTransform transform = new JointTransform(matrix.toTranslationVector(), matrix.toQuaternion(), matrix.toScaleVector());
 			keyframeList.add(new Keyframe(timeStamp, transform));
 		}
-		
-		TransformSheet sheet = new TransformSheet(keyframeList);
-		return sheet;
+
+        return new TransformSheet(keyframeList);
 	}
 }
