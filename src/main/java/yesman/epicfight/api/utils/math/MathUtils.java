@@ -16,7 +16,25 @@ public class MathUtils {
 		modelMatrix.translate(entityPosition).rotateDeg(-yawDegree, Vec3f.Y_AXIS).rotateDeg(-pitchDegree, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 		return modelMatrix;
 	}
+	/**
+	 * Blender 2.79 bezier curve
+	 * @param t: 0 ~ 1
+	 * @retur
+	 */
+	public static double bezierCurve(double t) {
+		double p1 = 0.0D;
+		double p2 = 0.0D;
+		double p3 = 1.0D;
+		double p4 = 1.0D;
+		double v1, v2, v3, v4;
 
+		v1 = p1;
+		v2 = 3.0D * (p2 - p1);
+		v3 = 3.0D * (p1 - 2.0D * p2 + p3);
+		v4 = p4 - p1 + 3.0D * (p2 - p3);
+
+		return v1 + t * v2 + t * t * v3 + t * t * t * v4;
+	}
 	public static Vector3d getVectorForRotation(float pitch, float yaw) {
 		float f = pitch * ((float) Math.PI / 180F);
 		float f1 = -yaw * ((float) Math.PI / 180F);
