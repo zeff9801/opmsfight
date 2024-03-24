@@ -29,51 +29,51 @@ public abstract class AnimationProperty<T> {
 		public static final StaticAnimationProperty<Float> PLAY_SPEED = new StaticAnimationProperty<Float> ();
 	}
 	
-	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
+	public static class MoveCoordFunctions<T> extends AnimationProperty<T> {
 		/**
 		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
 		 */
-		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ();
+		public static final MoveCoordFunctions<Boolean> STOP_MOVEMENT = new MoveCoordFunctions<Boolean>();
 		
 		/**
 		 * This property will move entity's coord of y-axis according to animation's coord if true.
 		 */
-		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ();
+		public static final MoveCoordFunctions<Boolean> MOVE_VERTICAL = new MoveCoordFunctions<Boolean>();
 
 		/**
 		 * Coord of action animation
 		 */
-		public static final ActionAnimationProperty<TransformSheet> COORD = new ActionAnimationProperty<TransformSheet> ();
+		public static final MoveCoordFunctions<TransformSheet> COORD = new MoveCoordFunctions<TransformSheet>();
 		
 		/**
 		 * This property determines whether to move the entity in link animation or not.
 		 */
-		public static final ActionAnimationProperty<Boolean> MOVE_ON_LINK = new ActionAnimationProperty<Boolean> ();
+		public static final MoveCoordFunctions<Boolean> MOVE_ON_LINK = new MoveCoordFunctions<Boolean>();
 		
 		/**
 		 * You can specify the coord movement time in action animation. Must be registered in order of time.
 		 */
-		public static final ActionAnimationProperty<ActionAnimation.ActionTime[]> MOVE_TIME = new ActionAnimationProperty<ActionAnimation.ActionTime[]> ();
+		public static final MoveCoordFunctions<ActionAnimation.ActionTime[]> MOVE_TIME = new MoveCoordFunctions<ActionAnimation.ActionTime[]>();
 		
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<MoveCoordSetter> ();
+		public static final MoveCoordFunctions<MoveCoordSetter> COORD_SET_BEGIN = new MoveCoordFunctions<MoveCoordSetter>();
 		
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<MoveCoordSetter> ();
+		public static final MoveCoordFunctions<MoveCoordSetter> COORD_SET_TICK = new MoveCoordFunctions<MoveCoordSetter>();
 		
 		/**
 		 * This property determines if the speed effect will increase the move distance.
 		 */
-		public static final ActionAnimationProperty<Boolean> AFFECT_SPEED = new ActionAnimationProperty<Boolean> ();
+		public static final MoveCoordFunctions<Boolean> AFFECT_SPEED = new MoveCoordFunctions<Boolean>();
 		
 		/**
 		 * This property determines if the movement can be canceled by {@link LivingEntityPatch#shouldBlockMoving()}.
 		 */
-		public static final ActionAnimationProperty<Boolean> CANCELABLE_MOVE = new ActionAnimationProperty<Boolean> ();
+		public static final MoveCoordFunctions<Boolean> CANCELABLE_MOVE = new MoveCoordFunctions<Boolean>();
 	}
 	
 	@FunctionalInterface

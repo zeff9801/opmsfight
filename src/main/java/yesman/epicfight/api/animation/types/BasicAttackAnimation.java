@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.util.Hand;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
@@ -23,14 +23,14 @@ public class BasicAttackAnimation extends AttackAnimation {
 		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
 		
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
 	}
 	
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, Hand hand, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
 		
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
 		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
 		
-		if (entitypatch.shouldBlockMoving() && this.getProperty(ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
+		if (entitypatch.shouldBlockMoving() && this.getProperty(MoveCoordFunctions.CANCELABLE_MOVE).orElse(false)) {
 			vec3.scale(0.0F);
 		}
 		

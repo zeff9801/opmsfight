@@ -16,7 +16,7 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.FABRIK;
@@ -40,7 +40,7 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 	public void loadAnimation(IResourceManager resourceManager) {
 		loadBothSide(resourceManager, this);
 		this.tipPointTransforms = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getModel().getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
+		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getModel().getArmature(), this.getProperty(MoveCoordFunctions.MOVE_VERTICAL).orElse(false), true);
 		this.onLoaded();
 	}
 	

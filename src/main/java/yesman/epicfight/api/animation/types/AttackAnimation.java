@@ -31,7 +31,7 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
@@ -97,9 +97,9 @@ public class AttackAnimation extends ActionAnimation {
 	public AttackAnimation(float convertTime, String path, Model model, Phase... phases) {
 		super(convertTime, path, model);
 
-		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, COMMON_COORD_SETTER);
-		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, COMMON_COORD_SETTER);
-		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
+		this.addProperty(MoveCoordFunctions.COORD_SET_BEGIN, COMMON_COORD_SETTER);
+		this.addProperty(MoveCoordFunctions.COORD_SET_TICK, COMMON_COORD_SETTER);
+		this.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true);
 		this.phases = phases;
 
 		this.stateSpectrumBlueprint.clear();

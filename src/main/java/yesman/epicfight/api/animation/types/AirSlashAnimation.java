@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.world.server.ServerWorld;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.collider.Collider;
@@ -27,8 +27,8 @@ public class AirSlashAnimation extends AttackAnimation {
 		
 		this.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(1.5F));
 		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
-		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, false);
-		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
+		this.addProperty(MoveCoordFunctions.STOP_MOVEMENT, false);
+		this.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true);
 		
 		this.stateSpectrumBlueprint.addStateRemoveOld(EntityState.TURNING_LOCKED, true);
 	}

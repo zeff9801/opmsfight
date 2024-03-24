@@ -33,8 +33,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -500,7 +499,7 @@ public class WitherPatch extends MobPatch<WitherEntity> {
 					Vector3d vec31 = new Vector3d(entity.getX() - witherBoss.getX(), 0.0D, entity.getZ() - witherBoss.getZ());
 					double d0 = vec3.y;
 					
-					if (witherBoss.getY() < entity.getY() || !witherBoss.isPowered() && witherBoss.getY() < entity.getY() + 5.0D && !WitherPatch.this.getAnimator().getPlayerFor(null).getAnimation().getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false)) {
+					if (witherBoss.getY() < entity.getY() || !witherBoss.isPowered() && witherBoss.getY() < entity.getY() + 5.0D && !WitherPatch.this.getAnimator().getPlayerFor(null).getAnimation().getProperty(MoveCoordFunctions.MOVE_VERTICAL).orElse(false)) {
 						d0 = Math.max(0.0D, d0);
 						d0 = d0 + (0.3D - d0 * (double) 0.6F);
 					}

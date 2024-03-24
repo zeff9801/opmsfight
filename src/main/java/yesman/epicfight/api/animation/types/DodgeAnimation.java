@@ -3,8 +3,7 @@ package yesman.epicfight.api.animation.types;
 import java.util.function.Function;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -49,7 +48,7 @@ public class DodgeAnimation extends ActionAnimation {
 				.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
 
 
-		this.addProperty(ActionAnimationProperty.AFFECT_SPEED, true);
+		this.addProperty(MoveCoordFunctions.AFFECT_SPEED, true);
 	}
 
 	@Override

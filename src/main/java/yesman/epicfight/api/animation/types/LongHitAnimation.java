@@ -1,12 +1,12 @@
 package yesman.epicfight.api.animation.types;
 
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.model.Model;
 
 public class LongHitAnimation extends ActionAnimation {
 	public LongHitAnimation(float convertTime, String path, Model model) {
 		super(convertTime, path, model);
-		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
+		this.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true);
 		
 		this.stateSpectrumBlueprint.clear()
 			.newTimePair(0.0F, Float.MAX_VALUE)
