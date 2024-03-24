@@ -43,7 +43,7 @@ import yesman.epicfight.skill.StepSkill;
 import yesman.epicfight.skill.SwordmasterSkill;
 import yesman.epicfight.skill.TechnicianSkill;
 
-public class Skills {
+public class EpicFightSkills {
 	private static final Map<ResourceLocation, Skill> SKILLS = Maps.newHashMap();
 	private static final Map<ResourceLocation, Skill> LEARNABLE_SKILLS = Maps.newHashMap();
 	private static final Random RANDOM = new Random();

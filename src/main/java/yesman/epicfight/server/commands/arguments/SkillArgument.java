@@ -19,7 +19,7 @@ import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 
 public class SkillArgument implements ArgumentType<Skill> {
@@ -42,7 +42,7 @@ public class SkillArgument implements ArgumentType<Skill> {
 	
 	public Skill parse(StringReader p_98428_) throws CommandSyntaxException {
 		ResourceLocation resourcelocation = ResourceLocation.read(p_98428_);
-		Skill skill = Skills.getSkill(resourcelocation.toString());
+		Skill skill = EpicFightSkills.getSkill(resourcelocation.toString());
 		
 		if (skill != null && !skill.getCategory().learnable()) {
 			skill = null;
@@ -54,7 +54,7 @@ public class SkillArgument implements ArgumentType<Skill> {
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_98438_, SuggestionsBuilder p_98439_) {
-		return ISuggestionProvider.suggestResource(Skills.getLearnableSkillNames(), p_98439_);
+		return ISuggestionProvider.suggestResource(EpicFightSkills.getLearnableSkillNames(), p_98439_);
 	}
 
 	public Collection<String> getExamples() {

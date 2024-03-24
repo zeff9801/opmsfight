@@ -46,7 +46,7 @@ import yesman.epicfight.events.ModBusEvents;
 import yesman.epicfight.events.PlayerEvents;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -163,7 +163,7 @@ public class EpicFightMod {
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
 		event.enqueueWork(this.animationManager::registerAnimations);
 		event.enqueueWork(EpicFightCapabilities::registerCapabilities);
-		event.enqueueWork(Skills::registerSkills);
+		event.enqueueWork(EpicFightSkills::registerSkills);
 		event.enqueueWork(SkillArgument::registerArgumentTypes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ProviderItem::registerWeaponTypesByClass);

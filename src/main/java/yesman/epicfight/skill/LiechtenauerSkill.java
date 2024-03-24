@@ -18,7 +18,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
@@ -68,7 +68,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 				if (isFront) {
 					this.setDurationSynchronize(event.getPlayerPatch(), container.duration - 1);
 					
-					if (event.getPlayerPatch().getSkill(SkillCategories.GUARD).containingSkill == Skills.ACTIVE_GUARD) {
+					if (event.getPlayerPatch().getSkill(SkillCategories.GUARD).containingSkill == EpicFightSkills.ACTIVE_GUARD) {
 						SkillDataManager dataManager = event.getPlayerPatch().getSkill(this.getCategory()).getDataManager();
 						int motionCounter = dataManager.getDataValue(PARRY_MOTION_COUNTER);
 						dataManager.setDataF(PARRY_MOTION_COUNTER, (v) -> v + 1);

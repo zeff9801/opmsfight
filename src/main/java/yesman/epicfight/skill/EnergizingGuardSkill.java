@@ -12,7 +12,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -80,7 +80,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 	
 	@Override
 	public Skill getPriorSkill() {
-		return Skills.GUARD;
+		return EpicFightSkills.GUARD;
 	}
 	
 	@Override

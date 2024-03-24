@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -45,7 +45,7 @@ public class CPChangeSkill {
 			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
 			
 			if (playerpatch != null) {
-				Skill skill = Skills.getSkill(msg.skillName);
+				Skill skill = EpicFightSkills.getSkill(msg.skillName);
 				playerpatch.getSkill(msg.skillSlotIndex).setSkill(skill);
 				
 				if (skill.getCategory().learnable()) {

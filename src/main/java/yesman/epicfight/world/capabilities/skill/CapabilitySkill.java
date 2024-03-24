@@ -6,7 +6,7 @@ import java.util.Map;
 import com.google.common.collect.HashMultimap;
 
 import net.minecraft.nbt.CompoundNBT;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
@@ -95,7 +95,7 @@ public class CapabilitySkill {
 		int i = 0;
 		for (SkillContainer container : this.skillContainers) {
 			if (nbt.contains(String.valueOf(i))) {
-				Skill skill = Skills.getSkill(nbt.getString(String.valueOf(i)));
+				Skill skill = EpicFightSkills.getSkill(nbt.getString(String.valueOf(i)));
 				container.setSkill(skill);
 				this.addLearnedSkill(skill);
 			}
@@ -106,7 +106,7 @@ public class CapabilitySkill {
 			if (nbt.contains("learned" + String.valueOf(category.universalOrdinal()))) {
 				CompoundNBT learnedNBT = nbt.getCompound("learned" + String.valueOf(category.universalOrdinal()));
 				for (String key : learnedNBT.getAllKeys()) {
-					this.addLearnedSkill(Skills.getSkill(learnedNBT.getString(key)));
+					this.addLearnedSkill(EpicFightSkills.getSkill(learnedNBT.getString(key)));
 				}
 			}
 		}

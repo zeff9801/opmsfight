@@ -5,8 +5,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
@@ -49,7 +48,7 @@ public class SPAddSkill {
 			PlayerPatch<?> playerpatch = (PlayerPatch<?>)mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			CapabilitySkill skillCapability = playerpatch.getSkillCapability();
 			for (String skillName : msg.skillNames) {
-				skillCapability.addLearnedSkill(Skills.getSkill(skillName));
+				skillCapability.addLearnedSkill(EpicFightSkills.getSkill(skillName));
 			}
 		});
 		ctx.get().setPacketHandled(true);

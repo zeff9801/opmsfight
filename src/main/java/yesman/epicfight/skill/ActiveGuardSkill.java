@@ -18,7 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
@@ -147,7 +147,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	
 	@Override
 	public Skill getPriorSkill() {
-		return Skills.GUARD;
+		return EpicFightSkills.GUARD;
 	}
 	
 	@Override

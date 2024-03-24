@@ -10,7 +10,7 @@ import net.minecraft.loot.LootFunction;
 import net.minecraft.loot.LootFunctionType;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.loot.functions.LootFunctionManager;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 
 public class SetRandomSkillFunction extends LootFunction {
 	protected SetRandomSkillFunction(ILootCondition[] p_i51231_1_) {
@@ -24,7 +24,7 @@ public class SetRandomSkillFunction extends LootFunction {
 	
 	@Override
 	public ItemStack run(ItemStack t, LootContext u) {
-		t.getOrCreateTag().putString("skill", Skills.getRandomLearnableSkillName());
+		t.getOrCreateTag().putString("skill", EpicFightSkills.getRandomLearnableSkillName());
 		return t;
 	}
 	

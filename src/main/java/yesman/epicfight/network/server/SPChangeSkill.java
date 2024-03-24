@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -44,7 +44,7 @@ public class SPChangeSkill {
 			
 			if (playerpatch != null) {
 				if (!msg.skillName.equals("")) {
-					Skill skill = Skills.getSkill(msg.skillName);
+					Skill skill = EpicFightSkills.getSkill(msg.skillName);
 					playerpatch.getSkill(msg.slotIndex).setSkill(skill);
 					
 					if (SkillCategory.ENUM_MANAGER.get(msg.slotIndex).learnable()) {

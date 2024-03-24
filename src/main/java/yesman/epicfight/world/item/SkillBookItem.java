@@ -20,7 +20,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -36,7 +36,7 @@ public class SkillBookItem extends Item {
 	
 	public static Skill getContainSkill(ItemStack stack) {
 		String skillName = stack.getTag().getString("skill");
-		return Skills.getSkill(skillName);
+		return EpicFightSkills.getSkill(skillName);
 	}
 	
 	public SkillBookItem(Properties properties) {
@@ -52,7 +52,7 @@ public class SkillBookItem extends Item {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		if (stack.getTag() != null && stack.getTag().contains("skill")) {
-			Skill skill = Skills.getSkill(stack.getTag().getString("skill"));
+			Skill skill = EpicFightSkills.getSkill(stack.getTag().getString("skill"));
 			
 			if (skill != null) {
 				tooltip.add(new TranslationTextComponent(skill.getTranslatableText()).withStyle(TextFormatting.DARK_GRAY));
@@ -63,7 +63,7 @@ public class SkillBookItem extends Item {
 	@Override
 	public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
 		if (group == EpicFightItemGroup.ITEMS) {
-			Skills.getLearnableSkills().forEach((skill) -> {
+			EpicFightSkills.getLearnableSkills().forEach((skill) -> {
 				ItemStack stack = new ItemStack(this);
 				setContainingSkill(skill, stack);
 				items.add(stack);

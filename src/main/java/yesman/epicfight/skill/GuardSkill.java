@@ -30,7 +30,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
@@ -350,7 +350,7 @@ public class GuardSkill extends Skill {
 		matStackIn.translate(0, (float)gui.getSlidingProgression() * 1.0F / scale, 0);
 		
 		Minecraft mc = Minecraft.getInstance();
-		mc.textureManager.bind(Skills.GUARD.getSkillTexture());
+		mc.textureManager.bind(EpicFightSkills.GUARD.getSkillTexture());
 		
 		float scaleMultiply = 1.0F / scale;
 		gui.drawTexturedModalRectFixCoord(matStackIn.last().pose(), (width - x) * scaleMultiply, (height - y) * scaleMultiply, 0, 0, 255, 255);
