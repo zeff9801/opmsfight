@@ -76,7 +76,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.ValueCorrector;
+import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -528,7 +528,7 @@ public class Animations {
 		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, "Tool_R", "biped/combat/sword_auto4", biped);
 		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, "Tool_R", "biped/combat/tool_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(1));
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(1));
 		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, "Tool_R", "biped/combat/axe_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, "Tool_R", "biped/combat/sword_dual_auto1", biped);
@@ -542,14 +542,14 @@ public class Animations {
 		KATANA_AUTO3 = new BasicAttackAnimation(0.06F, 0.1F, 0.21F, 0.59F, null, "Tool_R", "biped/combat/katana_auto3", biped);
 		KATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.06F, 0.0F, 0.06F, 0.65F, ColliderPreset.FATAL_DRAW, "Root", "biped/combat/katana_sheath_auto", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(30.0F))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(2))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 		KATANA_SHEATHING_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.05F, 0.11F, 0.65F, null, "Tool_R", "biped/combat/katana_sheath_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(30.0F))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, "Tool_R", "biped/combat/axe_auto1", biped);
 		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, "Tool_R", "biped/combat/axe_auto2", biped);
@@ -575,8 +575,8 @@ public class Animations {
 		KATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, "Tool_R", "biped/combat/katana_airslash", biped);
 		KATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, "Tool_R", "biped/combat/katana_sheath_airslash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(30.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(2))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, "Tool_R", "biped/combat/spear_onehand_airslash", biped);
@@ -681,7 +681,7 @@ public class Animations {
 		ENDERMAN_TP_KICK1 = new AttackAnimation(0.06F, 0.15F, 0.3F, 0.4F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/tp_kick1", enderman);
 		ENDERMAN_TP_KICK2 = new AttackAnimation(0.16F, 0.15F, 0.25F, 0.45F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/tp_kick2", enderman);
 		ENDERMAN_KICK1 = new AttackAnimation(0.16F, 0.66F, 0.7F, 0.81F, 1.6F, ColliderPreset.ENDERMAN_LIMB, "Leg_L", "enderman/rush_kick", enderman)
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.setter(4.0F));
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(4.0F));
 		ENDERMAN_KICK2 = new AttackAnimation(0.16F, 0.8F, 0.8F, 0.9F, 1.3F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/jump_kick", enderman);
 		ENDERMAN_KNEE = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.31F, 1.0F, ColliderPreset.FIST, "Leg_R", "enderman/knee", enderman)
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG);
@@ -1003,8 +1003,8 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
 				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(100))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(15.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(100))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(15.0F))
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
@@ -1109,8 +1109,8 @@ public class Animations {
 		
 		WITHER_SWIRL = new AttackAnimation(0.2F, 0.05F, 0.4F, 0.51F, 1.6F, ColliderPreset.WITHER_CHARGE, "Torso", "wither/swirl", wither)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_BIG)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(3))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(6.0F));
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(3))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(6.0F));
 		
 		WITHER_BEAM = new ActionAnimation(0.05F, "wither/laser", wither)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
@@ -1220,8 +1220,8 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.FAST_MOVE)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(100))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(10.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(100))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(10.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 		
 		ZOMBIE_ATTACK1 = new AttackAnimation(0.1F, 0.3F, 0.4F, 0.6F, 0.85F, ColliderPreset.FIST, "Tool_R", "zombie/attack1", biped)

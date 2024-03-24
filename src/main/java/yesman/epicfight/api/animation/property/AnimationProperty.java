@@ -12,7 +12,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
-import yesman.epicfight.api.utils.math.ValueCorrector;
+import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -114,11 +114,11 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {
-		public static final AttackPhaseProperty<ValueCorrector> MAX_STRIKES = new AttackPhaseProperty<ValueCorrector> ();
-		public static final AttackPhaseProperty<ValueCorrector> DAMAGE = new AttackPhaseProperty<ValueCorrector> ();
+		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES = new AttackPhaseProperty<ValueModifier> ();
+		public static final AttackPhaseProperty<ValueModifier> DAMAGE = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<ExtraDamageType> EXTRA_DAMAGE = new AttackPhaseProperty<ExtraDamageType> ();
-		public static final AttackPhaseProperty<ValueCorrector> ARMOR_NEGATION = new AttackPhaseProperty<ValueCorrector> ();
-		public static final AttackPhaseProperty<ValueCorrector> IMPACT = new AttackPhaseProperty<ValueCorrector> ();
+		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION = new AttackPhaseProperty<ValueModifier> ();
+		public static final AttackPhaseProperty<ValueModifier> IMPACT = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<StunType> STUN_TYPE = new AttackPhaseProperty<StunType> ();
 		public static final AttackPhaseProperty<SoundEvent> SWING_SOUND = new AttackPhaseProperty<SoundEvent> ();
 		public static final AttackPhaseProperty<SoundEvent> HIT_SOUND = new AttackPhaseProperty<SoundEvent> ();

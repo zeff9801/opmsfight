@@ -14,7 +14,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProp
 import yesman.epicfight.api.forgeevent.SkillRegistryEvent;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
-import yesman.epicfight.api.utils.math.ValueCorrector;
+import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.ActiveGuardSkill;
@@ -131,51 +131,51 @@ public class EpicFightSkills {
 		
 		SWEEPING_EDGE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "sweeping_edge")).setConsumption(30.0F).setAnimations(Animations.SWEEPING_EDGE))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(1))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.0F))
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(20.0F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.multiplier(1.6F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(1))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.6F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.registerPropertiesToAnimation());
 		
 		DANCING_EDGE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "dancing_edge")).setConsumption(30.0F).setAnimations(Animations.DANCING_EDGE))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(1))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.multiplier(1.2F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(1))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.2F))
 				.registerPropertiesToAnimation());
 		
 		GUILLOTINE_AXE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "guillotine_axe")).setConsumption(20.0F).setAnimations(Animations.GUILLOTINE_AXE))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.5F))
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(20.0F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.5F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.registerPropertiesToAnimation());
 		
 		SLAUGHTER_STANCE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "slaughter_stance")).setConsumption(40.0F).setAnimations(Animations.SPEAR_SLASH))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(4))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(1.25F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.multiplier(1.2F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(4))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(1.25F))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.2F))
 				.registerPropertiesToAnimation());
 		
 		HEARTPIERCER = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "heartpiercer")).setConsumption(40.0F).setAnimations(Animations.SPEAR_THRUST))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(10.0F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(10.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.registerPropertiesToAnimation());
 		
 		GIANT_WHIRLWIND = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "giant_whirlwind")).setConsumption(60.0F).setAnimations(Animations.GIANT_WHIRLWIND))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.multiplier(1.4F))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.4F))
 				.registerPropertiesToAnimation());
 		
 		FATAL_DRAW = registerSkill(new FatalDrawSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "fatal_draw")).setConsumption(30.0F))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.0F))
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(50.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(6))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(50.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(6))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.registerPropertiesToAnimation());
 		
@@ -188,22 +188,22 @@ public class EpicFightSkills {
 		
 		LETHAL_SLICING = registerSkill(new LethalSlicingSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "lethal_slicing")).setConsumption(35.0F))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(2))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.setter(0.5F))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(1.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(2))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(0.5F))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(1.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(50.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(2))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(1.7F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(50.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(2))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(1.7F))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.registerPropertiesToAnimation());
 		
 		RELENTLESS_COMBO = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "relentless_combo")).setConsumption(20.0F).setAnimations(Animations.RELENTLESS_COMBO))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.registerPropertiesToAnimation());
@@ -212,23 +212,23 @@ public class EpicFightSkills {
 		
 		EVISCERATE = registerSkill(new EviscerateSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "eviscerate")).setConsumption(25.0F))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueCorrector.setter(2.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
+				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(2.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, ExtraDamageType.get(ExtraDamageType.PERCENT_OF_TARGET_LOST_HEALTH, 0.5F))
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(50.0F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(50.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.registerPropertiesToAnimation());
 		
 		BLADE_RUSH = registerSkill(new BladeRushSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "blade_rush")).setConsumption(25.0F).setMaxDuration(1).setMaxStack(4).setActivateType(ActivateType.TOGGLE))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(2.5F))
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueCorrector.adder(20.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.setter(1))
+				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.5F))
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.BLADE_RUSH_SKILL)

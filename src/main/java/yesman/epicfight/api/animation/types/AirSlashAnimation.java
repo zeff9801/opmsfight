@@ -10,7 +10,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.math.ValueCorrector;
+import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class AirSlashAnimation extends AttackAnimation {
@@ -25,7 +25,7 @@ public class AirSlashAnimation extends AttackAnimation {
 			this.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		}
 		
-		this.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.multiplier(1.5F));
+		this.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(1.5F));
 		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
 		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, false);
 		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);

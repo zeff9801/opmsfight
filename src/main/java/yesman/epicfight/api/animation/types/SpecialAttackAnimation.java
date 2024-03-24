@@ -10,7 +10,7 @@ import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
-import yesman.epicfight.api.utils.math.ValueCorrector;
+import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SpecialAttackAnimation extends AttackAnimation {
@@ -26,7 +26,7 @@ public class SpecialAttackAnimation extends AttackAnimation {
 	protected float getDamageTo(LivingEntityPatch<?> entitypatch, LivingEntity target, Phase phase, ExtendedDamageSource source) {
 		float f = entitypatch.getDamageTo(target, source, phase.hand);
 		int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, entitypatch.getOriginal());
-		ValueCorrector cor = new ValueCorrector(0, (i > 0) ? 1.0F + (float)i / (float)(i + 1.0F) : 1.0F, 0);
+		ValueModifier cor = new ValueModifier(0, (i > 0) ? 1.0F + (float)i / (float)(i + 1.0F) : 1.0F, 0);
 		phase.getProperty(AttackPhaseProperty.DAMAGE).ifPresent((opt) -> cor.merge(opt));
 		float totalDamage = cor.getTotalValue(f);
 		ExtraDamageType extraCalculator = phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).orElse(null);
