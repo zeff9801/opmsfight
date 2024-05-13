@@ -25,8 +25,6 @@ public abstract class EntityIndicator extends ModIngameGui {
 	public static final ResourceLocation BATTLE_ICON = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
 	
 	public static void init() {
-		new TargetIndicator();
-		new HealthBarIndicator();
 	}
 	
 	public void drawTexturedModalRect2DPlane(Matrix4f matrix, IVertexBuilder vertexBuilder, float minX, float minY, float maxX, float maxY, float minTexU, float minTexV, float maxTexU, float maxTexV) {
