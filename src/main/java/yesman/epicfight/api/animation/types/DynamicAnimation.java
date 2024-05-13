@@ -149,6 +149,9 @@ public abstract class DynamicAnimation {
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		return 1.0F;
 	}
+	public TransformSheet getCoord() {
+		return this.jointTransforms.get("Root");
+	}
 	
 	public DynamicAnimation getRealAnimation() {
 		return this;

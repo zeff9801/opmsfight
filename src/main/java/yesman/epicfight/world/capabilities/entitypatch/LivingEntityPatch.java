@@ -37,6 +37,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -415,6 +416,39 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
 
+	public Armature getArmature() {
+		return this.armature;
+	}
+	public void setLastAttackEntity(Entity tryHurtEntity) {
+		this.lastTryHurtEntity = tryHurtEntity;
+	}
+	protected boolean checkLastAttackSuccess(Entity target) {
+		boolean success = target.is(this.lastTryHurtEntity);
+		this.lastTryHurtEntity = null;
+
+		if (success && !this.isLastAttackSuccess) {
+			this.setLastAttackSuccess(true);
+		}
+
+		return success;
+	}
+	public void setLastAttackSuccess(boolean setter) {
+		this.isLastAttackSuccess = setter;
+	}
+	@Nullable
+	public EpicFightDamageSource getEpicFightDamageSource() {
+		return this.epicFightDamageSource;
+	}
+	public boolean isLastAttackSuccess() {
+		return this.isLastAttackSuccess;
+	}
+	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
+		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
+	}
+	public AttackResult attack(ExtendedDamageSource damageSource, Entity target, Hand hand) {
+		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
+	}
+
 	@FunctionalInterface
 	public static interface AnimationPacketProvider {
 		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
@@ -459,6 +493,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	@SuppressWarnings("unchecked")
 	public <A extends Animator> A getAnimator() {
 		return (A) this.animator;
+	}
+	public LivingMotion getCurrentLivingMotion() {
+		return this.currentLivingMotion;
 	}
 
 	public ClientAnimator getClientAnimator() {
@@ -598,12 +635,20 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public float getYRotLimit() {
 		return 20.0F;
 	}
+	public double getXOld() {
+		return this.original.xOld;
+	}
+
+	public double getYOld() {
+		return this.original.yOld;
+	}
+
+	public double getZOld() {
+		return this.original.zOld;
+	}
+
 
 	public EntityState getEntityState() {
 		return this.state;
-	}
-
-	public LivingMotion getCurrentLivingMotion() {
-		return this.currentLivingMotion;
 	}
 }

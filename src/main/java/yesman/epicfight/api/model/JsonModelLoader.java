@@ -208,7 +208,7 @@ public class JsonModelLoader {
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
 				Armature armature = animation.getModel().getArmature();
-				Joint joint = armature.getJointHierarcy();
+				Joint joint = armature.getRootJoint();
 				int pathIndex = armature.searchPathIndex(phase.getColliderJointName());
 				
 				while (joint != null) {

@@ -16,11 +16,14 @@ import net.minecraft.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.UseAction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.EpicFightDamageSource;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSetAttackTarget;
@@ -156,7 +159,18 @@ public abstract class MobPatch<T extends MobEntity> extends LivingEntityPatch<T>
 		
 		return super.isTeammate(entityIn);
 	}
-	
+	@Override
+	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
+		boolean shouldSwap = hand == Hand.OFF_HAND;
+
+		this.epicFightDamageSource = damageSource;
+		//this.setOffhandDamage(shouldSwap);
+		this.original.doHurtTarget(target);
+		//this.recoverMainhandDamage(shouldSwap);
+		this.epicFightDamageSource = null;
+
+		return super.attack(damageSource, target, hand);
+	}
 	@Override
 	public LivingEntity getTarget() {
 		return this.original.getTarget();
