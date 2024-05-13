@@ -13,7 +13,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
@@ -22,7 +21,6 @@ import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.Layer.Priority;
-import yesman.epicfight.api.client.animation.JointMask;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -153,7 +151,7 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void setPoseToModel(float partialTicks) {
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy();
+		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint();
 		this.applyPoseToJoint(rootJoint, new OpenMatrix4f(), this.getPose(partialTicks), partialTicks);
 	}
 	
@@ -242,7 +240,7 @@ public class ClientAnimator extends Animator {
 			}
 		}
 
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy(); //TODO change
+		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint(); //TODO change
 		applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
 
 		return composedPose;
@@ -267,7 +265,7 @@ public class ClientAnimator extends Animator {
 			}
 		}
 
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getJointHierarcy(); //TODO change
+		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint(); //TODO change
 
 		if (!layerPoses.isEmpty()) {
 			applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
