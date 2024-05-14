@@ -82,7 +82,7 @@ public class JsonModelLoader {
 				this.rootJson = Streams.parse(in).getAsJsonObject();
 			}
 		} catch (Exception e) {
-			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because " + e);
+			System.out.println("Can't read " + resourceLocation.toString() + " because " + e);
 		}
 	}
 	

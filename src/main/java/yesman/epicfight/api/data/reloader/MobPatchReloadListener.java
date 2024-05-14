@@ -71,7 +71,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 			ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), pathString);
 			
 			if (!ForgeRegistries.ENTITIES.containsKey(registryName)) {
-				EpicFightMod.LOGGER.warn("[Custom Entity] Entity named " + registryName + " does not exist");
+				System.out.println("[Custom Entity] Entity named " + registryName + " does not exist");
 				continue;
 			}
 			
@@ -231,7 +231,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		}
 		
 		for (String[] formatArgs : loggerNote) {
-			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]", (Object[])formatArgs));
+			System.out.println(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]", (Object[])formatArgs));
 		}
 		
 		if (predicate == null) {
@@ -467,7 +467,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		}
 		
 		for (String[] formatArgs : loggerNote) {
-			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s, default: %s]", (Object[])formatArgs));
+			System.out.println(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s, default: %s]", (Object[])formatArgs));
 		}
 		
 		if (predicate == null) {

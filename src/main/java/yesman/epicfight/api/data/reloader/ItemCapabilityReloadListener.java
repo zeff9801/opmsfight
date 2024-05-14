@@ -64,7 +64,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				
 				if (item == null) {
-					EpicFightMod.LOGGER.warn("Tried to add a capabiltiy for item " + registryName + ", but it's not exist!");
+					System.out.println("Tried to add a capabiltiy for item " + registryName + ", but it's not exist!");
 					return;
 				}
 				
@@ -195,7 +195,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 		int number = tag.getInt("number");
 		
 		if (number < 1) {
-			EpicFightMod.LOGGER.warn("Datapack deserialization error: the number of colliders must bigger than 0! " + item);
+			System.out.println("Datapack deserialization error: the number of colliders must bigger than 0! " + item);
 			return null;
 		}
 		
@@ -211,7 +211,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 		double centerZ = centerVector.getDouble(2);
 		
 		if (sizeX < 0 || sizeY < 0 || sizeZ < 0) {
-			EpicFightMod.LOGGER.warn("Datapack deserialization error: the size of the collider must be non-negative! " + item);
+			System.out.println("Datapack deserialization error: the size of the collider must be non-negative! " + item);
 			return null;
 		}
 		

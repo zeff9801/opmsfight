@@ -114,7 +114,7 @@ public class TransformSheet {
 				prev++;
 				next++;
 			} else {
-				EpicFightMod.LOGGER.error("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
+				System.out.println("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
 				(new IllegalArgumentException()).printStackTrace();
 			}
 		}

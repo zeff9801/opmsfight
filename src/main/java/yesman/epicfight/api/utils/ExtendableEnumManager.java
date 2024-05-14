@@ -20,7 +20,7 @@ public class ExtendableEnumManager<T> {
 			Method m = targetClss.getMethod("values");
 			m.invoke(null);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.warn("Error when loading extendable enum " + targetClss);
+			System.out.println("Error when loading extendable enum " + targetClss);
 			e.printStackTrace();
 		}
 	}

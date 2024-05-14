@@ -131,7 +131,7 @@ public class IngameConfigurationScreen extends Screen {
 				CustomModelBakery.exportModels(resourcePackDirectory);
 				Util.getPlatform().openFile(resourcePackDirectory);
 			} catch (IOException e) {
-				EpicFightMod.LOGGER.info("Failed to export custom armor models");
+				System.out.println("Failed to export custom armor models");
 				e.printStackTrace();
 			}
 		}, (button, matrixStack, mouseX, mouseY) -> {

@@ -139,7 +139,7 @@ public class Vec3f extends Vec2f {
 		float dotDivLength = Vec3f.dot(a, b) / (a.length() * b.length());
 		
 		if (!Float.isFinite(dotDivLength)) {
-			EpicFightMod.LOGGER.info("Warning : given vector's length is zero");
+			System.out.println("Warning : given vector's length is zero");
 			(new IllegalArgumentException()).printStackTrace();
 			dotDivLength = 1.0F;
 		}
