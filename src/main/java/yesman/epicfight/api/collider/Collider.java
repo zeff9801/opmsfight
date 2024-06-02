@@ -69,6 +69,8 @@ public abstract class Collider {
 		return list;
 	}
 
+	public abstract Collider deepCopy();
+
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
 	public abstract void drawInternal(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, OpenMatrix4f pose, boolean red);

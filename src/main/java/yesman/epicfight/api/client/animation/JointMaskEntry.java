@@ -95,8 +95,6 @@ public class JointMaskEntry {
 
 	public static final List<JointMask> WINGS = new ArrayList<> (Arrays.asList(JointMask.of("Wing_L"), JointMask.of("Wing_R")));
 
-	public static final List<JointMask> NONE = new ArrayList<> (List.of());
-
 	public static final List<JointMask> ALL = new ArrayList<> (
 			Arrays.asList(
 					JointMask.of("Root"), JointMask.of("Thigh_R"),

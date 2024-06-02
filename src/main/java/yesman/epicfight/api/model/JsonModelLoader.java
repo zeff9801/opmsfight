@@ -32,6 +32,7 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
@@ -195,6 +196,7 @@ public class JsonModelLoader {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean action = animation instanceof ActionAnimation;
 		boolean attack = animation instanceof AttackAnimation;
+		boolean noTransformData = !action && !attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
 		boolean root = true;
 		
 		if (!action && !attack) {
@@ -203,7 +205,7 @@ public class JsonModelLoader {
 			}
 		}
 		
-		Set<String> allowedJoints = Sets.<String>newLinkedHashSet();
+		Set<String> allowedJoints = Sets.newLinkedHashSet();
 		
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
@@ -226,77 +228,114 @@ public class JsonModelLoader {
 		} else if (action) {
 			allowedJoints.add("Root");
 		}
-		
+
 		for (JsonElement element : array) {
 			JsonObject keyObject = element.getAsJsonObject();
 			String name = keyObject.get("name").getAsString();
-			
+
 			if (attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER && !allowedJoints.contains(name)) {
+				if (name.equals("Coord")) {
+					root = false;
+				}
+
 				continue;
 			}
 			
 			Joint joint = animation.getModel().getArmature().searchJointByName(name);
-			
+
 			if (joint == null) {
-				throw new IllegalArgumentException("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation);
+				if (name.equals("Coord") && action) {
+					JsonArray timeArray = keyObject.getAsJsonArray("time");
+					JsonArray transformArray = keyObject.getAsJsonArray("transform");
+					int timeNum = timeArray.size();
+					int matrixNum = transformArray.size();
+					float[] times = new float[timeNum];
+					float[] transforms = new float[matrixNum * 16];
+
+					for (int i = 0; i < timeNum; i++) {
+						times[i] = timeArray.get(i).getAsFloat();
+					}
+
+					for (int i = 0; i < matrixNum; i++) {
+						JsonArray matrixJson = transformArray.get(i).getAsJsonArray();
+
+						for (int j = 0; j < 16; j++) {
+							transforms[i * 16 + j] = matrixJson.get(j).getAsFloat();
+						}
+					}
+
+					TransformSheet sheet = getTransformSheet(times, transforms, new OpenMatrix4f(), true);
+					((ActionAnimation)animation).addProperty(AnimationProperty.MoveCoordFunctions.COORD, sheet);
+					root = false;
+					continue;
+				} else {
+					EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint " + name + " in the animation file, " + animation);
+					continue;
+				}
 			}
-			
+
 			JsonArray timeArray = keyObject.getAsJsonArray("time");
 			JsonArray transformArray = keyObject.getAsJsonArray("transform");
 			int timeNum = timeArray.size();
 			int matrixNum = transformArray.size();
 			float[] times = new float[timeNum];
 			float[] transforms = new float[matrixNum * 16];
-			
+
 			for (int i = 0; i < timeNum; i++) {
 				times[i] = timeArray.get(i).getAsFloat();
 			}
-			
+
 			for (int i = 0; i < matrixNum; i++) {
 				JsonArray matrixJson = transformArray.get(i).getAsJsonArray();
+
 				for (int j = 0; j < 16; j++) {
 					transforms[i * 16 + j] = matrixJson.get(j).getAsFloat();
 				}
 			}
-			
+
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
-			animation.addSheet(name, sheet);
+			animation.addSheet(name, sheet); //TODO i think remove
+			if (!noTransformData) {
+				animation.addSheet(name, sheet);
+			}
+
 			animation.setTotalTime(times[times.length - 1]);
 			root = false;
 		}
 	}
-
 	public void loadStaticAnimationBothSide(StaticAnimation animation) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean root = true;
-		
+		Armature armature = animation.getModel().getArmature();
+
 		for (JsonElement element : array) {
 			JsonObject keyObject = element.getAsJsonObject();
 			String name = keyObject.get("name").getAsString();
-			Joint joint = animation.getModel().getArmature().searchJointByName(name);
-			
+			Joint joint = armature.searchJointByName(name);
+
 			if (joint == null) {
 				throw new IllegalArgumentException("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation);
 			}
-			
+
 			JsonArray timeArray = keyObject.getAsJsonArray("time");
 			JsonArray transformArray = keyObject.getAsJsonArray("transform");
 			int timeNum = timeArray.size();
 			int matrixNum = transformArray.size();
 			float[] times = new float[timeNum];
 			float[] transforms = new float[matrixNum * 16];
-			
+
 			for (int i = 0; i < timeNum; i++) {
 				times[i] = timeArray.get(i).getAsFloat();
 			}
-			
+
 			for (int i = 0; i < matrixNum; i++) {
 				JsonArray matrixJson = transformArray.get(i).getAsJsonArray();
+
 				for (int j = 0; j < 16; j++) {
 					transforms[i * 16 + j] = matrixJson.get(j).getAsFloat();
 				}
 			}
-			
+
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
 			animation.addSheet(name, sheet);
 			animation.setTotalTime(times[times.length - 1]);
