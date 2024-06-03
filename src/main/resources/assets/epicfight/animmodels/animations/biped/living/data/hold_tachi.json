@@ -4,12 +4,8 @@
 	"masks":
 	[
 		{
-			"livingmotion":"IDLE",
-			"type":"none"
-		},
-		{
 			"livingmotion":"ALL",
-			"type":"right_arms"
+			"type":"arms"
 		}
 	]
 }
