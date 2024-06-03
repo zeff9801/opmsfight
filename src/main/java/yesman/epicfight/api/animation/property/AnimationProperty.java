@@ -114,7 +114,7 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {
-		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES = new AttackPhaseProperty<ValueModifier> ();
+		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES_MODIFIER = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<ValueModifier> DAMAGE = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<ExtraDamageType> EXTRA_DAMAGE = new AttackPhaseProperty<ExtraDamageType> ();
 		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION = new AttackPhaseProperty<ValueModifier> ();

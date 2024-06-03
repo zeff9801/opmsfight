@@ -92,7 +92,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		this.getProperty(AttackPhaseProperty.DAMAGE, propertyMap).ifPresent(damageCorrector::merge);
 		this.getProperty(AttackPhaseProperty.ARMOR_NEGATION, propertyMap).ifPresent(armorNegationCorrector::merge);
 		this.getProperty(AttackPhaseProperty.IMPACT, propertyMap).ifPresent(impactCorrector::merge);
-		this.getProperty(AttackPhaseProperty.MAX_STRIKES, propertyMap).ifPresent(maxStrikesCorrector::merge);
+		this.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, propertyMap).ifPresent(maxStrikesCorrector::merge);
 		
 		impactCorrector.merge(ValueModifier.multiplier(1.0F + EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemStack) * 0.12F));
 		

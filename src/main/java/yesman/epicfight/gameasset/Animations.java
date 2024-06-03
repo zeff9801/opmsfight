@@ -532,7 +532,7 @@ public class Animations {
 		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, "Tool_R", "biped/combat/sword_auto4", biped);
 		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, "Tool_R", "biped/combat/tool_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(1));
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1));
 		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, "Tool_R", "biped/combat/axe_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, "Tool_R", "biped/combat/sword_dual_auto1", biped);
@@ -548,7 +548,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(2))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 		KATANA_SHEATHING_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.05F, 0.11F, 0.65F, null, "Tool_R", "biped/combat/katana_sheath_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
@@ -580,7 +580,7 @@ public class Animations {
 		KATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, "Tool_R", "biped/combat/katana_sheath_airslash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(2))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, "Tool_R", "biped/combat/spear_onehand_airslash", biped);
@@ -1007,7 +1007,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
 				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(100))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(15.0F))
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
@@ -1113,7 +1113,7 @@ public class Animations {
 
 		WITHER_SWIRL = new AttackAnimation(0.2F, 0.05F, 0.4F, 0.51F, 1.6F, ColliderPreset.WITHER_CHARGE, "Torso", "wither/swirl", wither)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_BIG)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.setter(3))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(3))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(6.0F));
 
 		WITHER_BEAM = new ActionAnimation(0.05F, "wither/laser", wither)
@@ -1224,7 +1224,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.FAST_MOVE)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueModifier.adder(100))
+				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(10.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 
