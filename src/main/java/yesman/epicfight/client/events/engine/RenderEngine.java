@@ -77,6 +77,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.item.BowCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;

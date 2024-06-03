@@ -6,9 +6,9 @@ import net.minecraft.item.ToolItem;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class KnuckleCapability extends WeaponCapability {
+public class GloveCapability extends WeaponCapability {
 	
-	protected KnuckleCapability(CapabilityItem.Builder builder) {
+	protected GloveCapability(CapabilityItem.Builder builder) {
 		super(builder);
 	}
 	

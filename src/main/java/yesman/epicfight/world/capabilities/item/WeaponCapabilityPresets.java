@@ -34,65 +34,66 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, EpicFightSkills.GUILLOTINE_AXE)
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD);
-		
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			
+
+		if (item instanceof TieredItem tieredItem) {
+			int harvestLevel = tieredItem.getTier().getLevel();
+
 			if (harvestLevel != 0) {
 				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(10.0D * harvestLevel)));
 			}
-			
+
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.7D + 0.3D * harvestLevel)));
 		}
-		
+
 		return builder;
 	};
+
 	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.HOE)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO1, Animations.TOOL_AUTO2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
-		
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
+				.category(WeaponCategories.HOE)
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO1, Animations.TOOL_AUTO2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+
+		if (item instanceof TieredItem tieredItem) {
+			int harvestLevel = tieredItem.getTier().getLevel();
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(-0.4D + 0.1D * harvestLevel)));
 		}
-		
+
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.PICKAXE)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.TOOLS)
-			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
-		
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			
+				.category(WeaponCategories.PICKAXE)
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.collider(ColliderPreset.TOOLS)
+				.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+
+		if (item instanceof TieredItem tieredItem) {
+			int harvestLevel = tieredItem.getTier().getLevel();
+
 			if (harvestLevel != 0) {
 				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(6.0D * harvestLevel)));
 			}
-			
+
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.4D + 0.1D * harvestLevel)));
 		}
-		
+
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.SHOVEL)
-			.collider(ColliderPreset.TOOLS)
-			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
-		
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
+				.category(WeaponCategories.SHOVEL)
+				.collider(ColliderPreset.TOOLS)
+				.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+
+		if (item instanceof TieredItem tieredItem) {
+			int harvestLevel = tieredItem.getTier().getLevel();
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.8D + 0.4D * harvestLevel)));
 		}
-		
+
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> {
@@ -108,14 +109,23 @@ public class WeaponCapabilityPresets {
 			.specialAttack(Styles.TWO_HAND, EpicFightSkills.DANCING_EDGE)
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SWORD_DUAL_GUARD)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_DUAL)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_DUAL_WEAPON)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_DUAL_WEAPON)
 			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD);
-		
+
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
 			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
 		}
-		
+
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) -> {
@@ -129,36 +139,39 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO1, Animations.SPEAR_TWOHAND_AUTO2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, EpicFightSkills.HEARTPIERCER)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.SLAUGHTER_STANCE)
+			.specialAttack(Styles.TWO_HAND, EpicFightSkills.GRASPING_SPIRE)
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_SPEAR)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_SPEAR)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_SPEAR)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_SPEAR)
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
-		
+
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.GREATSWORD)
-			.styleProvider((playerpatch) -> Styles.TWO_HAND)
-			.collider(ColliderPreset.GREATSWORD)
-			.swingSound(EpicFightSounds.WHOOSH_BIG)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.canBePlacedOffhand(false)
-			.newStyleCombo(Styles.TWO_HAND, Animations.GREATSWORD_AUTO1, Animations.GREATSWORD_AUTO2, Animations.GREATSWORD_DASH, Animations.GREATSWORD_AIR_SLASH)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.GIANT_WHIRLWIND)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.JUMP, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD);
+		.category(WeaponCategories.GREATSWORD)
+		.styleProvider((playerpatch) -> Styles.TWO_HAND)
+		.collider(ColliderPreset.GREATSWORD)
+		.swingSound(EpicFightSounds.WHOOSH_BIG)
+		.hitSound(EpicFightSounds.BLADE_HIT)
+		.canBePlacedOffhand(false)
+		.newStyleCombo(Styles.TWO_HAND, Animations.GREATSWORD_AUTO1, Animations.GREATSWORD_AUTO2, Animations.GREATSWORD_DASH, Animations.GREATSWORD_AIR_SLASH)
+		.specialAttack(Styles.TWO_HAND, EpicFightSkills.STEEL_WHIRLWIND)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.JUMP, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLY, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CREATIVE_FLY, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CREATIVE_IDLE, Animations.BIPED_HOLD_GREATSWORD)
+		.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD);
 		
 		return builder;
 	};
@@ -175,57 +188,57 @@ public class WeaponCapabilityPresets {
 				}
 				return Styles.TWO_HAND;
 			})
-			.passiveSkill(EpicFightSkills.KATANA_PASSIVE)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.KATANA)
-			.canBePlacedOffhand(false)
-			.newStyleCombo(Styles.SHEATH, Animations.KATANA_SHEATHING_AUTO, Animations.KATANA_SHEATHING_DASH, Animations.KATANA_SHEATH_AIR_SLASH)
-			.newStyleCombo(Styles.TWO_HAND, Animations.KATANA_AUTO1, Animations.KATANA_AUTO2, Animations.KATANA_AUTO3, Animations.SWORD_DASH, Animations.KATANA_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-			.specialAttack(Styles.SHEATH, EpicFightSkills.FATAL_DRAW)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.FATAL_DRAW)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_KATANA)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_KATANA)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_WALK_UNSHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.IDLE, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.KNEEL, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.WALK, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.CHASE, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.RUN, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.SNEAK, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.SWIM, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.FLOAT, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.SHEATH, LivingMotions.FALL, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.KATANA_GUARD);
+				.passiveSkill(EpicFightSkills.BATTOJUTSU_PASSIVE)
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.collider(ColliderPreset.KATANA)
+				.canBePlacedOffhand(false)
+				.newStyleCombo(Styles.SHEATH, Animations.UCHIGATANA_SHEATHING_AUTO, Animations.UCHIGATANA_SHEATHING_DASH, Animations.UCHIGATANA_SHEATH_AIR_SLASH)
+				.newStyleCombo(Styles.TWO_HAND, Animations.UCHIGATANA_AUTO1, Animations.UCHIGATANA_AUTO2, Animations.UCHIGATANA_AUTO3, Animations.UCHIGATANA_DASH, Animations.UCHIGATANA_AIR_SLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
+				.specialAttack(Styles.SHEATH,  EpicFightSkills.BATTOJUTSU)
+				.specialAttack(Styles.TWO_HAND, EpicFightSkills.BATTOJUTSU)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_WALK_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_UCHIGATANA)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_UCHIGATANA)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.IDLE, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.KNEEL, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.WALK, Animations.BIPED_WALK_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.CHASE, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.RUN, Animations.BIPED_RUN_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.SNEAK, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.SWIM, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.FLOAT, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.SHEATH, LivingMotions.FALL, Animations.BIPED_HOLD_UCHIGATANA_SHEATHING)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.UCHIGATANA_GUARD);
 		
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> TACHI = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.TACHI)
-			.styleProvider((playerpatch) -> Styles.TWO_HAND)
-			.collider(ColliderPreset.KATANA)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.canBePlacedOffhand(false)
-			.newStyleCombo(Styles.TWO_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.TACHI_DASH, Animations.LONGSWORD_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.LETHAL_SLICING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
+				.category(WeaponCategories.TACHI)
+				.styleProvider((playerpatch) -> Styles.TWO_HAND)
+				.collider(ColliderPreset.TACHI)
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.canBePlacedOffhand(false)
+				.newStyleCombo(Styles.TWO_HAND, Animations.TACHI_AUTO1, Animations.TACHI_AUTO2, Animations.TACHI_AUTO3, Animations.TACHI_DASH, Animations.LONGSWORD_AIR_SLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
+				.specialAttack(Styles.TWO_HAND, EpicFightSkills.RUSHING_TEMPO)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_TACHI)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
 		
 		return builder;
 	};
@@ -240,47 +253,60 @@ public class WeaponCapabilityPresets {
 				}
 				return Styles.TWO_HAND;
 			})
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.LONGSWORD)
-			.canBePlacedOffhand(false)
-			.newStyleCombo(Styles.TWO_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
-			.newStyleCombo(Styles.LIECHTENAUER, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.LIECHTENAUER)
-			.specialAttack(Styles.LIECHTENAUER, EpicFightSkills.LIECHTENAUER)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.JUMP, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.IDLE, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.WALK, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.CHASE, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.RUN, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.SNEAK, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.KNEEL, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.JUMP, Animations.BIPED_HOLD_LONGSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.collider(ColliderPreset.LONGSWORD)
+				.canBePlacedOffhand(false)
+				.newStyleCombo(Styles.ONE_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
+				.newStyleCombo(Styles.TWO_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
+				.newStyleCombo(Styles.OCHS, Animations.LONGSWORD_LIECHTENAUER_AUTO1, Animations.LONGSWORD_LIECHTENAUER_AUTO2, Animations.LONGSWORD_LIECHTENAUER_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
+				.specialAttack(Styles.ONE_HAND, EpicFightSkills.SHARP_STAB)
+				.specialAttack(Styles.TWO_HAND, EpicFightSkills.LIECHTENAUER)
+				.specialAttack(Styles.OCHS, EpicFightSkills.LIECHTENAUER)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.IDLE, Animations.BIPED_HOLD_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.WALK, Animations.BIPED_WALK_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.CHASE, Animations.BIPED_WALK_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.RUN, Animations.BIPED_RUN_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.SNEAK, Animations.BIPED_HOLD_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.KNEEL, Animations.BIPED_HOLD_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.JUMP, Animations.BIPED_HOLD_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.SWIM, Animations.BIPED_HOLD_LONGSWORD)
+				.livingMotionModifier(Styles.COMMON, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.IDLE, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.WALK, Animations.BIPED_WALK_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.CHASE, Animations.BIPED_WALK_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.RUN, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.SNEAK, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.KNEEL, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.JUMP, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.SWIM, Animations.BIPED_HOLD_LIECHTENAUER)
+				.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
+				.livingMotionModifier(Styles.OCHS, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
 		
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> DAGGER = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
-			.category(WeaponCategories.DAGGER)
-			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
-			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.DAGGER)
-			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.DAGGER)
-			.newStyleCombo(Styles.ONE_HAND, Animations.DAGGER_AUTO1, Animations.DAGGER_AUTO2, Animations.DAGGER_AUTO3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
-			.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO1, Animations.DAGGER_DUAL_AUTO2, Animations.DAGGER_DUAL_AUTO3, Animations.DAGGER_DUAL_AUTO4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-			.specialAttack(Styles.ONE_HAND, EpicFightSkills.EVISCERATE)
-			.specialAttack(Styles.TWO_HAND, EpicFightSkills.BLADE_RUSH);
+				.category(WeaponCategories.DAGGER)
+				.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
+				.hitSound(EpicFightSounds.BLADE_HIT)
+				.swingSound(EpicFightSounds.WHOOSH_SMALL)
+				.collider(ColliderPreset.DAGGER)
+				.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).getWeaponCategory() == WeaponCategories.DAGGER)
+				.newStyleCombo(Styles.ONE_HAND, Animations.DAGGER_AUTO1, Animations.DAGGER_AUTO2, Animations.DAGGER_AUTO3, Animations.DAGGER_DASH, Animations.DAGGER_AIR_SLASH)
+				.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO1, Animations.DAGGER_DUAL_AUTO2, Animations.DAGGER_DUAL_AUTO3, Animations.DAGGER_DUAL_AUTO4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
+				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
+				.specialAttack(Styles.ONE_HAND, EpicFightSkills.EVISCERATE)
+				.specialAttack(Styles.TWO_HAND, EpicFightSkills.BLADE_RUSH)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_DUAL)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_DUAL_WEAPON)
+				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_DUAL_WEAPON);
 		
 		return builder;
 	};
@@ -288,13 +314,14 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO1, Animations.FIST_AUTO2, Animations.FIST_AUTO3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
 			.specialAttack(Styles.ONE_HAND, EpicFightSkills.RELENTLESS_COMBO)
 			.category(WeaponCategories.FIST)
-			.constructor(KnuckleCapability::new);
-	
+			.constructor(GloveCapability::new);
+
 	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
 			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_BOW_AIM)
-			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT)
+			.constructor(BowCapability::new);
 			
 	public static final Function<Item, CapabilityItem.Builder> CROSSBOW =  (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_HOLD_CROSSBOW)
@@ -307,7 +334,8 @@ public class WeaponCapabilityPresets {
 			.addAnimationsModifier(LivingMotions.FALL, Animations.BIPED_HOLD_CROSSBOW)
 			.addAnimationsModifier(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM)
-			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT)
+			.constructor(CrossbowCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> TRIDENT = (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
@@ -316,7 +344,7 @@ public class WeaponCapabilityPresets {
 			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_JAVELIN_THROW)
 			.constructor(TridentCapability::new)
 			.category(WeaponCategories.TRIDENT);
-	
+
 	public static final Function<Item, CapabilityItem.Builder> SHIELD = (item) -> CapabilityItem.builder()
 			.constructor(ShieldCapability::new)
 			.category(WeaponCategories.SHIELD);

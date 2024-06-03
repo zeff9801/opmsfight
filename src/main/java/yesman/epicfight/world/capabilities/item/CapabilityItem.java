@@ -279,7 +279,7 @@ public class CapabilityItem {
 	}
 	
 	public enum Styles implements Style {
-		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false);
+		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false), OCHS(false);
 		
 		final boolean canUseOffhand;
 		final int id;

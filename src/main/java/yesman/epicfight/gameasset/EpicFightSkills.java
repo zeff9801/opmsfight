@@ -78,7 +78,7 @@ public class EpicFightSkills {
 		LAST_PICK = (LAST_PICK + RANDOM.nextInt(values.size() - 1) + 1) % values.size();
 		return values.get(LAST_PICK).toString();
 	}
-	
+
 	/** Default skills **/
 	public static Skill BASIC_ATTACK;
 	public static Skill AIR_ATTACK;
@@ -89,12 +89,17 @@ public class EpicFightSkills {
 	/** Guard skills **/
 	public static Skill GUARD;
 	public static Skill ACTIVE_GUARD;
-	public static Skill ENERGIZING_GUARD;
+	public static Skill IMPACT_GUARD;
 	/** Passive skills **/
 	public static Skill BERSERKER;
 	public static Skill STAMINA_PILLAGER;
 	public static Skill SWORD_MASTER;
 	public static Skill TECHNICIAN;
+	public static Skill DEATH_HARVEST;
+	public static Skill EMERGENCY_ESCAPE;
+	public static Skill ENDURANCE;
+	public static Skill FORBIDDEN_STRENGTH;
+	public static Skill HYPERVITALITY;
 	/** Special attack skills**/
 	public static Skill GUILLOTINE_AXE;
 	public static Skill SWEEPING_EDGE;
@@ -109,11 +114,27 @@ public class EpicFightSkills {
 	public static Skill LIECHTENAUER;
 	public static Skill EVISCERATE;
 	public static Skill BLADE_RUSH;
+	public static Skill GRASPING_SPIRE;
+	public static Skill STEEL_WHIRLWIND;
+	public static Skill BATTOJUTSU;
+	public static Skill BATTOJUTSU_PASSIVE;
+	public static Skill RUSHING_TEMPO;
+	public static Skill SHARP_STAB;
+	public static Skill WRATHFUL_LIGHTING;
+	public static Skill TSUNAMI;
+	public static Skill EVERLASTING_ALLEGIANCE;
+	/** Battle style skills **/
+	public static Skill METEOR_STRIKE;
+	public static Skill REVELATION;
+	/** Mover skills **/
+	public static Skill DEMOLITION_LEAP;
+	public static Skill PHANTOM_ASCENT;
 	/** etc skills **/
 	public static Skill CHARGING_JUMP;
 	public static Skill GROUND_SLAM;
 	
 	public static void registerSkills() {
+
 		BASIC_ATTACK = registerSkill(new BasicAttack(BasicAttack.createBuilder()));
 		AIR_ATTACK = registerSkill(new AirAttack(AirAttack.createBuilder()));
 		ROLL = registerSkill(new DodgeSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "roll")).setConsumption(4.0F).setAnimations(Animations.BIPED_ROLL_FORWARD, Animations.BIPED_ROLL_BACKWARD)));
@@ -122,7 +143,7 @@ public class EpicFightSkills {
 		
 		GUARD = registerSkill(new GuardSkill(GuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "guard")).setRequiredXp(5)));
 		ACTIVE_GUARD = registerSkill(new ActiveGuardSkill(ActiveGuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "active_guard")).setRequiredXp(8)));
-		ENERGIZING_GUARD = registerSkill(new EnergizingGuardSkill(EnergizingGuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "energizing_guard")).setRequiredXp(8)));
+		IMPACT_GUARD = registerSkill(new EnergizingGuardSkill(EnergizingGuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "energizing_guard")).setRequiredXp(8)));
 		
 		BERSERKER = registerSkill(new BerserkerSkill(PassiveSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "berserker"))));
 		STAMINA_PILLAGER = registerSkill(new StaminaPillagerSkill(PassiveSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "stamina_pillager"))));
@@ -252,7 +273,7 @@ public class EpicFightSkills {
 	
 	private static void registerIfAbsent(Map<ResourceLocation, Skill> map, Skill skill) {
 		if (map.containsKey(skill.getRegistryName())) {
-			EpicFightMod.LOGGER.info("Duplicated skill name : " + skill.getRegistryName() + ". Registration was skipped.");
+            EpicFightMod.LOGGER.info("Duplicated skill name : {}. Registration was skipped.", skill.getRegistryName());
 		} else {
 			map.put(skill.getRegistryName(), skill);
 		}
