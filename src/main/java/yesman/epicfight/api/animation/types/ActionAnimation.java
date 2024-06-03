@@ -19,8 +19,6 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;

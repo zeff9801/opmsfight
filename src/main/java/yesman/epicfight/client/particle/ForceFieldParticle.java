@@ -21,7 +21,6 @@ import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.DragonCrystalLinkPhase;
 
 @OnlyIn(Dist.CLIENT)
 public class ForceFieldParticle extends TexturedCustomModelParticle {

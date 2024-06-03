@@ -68,26 +68,8 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PEnderDragonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PEndermanRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PHoglinRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PHumanoidRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PIronGolemRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PRavagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PSpiderRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PStrayRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PVexRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PVindicatorRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitchRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitherRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
-import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
 import yesman.epicfight.client.renderer.patched.item.RenderBow;
 import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
 import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
@@ -99,9 +81,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
 
@@ -142,34 +122,8 @@ public class RenderEngine {
 	}
 
 	public void registerRenderer() {
-		this.entityRendererProvider.put(EntityType.CREEPER, PCreeperRenderer::new);
-		this.entityRendererProvider.put(EntityType.ENDERMAN, PEndermanRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIE, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, PZombieVillagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.HUSK, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.SKELETON, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.STRAY, PStrayRenderer::new);
 		this.entityRendererProvider.put(EntityType.PLAYER, PPlayerRenderer::new);
-		this.entityRendererProvider.put(EntityType.SPIDER, PSpiderRenderer::new);
-		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PSpiderRenderer::new);
-		this.entityRendererProvider.put(EntityType.IRON_GOLEM, PIronGolemRenderer::new);
-		this.entityRendererProvider.put(EntityType.VINDICATOR, PVindicatorRenderer::new);
-		this.entityRendererProvider.put(EntityType.EVOKER, PIllagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.WITCH, PWitchRenderer::new);
-		this.entityRendererProvider.put(EntityType.DROWNED, PDrownedRenderer::new);
-		this.entityRendererProvider.put(EntityType.PILLAGER, PIllagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.RAVAGER, PRavagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.VEX, PVexRenderer::new);
-		this.entityRendererProvider.put(EntityType.PIGLIN, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, PHumanoidRenderer::new);
-		this.entityRendererProvider.put(EntityType.HOGLIN, PHoglinRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOGLIN, PHoglinRenderer::new);
-		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, PEnderDragonRenderer::new);
-		this.entityRendererProvider.put(EntityType.WITHER, PWitherRenderer::new);
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), () -> new PWitherSkeletonMinionRenderer().setOverridingTexture("epicfight:textures/entity/wither_skeleton_minion.png"));
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostCloneRenderer::new);
+
 
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();

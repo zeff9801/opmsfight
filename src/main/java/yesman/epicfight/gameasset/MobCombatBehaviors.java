@@ -3,10 +3,6 @@ package yesman.epicfight.gameasset;
 import yesman.epicfight.network.server.SPPlayAnimationAndSyncTransform;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.DragonFlyingPhase;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.PatchedPhases;
 import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.RavagerPatch;
@@ -146,41 +142,7 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<WitchPatch>builder().animationBehavior(Animations.BIPED_MOB_THROW).custom((witchpatch) -> !witchpatch.getOriginal().isDrinkingPotion()).withinEyeHeight().withinDistance(0.0D, 10.0D))
 		);
 	
-	public static final CombatBehaviors.Builder<EnderDragonPatch> ENDER_DRAGON = CombatBehaviors.<EnderDragonPatch>builder()
-		.newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(50.0F).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK1).randomChance(0.1F).withinDistance(0.0D, 7.0D).withinAngle(0.0F, 60.0F))
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK3).withinDistance(0.0D, 7.0D))
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK2))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(50.0F).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK2).withinDistance(0.0D, 5.0D).withinAngle(0.0F, 60.0F))
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK3))
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK1).randomChance(0.4F).withinDistance(0.0D, 7.0D))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(50.0F).cooldown(200).simultaneousCooldown(3).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK4).withinDistance(10.0D, 15.0D).withinAngle(0.0F, 40.0F))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(100.0F).cooldown(100).simultaneousCooldown(2).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_BACKJUMP_PREPARE).withinDistance(0.0D, 4.0D).withinAngle(90.0F, 180.0F))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(100.0F).cooldown(240).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_FIREBALL).withinDistance(15.0D, 30.0D).withinAngleHorizontal(0.0F, 10.0F))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(1000.0F).cooldown(0).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.3F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getOriginal().getDragonFight().getCrystalsAlive() > 0)
-				.behavior((mobpatch) -> {
-					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.CRYSTAL_LINK);
-				}))
-		).newBehaviorSeries(
-			BehaviorSeries.<EnderDragonPatch>builder().weight(10.0F).cooldown(1600).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.5F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getOriginal().getDragonFight().getCrystalsAlive() > 0)
-				.behavior((mobpatch) -> {
-					mobpatch.playAnimationSynchronized(Animations.DRAGON_GROUND_TO_FLY, 0.0F);
-					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.FLYING);
-					((DragonFlyingPhase)mobpatch.getOriginal().getPhaseManager().getCurrentPhase()).enableAirstrike();
-				}))
-		);
+
 	
 	public static final CombatBehaviors.Builder<EndermanPatch> ENDERMAN = CombatBehaviors.<EndermanPatch>builder()
 		.newBehaviorSeries(
@@ -256,23 +218,6 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<SpiderPatch<?>>builder().animationBehavior(Animations.SPIDER_JUMP_ATTACK).withinEyeHeight().withinDistance(0.0D, 2.5D))
 		);
 	
-	public static final CombatBehaviors.Builder<WitherPatch> WITHER = CombatBehaviors.<WitherPatch>builder()
-		.newBehaviorSeries(
-			BehaviorSeries.<WitherPatch>builder().weight(3000.0F)
-				.nextBehavior(Behavior.<WitherPatch>builder().emptyBehavior().health(150.0F, Comparator.GREATER_ABSOLUTE))
-		).newBehaviorSeries(
-			BehaviorSeries.<WitherPatch>builder().weight(100.0F).cooldown(200).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_CHARGE).withinDistance(6.0D, 10.0D).withinAngleHorizontal(0.0D, 30.0D))
-		).newBehaviorSeries(
-			BehaviorSeries.<WitherPatch>builder().weight(500.0F).cooldown(60).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_SWIRL).health(150.0F, Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 60.0D))
-		).newBehaviorSeries(
-			BehaviorSeries.<WitherPatch>builder().weight(500.0F).cooldown(180).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_BACKFLIP).health(150.0F, Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 20.0D))
-		).newBehaviorSeries(
-			BehaviorSeries.<WitherPatch>builder().weight(50.0F).cooldown(200).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_BEAM).withinDistance(3.0D, 20.0D).withinAngleHorizontal(0.0D, 20.0D))
-		);
 	
 	public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> VINDICATOR_ONEHAND = CombatBehaviors.<HumanoidMobPatch<?>>builder()
 		.newBehaviorSeries(
