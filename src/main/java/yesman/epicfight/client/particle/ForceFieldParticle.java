@@ -28,7 +28,7 @@ public class ForceFieldParticle extends TexturedCustomModelParticle {
 	
 	public ForceFieldParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, ClientModel particleMesh, ResourceLocation texture) {
 		super(level, x, y, z, xd, yd, zd, particleMesh, texture);
-		this.lifetime = DragonCrystalLinkPhase.CHARGING_TICK;
+		this.lifetime = 20;
 		this.hasPhysics = false;
 		this.roll = (float)xd;
 		this.pitch = (float)zd;

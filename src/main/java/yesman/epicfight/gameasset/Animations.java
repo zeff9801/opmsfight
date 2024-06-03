@@ -1,89 +1,45 @@
 package yesman.epicfight.gameasset;
 
-import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.tuple.Pair;
-
-import com.google.common.collect.Lists;
-
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.WitherEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.DragonFireballEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
-import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.ActionAnimation.ActionTime;
 import yesman.epicfight.api.animation.types.AimAnimation;
 import yesman.epicfight.api.animation.types.AirSlashAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.DashAttackAnimation;
 import yesman.epicfight.api.animation.types.DodgeAnimation;
 import yesman.epicfight.api.animation.types.GuardAnimation;
 import yesman.epicfight.api.animation.types.HitAnimation;
-import yesman.epicfight.api.animation.types.InvincibleAnimation;
 import yesman.epicfight.api.animation.types.KnockdownAnimation;
 import yesman.epicfight.api.animation.types.LongHitAnimation;
 import yesman.epicfight.api.animation.types.MirrorAnimation;
 import yesman.epicfight.api.animation.types.MountAttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.OffAnimation;
-import yesman.epicfight.api.animation.types.RangedAttackAnimation;
 import yesman.epicfight.api.animation.types.ReboundAnimation;
 import yesman.epicfight.api.animation.types.SpecialAttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation.Event;
 import yesman.epicfight.api.animation.types.StaticAnimation.Event.Side;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonAttackAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDeathAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
-import yesman.epicfight.api.animation.types.procedural.IKInfo;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModels;
-import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
-import yesman.epicfight.api.utils.math.MathUtils;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.ValueModifier;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.PatchedPhases;
 
 public class Animations {
 	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
@@ -137,143 +93,8 @@ public class Animations {
 	public static StaticAnimation BIPED_STEP_RIGHT;
 	public static StaticAnimation BIPED_KNOCKDOWN_WAKEUP_LEFT;
 	public static StaticAnimation BIPED_KNOCKDOWN_WAKEUP_RIGHT;
-	public static StaticAnimation BIPED_MOB_ONEHAND1;
-	public static StaticAnimation BIPED_MOB_ONEHAND2;
-	public static StaticAnimation BIPED_MOB_GREATSWORD;
-	public static StaticAnimation BIPED_MOB_TACHI;
-	public static StaticAnimation BIPED_MOB_SPEAR_ONEHAND;
-	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND1;
-	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND2;
-	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND3;
-	public static StaticAnimation BIPED_MOB_SWORD_DUAL1;
-	public static StaticAnimation BIPED_MOB_SWORD_DUAL2;
-	public static StaticAnimation BIPED_MOB_SWORD_DUAL3;
-	public static StaticAnimation BIPED_MOB_LONGSWORD1;
-	public static StaticAnimation BIPED_MOB_LONGSWORD2;
-	public static StaticAnimation BIPED_MOB_KATANA1;
-	public static StaticAnimation BIPED_MOB_KATANA2;
-	public static StaticAnimation BIPED_MOB_KATANA3;
-	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND1;
-	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND2;
-	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND3;
-	public static StaticAnimation BIPED_MOB_DAGGER_TWOHAND1;
-	public static StaticAnimation BIPED_MOB_DAGGER_TWOHAND2;
-	public static StaticAnimation BIPED_MOB_THROW;
-	public static StaticAnimation CREEPER_IDLE;
-	public static StaticAnimation CREEPER_WALK;
-	public static StaticAnimation CREEPER_HIT_LONG;
-	public static StaticAnimation CREEPER_HIT_SHORT;
-	public static StaticAnimation CREEPER_DEATH;
-	public static StaticAnimation DRAGON_IDLE;
-	public static StaticAnimation DRAGON_WALK;
-	public static StaticAnimation DRAGON_WALK_PROCEDURAL;
-	public static StaticAnimation DRAGON_FLY;
-	public static StaticAnimation DRAGON_DEATH;
-	public static StaticAnimation DRAGON_GROUND_TO_FLY;
-	public static StaticAnimation DRAGON_FLY_TO_GROUND;
-	public static StaticAnimation DRAGON_ATTACK1;
-	public static StaticAnimation DRAGON_ATTACK2;
-	public static StaticAnimation DRAGON_ATTACK3;
-	public static StaticAnimation DRAGON_ATTACK4;
-	public static StaticAnimation DRAGON_ATTACK4_RECOVERY;
-	public static StaticAnimation DRAGON_FIREBALL;
-	public static StaticAnimation DRAGON_AIRSTRIKE;
-	public static StaticAnimation DRAGON_BACKJUMP_PREPARE;
-	public static StaticAnimation DRAGON_BACKJUMP_MOVE;
-	public static StaticAnimation DRAGON_BACKJUMP_RECOVERY;
-	public static StaticAnimation DRAGON_CRYSTAL_LINK;
-	public static StaticAnimation DRAGON_NEUTRALIZED;
-	public static StaticAnimation DRAGON_NEUTRALIZED_RECOVERY;
-	public static StaticAnimation ENDERMAN_IDLE;
-	public static StaticAnimation ENDERMAN_WALK;
-	public static StaticAnimation ENDERMAN_DEATH;
-	public static StaticAnimation ENDERMAN_HIT_SHORT;
-	public static StaticAnimation ENDERMAN_HIT_LONG;
-	public static StaticAnimation ENDERMAN_CONVERT_RAGE;
-	public static StaticAnimation ENDERMAN_ATTACK1;
-	public static StaticAnimation ENDERMAN_ATTACK2;
-	public static StaticAnimation ENDERMAN_RAGE_IDLE;
-	public static StaticAnimation ENDERMAN_RAGE_WALK;
-	public static StaticAnimation ENDERMAN_GRASP;
-	public static StaticAnimation ENDERMAN_TP_KICK1;
-	public static StaticAnimation ENDERMAN_TP_KICK2;
-	public static StaticAnimation ENDERMAN_KNEE;
-	public static StaticAnimation ENDERMAN_KICK1;
-	public static StaticAnimation ENDERMAN_KICK2;
-	public static StaticAnimation ENDERMAN_KICK_COMBO;
-	public static StaticAnimation ENDERMAN_TP_EMERGENCE;
-	public static StaticAnimation SPIDER_IDLE;
-	public static StaticAnimation SPIDER_CRAWL;
-	public static StaticAnimation SPIDER_DEATH;
-	public static StaticAnimation SPIDER_HIT;
-	public static StaticAnimation SPIDER_ATTACK;
-	public static StaticAnimation SPIDER_JUMP_ATTACK;
-	public static StaticAnimation GOLEM_IDLE;
-	public static StaticAnimation GOLEM_WALK;
-	public static StaticAnimation GOLEM_DEATH;
-	public static StaticAnimation GOLEM_ATTACK1;
-	public static StaticAnimation GOLEM_ATTACK2;
-	public static StaticAnimation GOLEM_ATTACK3;
-	public static StaticAnimation GOLEM_ATTACK4;
-	public static StaticAnimation HOGLIN_IDLE;
-	public static StaticAnimation HOGLIN_WALK;
-	public static StaticAnimation HOGLIN_DEATH;
-	public static StaticAnimation HOGLIN_ATTACK;
-	public static StaticAnimation ILLAGER_IDLE;
-	public static StaticAnimation ILLAGER_WALK;
-	public static StaticAnimation VINDICATOR_IDLE_AGGRESSIVE;
-	public static StaticAnimation VINDICATOR_CHASE;
-	public static StaticAnimation VINDICATOR_SWING_AXE1;
-	public static StaticAnimation VINDICATOR_SWING_AXE2;
-	public static StaticAnimation VINDICATOR_SWING_AXE3;
-	public static StaticAnimation EVOKER_CAST_SPELL;
-	public static StaticAnimation PIGLIN_IDLE;
-	public static StaticAnimation PIGLIN_WALK;
-	public static StaticAnimation PIGLIN_ZOMBIFIED_IDLE;
-	public static StaticAnimation PIGLIN_ZOMBIFIED_WALK;
-	public static StaticAnimation PIGLIN_ZOMBIFIED_CHASE;
-	public static StaticAnimation PIGLIN_CELEBRATE1;
-	public static StaticAnimation PIGLIN_CELEBRATE2;
-	public static StaticAnimation PIGLIN_CELEBRATE3;
-	public static StaticAnimation PIGLIN_ADMIRE;
-	public static StaticAnimation PIGLIN_DEATH;
-	public static StaticAnimation RAVAGER_IDLE;
-	public static StaticAnimation RAVAGER_WALK;
-	public static StaticAnimation RAVAGER_DEATH;
-	public static StaticAnimation RAVAGER_STUN;
-	public static StaticAnimation RAVAGER_ATTACK1;
-	public static StaticAnimation RAVAGER_ATTACK2;
-	public static StaticAnimation RAVAGER_ATTACK3;
-	public static StaticAnimation VEX_IDLE;
-	public static StaticAnimation VEX_FLIPPING;
-	public static StaticAnimation VEX_DEATH;
-	public static StaticAnimation VEX_HIT;
-	public static StaticAnimation VEX_CHARGE;
-	public static StaticAnimation VEX_NEUTRALIZED;
-	public static StaticAnimation WITCH_DRINKING;
-	public static StaticAnimation WITHER_SKELETON_IDLE;
-	public static StaticAnimation WITHER_SKELETON_SPECIAL_SPAWN;
-	public static StaticAnimation WITHER_SKELETON_WALK;
-	public static StaticAnimation WITHER_SKELETON_CHASE;
-	public static StaticAnimation WITHER_SKELETON_ATTACK1;
-	public static StaticAnimation WITHER_SKELETON_ATTACK2;
-	public static StaticAnimation WITHER_SKELETON_ATTACK3;
-	public static StaticAnimation WITHER_IDLE;
-	public static StaticAnimation WITHER_CHARGE;
-	public static StaticAnimation WITHER_DEATH;
-	public static StaticAnimation WITHER_NEUTRALIZED;
-	public static StaticAnimation WITHER_SPELL_ARMOR;
-	public static StaticAnimation WITHER_BLOCKED;
-	public static StaticAnimation WITHER_GHOST_STANDBY;
-	public static StaticAnimation WITHER_SWIRL;
-	public static StaticAnimation WITHER_BEAM;
-	public static StaticAnimation WITHER_BACKFLIP;
-	public static StaticAnimation ZOMBIE_IDLE;
-	public static StaticAnimation ZOMBIE_WALK;
-	public static StaticAnimation ZOMBIE_CHASE;
-	public static StaticAnimation ZOMBIE_ATTACK1;
-	public static StaticAnimation ZOMBIE_ATTACK2;
-	public static StaticAnimation ZOMBIE_ATTACK3;
+
+
 	public static StaticAnimation AXE_AUTO1;
 	public static StaticAnimation AXE_AUTO2;
 	public static StaticAnimation AXE_DASH;
@@ -435,55 +256,6 @@ public class Animations {
 		OFF_ANIMATION_HIGHEST = new OffAnimation("off_highest");
 		OFF_ANIMATION_MIDDLE = new OffAnimation("off_middle");
 
-		ZOMBIE_IDLE = new StaticAnimation(true, "zombie/idle", biped);
-		ZOMBIE_WALK = new MovementAnimation(true, "zombie/walk", biped);
-		ZOMBIE_CHASE = new MovementAnimation(true, "zombie/chase", biped);
-
-		CREEPER_IDLE = new StaticAnimation(true, "creeper/idle", crepper);
-		CREEPER_WALK = new MovementAnimation(true, "creeper/walk", crepper);
-
-		ENDERMAN_IDLE = new StaticAnimation(true, "enderman/idle", enderman);
-		ENDERMAN_WALK = new MovementAnimation(true, "enderman/walk", enderman);
-		ENDERMAN_RAGE_IDLE = new StaticAnimation(true, "enderman/rage_idle", enderman);
-		ENDERMAN_RAGE_WALK = new MovementAnimation(true, "enderman/rage_walk", enderman);
-
-		WITHER_SKELETON_WALK = new MovementAnimation(true, "wither_skeleton/walk", biped);
-		WITHER_SKELETON_CHASE = new MovementAnimation(0.36F, true, "wither_skeleton/chase", biped);
-		WITHER_SKELETON_IDLE = new StaticAnimation(true, "wither_skeleton/idle", biped);
-		WITHER_SKELETON_SPECIAL_SPAWN = new InvincibleAnimation(0.0F, "wither_skeleton/special_spawn", biped);
-
-		SPIDER_IDLE = new StaticAnimation(true, "spider/idle", spider);
-		SPIDER_CRAWL = new MovementAnimation(true, "spider/crawl", spider);
-
-		GOLEM_IDLE = new StaticAnimation(true, "iron_golem/idle", iron_golem);
-		GOLEM_WALK = new MovementAnimation(true, "iron_golem/walk", iron_golem);
-
-		HOGLIN_IDLE = new StaticAnimation(true, "hoglin/idle", hoglin);
-		HOGLIN_WALK = new MovementAnimation(true, "hoglin/walk", hoglin);
-
-		ILLAGER_IDLE = new StaticAnimation(true, "illager/idle", biped);
-		ILLAGER_WALK = new MovementAnimation(true, "illager/walk", biped);
-		VINDICATOR_IDLE_AGGRESSIVE = new StaticAnimation(true, "illager/idle_aggressive", biped);
-		VINDICATOR_CHASE = new MovementAnimation(true, "illager/chase", biped);
-		EVOKER_CAST_SPELL = new StaticAnimation(true, "illager/spellcast", biped);
-
-		RAVAGER_IDLE = new StaticAnimation(true, "ravager/idle", ravager);
-		RAVAGER_WALK = new MovementAnimation(true, "ravager/walk", ravager);
-
-		VEX_IDLE = new StaticAnimation(true, "vex/idle", vex);
-		VEX_FLIPPING = new StaticAnimation(0.05F, true, "vex/flip", vex);
-
-		PIGLIN_IDLE = new StaticAnimation(true, "piglin/idle", piglin);
-		PIGLIN_WALK = new MovementAnimation(true, "piglin/walk", piglin);
-		PIGLIN_ZOMBIFIED_IDLE = new StaticAnimation(true, "piglin/zombified_idle", piglin);
-		PIGLIN_ZOMBIFIED_WALK = new MovementAnimation(true, "piglin/zombified_walk", piglin);
-		PIGLIN_ZOMBIFIED_CHASE = new MovementAnimation(true, "piglin/zombified_chase", piglin);
-		PIGLIN_CELEBRATE1 = new StaticAnimation(true, "piglin/celebrate1", piglin);
-		PIGLIN_CELEBRATE2 = new StaticAnimation(true, "piglin/celebrate2", piglin);
-		PIGLIN_CELEBRATE3 = new StaticAnimation(true, "piglin/celebrate3", piglin);
-		PIGLIN_ADMIRE = new StaticAnimation(true, "piglin/admire", piglin);
-
-		WITHER_IDLE = new StaticAnimation(true, "wither/idle", wither);
 
 		SPEAR_GUARD = new StaticAnimation(true, "biped/skill/guard_spear", biped);
 		SWORD_GUARD = new StaticAnimation(true, "biped/skill/guard_sword", biped);
@@ -601,55 +373,6 @@ public class Animations {
 		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, "Tool_R", "biped/combat/spear_mount_attack", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 
-		BIPED_MOB_ONEHAND1 = new AttackAnimation(0.08F, 0.45F, 0.55F, 0.66F, 0.95F, null, "Tool_R", "biped/combat/mob_onehand1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_ONEHAND2 = new AttackAnimation(0.08F, 0.45F, 0.5F, 0.61F, 0.95F, null, "Tool_R", "biped/combat/mob_onehand2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_GREATSWORD = new AttackAnimation(0.15F, 0.45F, 0.85F, 0.95F, 2.2F, null, "Tool_R", "biped/combat/mob_greatsword1", biped)
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_TACHI = new AttackAnimation(0.15F, 0.15F, 0.25F, 0.35F, 1.0F, null, "Tool_R", "biped/combat/mob_tachi_special", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SPEAR_ONEHAND = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.1F, null, "Tool_R", "biped/combat/mob_spear_onehand", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SPEAR_TWOHAND1 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SPEAR_TWOHAND2 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SPEAR_TWOHAND3 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand3", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SWORD_DUAL1 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual1", biped,
-				new Phase(0.0F, 0.35F, 0.4F, 0.5F, 0.55F, 0.55F, Hand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.55F, 0.65F, 0.75F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SWORD_DUAL2 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual2", biped,
-				new Phase(0.0F, 0.3F, 0.3F, 0.45F, 0.55F, 0.55F, Hand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.55F, 0.65F, 0.75F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_SWORD_DUAL3 = new AttackAnimation(0.1F, 0.25F, 0.85F, 0.95F, 1.4F, null, "Tool_R", "biped/combat/mob_sword_dual3", biped)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true);
-		BIPED_MOB_LONGSWORD1 = new AttackAnimation(0.15F, "biped/combat/mob_longsword1", biped,
-				new Phase(0.0F, 0.15F, 0.25F, 0.35F, 0.45F, 0.65F, "Tool_R", null), new Phase(0.65F, 0.85F, 1.0F, 1.1F, 1.55F, Float.MAX_VALUE, "Tool_R", null))
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_LONGSWORD2 = new AttackAnimation(0.25F, 0.3F, 0.45F, 0.55F, 1.0F, null, "Tool_R", "biped/combat/mob_longsword2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_KATANA1 = new AttackAnimation(0.05F, 0.3F, 0.2F, 0.3F, 0.7F, null, "Tool_R", "biped/combat/mob_katana1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_KATANA2 = new AttackAnimation(0.15F, 0.01F, 0.01F, 0.1F, 0.55F, null, "Tool_R", "biped/combat/mob_katana2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_KATANA3 = new AttackAnimation(0.15F, 0.01F, 0.1F, 0.2F, 0.7F, null, "Tool_R", "biped/combat/mob_katana3", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_DAGGER_ONEHAND1 = new AttackAnimation(0.1F, 0.05F, 0.15F, 0.25F, 0.4F, null, "Tool_R", "biped/combat/mob_dagger_onehand1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_DAGGER_ONEHAND2 = new AttackAnimation(0.1F, 0.05F, 0.01F, 0.1F, 0.45F, null, "Tool_R", "biped/combat/mob_dagger_onehand2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_DAGGER_ONEHAND3 = new AttackAnimation(0.1F, 0.3F, 0.5F, 0.6F, 0.9F, null, "Tool_R", "biped/combat/mob_dagger_onehand3", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_DAGGER_TWOHAND1 = new AttackAnimation(0.15F, "biped/combat/mob_dagger_twohand1", biped,
-				new Phase(0.0F, 0.0F, 0.05F, 0.15F, 0.3F, 0.3F, "Tool_R", null), new Phase(0.3F, 0.3F, 0.3F, 0.4F, 0.5F, 0.5F, Hand.OFF_HAND, "Tool_L", null)
-				,new Phase(0.5F, 0.5F, 0.55F, 0.65F, 1.0F, Float.MAX_VALUE, "Tool_R", null))
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_DAGGER_TWOHAND2 = new AttackAnimation(0.1F, 0.25F, 0.75F, 0.85F, 1.0F, null, "Tool_R", "biped/combat/mob_dagger_twohand2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_THROW = new RangedAttackAnimation(0.11F, 0.1F, 0.45F, 0.49F, 0.95F, null, "Root", "biped/combat/mob_throw", biped);
 
 		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
 		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active1", biped);
@@ -675,565 +398,6 @@ public class Animations {
 		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, 2.1F, "biped/combat/knockdown", biped);
 		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 
-		CREEPER_HIT_SHORT = new HitAnimation(0.05F, "creeper/hit_short", crepper);
-		CREEPER_HIT_LONG = new LongHitAnimation(0.08F, "creeper/hit_long", crepper);
-		CREEPER_DEATH = new LongHitAnimation(0.16F, "creeper/death", crepper);
-
-		ENDERMAN_HIT_SHORT = new HitAnimation(0.05F, "enderman/hit_short", enderman);
-		ENDERMAN_HIT_LONG = new LongHitAnimation(0.08F, "enderman/hit_long", enderman);
-		ENDERMAN_CONVERT_RAGE = new DodgeAnimation(0.16F, 0.0F, "enderman/convert_rage", -1.0F, -1.0F, enderman);
-		ENDERMAN_TP_KICK1 = new AttackAnimation(0.06F, 0.15F, 0.3F, 0.4F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/tp_kick1", enderman);
-		ENDERMAN_TP_KICK2 = new AttackAnimation(0.16F, 0.15F, 0.25F, 0.45F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/tp_kick2", enderman);
-		ENDERMAN_KICK1 = new AttackAnimation(0.16F, 0.66F, 0.7F, 0.81F, 1.6F, ColliderPreset.ENDERMAN_LIMB, "Leg_L", "enderman/rush_kick", enderman)
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(4.0F));
-		ENDERMAN_KICK2 = new AttackAnimation(0.16F, 0.8F, 0.8F, 0.9F, 1.3F, ColliderPreset.ENDERMAN_LIMB, "Leg_R", "enderman/jump_kick", enderman);
-		ENDERMAN_KNEE = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.31F, 1.0F, ColliderPreset.FIST, "Leg_R", "enderman/knee", enderman)
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG);
-		ENDERMAN_KICK_COMBO = new AttackAnimation(0.1F, "enderman/kick_twice", enderman,
-					new Phase(0.0F, 0.15F, 0.15F, 0.21F, 0.46F, 0.6F, "Leg_R", ColliderPreset.ENDERMAN_LIMB),
-					new Phase(0.6F, 0.75F, 0.75F, 0.81F, 1.6F, Float.MAX_VALUE, "Leg_L", ColliderPreset.ENDERMAN_LIMB))
-				.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true);
-		ENDERMAN_GRASP = new AttackAnimation(0.06F, 0.5F, 0.45F, 1.0F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Tool_R", "enderman/grasp", enderman)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		ENDERMAN_DEATH = new LongHitAnimation(0.16F, "enderman/death", enderman);
-		ENDERMAN_TP_EMERGENCE = new ActionAnimation(0.05F, "enderman/teleport", enderman)
-				.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true);
-
-		DRAGON_IDLE = new StaticAnimation(0.6F, true, "dragon/idle", dragon);
-		DRAGON_WALK = new EnderDraonWalkAnimation(0.35F, "dragon/walk", dragon,
-				new IKInfo[] {
-					IKInfo.make("Leg_Front_L1", "Leg_Front_L3", "Leg_Front_R3", Pair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
-					IKInfo.make("Leg_Front_R1", "Leg_Front_R3", "Leg_Front_L3", Pair.of(2, 5), 0.12F, 2, new boolean[] {true, true, true}),
-					IKInfo.make("Leg_Back_L1", "Leg_Back_L3", "Leg_Back_R3", Pair.of(2, 5), 0.1344F, 4, new boolean[] {true, true, true}),
-					IKInfo.make("Leg_Back_R1", "Leg_Back_R3", "Leg_Back_L3", Pair.of(0, 3), 0.1344F, 2, new boolean[] {true, true, true})
-				});
-
-		DRAGON_FLY = new StaticAnimation(0.35F, true, "dragon/fly", dragon)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.4F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT)});
-
-		DRAGON_DEATH = new EnderDragonDeathAnimation(1.0F, "dragon/death", dragon);
-
-		DRAGON_GROUND_TO_FLY = new EnderDragonActionAnimation(0.25F, "dragon/ground_to_fly", dragon, new IKInfo[] {
-					IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false})
-				})
-				.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.25F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.05F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.45F, (entitypatch) -> {
-					if (entitypatch instanceof EnderDragonPatch) {
-						((EnderDragonPatch)entitypatch).setFlyingPhase();
-					}
-				}, Event.Side.BOTH)});
-
-		DRAGON_FLY_TO_GROUND = new EnderDragonDynamicActionAnimation(0.35F, "dragon/fly_to_ground", dragon, new IKInfo[] {
-					IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
-					IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
-					IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true}),
-					IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true})
-				})
-				.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(MoveCoordFunctions.MOVE_ON_LINK, false)
-				.addProperty(MoveCoordFunctions.MOVE_TIME, new ActionTime[] {ActionTime.crate(0.0F, 1.35F)})
-				.addProperty(MoveCoordFunctions.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-					if (entitypatch instanceof EnderDragonPatch) {
-						TransformSheet transform = self.getTransfroms().get("Root").copyAll();
-						Vector3d dragonpos = entitypatch.getOriginal().position();
-						Vector3d targetpos = ((EnderDragonEntity)entitypatch.getOriginal()).getPhaseManager().getPhase(PatchedPhases.LANDING).getLandingPosition();
-						float horizontalDistance = (float) dragonpos.subtract(0, dragonpos.y, 0).distanceTo(targetpos.subtract(0, targetpos.y, 0));
-						float verticalDistance = (float) Math.abs(dragonpos.y - targetpos.y);
-						JointTransform jt0 = transform.getKeyframes()[0].transform();
-						JointTransform jt1 = transform.getKeyframes()[1].transform();
-						JointTransform jt2 = transform.getKeyframes()[2].transform();
-						OpenMatrix4f coordReverse = OpenMatrix4f.createRotatorDeg(90F, Vec3f.X_AXIS);
-						Vec3f jointCoord = OpenMatrix4f.transform3v(coordReverse, new Vec3f(jt0.translation().x, verticalDistance, horizontalDistance), null);
-						jt0.translation().set(jointCoord);
-						jt1.translation().set(MathUtils.lerpVector(jt0.translation(), jt2.translation(), transform.getKeyframes()[1].time()));
-						transformSheet.readFrom(transform);
-					}
-				})
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.1F, (entitypatch) -> {
-					entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
-					LivingEntity original = entitypatch.getOriginal();
-					BlockPos blockpos = original.level.getHeightmapPos(Heightmap.Type.WORLD_SURFACE, original.blockPosition());
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), blockpos.getX(), blockpos.getY(), blockpos.getZ(), 3.0D, 0.0D, 1.0D);
-				}, Event.Side.CLIENT), Event.create(1.1F, (entitypatch) -> {
-					LivingEntity original = entitypatch.getOriginal();
-					DamageSource extDamageSource = ExtendedDamageSource.causeMobDamage(original, StunType.KNOCKDOWN, DRAGON_FLY_TO_GROUND);
-
-					for (Entity entity : original.level.getEntities(original, original.getBoundingBox().inflate(-3.0D, 0.0D, -3.0D))) {
-						entity.hurt(extDamageSource, 6.0F);
-					}
-				}, Event.Side.SERVER)});
-
-		DRAGON_ATTACK1 = new EnderDragonAttackAnimation(0.35F, 0.4F, 0.65F, 0.76F, 1.9F, ColliderPreset.DRAGON_LEG, "Leg_Front_R3", "dragon/attack1", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(2, 4), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 5), 0.12F, 0, new boolean[] {false, false, false, false, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, null, 0.1344F, 0, new boolean[] {}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(1, 4), 0.1344F, 0, new boolean[] {true, false, true})
-			})
-			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.65F, (entitypatch) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
-
-				if (entitypatch instanceof EnderDragonPatch) {
-					EnderDragonPatch dragonpatch = ((EnderDragonPatch)entitypatch);
-					Vec3f tipPosition = dragonpatch.getTipPointAnimation("Leg_Front_R3").getTargetPosition();
-					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 0.5D, 0.0D, 0.5D);
-				}
-			}, Event.Side.CLIENT)});
-
-		DRAGON_ATTACK2 = new EnderDragonAttackAnimation(0.35F, 0.25F, 0.45F, 0.66F, 0.75F, ColliderPreset.DRAGON_LEG, "Leg_Front_R3", "dragon/attack2", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, null, 0.1344F, 0, new boolean[] {}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, null, 0.1344F, 0, new boolean[] {})
-			});
-
-		DRAGON_ATTACK3 = new EnderDragonAttackAnimation(0.35F, 0.25F, 0.45F, 0.66F, 0.75F, ColliderPreset.DRAGON_LEG, "Leg_Front_L3", "dragon/attack3", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, null, 0.1344F, 0, new boolean[] {}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, null, 0.1344F, 0, new boolean[] {})
-			});
-
-		DRAGON_ATTACK4 = new EnderDragonAttackAnimation(0.35F, 0.5F, 1.15F, 1.26F, 1.9F, ColliderPreset.DRAGON_BODY, "Root", "dragon/attack4", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true})
-			})
-			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-			.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(1.2F, (entitypatch) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
-
-				if (entitypatch instanceof EnderDragonPatch) {
-					EnderDragonPatch dragonpatch = ((EnderDragonPatch)entitypatch);
-					Vec3f tipPosition = dragonpatch.getTipPointAnimation("Leg_Front_R3").getTargetPosition();
-					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 0.0D, 1.0D);
-				}
-			}, Event.Side.CLIENT), Event.create(1.85F, (entitypatch) -> {
-				entitypatch.getAnimator().reserveAnimation(DRAGON_ATTACK4_RECOVERY);
-			}, Event.Side.BOTH)});
-
-		DRAGON_ATTACK4_RECOVERY = new EnderDragonActionAnimation(0.35F, "dragon/attack4_recovery", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, false, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, false, false, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, false, false})
-		});
-
-		DRAGON_FIREBALL = new EnderDragonActionAnimation(0.16F, "dragon/fireball", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true})
-		}).addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.65F, (entitypatch) -> {
-			LivingEntity original = entitypatch.getOriginal();
-			Entity target = entitypatch.getTarget();
-			Vector3d pos = original.position();
-            Vector3d toTarget = target.position().subtract(original.position()).normalize().scale(original.getBbWidth() * 0.5D);
-
-            double d6 = (float)(pos.x + toTarget.x);
-            double d7 = (float)(pos.y + 2.0F);
-            double d8 = (float)(pos.z + toTarget.z);
-            double d9 = target.getX() - d6;
-            double d10 = target.getY(0.5D) - d7;
-            double d11 = target.getZ() - d8;
-
-            if (!original.isSilent()) {
-               original.level.levelEvent((PlayerEntity)null, 1017, original.blockPosition(), 0);
-            }
-
-            DragonFireballEntity dragonfireball = new DragonFireballEntity(original.level, original, d9, d10, d11);
-            dragonfireball.moveTo(d6, d7, d8, 0.0F, 0.0F);
-            original.level.addFreshEntity(dragonfireball);
-		}, Side.SERVER)});
-
-		DRAGON_AIRSTRIKE = new StaticAnimation(0.35F, true, "dragon/airstrike", dragon)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT)});
-
-		DRAGON_BACKJUMP_PREPARE = new EnderDragonActionAnimation(0.35F, "dragon/backjump_prepare", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
-		}).addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, (entitypatch) -> {
-			entitypatch.getAnimator().reserveAnimation(DRAGON_BACKJUMP_MOVE);
-		}, Side.BOTH)});
-
-		DRAGON_BACKJUMP_MOVE = new AttackAnimation(0.0F, 10.0F, 10.0F, 10.0F, 10.0F, ColliderPreset.FIST, "Root", "dragon/backjump_move", dragon)
-			.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(1.0F, (entitypatch) -> {
-				entitypatch.getAnimator().reserveAnimation(DRAGON_BACKJUMP_RECOVERY);
-			}, Side.BOTH)});
-
-		DRAGON_BACKJUMP_RECOVERY = new EnderDragonActionAnimation(0.0F, "dragon/backjump_recovery", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
-			})
-			.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, (entitypatch) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
-
-				if (entitypatch instanceof EnderDragonPatch) {
-					EnderDragonPatch dragonpatch = ((EnderDragonPatch)entitypatch);
-					Vec3f tipPosition = dragonpatch.getTipPointAnimation("Leg_Front_R3").getTargetPosition();
-					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 0.0D, 1.0D);
-				}
-			}, Event.Side.CLIENT)});
-
-		DRAGON_CRYSTAL_LINK = new EnderDragonActionAnimation(0.5F, "dragon/crystal_link", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 2), 0.1344F, 0, new boolean[] {true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 2), 0.1344F, 0, new boolean[] {true, true})
-			})
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(7.0F, (entitypatch) -> {
-				entitypatch.getOriginal().playSound(SoundEvents.ENDER_DRAGON_GROWL, 7.0F, 0.8F + entitypatch.getOriginal().getRandom().nextFloat() * 0.3F);
-				entitypatch.getOriginal().setHealth(entitypatch.getOriginal().getMaxHealth());
-
-				if (entitypatch instanceof EnderDragonPatch) {
-					((EnderDragonPatch)entitypatch).getOriginal().getPhaseManager().setPhase(PatchedPhases.GROUND_BATTLE);
-					entitypatch.setStunShield(0.0F);
-				}
-			}, Event.Side.SERVER), Event.create(7.0F, (entitypatch) -> {
-				Entity original = entitypatch.getOriginal();
-				original.level.addParticle(EpicFightParticles.FORCE_FIELD_END.get(), original.getX(), original.getY() + 2.0D, original.getZ(), 0, 0, 0);
-			}, Event.Side.CLIENT)});
-
-		DRAGON_NEUTRALIZED = new EnderDragonActionAnimation(0.1F, "dragon/neutralized", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
-			})
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(3.95F, (entitypatch) -> {
-				entitypatch.getAnimator().playAnimation(DRAGON_NEUTRALIZED_RECOVERY, 0);
-			}, Event.Side.BOTH)});
-
-		DRAGON_NEUTRALIZED_RECOVERY = new EnderDragonActionAnimation(0.05F, "dragon/neutralized_recovery", dragon, new IKInfo[] {
-				IKInfo.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, false, true}),
-				IKInfo.make("Leg_Front_R1", "Leg_Front_R3", null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, false, true, true, true}),
-				IKInfo.make("Leg_Back_L1", "Leg_Back_L3", null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
-			})
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(1.6F, (entitypatch) -> {
-				if (entitypatch instanceof EnderDragonPatch) {
-					((EnderDragonPatch)entitypatch).getOriginal().getPhaseManager().getPhase(PatchedPhases.GROUND_BATTLE).fly();
-				}
-			}, Event.Side.SERVER)});
-
-		SPIDER_ATTACK = new AttackAnimation(0.16F, 0.31F, 0.31F, 0.36F, 0.44F, ColliderPreset.SPIDER, "Head", "spider/attack", spider);
-		SPIDER_JUMP_ATTACK = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.41F, 0.8F,  ColliderPreset.SPIDER, "Head", "spider/jump_attack", spider)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true);
-		SPIDER_HIT = new HitAnimation(0.08F, "spider/hit", spider);
-		SPIDER_DEATH = new LongHitAnimation(0.16F, "spider/death", spider);
-
-		GOLEM_ATTACK1 = new AttackAnimation(0.2F, 0.1F, 0.15F, 0.25F, 0.9F, ColliderPreset.HEAD, "Head", "iron_golem/attack1", iron_golem)
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
-		GOLEM_ATTACK2 = new AttackAnimation(0.34F, 0.1F, 0.4F, 0.6F, 1.3F, ColliderPreset.GOLEM_SMASHDOWN, "LA4", "iron_golem/attack2", iron_golem)
-				.addProperty(AttackPhaseProperty.FINISHER, true);
-		GOLEM_ATTACK3 = new AttackAnimation(0.16F, 0.4F, 0.4F, 0.5F, 0.9F, ColliderPreset.GOLEM_SWING_ARM, "RA4", "iron_golem/attack3", iron_golem)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		GOLEM_ATTACK4 = new AttackAnimation(0.16F, 0.4F, 0.4F, 0.5F, 0.9F, ColliderPreset.GOLEM_SWING_ARM, "LA4", "iron_golem/attack4", iron_golem)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		GOLEM_DEATH = new LongHitAnimation(0.11F, "iron_golem/death", iron_golem);
-
-		VINDICATOR_SWING_AXE1 = new AttackAnimation(0.2F, 0.25F, 0.35F, 0.46F, 0.71F, ColliderPreset.TOOLS, "Tool_R", "illager/swing_axe1", biped);
-		VINDICATOR_SWING_AXE2 = new AttackAnimation(0.2F, 0.25F, 0.3F, 0.41F, 0.71F, ColliderPreset.TOOLS, "Tool_R", "illager/swing_axe2", biped);
-		VINDICATOR_SWING_AXE3 = new AttackAnimation(0.05F, 0.50F, 0.62F, 0.75F, 1F, ColliderPreset.TOOLS, "Tool_R", "illager/swing_axe3", biped)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true);
-
-		PIGLIN_DEATH = new LongHitAnimation(0.16F, "piglin/death", piglin);
-
-		HOGLIN_DEATH = new LongHitAnimation(0.16F, "hoglin/death", hoglin);
-		HOGLIN_ATTACK = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.45F, 1.0F, ColliderPreset.GOLEM_SWING_ARM, "Head", "hoglin/attack", hoglin);
-
-		RAVAGER_DEATH = new LongHitAnimation(0.11F, "ravager/death", ravager);
-		RAVAGER_STUN = new ActionAnimation(0.16F, "ravager/groggy", ravager)
-				.addProperty(MoveCoordFunctions.STOP_MOVEMENT, true);
-		RAVAGER_ATTACK1 = new AttackAnimation(0.16F, 0.2F, 0.4F, 0.5F, 0.55F, ColliderPreset.HEADBUTT_RAVAGER, "Head", "ravager/attack1", ravager);
-		RAVAGER_ATTACK2 = new AttackAnimation(0.16F, 0.2F, 0.4F, 0.5F, 1.3F, ColliderPreset.HEADBUTT_RAVAGER, "Head", "ravager/attack2", ravager);
-		RAVAGER_ATTACK3 = new AttackAnimation(0.16F, 0.0F, 1.1F, 1.16F, 1.6F, ColliderPreset.HEADBUTT_RAVAGER, "Head", "ravager/attack3", ravager);
-
-		VEX_HIT = new HitAnimation(0.048F, "vex/hit", vex);
-		VEX_DEATH = new LongHitAnimation(0.16F, "vex/death", vex);
-		VEX_CHARGE = new AttackAnimation(0.11F, 0.3F, 0.3F, 0.5F, 1.2F, ColliderPreset.VEX_CHARGE, "Root", "vex/charge", vex)
-				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(MoveCoordFunctions.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-					TransformSheet transform = self.getTransfroms().get("Root").copyAll();
-					Keyframe[] keyframes = transform.getKeyframes();
-					int startFrame = 0;
-					int endFrame = 6;
-					Vector3d pos = entitypatch.getOriginal().position();
-					Vector3d targetpos = entitypatch.getTarget().position();
-					float verticalDistance = (float) (targetpos.y - pos.y);
-					Quaternion rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, verticalDistance, -(float)MathUtils.horizontalDistance(targetpos.subtract(pos))), new Vec3f(0.0F, 0.0F, -1.0F));
-
-					for (int i = startFrame; i <= endFrame; i++) {
-						Vec3f translation = keyframes[i].transform().translation();
-						OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
-					}
-
-					transformSheet.readFrom(transform);
-				})
-				.addProperty(MoveCoordFunctions.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {})
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {
-					Event.create(0.0F, (entitypatch) -> entitypatch.setLastAttackPosition(), Side.SERVER)
-				});
-
-		VEX_NEUTRALIZED = new LongHitAnimation(0.1F, "vex/neutralized", vex);
-
-		WITCH_DRINKING = new StaticAnimation(0.16F, false, "witch/drink", biped);
-
-		WITHER_SKELETON_ATTACK1 = new AttackAnimation(0.16F, 0.2F, 0.3F, 0.41F, 0.7F, ColliderPreset.SWORD, "Tool_R", "wither_skeleton/sword_attack1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		WITHER_SKELETON_ATTACK2 = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.36F, 0.7F, ColliderPreset.SWORD, "Tool_R", "wither_skeleton/sword_attack2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		WITHER_SKELETON_ATTACK3 = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.36F, 0.7F, ColliderPreset.SWORD, "Tool_R", "wither_skeleton/sword_attack3", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-
-		WITHER_CHARGE = new AttackAnimation(0.35F, 0.35F, 0.35F, 0.66F, 2.05F, ColliderPreset.WITHER_CHARGE, "Root", "wither/rush", wither)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.FAST_MOVE)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
-				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(15.0F))
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(MoveCoordFunctions.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-					if (entitypatch instanceof WitherPatch && ((WitherPatch)entitypatch).getOriginal().getAlternativeTarget(0) > 0) {
-						WitherPatch witherpatch = (WitherPatch)entitypatch;
-						TransformSheet transform = self.getTransfroms().get("Root").copyAll();
-						Keyframe[] keyframes = transform.getKeyframes();
-						int startFrame = 1;
-						int endFrame = 5;
-						Vec3f keyOrigin = keyframes[startFrame].transform().translation().multiply(1.0F, 1.0F, 0.0F);
-						Vec3f keyLast = keyframes[3].transform().translation();
-						Vector3d pos = entitypatch.getOriginal().getEyePosition(1.0F);
-						Vector3d targetpos = entitypatch.getOriginal().level.getEntity(witherpatch.getOriginal().getAlternativeTarget(0)).position();
-						float horizontalDistance = (float)targetpos.subtract(pos).length();
-						float verticalDistance = (float)(targetpos.y - pos.y);
-						Vec3f prevPosition = Vec3f.sub(keyLast, keyOrigin, null);
-						Vec3f newPosition = new Vec3f(keyLast.x, verticalDistance, -horizontalDistance);
-						float scale = Math.min(newPosition.length() / prevPosition.length(), 5.0F);
-						Quaternion rotator = Vec3f.getRotatorBetween(newPosition, keyLast);
-
-						for (int i = startFrame; i <= endFrame; i++) {
-							Vec3f translation = keyframes[i].transform().translation();
-							translation.z *= scale;
-							OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
-						}
-
-						transformSheet.readFrom(transform);
-					} else {
-						transformSheet.readFrom(self.getTransfroms().get("Root").copyAll());
-					}
-				}).addProperty(MoveCoordFunctions.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {
-
-				}).addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.4F, (entitypatch) -> {
-						if (entitypatch instanceof WitherPatch) {
-							((WitherPatch)entitypatch).startCharging();
-						} else {
-							entitypatch.setLastAttackPosition();
-						}
-					}, Side.SERVER), Event.create(0.4F, (entitypatch) -> {
-						Entity entity = entitypatch.getOriginal();
-						entitypatch.getOriginal().level.addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
-					}, Side.CLIENT), Event.create(Event.ON_BEGIN, (entitypatch) -> {
-						if (entitypatch instanceof WitherPatch) {
-							WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-							if (!witherpatch.getOriginal().isPowered()) {
-								((WitherPatch)entitypatch).setArmorActivated(true);
-							}
-						}
-					}, Side.CLIENT), Event.create(Event.ON_END, (entitypatch) -> {
-						if (entitypatch instanceof WitherPatch) {
-							WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-							if (!witherpatch.getOriginal().isPowered()) {
-								((WitherPatch)entitypatch).setArmorActivated(false);
-							}
-						}
-					}, Side.CLIENT)}
-				);
-
-		WITHER_DEATH = new LongHitAnimation(0.16F, "wither/death", wither);
-		WITHER_NEUTRALIZED = new LongHitAnimation(0.05F, "wither/neutralized", wither)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.0F, (entitypatch) -> {
-					Entity entity = entitypatch.getOriginal();
-					entity.level.addParticle(EpicFightParticles.NEUTRALIZE.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 3.0D, Double.longBitsToDouble(15), Double.NaN);
-				}, Side.CLIENT)}
-			);
-
-		WITHER_SPELL_ARMOR = new InvincibleAnimation(0.35F, "wither/spell_wither_armor", wither)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, false)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.0F, (entitypatch) -> {
-					entitypatch.playSound(EpicFightSounds.WITHER_SPELL_ARMOR, 5.0F, 0.0F, 0.0F);
-					Entity entity = entitypatch.getOriginal();
-					entity.level.addParticle(EpicFightParticles.BOSS_CASTING.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 5.0D, Double.longBitsToDouble(20), Double.longBitsToDouble(4));
-				}, Side.CLIENT), Event.create(0.5F, (entitypatch) -> {
-					((WitherPatch)entitypatch).setArmorActivated(true);
-				}, Side.SERVER)}
-			);
-
-		WITHER_BLOCKED = new ActionAnimation(0.05F, "wither/charging_blocked", wither)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(Event.ON_BEGIN, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-						if (!witherpatch.getOriginal().isPowered()) {
-							((WitherPatch)entitypatch).setArmorActivated(true);
-						}
-					}
-				}, Side.SERVER), Event.create(Event.ON_END, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-						if (!witherpatch.getOriginal().isPowered()) {
-							((WitherPatch)entitypatch).setArmorActivated(false);
-						}
-					}
-				}, Side.SERVER)
-			});
-
-		WITHER_GHOST_STANDBY = new InvincibleAnimation(0.16F, "wither/ghost_stand", wither);
-
-		WITHER_SWIRL = new AttackAnimation(0.2F, 0.05F, 0.4F, 0.51F, 1.6F, ColliderPreset.WITHER_CHARGE, "Torso", "wither/swirl", wither)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_BIG)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(3))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(6.0F));
-
-		WITHER_BEAM = new ActionAnimation(0.05F, "wither/laser", wither)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, false)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.0F, (entitypatch) -> {
-					entitypatch.playSound(EpicFightSounds.BUZZ, 0.0F, 0.0F);
-
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-						for (int i = 0; i < 3; i++) {
-							Entity headTarget = witherpatch.getAlternativeTargetEntity(i);
-
-							if (headTarget == null) {
-								headTarget = witherpatch.getAlternativeTargetEntity(0);
-							}
-
-							if (headTarget != null) {
-								witherpatch.setLaserTarget(i, headTarget);
-							}
-						}
-					}
-				}, Side.SERVER), Event.create(0.7F, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-						for (int i = 0; i < 3; i++) {
-							Entity headTarget = witherpatch.getLaserTargetEntity(i);
-
-							if (headTarget != null) {
-								Vector3d pos = headTarget.position().add(0.0D, headTarget.getBbHeight() * 0.5D, 0.0D);
-								witherpatch.setLaserTargetPosition(i, pos);
-								witherpatch.setLaserTarget(i, null);
-							}
-						}
-					}
-				}, Side.SERVER), Event.create(0.9F, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-						WitherEntity witherboss = witherpatch.getOriginal();
-						witherboss.level.playLocalSound(witherboss.getX(), witherboss.getY(), witherboss.getZ(), EpicFightSounds.LASER_BLAST, SoundCategory.HOSTILE, 1.0F, 1.0F, false);
-
-						for (int i = 0; i < 3; i++) {
-							Vector3d laserDestination = witherpatch.getLaserTargetPosition(i);
-							Entity headTarget = witherpatch.getAlternativeTargetEntity(i);
-
-							if (headTarget != null) {
-								witherpatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.LASER.get(), witherboss.getHeadX(i), witherboss.getHeadY(i), witherboss.getHeadZ(i), laserDestination.x, laserDestination.y, laserDestination.z);
-							}
-						}
-					}
-				}, Side.CLIENT), Event.create(0.9F, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-						WitherEntity witherboss = witherpatch.getOriginal();
-						List<Entity> hurted = Lists.newArrayList();
-
-						for (int i = 0; i < 3; i++) {
-							Vector3d laserDestination = witherpatch.getLaserTargetPosition(i);
-							Entity headTarget = witherpatch.getAlternativeTargetEntity(i);
-
-							if (headTarget != null) {
-								double x = witherboss.getHeadX(i);
-								double y = witherboss.getHeadY(i);
-								double z = witherboss.getHeadZ(i);
-								Vector3d direction = laserDestination.subtract(x, y, z);
-								Vector3d start = new Vector3d(x, y, z);
-								Vector3d destination = start.add(direction.normalize().scale(200.0D));
-								BlockRayTraceResult hitResult = witherboss.level.clip(new RayTraceContext(start, destination, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, null));
-								Vector3d hitLocation = hitResult.getLocation();
-								double xLength = hitLocation.x - x;
-								double yLength = hitLocation.y - y;
-								double zLength = hitLocation.z - z;
-								double horizontalDistance = Math.sqrt(xLength * xLength + zLength * zLength);
-								double length = Math.sqrt(xLength * xLength + yLength * yLength + zLength * zLength);
-								float yRot = (float)(-Math.atan2(zLength, xLength) * (180D / Math.PI)) - 90.0F;
-								float xRot = (float)(Math.atan2(yLength, horizontalDistance) * (180D / Math.PI));
-								OBBCollider collider = new OBBCollider(0.25D, 0.25D, length * 0.5D, 0.0D, 0.0D, length * 0.5D);
-								collider.transform(OpenMatrix4f.createTranslation((float)-x, (float)y, (float)-z).rotateDeg(yRot, Vec3f.Y_AXIS).rotateDeg(-xRot, Vec3f.X_AXIS));
-								List<Entity> hitEntities = collider.getCollideEntities(witherboss);
-
-								DamageSource damagesource = ExtendedDamageSource.causeDamage("wither_beam", witherboss, StunType.SHORT, WITHER_BEAM);
-								damagesource.setMagic();
-
-								hitEntities.forEach((entity) -> {
-									if (!hurted.contains(entity)) {
-										hurted.add(entity);
-										entity.hurt(damagesource, 12.0F);
-									}
-								});
-
-								Explosion.Mode explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(witherboss.level, witherboss) ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
-								witherboss.level.explode(witherboss, hitLocation.x, hitLocation.y, hitLocation.z, 0.0F, false, explosion$blockinteraction);
-							}
-						}
-					}
-				}, Side.SERVER), Event.create(2.3F, (entitypatch) -> {
-					if (entitypatch instanceof WitherPatch) {
-						WitherPatch witherpatch = ((WitherPatch)entitypatch);
-
-						for (int i = 0; i < 3; i++) {
-							witherpatch.setLaserTargetPosition(i, new Vector3d(Double.NaN, Double.NaN, Double.NaN));
-						}
-					}
-				}, Side.SERVER)}
-			);
-
-		WITHER_BACKFLIP = new AttackAnimation(0.2F, 0.3F, 0.5F, 0.66F, 2.1F, ColliderPreset.WITHER_CHARGE, "Torso", "wither/backflip", wither)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.FAST_MOVE)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
-				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(10.0F))
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
-
-		ZOMBIE_ATTACK1 = new AttackAnimation(0.1F, 0.3F, 0.4F, 0.6F, 0.85F, ColliderPreset.FIST, "Tool_R", "zombie/attack1", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		ZOMBIE_ATTACK2 = new AttackAnimation(0.1F, 0.3F, 0.4F, 0.6F, 0.85F, ColliderPreset.FIST, "Tool_L", "zombie/attack2", biped)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		ZOMBIE_ATTACK3 = new AttackAnimation(0.1F, 0.5F, 0.5F, 0.6F, 1.15F, ColliderPreset.HEAD, "Head", "zombie/attack3", biped);
-
 		SWEEPING_EDGE = new SpecialAttackAnimation(0.16F, 0.1F, 0.35F, 0.46F, 0.79F, null, "Tool_R", "biped/skill/sweeping_edge", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
@@ -1244,11 +408,11 @@ public class Animations {
 				new Phase(0.0F, 0.2F, 0.31F, 0.4F, 0.4F, "Tool_R", null), new Phase(0.4F, 0.5F, 0.61F, 0.65F, 0.65F, Hand.OFF_HAND, "Tool_L", null),
 				new Phase(0.65F, 0.75F, 0.85F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true);
+				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true);
 
 		GUILLOTINE_AXE = new SpecialAttackAnimation(0.08F, 0.2F, 0.5F, 0.65F, 1.0F, null, "Tool_R", "biped/skill/guillotine_axe", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(MoveCoordFunctions.MOVE_VERTICAL, true)
+				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 
 		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", biped,
@@ -1337,15 +501,6 @@ public class Animations {
 	}
 
 	private static class ReuseableEvents {
-		private static final Consumer<LivingEntityPatch<?>> WING_FLAP = (entitypatch) -> {
-			if (entitypatch instanceof EnderDragonPatch) {
-				LivingEntity e = ((EnderDragonPatch) entitypatch).getOriginal();
-
-				if (e.level.isClientSide && !e.isSilent()) {
-					e.level.playLocalSound(e.getX(), e.getY(), e.getZ(), SoundEvents.ENDER_DRAGON_FLAP, e.getSoundSource(), 5.0F, 0.8F + e.getRandom().nextFloat() * 0.3F, false);
-				}
-			}
-		};
 		private static final Consumer<LivingEntityPatch<?>> KATANA_IN = (entitypatch) -> entitypatch.playSound(EpicFightSounds.SWORD_IN, 0, 0);
 	}
 

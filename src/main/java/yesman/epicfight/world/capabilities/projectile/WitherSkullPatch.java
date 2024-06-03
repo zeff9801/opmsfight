@@ -16,7 +16,6 @@ import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.network.server.SPPlayAnimationInstant;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
-import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherSkeletonMinion;
 
@@ -49,9 +48,7 @@ public class WitherSkullPatch extends ProjectilePatch<WitherSkullEntity> {
 					witherskeletonminion.finalizeSpawn(level, level.getCurrentDifficultyAt(blockpos), SpawnReason.REINFORCEMENT, null, null);
 					witherskeletonminion.yRot = projectile.yRot - 180.0F;
 					level.addFreshEntity(witherskeletonminion);
-					
-					WitherSkeletonPatch<?> witherskeletonpatch = (WitherSkeletonPatch<?>)witherskeletonminion.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-					witherskeletonpatch.playAnimationSynchronized(Animations.WITHER_SKELETON_SPECIAL_SPAWN, 0, SPPlayAnimationInstant::new);
+
 				}
 			}
 		} else {

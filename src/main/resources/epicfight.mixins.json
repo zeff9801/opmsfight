@@ -4,14 +4,11 @@
 	"compatibilityLevel": "JAVA_8",
 	"package": "yesman.epicfight.mixin",
 	"client": [
-		"MixinEnderDragonRenderer",
 		"MixinBufferBuilder",
 		"MixinKeyboardHandler",
 		"MixinMouseHelper"
 	],
 	"mixins": [
-		"MixinEndCrystal",
-		"MixinWitherBoss"
 	],
 	"injector": {
 		"defaultRequire": 1

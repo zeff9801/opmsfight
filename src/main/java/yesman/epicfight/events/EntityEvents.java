@@ -56,7 +56,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
@@ -449,30 +448,7 @@ public class EntityEvents {
 			}
 		}
 	}
-	
-	@SubscribeEvent
-	public static void tpEvent(EntityTeleportEvent.EnderEntity event) {
-		LivingEntity entity = event.getEntityLiving();
-		
-		if (event.getEntityLiving() instanceof EndermanEntity) {
-			EndermanEntity enderman = (EndermanEntity)entity;
-			EndermanPatch endermanpatch = (EndermanPatch) enderman.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-			
-			if (endermanpatch != null) {
-				if (endermanpatch.getEntityState().inaction()) {
-					for (Entity collideEntity : enderman.level.getEntitiesOfClass(Entity.class, enderman.getBoundingBox().inflate(0.2D, 0.2D, 0.2D))) {
-						if (collideEntity instanceof ProjectileEntity) {
-	                    	return;
-	                    }
-	                }
-					
-					event.setCanceled(true);
-				} else if (endermanpatch.isRaging()) {
-					event.setCanceled(true);
-				}
-			}
-		}
-	}
+
 	
 	@SubscribeEvent
 	public static void jumpEvent(LivingJumpEvent event) {

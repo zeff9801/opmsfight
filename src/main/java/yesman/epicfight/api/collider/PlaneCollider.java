@@ -29,6 +29,15 @@ public class PlaneCollider extends Collider {
 		this.worldPos[1] = new Vector3d(0.0D, 0.0D, 0.0D);
 	}
 
+
+
+	@Override
+	public PlaneCollider deepCopy() {
+		Vector3d aVec = this.modelPos[0];
+		Vector3d bVec = this.modelPos[1];
+
+		return new PlaneCollider(this.outerAABB, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
+	}
 	@Override
 	public boolean isCollide(Entity entity) {
 		AxisAlignedBB opponent = entity.getBoundingBox();

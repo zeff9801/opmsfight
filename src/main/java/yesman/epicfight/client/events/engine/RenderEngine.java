@@ -6,12 +6,10 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -25,7 +23,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
@@ -57,7 +54,6 @@ import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
-import yesman.epicfight.api.client.forgeevent.RenderEnderDragonEvent;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.ClientEngine;
@@ -533,22 +529,6 @@ public class RenderEngine {
 		@SubscribeEvent
 		public static void renderGameOverlayPost(RenderGameOverlayEvent.BossInfo event) {
 			if (event.getBossInfo().getName().getString().equals("Ender Dragon")) {
-				if (EnderDragonPatch.INSTANCE_CLIENT != null) {
-					EnderDragonPatch dragonpatch = EnderDragonPatch.INSTANCE_CLIENT;
-					float stunShield = dragonpatch.getStunShield();
-
-					if (stunShield > 0) {
-						float progression = stunShield / dragonpatch.getMaxStunShield();
-						int x = event.getX();
-						int y = event.getY();
-
-						RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-						renderEngine.minecraft.textureManager.bind(GUI_BARS_LOCATION);
-
-						AbstractGui.blit(event.getMatrixStack(), x, y + 6, 183, 2, 0, 45.0F, 182, 6, 255, 255);
-						AbstractGui.blit(event.getMatrixStack(), x + (int)(183 * progression), y + 6, (int)(183 * (1.0F - progression)), 2, 0, 39.0F, 182, 6, 255, 255);
-					}
-				}
 			}
 		}
 
@@ -580,19 +560,5 @@ public class RenderEngine {
 			}
 		}
 
-		@SuppressWarnings("unchecked")
-		@SubscribeEvent
-		public static void renderEnderDragonEvent(RenderEnderDragonEvent event) {
-			EnderDragonEntity livingentity = event.getEntity();
-
-			if (renderEngine.hasRendererFor(livingentity)) {
-				EnderDragonPatch entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, EnderDragonPatch.class);
-
-				if (entitypatch != null) {
-					event.setCanceled(true);
-					renderEngine.getEntityRenderer(livingentity).render(livingentity, entitypatch, event.getRenderer(), event.getBuffers(), event.getPoseStack(), event.getLight(), event.getPartialRenderTick());
-				}
-			}
-		}
 	}
 }

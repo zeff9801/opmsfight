@@ -9,7 +9,6 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.JointTransform;
@@ -48,7 +47,7 @@ public class MoveCoordFunctions {
         prevpos.transform(rotationTransform);
 
         boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
-        boolean moveVertical = animation.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false) || animation.getProperty(ActionAnimationProperty.COORD).isPresent();
+        boolean moveVertical = animation.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false) || animation.getProperty(AnimationProperty.MoveCoordFunctions.COORD).isPresent();
         float dx = prevpos.x - currentpos.x;
         float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
         float dz = prevpos.z - currentpos.z;
@@ -61,7 +60,7 @@ public class MoveCoordFunctions {
         ModifiableAttributeInstance movementSpeed = livingentity.getAttribute(Attributes.MOVEMENT_SPEED);
         boolean soulboost = blockState.is(BlockTags.SOUL_SPEED_BLOCKS) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, livingentity) > 0;
         float speedFactor = (float)(soulboost ? 1.0D : livingentity.level.getBlockState(blockpos).getBlock().getSpeedFactor());
-        float moveMultiplier = (float)(animation.getProperty(ActionAnimationProperty.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F);
+        float moveMultiplier = (float)(animation.getProperty(AnimationProperty.MoveCoordFunctions.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F);
 
         return new Vec3f(dx * moveMultiplier * speedFactor, dy, dz * moveMultiplier * speedFactor);
     };
@@ -166,7 +165,7 @@ public class MoveCoordFunctions {
             Vector3d targetpos = attackTarget.position();
             Vector3d toTarget = targetpos.subtract(pos);
             Vector3d viewVec = entitypatch.getOriginal().getViewVector(1.0F);
-            float horizontalDistance = Math.max((float)toTarget.horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+            float horizontalDistance = Math.max((float)MathUtils.horizontalDistance(targetpos.subtract(pos)) - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
             Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
             float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 
@@ -201,7 +200,7 @@ public class MoveCoordFunctions {
             Vector3d pos = entitypatch.getOriginal().position();
             Vector3d targetpos = attackTarget.position();
             Vector3d toTarget = targetpos.subtract(pos);
-            float horizontalDistance = Math.max((float)toTarget.horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+            float horizontalDistance = Math.max((float)MathUtils.horizontalDistance(targetpos.subtract(pos)) - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
             Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
             float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 
@@ -237,23 +236,5 @@ public class MoveCoordFunctions {
         }
 
         transformSheet.readFrom(sheet);
-    };
-
-    public static final MoveCoordSetter VEX_TRACE = (self, entitypatch, transformSheet) -> {
-        TransformSheet transform = self.getCoord().copyAll();
-        Keyframe[] keyframes = transform.getKeyframes();
-        int startFrame = 0;
-        int endFrame = 6;
-        Vector3d pos = entitypatch.getOriginal().position();
-        Vector3d targetpos = entitypatch.getTarget().position();
-        float verticalDistance = (float) (targetpos.y - pos.y);
-        Quaternion rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, 1.0F));
-
-        for (int i = startFrame; i <= endFrame; i++) {
-            Vec3f translation = keyframes[i].transform().translation();
-            OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
-        }
-
-        transformSheet.readFrom(transform);
     };
 }

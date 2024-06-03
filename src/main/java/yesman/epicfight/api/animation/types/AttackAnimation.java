@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,11 +26,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.RegistryObject;
-import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
 import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
@@ -273,7 +270,7 @@ public class AttackAnimation extends ActionAnimation {
 	}
 
 	protected int getMaxStrikes(LivingEntityPatch<?> entitypatch, Phase phase) {
-		return phase.getProperty(AttackPhaseProperty.MAX_STRIKES).map((valueCorrector) -> valueCorrector.getTotalValue(entitypatch.getMaxStrikes(phase.hand))).orElse(Float.valueOf(entitypatch.getMaxStrikes(phase.hand))).intValue();
+		return phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).map((valueCorrector) -> valueCorrector.getTotalValue(entitypatch.getMaxStrikes(phase.hand))).orElse(Float.valueOf(entitypatch.getMaxStrikes(phase.hand))).intValue();
 	}
 
 	protected float getDamageTo(LivingEntityPatch<?> entitypatch, LivingEntity target, Phase phase, ExtendedDamageSource source) {

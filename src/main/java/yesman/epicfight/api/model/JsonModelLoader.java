@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.mojang.datafixers.util.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
@@ -39,34 +40,37 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
+
 	public static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
-	
+
+	private JsonObject rootJson;
+	private IResourceManager resourceManager;
 	private static int[] toIntArray(JsonArray array) {
 		List<Integer> result = Lists.newArrayList();
 		for (JsonElement je : array) {
 			result.add(je.getAsInt());
 		}
-		
+
 		return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
 	}
-	
+
 	private static float[] toFloatArray(JsonArray array) {
 		List<Float> result = Lists.newArrayList();
 		for (JsonElement je : array) {
 			result.add(je.getAsFloat());
 		}
-		
+
 		return ArrayUtils.toPrimitive(result.toArray(new Float[0]));
 	}
-	
-	private JsonObject rootJson;
-	
+
+
 	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) {
 		try {
 			if (resourceManager == null) {
@@ -75,26 +79,31 @@ public class JsonModelLoader {
 				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
 				JsonReader in = new JsonReader(reader);
 				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();	
+				this.rootJson = Streams.parse(in).getAsJsonObject();
 			} else {
+				this.resourceManager = resourceManager;
 				IResource resource = resourceManager.getResource(resourceLocation);
+
+				//TODO Double check
 				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();
 			}
 		} catch (Exception e) {
-			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because " + e);
+			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because of " + e);
+			e.printStackTrace();
 		}
 	}
-	
+
+
 	public boolean isValidSource() {
 		return this.rootJson != null;
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public ClientModel.RenderProperties getRenderProperties() {
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
-		
+
 		if (properties != null) {
 			return ClientModel.RenderProperties.builder()
 					.transparency(properties.has("transparent") ? properties.get("transparent").getAsBoolean() : false)
@@ -103,24 +112,27 @@ public class JsonModelLoader {
 			return ClientModel.RenderProperties.builder().build();
 		}
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public ResourceLocation getParent() {
 		return this.rootJson.has("parent") ? new ResourceLocation(this.rootJson.get("parent").getAsString()) : null;
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public Mesh getMesh() {
 		JsonObject obj = this.rootJson.getAsJsonObject("vertices");
 		JsonObject positions = obj.getAsJsonObject("positions");
 		JsonObject normals = obj.getAsJsonObject("normals");
 		JsonObject uvs = obj.getAsJsonObject("uvs");
+		JsonObject parts = obj.getAsJsonObject("parts");
+		JsonObject indices = obj.getAsJsonObject("indices");
 		JsonObject vdincies = obj.getAsJsonObject("vindices");
 		JsonObject weights = obj.getAsJsonObject("weights");
 		JsonObject drawingIndices = obj.getAsJsonObject("indices");
 		JsonObject vcounts = obj.getAsJsonObject("vcounts");
+
 		float[] positionArray = toFloatArray(positions.get("array").getAsJsonArray());
-		
+
 		for (int i = 0; i < positionArray.length / 3; i++) {
 			int k = i * 3;
 			Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
@@ -129,9 +141,9 @@ public class JsonModelLoader {
 			positionArray[k+1] = posVector.y;
 			positionArray[k+2] = posVector.z;
 		}
-		
+
 		float[] normalArray = toFloatArray(normals.get("array").getAsJsonArray());
-		
+
 		for (int i = 0; i < normalArray.length / 3; i++) {
 			int k = i * 3;
 			Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
@@ -140,16 +152,16 @@ public class JsonModelLoader {
 			normalArray[k+1] = normVector.y;
 			normalArray[k+2] = normVector.z;
 		}
-		
+
 		float[] uvArray = toFloatArray(uvs.get("array").getAsJsonArray());
 		int[] animationIndexArray = toIntArray(vdincies.get("array").getAsJsonArray());
 		float[] weightArray = toFloatArray(weights.get("array").getAsJsonArray());
 		int[] drawingIndexArray = toIntArray(drawingIndices.get("array").getAsJsonArray());
 		int[] vcountArray = toIntArray(vcounts.get("array").getAsJsonArray());
-		
+
 		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, drawingIndexArray, vcountArray);
 	}
-	
+
 	public Armature getArmature() {
 		JsonObject obj = this.rootJson.getAsJsonObject("armature");
 		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
@@ -159,7 +171,7 @@ public class JsonModelLoader {
 		joint.setInversedModelTransform(new OpenMatrix4f());
 		return new Armature(jointMap.size(), joint, jointMap);
 	}
-	
+
 	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
 		float[] floatArray = toFloatArray(object.get("transform").getAsJsonArray());
 		OpenMatrix4f localMatrix = new OpenMatrix4f().load(FloatBuffer.wrap(floatArray));
@@ -167,56 +179,54 @@ public class JsonModelLoader {
 		if (start) {
 			localMatrix.mulFront(CORRECTION);
 		}
-		
+
 		String name = object.get("name").getAsString();
 		int index = -1;
-		
+
 		for (int i = 0; i < nameAsVertexGroups.size(); i++) {
 			if (name.equals(nameAsVertexGroups.get(i).getAsString())) {
 				index = i;
 				break;
 			}
 		}
-		
+
 		if (index == -1) {
 			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " not exist!");
 		}
-		
+
 		Joint joint = new Joint(name, index, localMatrix);
 		jointMap.put(name, joint);
-		
+
 		for (JsonElement children : object.get("children").getAsJsonArray()) {
 			joint.addSubJoint(this.getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
 		}
-		
+
 		return joint;
 	}
-	
+
 	public void loadStaticAnimation(StaticAnimation animation) {
+		if (this.rootJson == null) {
+			throw new IllegalStateException("[ModelParsingError]Can't find animation path: " + animation);
+		}
+
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean action = animation instanceof ActionAnimation;
 		boolean attack = animation instanceof AttackAnimation;
 		boolean noTransformData = !action && !attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
 		boolean root = true;
-		
-		if (!action && !attack) {
-			if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-				return;
-			}
-		}
-		
+		Armature armature = animation.getModel().getArmature();
+
 		Set<String> allowedJoints = Sets.newLinkedHashSet();
-		
+
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
-				Armature armature = animation.getModel().getArmature();
 				Joint joint = armature.getRootJoint();
 				int pathIndex = armature.searchPathIndex(phase.getColliderJointName());
-				
+
 				while (joint != null) {
 					allowedJoints.add(joint.getName());
 					int nextJoint = pathIndex % 10;
-					
+
 					if (nextJoint > 0) {
 						pathIndex /= 10;
 						joint = joint.getSubJoints().get(nextJoint - 1);
@@ -240,8 +250,8 @@ public class JsonModelLoader {
 
 				continue;
 			}
-			
-			Joint joint = animation.getModel().getArmature().searchJointByName(name);
+
+			Joint joint = armature.searchJointByName(name);
 
 			if (joint == null) {
 				if (name.equals("Coord") && action) {
@@ -294,7 +304,7 @@ public class JsonModelLoader {
 			}
 
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
-			animation.addSheet(name, sheet); //TODO i think remove
+
 			if (!noTransformData) {
 				animation.addSheet(name, sheet);
 			}
@@ -303,6 +313,7 @@ public class JsonModelLoader {
 			root = false;
 		}
 	}
+
 	public void loadStaticAnimationBothSide(StaticAnimation animation) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean root = true;
@@ -342,7 +353,7 @@ public class JsonModelLoader {
 			root = false;
 		}
 	}
-	
+
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {
 		List<Keyframe> keyframeList = new ArrayList<Keyframe> ();
 

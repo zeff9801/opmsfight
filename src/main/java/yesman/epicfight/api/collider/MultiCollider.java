@@ -28,7 +28,9 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	}
 	
 	protected abstract T createCollider();
-	
+	public MultiCollider<T> deepCopy() {
+		return null;
+	}
 	@Override
 	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
 		int numberOf = Math.max(Math.round((this.numberOfColliders + attackAnimation.getProperty(AttackAnimationProperty.COLLIDER_ADDER).orElse(0)) * attackSpeed), 1);

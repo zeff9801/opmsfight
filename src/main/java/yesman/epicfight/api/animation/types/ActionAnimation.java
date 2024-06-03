@@ -19,6 +19,7 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -45,7 +46,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			.addState(EntityState.INACTION, true);
 	}
 	
-	public <V> ActionAnimation addProperty(MoveCoordFunctions<V> propertyType, V value) {
+	public <V> ActionAnimation addProperty(AnimationProperty.MoveCoordFunctions<V> propertyType, V value) {
 		this.properties.put(propertyType, value);
 		return this;
 	}
@@ -55,11 +56,11 @@ public class ActionAnimation extends MainFrameAnimation {
 		super.begin(entitypatch);
 		entitypatch.cancelUsingItem();
 		
-		if (this.getProperty(MoveCoordFunctions.STOP_MOVEMENT).orElse(false)) {
+		if (this.getProperty(AnimationProperty.MoveCoordFunctions.STOP_MOVEMENT).orElse(false)) {
 			entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
 		}
 		
-		MoveCoordSetter actionCoordSetter = this.getProperty(MoveCoordFunctions.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
+		AnimationProperty.MoveCoordSetter actionCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
 			transformSheet.readFrom(self.jointTransforms.get("Root"));
 		});
 		
@@ -92,7 +93,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			ModifiableAttributeInstance movementSpeed = livingentity.getAttribute(Attributes.MOVEMENT_SPEED);
 			boolean soulboost = blockState.is(BlockTags.SOUL_SPEED_BLOCKS) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, livingentity) > 0;
 			double speedFactor = soulboost ? 1.0D : livingentity.level.getBlockState(blockpos).getBlock().getSpeedFactor();
-			double moveMultiplier = this.getProperty(MoveCoordFunctions.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F;
+			double moveMultiplier = this.getProperty(AnimationProperty.MoveCoordFunctions.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F;
 			livingentity.move(MoverType.SELF, new Vector3d(vec3.x * moveMultiplier, vec3.y, vec3.z * moveMultiplier * speedFactor));
 		}
 	}
@@ -111,7 +112,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		}
 		
 		if (animation instanceof LinkAnimation) {
-			if (!this.getProperty(MoveCoordFunctions.MOVE_ON_LINK).orElse(true)) {
+			if (!this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_ON_LINK).orElse(true)) {
 				return false;
 			} else {
 				return this.shouldMove(0.0F);
@@ -122,8 +123,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	}
 	
 	private boolean shouldMove(float currentTime) {
-		if (this.properties.containsKey(MoveCoordFunctions.MOVE_TIME)) {
-			ActionTime[] actionTimes = this.getProperty(MoveCoordFunctions.MOVE_TIME).get();
+		if (this.properties.containsKey(AnimationProperty.MoveCoordFunctions.MOVE_TIME)) {
+			ActionTime[] actionTimes = this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_TIME).get();
 			for (ActionTime actionTime : actionTimes) {
 				if (actionTime.begin <= currentTime && currentTime <= actionTime.end) {
 					return true;
@@ -138,14 +139,14 @@ public class ActionAnimation extends MainFrameAnimation {
 
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		if (this.getProperty(MoveCoordFunctions.COORD).isEmpty()) {
+		if (this.getProperty(AnimationProperty.MoveCoordFunctions.COORD).isEmpty()) {
 			JointTransform jt = pose.getOrDefaultTransform("Root");
 			Vec3f jointPosition = jt.translation();
 			OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
 			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
 			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
 			worldPosition.x = 0.0F;
-			worldPosition.y = (this.getProperty(MoveCoordFunctions.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
+			worldPosition.y = (this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
 			worldPosition.z = 0.0F;
 			OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
 			jointPosition.x = worldPosition.x;
@@ -189,8 +190,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	}
 	
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
-		if (this.getProperty(MoveCoordFunctions.COORD_SET_TICK).isPresent()) {
-			MoveCoordSetter moveCoordSetter = this.getProperty(MoveCoordFunctions.COORD_SET_TICK).orElse(null);
+		if (this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).isPresent()) {
+			AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).orElse(null);
 			
 			if (animation instanceof LinkAnimation) {
 				moveCoordSetter.set(animation, entitypatch, animation.jointTransforms.get("Root"));
@@ -223,7 +224,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		currentpos.transform(rotationTransform);
 		prevpos.transform(rotationTransform);
 		boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
-		boolean moveVertical = this.getProperty(MoveCoordFunctions.MOVE_VERTICAL).orElse(false);
+		boolean moveVertical = this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false);
 		float dx = prevpos.x - currentpos.x;
 		float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
 		float dz = prevpos.z - currentpos.z;

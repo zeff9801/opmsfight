@@ -111,7 +111,7 @@ public class OBBCollider extends Collider {
 	}
 	
 	/**
-	 * Transform every elements of this Bounding Box
+	 * Transform every element of this Bounding Box
 	 **/
 	@Override
 	public void transform(OpenMatrix4f modelMatrix) {
@@ -129,7 +129,13 @@ public class OBBCollider extends Collider {
 		
 		super.transform(modelMatrix);
 	}
-	
+
+	@Override
+	public OBBCollider deepCopy() {
+		Vector3d xyzVec = this.modelVertex[1];
+		return new OBBCollider(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
+	}
+
 	@Override
 	protected AxisAlignedBB getHitboxAABB() {
 		return this.outerAABB.inflate((this.outerAABB.maxX - this.outerAABB.minX) * this.scale.x,

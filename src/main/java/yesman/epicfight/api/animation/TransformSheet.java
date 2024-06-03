@@ -117,23 +117,6 @@ public class TransformSheet {
 		}
 	}
 
-	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
-		TransformSheet transform = this.copyAll();
-		float horizontalDistance = (float) dest.subtract(start).horizontalDistance();
-		float verticalDistance = (float) Math.abs(dest.y - start.y);
-		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
-		JointTransform endJt = transform.getKeyframes()[endFrame].transform();
-		Vec3f jointCoord = new Vec3f(startJt.translation().x, verticalDistance, horizontalDistance);
-
-		startJt.translation().set(jointCoord);
-
-		for (int i = startFrame + 1; i < endFrame; i++) {
-			JointTransform middleJt = transform.getKeyframes()[i].transform();
-			middleJt.translation().set(MathUtils.lerpVector(startJt.translation(), endJt.translation(), transform.getKeyframes()[i].time() / transform.getKeyframes()[endFrame].time()));
-		}
-
-		return transform;
-	}
 
 	public TransformSheet extendsZCoord(float multiplier, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();

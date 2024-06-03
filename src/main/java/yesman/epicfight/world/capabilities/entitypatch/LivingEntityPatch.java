@@ -650,18 +650,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return this.currentLivingMotion;
 	}
 
-	public List<LivingEntity> getCurrenltyAttackedEntities() {
-		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
-	}
-
-	public List<LivingEntity> getCurrenltyHurtEntities() {
-		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
-	}
-
-	public void removeHurtEntities() {
-		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
-		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
-	}
 
 	public EntityState getEntityState() {
 		return this.state;
