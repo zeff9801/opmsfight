@@ -142,4 +142,8 @@ public class Armature {
 		int nextIndex = pathIndex % 10;
 		return nextIndex > 0 ? this.getBindedJointTransformByIndexInternal(pose, joint.getSubJoints().get(nextIndex - 1), result, pathIndex / 10) : result;
 	}
+
+	public TransformSheet getActionAnimationCoord() {
+		return this.actionAnimationCoord;
+	}
 }
