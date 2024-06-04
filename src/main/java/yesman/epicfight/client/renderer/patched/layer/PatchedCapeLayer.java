@@ -26,7 +26,7 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayerEntity, A
 			ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlotType.CHEST);
 			if (itemstack.getItem() != Items.ELYTRA) {
 				OpenMatrix4f modelMatrix = new OpenMatrix4f();
-				modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(8).getAnimatedTransform());
+				modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(8).getPoseTransform());
 				OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 				matrixStackIn.pushPose();
 				MathUtils.translateStack(matrixStackIn, modelMatrix);

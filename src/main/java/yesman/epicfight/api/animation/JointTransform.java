@@ -94,7 +94,7 @@ public class JointTransform {
 		animationTransformEntry.put(ANIMATION_TRANSFROM, this.toMatrix(), OpenMatrix4f::mul);
 		animationTransformEntry.put(JOINT_LOCAL_TRANSFORM, joint.getLocalTrasnform());
 		animationTransformEntry.put(PARENT, parentTransform);
-		animationTransformEntry.put(ANIMATION_TRANSFROM, joint.getAnimatedTransform());
+		animationTransformEntry.put(ANIMATION_TRANSFROM, joint.getPoseTransform());
 		
 		return animationTransformEntry.getResult();
 	}

@@ -38,7 +38,7 @@ public class RenderItemBase {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		boolean isInMainhand = (hand == Hand.MAIN_HAND);
 		String holdingHand = isInMainhand ? "Tool_R" : "Tool_L";
-		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName(holdingHand).getAnimatedTransform();
+		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName(holdingHand).getPoseTransform();
 		modelMatrix.mulFront(jointTransform);
 		
 		poseStack.pushPose();
@@ -50,7 +50,7 @@ public class RenderItemBase {
 	
 	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(BACK_COORECTION);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(0).getAnimatedTransform());
+		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(0).getPoseTransform());
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

@@ -94,7 +94,7 @@ public class Armature {
 	}
 	
 	public void initializeTransform() {
-		this.rootJoint.initializeAnimationTransform();
+		this.rootJoint.resetPoseTransforms();
 	}
 
 	public int getJointNumber() {
@@ -106,7 +106,7 @@ public class Armature {
 	}
 
 	private void jointToTransformMatrixArray(Joint joint, OpenMatrix4f[] jointMatrices) {
-		OpenMatrix4f result = OpenMatrix4f.mul(joint.getAnimatedTransform(), joint.getInversedModelTransform(), null);
+		OpenMatrix4f result = OpenMatrix4f.mul(joint.getPoseTransform(), joint.getToOrigin(), null);
 		jointMatrices[joint.getId()] = result;
 		
 		for (Joint childJoint : joint.getSubJoints()) {

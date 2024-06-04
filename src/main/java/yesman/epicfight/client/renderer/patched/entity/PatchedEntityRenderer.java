@@ -62,7 +62,7 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	}
 	
 	protected void setJointTransform(int jointId, Armature modelArmature, OpenMatrix4f mat) {
-		modelArmature.searchJointById(jointId).getAnimatedTransform().mulFront(mat);
+		modelArmature.searchJointById(jointId).getPoseTransform().mulFront(mat);
 	}
 	
 	public void mulPoseStack(MatrixStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {

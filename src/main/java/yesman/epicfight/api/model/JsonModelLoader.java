@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.mojang.datafixers.util.Pair;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
@@ -40,7 +39,6 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.Mesh;
-import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
@@ -168,7 +166,7 @@ public class JsonModelLoader {
 		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
 		Map<String, Joint> jointMap = Maps.newHashMap();
 		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
-		joint.setInversedModelTransform(new OpenMatrix4f());
+		joint.initOriginTransform(new OpenMatrix4f());
 		return new Armature(jointMap.size(), joint, jointMap);
 	}
 

@@ -27,7 +27,7 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 			ModelRenderer model = originalRenderer.getParentModel().getHead();
 			E entity = entitypatch.getOriginal();
 			OpenMatrix4f modelMatrix = new OpenMatrix4f();
-			modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(9).getAnimatedTransform());
+			modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(9).getPoseTransform());
 			model.x = 0;
 			model.y = 0;
 			model.z = 0;

@@ -22,7 +22,7 @@ public class RenderKatana extends RenderItemBase {
 	@Override
 	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, Hand hand, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_R").getAnimatedTransform());
+		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_R").getPoseTransform());
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
@@ -30,7 +30,7 @@ public class RenderKatana extends RenderItemBase {
         poseStack.popPose();
         
 		modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform());
+		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getPoseTransform());
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

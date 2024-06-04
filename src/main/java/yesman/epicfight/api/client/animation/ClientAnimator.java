@@ -157,7 +157,7 @@ public class ClientAnimator extends Animator {
 	
 	public void applyPoseToJoint(Joint joint, OpenMatrix4f parentTransform, Pose pose, float partialTicks) {
 		OpenMatrix4f result = pose.getOrDefaultTransform(joint.getName()).getAnimationBindedMatrix(joint, parentTransform);
-		joint.setAnimatedTransform(result);
+		joint.setPoseTransform(result);
 		
 		for (Joint joints : joint.getSubJoints()) {
 			this.applyPoseToJoint(joints, result, pose, partialTicks);
