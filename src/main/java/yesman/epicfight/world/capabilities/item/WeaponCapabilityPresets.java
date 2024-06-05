@@ -25,28 +25,15 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class WeaponCapabilityPresets {
-	public static final Function<Item, CapabilityItem.Builder> AXE = (item) -> {
-		CapabilityItem.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.AXE)
-				.hitSound(EpicFightSounds.BLADE_HIT)
-				.collider(ColliderPreset.TOOLS)
-				.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-				.specialAttack(Styles.ONE_HAND, EpicFightSkills.GUILLOTINE_AXE)
-				.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD);
-
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-
-			if (harvestLevel != 0) {
-				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(10.0D * harvestLevel)));
-			}
-
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.7D + 0.3D * harvestLevel)));
-		}
-
-		return builder;
-	};
+	public static final Function<Item, CapabilityItem.Builder> AXE = (item) -> (CapabilityItem.Builder) WeaponCapability.builder()
+            .category(WeaponCategories.AXE)
+            .hitSound(EpicFightSounds.BLADE_HIT)
+            .collider(ColliderPreset.TOOLS)
+            .newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
+            .newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
+            .specialAttack(Styles.ONE_HAND, EpicFightSkills.GUILLOTINE_AXE)
+            .livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD);
+	
 	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.HOE)
             .hitSound(EpicFightSounds.BLADE_HIT)
