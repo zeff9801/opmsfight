@@ -302,6 +302,25 @@ public class Animations {
 		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
 		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
 
+
+
+		BIPED_WALK_SPEAR = new MovementAnimation(true, "biped/living/walk_spear", biped);
+		BIPED_WALK_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", biped);
+		BIPED_WALK_UCHIGATANA = new MovementAnimation(true, "biped/living/walk_uchigatana", biped);
+		BIPED_WALK_LONGSWORD = new MovementAnimation(true, "biped/living/walk_longsword", biped);
+		BIPED_WALK_LIECHTENAUER = new MovementAnimation(true, "biped/living/walk_liechtenauer", biped);
+
+		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", biped);
+		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", biped);
+		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
+
+		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", biped);
+
+		BIPED_UCHIGATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", biped);
+		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
+
+
+
 		BIPED_KATANA_SCRAP = new StaticAnimation(false, "biped/living/katana_scrap", biped)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, ReuseableEvents.KATANA_IN, Event.Side.CLIENT)});
 
@@ -397,6 +416,12 @@ public class Animations {
 		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.15F, 0.05F, 0.16F, 0.8F, null, "Tool_R", "biped/combat/longsword_auto3", biped);
 		LONGSWORD_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.3F, 0.5F, 0.7F, null, "Tool_R", "biped/combat/longsword_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
+		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null,"Tool_R", "biped/combat/longsword_liechtenauer_auto1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, "Tool_R", "biped/combat/longsword_liechtenauer_auto2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, "Tool_R", "biped/combat/longsword_liechtenauer_auto3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.2F, 0.45F, 0.7F, null, "Tool_R", "biped/combat/tachi_dash", false, biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		DAGGER_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.2F, null, "Tool_R", "biped/combat/dagger_auto1", biped);
