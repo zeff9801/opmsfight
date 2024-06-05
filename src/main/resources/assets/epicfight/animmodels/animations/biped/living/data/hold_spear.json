@@ -6,6 +6,14 @@
 		{
 			"livingmotion":"ALL",
 			"type":"arms"
+		},
+		{
+			"livingmotion":"IDLE",
+			"type":"none"
+		},
+		{
+			"livingmotion":"SWIM",
+			"type":"right_arms"
 		}
 	]
 }
