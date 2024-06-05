@@ -129,7 +129,7 @@ public class WeaponCapabilityPresets {
             })
             .passiveSkill(EpicFightSkills.KATANA_PASSIVE)
             .hitSound(EpicFightSounds.BLADE_HIT)
-            .collider(ColliderPreset.KATANA)
+            .collider(ColliderPreset.UCHIGATANA)
             .canBePlacedOffhand(false)
             .newStyleCombo(Styles.SHEATH, Animations.UCHIGATANA_SHEATHING_AUTO, Animations.UCHIGATANA_SHEATHING_DASH, Animations.UCHIGATANA_SHEATH_AIR_SLASH)
             .newStyleCombo(Styles.TWO_HAND, Animations.UCHIGATANA_AUTO1, Animations.UCHIGATANA_AUTO2, Animations.UCHIGATANA_AUTO3, Animations.UCHIGATANA_DASH, Animations.UCHIGATANA_AIR_SLASH)

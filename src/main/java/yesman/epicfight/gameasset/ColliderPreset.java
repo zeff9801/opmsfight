@@ -18,6 +18,7 @@ public class ColliderPreset {
 	public static final Collider GREATSWORD = new MultiOBBCollider(3, 0.5D, 0.8D, 1.0D, 0D, 0D, -1.0D);
 	public static final Collider TACHI = new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 0D, -0.95D);
 	public static final Collider KATANA = new MultiOBBCollider(3, 0.4D, 0.4D, 1.0D, 0D, 0D, -0.5D);
+	public static final Collider UCHIGATANA = new MultiOBBCollider(5, 0.4D, 0.4D, 0.7D, 0D, 0D, -0.7D);
 	public static final Collider SWORD = new MultiOBBCollider(3, 0.4D, 0.4D, 0.7D, 0D, 0D, -0.35D);
 	public static final Collider LONGSWORD = new MultiOBBCollider(3, 0.4D, 0.4D, 0.8D, 0D, 0D, -0.75D);
 	public static final Collider SPEAR = new MultiOBBCollider(3, 0.6D, 0.6D, 1.0D, 0D, 0D, -1.0D);
