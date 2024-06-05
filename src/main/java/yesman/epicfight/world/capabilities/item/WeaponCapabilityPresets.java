@@ -81,20 +81,12 @@ public class WeaponCapabilityPresets {
 
 		return builder;
 	};
-	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> {
-		WeaponCapability.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.SHOVEL)
-				.collider(ColliderPreset.TOOLS)
-				.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> WeaponCapability.builder()
+			.category(WeaponCategories.SHOVEL)
+			.collider(ColliderPreset.TOOLS)
+			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
+			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.8D + 0.4D * harvestLevel)));
-		}
-
-		return builder;
-	};
 	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.SWORD)
             .styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
