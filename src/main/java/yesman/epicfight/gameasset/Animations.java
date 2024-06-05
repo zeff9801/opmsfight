@@ -303,7 +303,6 @@ public class Animations {
 		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
 		BIPED_RUN_UNSHEATHING = new MovementAnimation(true, "biped/living/run_katana", biped);
 		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
-		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
 
 
 

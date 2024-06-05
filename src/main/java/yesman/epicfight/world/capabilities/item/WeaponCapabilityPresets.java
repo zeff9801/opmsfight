@@ -95,29 +95,28 @@ public class WeaponCapabilityPresets {
 
 		return builder;
 	};
-	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> {
-		WeaponCapability.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.SWORD)
-				.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
-				.collider(ColliderPreset.SWORD)
-				.hitSound(EpicFightSounds.BLADE_HIT)
-				.newStyleCombo(Styles.ONE_HAND, Animations.SWORD_AUTO1, Animations.SWORD_AUTO2, Animations.SWORD_AUTO3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
-				.newStyleCombo(Styles.TWO_HAND, Animations.SWORD_DUAL_AUTO1, Animations.SWORD_DUAL_AUTO2, Animations.SWORD_DUAL_AUTO3, Animations.SWORD_DUAL_DASH, Animations.SWORD_DUAL_AIR_SLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-				.specialAttack(Styles.ONE_HAND, EpicFightSkills.SWEEPING_EDGE)
-				.specialAttack(Styles.TWO_HAND, EpicFightSkills.DANCING_EDGE)
-				.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SWORD_DUAL_GUARD)
-				.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD);
+	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> WeaponCapability.builder()
+            .category(WeaponCategories.SWORD)
+            .styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
+            .collider(ColliderPreset.SWORD)
+            .newStyleCombo(Styles.ONE_HAND, Animations.SWORD_AUTO1, Animations.SWORD_AUTO2, Animations.SWORD_AUTO3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
+            .newStyleCombo(Styles.TWO_HAND, Animations.SWORD_DUAL_AUTO1, Animations.SWORD_DUAL_AUTO2, Animations.SWORD_DUAL_AUTO3, Animations.SWORD_DUAL_DASH, Animations.SWORD_DUAL_AIR_SLASH)
+            .newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
+            .specialAttack(Styles.ONE_HAND, EpicFightSkills.SWEEPING_EDGE)
+            .specialAttack(Styles.TWO_HAND, EpicFightSkills.DANCING_EDGE)
+            .livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SWORD_DUAL_GUARD)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.KNEEL, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_DUAL)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_DUAL_WEAPON)
+            .weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).getWeaponCategory() == WeaponCategories.SWORD);
 
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
-		}
-
-		return builder;
-	};
 	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.SPEAR)
             .styleProvider((playerpatch) -> (playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) ? Styles.ONE_HAND : Styles.TWO_HAND)
@@ -136,7 +135,7 @@ public class WeaponCapabilityPresets {
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
-	
+
 	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.GREATSWORD)
             .styleProvider((playerpatch) -> Styles.TWO_HAND)
