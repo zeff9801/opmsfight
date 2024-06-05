@@ -104,24 +104,31 @@ public class WeaponCapability extends CapabilityItem {
 	public boolean canBePlacedOffhand() {
 		return this.canBePlacedOffhand;
 	}
-	
+
 	@Override
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> player, Hand hand) {
-		return (this.livingMotionModifiers == null || hand == Hand.OFF_HAND) ? super.getLivingMotionModifier(player, hand) : this.livingMotionModifiers.get(this.getStyle(player));
+		if (this.livingMotionModifiers == null || hand == Hand.OFF_HAND) {
+			return super.getLivingMotionModifier(player, hand);
+		}
+
+		Map<LivingMotion, StaticAnimation> motions = this.livingMotionModifiers.getOrDefault(this.getStyle(player), Maps.newHashMap());
+		this.livingMotionModifiers.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(motions::putIfAbsent);
+
+		return motions;
 	}
 	
 	@Override
 	public UseAction getUseAnimation(LivingEntityPatch<?> playerpatch) {
 		if (this.livingMotionModifiers != null) {
 			Style style = this.getStyle(playerpatch);
-			
+
 			if (this.livingMotionModifiers.containsKey(style)) {
 				if (this.livingMotionModifiers.get(style).containsKey(LivingMotions.BLOCK)) {
 					return UseAction.BLOCK;
 				}
 			}
 		}
-		
+
 		return UseAction.NONE;
 	}
 	

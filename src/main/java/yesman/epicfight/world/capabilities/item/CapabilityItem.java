@@ -217,15 +217,15 @@ public class CapabilityItem {
 		
 		return map;
     }
-	
+
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, Hand hand) {
-		return Maps.<LivingMotion, StaticAnimation>newHashMap();
+		return Maps.newHashMap();
 	}
 	
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
 		return this.canBePlacedOffhand() ? Styles.ONE_HAND : Styles.TWO_HAND;
 	}
-	
+
 	public boolean canBePlacedOffhand() {
 		return true;
 	}

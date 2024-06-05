@@ -119,6 +119,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
 	}
 
+	public boolean isAirborneState() {
+		return this.original.getEntityData().get(AIRBORNE);
+	}
+
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
 	}
