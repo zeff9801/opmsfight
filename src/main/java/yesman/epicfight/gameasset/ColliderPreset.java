@@ -25,7 +25,9 @@ public class ColliderPreset {
 	public static final Collider FIST_FIXED = new OBBCollider(0.4D, 0.4D, 0.5D, 0D, 1.0D, -0.85D);
 	public static final Collider DUAL_SWORD_AIR_SLASH = new OBBCollider(0.8D, 0.4D, 1.0D, 0D, 0.5D, -0.5D);
 	public static final Collider DUAL_DAGGER_AIR_SLASH = new OBBCollider(0.8D, 0.4D, 0.75D, 0D, 0.5D, -0.5D);
-    /**
+	public static final Collider BATTOJUTSU = new OBBCollider(2.5D, 0.25D, 1.5D, 0D, 1.0D, -1.0D);
+	public static final Collider BATTOJUTSU_DASH = new OBBCollider(1D, 1D, 1D, 0D, 1.0D, -1.0D);
+	/**
 	public static void update() {
 		Collider newCOllider = new OBBCollider(0.7D, 0.7D, 3.5D, 0D, 1.0D, -3.5D);
 		((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
