@@ -44,34 +44,7 @@ public class EpicFightAttributes {
 	}
 	
 	public static void modifyExistingMobs(EntityAttributeModificationEvent event) {
-		commonCreature(EntityType.CAVE_SPIDER, event);
-		commonCreature(EntityType.EVOKER, event);
-		commonCreature(EntityType.IRON_GOLEM, event);
-		humanoid(EntityType.PILLAGER, event);
-		commonCreature(EntityType.RAVAGER, event);
-		commonCreature(EntityType.SPIDER, event);
-		commonCreature(EntityType.VEX, event);
-		humanoid(EntityType.VINDICATOR, event);
-		humanoid(EntityType.WITCH, event);
-		commonCreature(EntityType.HOGLIN, event);
-		commonCreature(EntityType.ZOGLIN, event);
-		commonCreature(EntityType.ENDER_DRAGON, event);
-		commonCreature(EntityType.CREEPER, event);
-		humanoid(EntityType.DROWNED, event);
-		commonCreature(EntityType.ENDERMAN, event);
-		humanoid(EntityType.HUSK, event);
-		humanoid(EntityType.PIGLIN, event);
-		humanoid(EntityType.PIGLIN_BRUTE, event);
-		humanoid(EntityType.SKELETON, event);
-		humanoid(EntityType.STRAY, event);
-		humanoid(EntityType.WITHER_SKELETON, event);
-		humanoid(EntityType.ZOMBIE, event);
-		humanoid(EntityType.ZOMBIE_VILLAGER, event);
-		humanoid(EntityType.ZOMBIFIED_PIGLIN, event);
-		commonCreature(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
 		player(EntityType.PLAYER, event);
-		dragon(EntityType.ENDER_DRAGON, event);
-		commonCreature(EntityType.WITHER, event);
 	}
     
     private static void commonCreature(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {

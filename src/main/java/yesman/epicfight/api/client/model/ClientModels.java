@@ -19,10 +19,6 @@ public class ClientModels extends Models<ClientModel> implements IFutureReloadLi
 	/** Entities **/
 	public final ClientModel playerFirstPerson;
 	public final ClientModel playerFirstPersonAlex;
-	public final ClientModel drownedOuterLayer;
-	/** Layers **/
-	public final ClientModel endermanEye;
-	public final ClientModel spiderEye;
 	/** Armors **/
 	public final ClientModel helmet;
 	public final ClientModel chestplate;
@@ -36,27 +32,8 @@ public class ClientModels extends Models<ClientModel> implements IFutureReloadLi
 		this.biped = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped"));
 		this.bipedOldTexture = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_old_texture"));
 		this.bipedAlex = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_slim_arm"));
-		this.villagerZombie = register(new ResourceLocation(EpicFightMod.MODID, "entity/zombie_villager"));
-		this.villagerZombieBody = register(new ResourceLocation(EpicFightMod.MODID, "entity/zombie_villager_body"));
-		this.creeper = register(new ResourceLocation(EpicFightMod.MODID, "entity/creeper"));
-		this.enderman = register(new ResourceLocation(EpicFightMod.MODID, "entity/enderman"));
-		this.skeleton = register(new ResourceLocation(EpicFightMod.MODID, "entity/skeleton"));
-		this.spider = register(new ResourceLocation(EpicFightMod.MODID, "entity/spider"));
-		this.ironGolem = register(new ResourceLocation(EpicFightMod.MODID, "entity/iron_golem"));
-		this.illager = register(new ResourceLocation(EpicFightMod.MODID, "entity/illager"));
-		this.witch = register(new ResourceLocation(EpicFightMod.MODID, "entity/witch"));
-		this.ravager = register(new ResourceLocation(EpicFightMod.MODID, "entity/ravager"));
-		this.vex = register(new ResourceLocation(EpicFightMod.MODID, "entity/vex"));
-		this.piglin = register(new ResourceLocation(EpicFightMod.MODID, "entity/piglin"));
-		this.hoglin = register(new ResourceLocation(EpicFightMod.MODID, "entity/hoglin"));
 		this.playerFirstPerson = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_firstperson"));
 		this.playerFirstPersonAlex = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_firstperson_slim"));
-		this.drownedOuterLayer = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_outer_layer"));
-		this.endermanEye = register(new ResourceLocation(EpicFightMod.MODID, "entity/enderman_face"));
-		this.spiderEye = register(new ResourceLocation(EpicFightMod.MODID, "entity/spider_face"));
-		this.dragon = register(new ResourceLocation(EpicFightMod.MODID, "entity/dragon"));
-		this.wither = register(new ResourceLocation(EpicFightMod.MODID, "entity/wither"));
-		
 		this.helmet = register(new ResourceLocation(EpicFightMod.MODID, "armor/helmet_default"));
 		this.chestplate = register(new ResourceLocation(EpicFightMod.MODID, "armor/chestplate_default"));
 		this.leggins = register(new ResourceLocation(EpicFightMod.MODID, "armor/leggings_default"));
@@ -80,11 +57,11 @@ public class ClientModels extends Models<ClientModel> implements IFutureReloadLi
 	public void loadModels(IResourceManager resourceManager) {
 		List<ResourceLocation> emptyResourceLocations = Lists.newArrayList();
 		
-		this.models.entrySet().forEach((entry) -> {
-			if (!entry.getValue().loadMeshAndProperties(resourceManager)) {
-				emptyResourceLocations.add(entry.getKey());
-			}
-		});
+		this.models.forEach((key, value) -> {
+            if (!value.loadMeshAndProperties(resourceManager)) {
+                emptyResourceLocations.add(key);
+            }
+        });
 		
 		emptyResourceLocations.forEach(this.models::remove);
 	}
