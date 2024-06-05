@@ -164,11 +164,9 @@ public class StaticAnimation extends DynamicAnimation {
 		if (!super.isJointEnabled(entitypatch, joint)) {
 			return false;
 		} else {
-			boolean bool = this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> {
-				return !bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint);
-			}).orElse(true);
-			
-			return bool;
+
+            return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) ->
+					!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
 		}
 	}
 	@Override

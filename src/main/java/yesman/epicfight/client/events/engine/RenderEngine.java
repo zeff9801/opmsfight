@@ -321,46 +321,35 @@ public class RenderEngine {
 		LocalPlayerPatch localPlayerPatch = ClientEngine.instance.getPlayerPatch();
 		ActiveRenderInfo camera = event.getInfo();
 		PointOfView cameraType = this.minecraft.options.getCameraType();
-		boolean hasAnyCorrection = false;
 
 		if (localPlayerPatch != null) {
 			if (localPlayerPatch.getTarget() != null && localPlayerPatch.isTargetLockedOn()) {
-				this.cameraXRot = localPlayerPatch.getLerpedLockOnX(partialTicks);
-				this.cameraYRot = localPlayerPatch.getLerpedLockOnY(partialTicks);
-				hasAnyCorrection = true;
-			} else if (this.isPlayerRotationLocked) {
-				if (!localPlayerPatch.getEntityState().turningLocked()) {
-					this.unlockRotation(this.minecraft.player);
+				float xRot = localPlayerPatch.getLerpedLockOnX(partialTicks);
+				float yRot = localPlayerPatch.getLerpedLockOnY(partialTicks);
+
+				if (cameraType.isMirrored()) {
+					yRot += 180.0F;
+					xRot *= -1.0F;
 				}
 
-				hasAnyCorrection = true;
-			}
-		}
+				camera.setRotation(yRot, xRot);
+				event.setPitch(xRot);
+				event.setYaw(yRot);
 
-		if (hasAnyCorrection) {
-			float xRot = this.cameraXRot;
-			float yRot = this.cameraYRot;
+				if (!cameraType.isFirstPerson()) {
+					Entity cameraEntity = this.minecraft.cameraEntity;
 
-			if (cameraType.isMirrored()) {
-				yRot += 180.0F;
-				xRot *= -1.0F;
-			}
+					camera.setPosition(MathHelper.lerp(partialTicks, cameraEntity.xo, cameraEntity.getX()),
+							MathHelper.lerp(partialTicks, cameraEntity.yo, cameraEntity.getY())
+									+ MathHelper.lerp(partialTicks, camera.eyeHeightOld, camera.eyeHeight),
+							MathHelper.lerp(partialTicks, cameraEntity.zo, cameraEntity.getZ()));
 
-			camera.setRotation(yRot, xRot);
-			event.setPitch(xRot);
-			event.setYaw(yRot);
-
-			if (!cameraType.isFirstPerson()) {
-				Entity cameraEntity = this.minecraft.cameraEntity;
-
-				camera.setPosition(MathHelper.lerp(partialTicks, cameraEntity.xo, cameraEntity.getX()),
-						MathHelper.lerp(partialTicks, cameraEntity.yo, cameraEntity.getY()) + MathHelper.lerp(partialTicks, camera.eyeHeightOld, camera.eyeHeight),
-						MathHelper.lerp(partialTicks, cameraEntity.zo, cameraEntity.getZ()));
-
-				camera.move(-camera.getMaxZoom(4.0D), 0.0D, 0.0D);
+					camera.move(-camera.getMaxZoom(4.0D), 0.0D, 0.0D);
+				}
 			}
 		}
 	}
+
 
 	public OverlayManager getOverlayManager() {
 		return this.overlayManager;
