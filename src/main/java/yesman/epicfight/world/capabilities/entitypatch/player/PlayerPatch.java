@@ -94,6 +94,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
 		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
 		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+
+		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
+		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
+		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
+		/* Mix Animations */
+		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
+		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
+		//clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
+
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	

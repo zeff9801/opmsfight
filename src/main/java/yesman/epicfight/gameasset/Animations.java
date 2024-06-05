@@ -278,6 +278,11 @@ public class Animations {
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
 		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);
+		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
+		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
+		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
+		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_offhand", biped);
+		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_offhand", biped);
 		BIPED_FLOAT = new StaticAnimation(true, "biped/living/float", biped);
 		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
 		BIPED_FALL = new StaticAnimation(false, "biped/living/fall", biped);

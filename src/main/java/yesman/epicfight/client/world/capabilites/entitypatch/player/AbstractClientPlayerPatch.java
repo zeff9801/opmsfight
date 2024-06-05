@@ -101,10 +101,10 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 						currentLivingMotion = LivingMotions.RUN;
 					else
 						currentLivingMotion = LivingMotions.WALK;
-					
+
 					if (original.zza < 0)
 						animator.baseLayer.animationPlayer.setReversed(true);
-					else 
+					else
 						animator.baseLayer.animationPlayer.setReversed(false);
 					
 				} else {
@@ -117,16 +117,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				}
 			}
 		}
-		
+
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.BaseLayer(this, this.currentLivingMotion));
-		CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
-		
+		CapabilityItem activeItemCap = this.getHoldingItemCapability(this.original.getUsedItemHand());
+
 		if (this.original.isUsingItem()) {
-			UseAction useAnim = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
-			UseAction secondUseAction = activeItem.getUseAnimation(this);
-			
-			if (useAnim == UseAction.BLOCK || secondUseAction == UseAction.BLOCK)
-				if (activeItem.getWeaponCategory() == WeaponCategories.SHIELD)
+			UseAction useAnim = this.original.getUseItem().getUseAnimation();
+			UseAction capUseAnim = activeItemCap.getUseAnimation(this);
+
+			if (useAnim == UseAction.BLOCK || capUseAnim == UseAction.BLOCK)
+				if (activeItemCap.getWeaponCategory() == WeaponCategories.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;
@@ -134,6 +134,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentCompositeMotion = LivingMotions.AIM;
 			else if (useAnim == UseAction.CROSSBOW)
 				currentCompositeMotion = LivingMotions.RELOAD;
+			else if (useAnim == UseAction.DRINK)
+				currentCompositeMotion = LivingMotions.DRINK;
+			else if (useAnim == UseAction.EAT)
+				currentCompositeMotion = LivingMotions.EAT;
+			//else if (useAnim == UseAction.SPYGLASS)
+			//	currentCompositeMotion = LivingMotions.SPECTATE;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
@@ -141,16 +147,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentCompositeMotion = LivingMotions.AIM;
 			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation().isReboundAnimation())
 				currentCompositeMotion = LivingMotions.NONE;
-			else if (this.original.swinging && !this.original.getSleepingPos().isPresent())
+			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
 				currentCompositeMotion = LivingMotions.DIGGING;
 			else
 				currentCompositeMotion = currentLivingMotion;
-			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItem instanceof RangedWeaponCapability) {
+
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItemCap instanceof RangedWeaponCapability) {
 				this.playReboundAnimation();
 			}
 		}
-		
+
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.CompositeLayer(this, this.currentCompositeMotion));
 	}
 	
