@@ -118,28 +118,25 @@ public class WeaponCapabilityPresets {
 
 		return builder;
 	};
-	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) -> {
-		WeaponCapability.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.SPEAR)
-				.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD ? Styles.ONE_HAND : Styles.TWO_HAND)
-				.collider(ColliderPreset.SPEAR)
-				.hitSound(EpicFightSounds.BLADE_HIT)
-				.canBePlacedOffhand(false)
-				.newStyleCombo(Styles.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH)
-				.newStyleCombo(Styles.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO1, Animations.SPEAR_TWOHAND_AUTO2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
-				.specialAttack(Styles.ONE_HAND, EpicFightSkills.HEARTPIERCER)
-				.specialAttack(Styles.TWO_HAND, EpicFightSkills.SLAUGHTER_STANCE)
-				.livingMotionModifier(Styles.ONE_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_HOLD_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
-				.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
-
-		return builder;
-	};
+	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) -> WeaponCapability.builder()
+            .category(WeaponCategories.SPEAR)
+            .styleProvider((playerpatch) -> (playerpatch.getHoldingItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) ? Styles.ONE_HAND : Styles.TWO_HAND)
+            .collider(ColliderPreset.SPEAR)
+            .hitSound(EpicFightSounds.BLADE_HIT)
+            .canBePlacedOffhand(false)
+            .newStyleCombo(Styles.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH)
+            .newStyleCombo(Styles.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO1, Animations.SPEAR_TWOHAND_AUTO2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
+            .newStyleCombo(Styles.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
+            .specialAttack(Styles.ONE_HAND, EpicFightSkills.HEARTPIERCER)
+            .specialAttack(Styles.TWO_HAND, EpicFightSkills.GRASPING_SPIRE)
+            .livingMotionModifier(Styles.ONE_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
+	
 	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.GREATSWORD)
             .styleProvider((playerpatch) -> Styles.TWO_HAND)
