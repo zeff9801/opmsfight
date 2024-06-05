@@ -270,6 +270,10 @@ public class Animations {
 		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
 		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
 		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
+		BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", biped);
+		BIPED_CREATIVE_FLYING = new MovementAnimation(true, "biped/living/creative_fly", biped);
+		BIPED_CREATIVE_FLYING_FORWARD = new MovementAnimation(true, "biped/living/creative_fly", biped);
+		BIPED_CREATIVE_FLYING_BACKWARD = new MovementAnimation(true, "biped/living/creative_fly_backward", biped); //TODO need to switch to backwards
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
@@ -295,6 +299,8 @@ public class Animations {
 		BIPED_WALK_UNSHEATHING = new MovementAnimation(true, "biped/living/walk_unsheath", biped);
 		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
 		BIPED_RUN_UNSHEATHING = new MovementAnimation(true, "biped/living/run_katana", biped);
+		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
+		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
 
 		BIPED_KATANA_SCRAP = new StaticAnimation(false, "biped/living/katana_scrap", biped)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, ReuseableEvents.KATANA_IN, Event.Side.CLIENT)});
@@ -403,6 +409,15 @@ public class Animations {
 		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, "Root", "biped/combat/dagger_dual_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
+		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null,"Tool_R", "biped/combat/dagger_dash", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
+				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
+		//.newTimePair(0.0F, 0.4F)
+				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
+				//.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
+				//.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
+				//.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
+
 		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, "Tool_R", "biped/combat/sword_airslash", biped);
 		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, "Torso", "biped/combat/sword_dual_airslash", biped);
 		KATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, "Tool_R", "biped/combat/katana_airslash", biped);
