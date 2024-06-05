@@ -61,26 +61,13 @@ public class WeaponCapabilityPresets {
 
 		return builder;
 	};
-	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> {
-		WeaponCapability.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.PICKAXE)
-				.hitSound(EpicFightSounds.BLADE_HIT)
-				.collider(ColliderPreset.TOOLS)
-				.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
-
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-
-			if (harvestLevel != 0) {
-				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(6.0D * harvestLevel)));
-			}
-
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.4D + 0.1D * harvestLevel)));
-		}
-
-		return builder;
-	};
+	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> WeaponCapability.builder()
+            .category(WeaponCategories.PICKAXE)
+            .hitSound(EpicFightSounds.BLADE_HIT)
+            .collider(ColliderPreset.TOOLS)
+            .newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
+            .newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+	
 	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> WeaponCapability.builder()
 			.category(WeaponCategories.SHOVEL)
 			.collider(ColliderPreset.TOOLS)
