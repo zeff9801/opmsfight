@@ -422,8 +422,32 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, "Tool_R", "biped/combat/longsword_liechtenauer_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null,"Tool_R", "biped/combat/tachi_auto1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 3);
+		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, "Tool_R", "biped/combat/tachi_auto2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, "Tool_R", "biped/combat/tachi_auto3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.2F, 0.45F, 0.7F, null, "Tool_R", "biped/combat/tachi_dash", false, biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
+		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null,"Tool_R", "biped/skill/rushing_tempo1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
+				//.newTimePair(0.0F, 0.25F)
+				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
+		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, "Tool_R", "biped/skill/rushing_tempo2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
+				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
+				//.newTimePair(0.0F, 0.25F)
+				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
+		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null,"Tool_R", "biped/skill/rushing_tempo3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
+				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
+				//.newTimePair(0.0F, 0.25F)
+				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		DAGGER_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.2F, null, "Tool_R", "biped/combat/dagger_auto1", biped);
 		DAGGER_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.1F, 0.2F, null, "Tool_R", "biped/combat/dagger_auto2", biped);
 		DAGGER_AUTO3 = new BasicAttackAnimation(0.08F, 0.15F, 0.26F, 0.5F, null, "Tool_R", "biped/combat/dagger_auto3", biped);
