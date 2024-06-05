@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import com.google.common.collect.Maps;
@@ -243,6 +244,41 @@ public class StaticAnimation extends DynamicAnimation {
 	@OnlyIn(Dist.CLIENT)
 	public Layer.LayerType getLayerType() {
 		return this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(LayerType.BASE_LAYER);
+	}
+
+	public StaticAnimation newTimePair(float start, float end) {
+		this.stateSpectrumBlueprint.newTimePair(start, end);
+		return this;
+	}
+
+	public StaticAnimation newConditionalTimePair(Function<LivingEntityPatch<?>, Integer> condition, float start, float end) {
+		this.stateSpectrumBlueprint.newConditionalTimePair(condition, start, end);
+		return this;
+	}
+
+	public <T> StaticAnimation addState(EntityState.StateFactor<T> factor, T val) {
+		this.stateSpectrumBlueprint.addState(factor, val);
+		return this;
+	}
+
+	public <T> StaticAnimation removeState(EntityState.StateFactor<T> factor) {
+		this.stateSpectrumBlueprint.removeState(factor);
+		return this;
+	}
+
+	public <T> StaticAnimation addConditionalState(int metadata, EntityState.StateFactor<T> factor, T val) {
+		this.stateSpectrumBlueprint.addConditionalState(metadata, factor, val);
+		return this;
+	}
+
+	public <T> StaticAnimation addStateRemoveOld(EntityState.StateFactor<T> factor, T val) {
+		this.stateSpectrumBlueprint.addStateRemoveOld(factor, val);
+		return this;
+	}
+
+	public <T> StaticAnimation addStateIfNotExist(EntityState.StateFactor<T> factor, T val) {
+		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
+		return this;
 	}
 	
 	public static class Event implements Comparable<Event> {

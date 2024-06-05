@@ -248,5 +248,16 @@ public class StateSpectrum {
 			this.timePairs.clear();
 			return this;
 		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			for (StatesInTime state : this.timePairs) {
+				sb.append(state).append("\n");
+			}
+
+			return sb.toString();
+		}
 	}
 }

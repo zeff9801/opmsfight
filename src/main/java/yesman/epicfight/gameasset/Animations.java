@@ -356,7 +356,6 @@ public class Animations {
 		OFF_ANIMATION_HIGHEST = new OffAnimation("off_highest");
 		OFF_ANIMATION_MIDDLE = new OffAnimation("off_middle");
 
-
 		SPEAR_GUARD = new StaticAnimation(true, "biped/skill/guard_spear", biped);
 		SWORD_GUARD = new StaticAnimation(true, "biped/skill/guard_sword", biped);
 		SWORD_DUAL_GUARD = new StaticAnimation(true, "biped/skill/guard_dualsword", biped);
@@ -475,21 +474,21 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null,toolR, "biped/skill/rushing_tempo1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
-				//.newTimePair(0.0F, 0.25F)
-				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
+				.newTimePair(0.0F, 0.25F)
+				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, toolR, "biped/skill/rushing_tempo2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
 				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
-				//.newTimePair(0.0F, 0.25F)
-				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
+				.newTimePair(0.0F, 0.25F)
+				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null,toolR, "biped/skill/rushing_tempo3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2);
+				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
 				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
-				//.newTimePair(0.0F, 0.25F)
-				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
+				.newTimePair(0.0F, 0.25F)
+				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		DAGGER_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.2F, null, toolR, "biped/combat/dagger_auto1", biped);
 		DAGGER_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.1F, 0.2F, null, toolR, "biped/combat/dagger_auto2", biped);
 		DAGGER_AUTO3 = new BasicAttackAnimation(0.08F, 0.15F, 0.26F, 0.5F, null, toolR, "biped/combat/dagger_auto3", biped);
@@ -502,12 +501,12 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null,toolR, "biped/combat/dagger_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
-		//.newTimePair(0.0F, 0.4F)
-				//.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
-				//.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
-				//.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
-				//.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
+				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
+		.newTimePair(0.0F, 0.4F)
+				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
+				.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
+				.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
+				.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
 
 		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, toolR, "biped/combat/sword_airslash", biped);
 		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, torso, "biped/combat/sword_dual_airslash", biped);

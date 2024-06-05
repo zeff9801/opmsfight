@@ -38,17 +38,20 @@ public class DodgeAnimation extends ActionAnimation {
 		}
 
 		this.stateSpectrumBlueprint.clear()
-			.newTimePair(0.0F, 10.0F)
-			.addState(EntityState.TURNING_LOCKED, true)
-			.addState(EntityState.MOVEMENT_LOCKED, true)
-			.addState(EntityState.CAN_BASIC_ATTACK, false)
-			.addState(EntityState.CAN_SKILL_EXECUTION, false)
-			.addState(EntityState.INACTION, true)
-			.newTimePair(delayTime, Float.MAX_VALUE)
+				.newTimePair(0.0F, delayTime)
+				.addState(EntityState.TURNING_LOCKED, true)
+				.addState(EntityState.MOVEMENT_LOCKED, true)
+				.addState(EntityState.UPDATE_LIVING_MOTION, false)
+				.addState(EntityState.CAN_BASIC_ATTACK, false)
+				.addState(EntityState.CAN_SKILL_EXECUTION, false)
+				.addState(EntityState.INACTION, true)
+				.newTimePair(0.0F, Float.MAX_VALUE)
 				.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
 
 
 		this.addProperty(MoveCoordFunctions.AFFECT_SPEED, true);
+		//this.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
+		//this.addEvents(StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntityDimensions.scalable(width, height)))
 	}
 
 	@Override
