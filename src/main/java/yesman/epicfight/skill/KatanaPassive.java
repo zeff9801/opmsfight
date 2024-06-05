@@ -62,7 +62,7 @@ public class KatanaPassive extends Skill {
 				ServerPlayerEntity serverPlayer = (ServerPlayerEntity) executer.getOriginal();
 				container.getDataManager().setDataSync(SHEATH, true, serverPlayer);
 				((ServerPlayerPatch)container.getExecuter()).modifyLivingMotionByCurrentItem();
-				SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_KATANA_SCRAP, serverPlayer.getId(), 0.0F);
+				SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_UCHIGATANA_SCRAP, serverPlayer.getId(), 0.0F);
 				EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
 			}
 		}

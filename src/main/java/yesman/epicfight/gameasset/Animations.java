@@ -327,7 +327,6 @@ public class Animations {
 		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
 
 
-
 		BIPED_KATANA_SCRAP = new StaticAnimation(false, "biped/living/katana_scrap", biped)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, ReuseableEvents.KATANA_IN, Event.Side.CLIENT)});
 

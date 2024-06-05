@@ -59,7 +59,10 @@ public class WeaponCapability extends CapabilityItem {
 	public final List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return this.autoAttackMotions.get(this.getStyle(playerpatch));
 	}
-	
+	@Override
+	public boolean availableOnHorse() {
+		return this.getMountAttackMotion() != null;
+	}
 	@Override
 	public final Skill getSpecialAttack(PlayerPatch<?> playerpatch) {
 		return this.specialAttacks.get(this.getStyle(playerpatch));
@@ -236,7 +239,7 @@ public class WeaponCapability extends CapabilityItem {
 			this.weaponCombinationPredicator = predicator;
 			return this;
 		}
-		
+
 		public Builder specialAttack(Style style, Skill specialAttack) {
 			this.specialAttackMap.put(style, specialAttack);
 			return this;
