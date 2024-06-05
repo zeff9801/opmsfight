@@ -148,7 +148,7 @@ public class WeaponCapabilityPresets {
             .hitSound(EpicFightSounds.BLADE_HIT)
             .canBePlacedOffhand(false)
             .newStyleCombo(Styles.TWO_HAND, Animations.GREATSWORD_AUTO1, Animations.GREATSWORD_AUTO2, Animations.GREATSWORD_DASH, Animations.GREATSWORD_AIR_SLASH)
-            .specialAttack(Styles.TWO_HAND, EpicFightSkills.GIANT_WHIRLWIND)
+            .specialAttack(Styles.TWO_HAND, EpicFightSkills.STEEL_WHIRLWIND)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_GREATSWORD)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_GREATSWORD)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_GREATSWORD)
