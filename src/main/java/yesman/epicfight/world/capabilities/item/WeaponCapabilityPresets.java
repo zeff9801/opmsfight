@@ -47,27 +47,19 @@ public class WeaponCapabilityPresets {
 
 		return builder;
 	};
-	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> {
-		WeaponCapability.Builder builder = WeaponCapability.builder()
-				.category(WeaponCategories.HOE)
-				.hitSound(EpicFightSounds.BLADE_HIT)
-				.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO1, Animations.TOOL_AUTO2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
-				.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
+	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> WeaponCapability.builder()
+            .category(WeaponCategories.HOE)
+            .hitSound(EpicFightSounds.BLADE_HIT)
+            .collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO1, Animations.TOOL_AUTO2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
+            .newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 
-		if (item instanceof TieredItem) {
-			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(-0.4D + 0.1D * harvestLevel)));
-		}
-
-		return builder;
-	};
 	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> WeaponCapability.builder()
             .category(WeaponCategories.PICKAXE)
             .hitSound(EpicFightSounds.BLADE_HIT)
             .collider(ColliderPreset.TOOLS)
             .newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
             .newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
-	
+
 	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> WeaponCapability.builder()
 			.category(WeaponCategories.SHOVEL)
 			.collider(ColliderPreset.TOOLS)
