@@ -1,7 +1,9 @@
 package yesman.epicfight.api.client.animation;
 
 import java.util.Map;
+import java.util.Set;
 
+import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraftforge.api.distmarker.Dist;
@@ -77,5 +79,38 @@ public class JointMask {
 
 	public BindModifier getBindModifier() {
 		return this.bindModifier;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static class JointMaskSet {
+		final Map<String, BindModifier> masks = Maps.newHashMap();
+
+		public boolean contains(String name) {
+			return this.masks.containsKey(name);
+		}
+
+		public BindModifier getBindModifier(String jointName) {
+			return this.masks.get(jointName);
+		}
+
+		public static JointMaskSet of(JointMask... masks) {
+			JointMaskSet jointMaskSet = new JointMaskSet();
+
+			for (JointMask jointMask : masks) {
+				jointMaskSet.masks.put(jointMask.jointName, jointMask.bindModifier);
+			}
+
+			return jointMaskSet;
+		}
+
+		public static JointMaskSet of(Set<JointMask> jointMasks) {
+			JointMaskSet jointMaskSet = new JointMaskSet();
+
+			for (JointMask jointMask : jointMasks) {
+				jointMaskSet.masks.put(jointMask.jointName, jointMask.bindModifier);
+			}
+
+			return jointMaskSet;
+		}
 	}
 }

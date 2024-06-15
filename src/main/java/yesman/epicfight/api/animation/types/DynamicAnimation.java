@@ -7,6 +7,7 @@ import java.util.Optional;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
@@ -20,6 +21,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class DynamicAnimation {
@@ -50,6 +52,14 @@ public abstract class DynamicAnimation {
 			}
 		}
 		return pose;
+	}
+
+	public boolean isStaticAnimation() {
+		return false;
+	}
+
+	public ResourceLocation getRegistryName() {
+		return new ResourceLocation(EpicFightMod.MODID, "");
 	}
 
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {

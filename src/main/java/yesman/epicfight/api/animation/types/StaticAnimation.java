@@ -38,7 +38,8 @@ public class StaticAnimation extends DynamicAnimation {
 	protected final Model model;
 	protected final int namespaceId;
 	protected final int animationId;
-	
+
+
 	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
 	public StaticAnimation() {
@@ -48,7 +49,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.resourceLocation = null;
 		this.model = null;
 	}
-	
+
 	public StaticAnimation(boolean repeatPlay, String path, Model model) {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path, model);
 	}
@@ -59,7 +60,7 @@ public class StaticAnimation extends DynamicAnimation {
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
 		this.namespaceId = animationManager.getNamespaceHash();
 		this.animationId = animationManager.getIdCounter();
-		
+
 		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(animationManager.getModid(), "animmodels/animations/" + path);
 		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), path), this);
@@ -111,7 +112,10 @@ public class StaticAnimation extends DynamicAnimation {
 			}
 		});
 	}
-	
+	@Override
+	public boolean isStaticAnimation() {
+		return true;
+	}
 	@Override
 	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
 		this.getProperty(StaticAnimationProperty.EVENTS).ifPresent((events) -> {
@@ -280,7 +284,12 @@ public class StaticAnimation extends DynamicAnimation {
 		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
 		return this;
 	}
-	
+
+	@Override
+	public ResourceLocation getRegistryName() {
+		return this.resourceLocation;
+	}
+
 	public static class Event implements Comparable<Event> {
 		public static final float ON_BEGIN = Float.MIN_VALUE;
 		public static final float ON_END = Float.MAX_VALUE;
