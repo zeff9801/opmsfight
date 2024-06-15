@@ -259,6 +259,8 @@ public class Animations {
 	public static StaticAnimation BLADE_RUSH_SECOND;
 	public static StaticAnimation BLADE_RUSH_THIRD;
 	public static StaticAnimation BLADE_RUSH_FINISHER;
+	public static StaticAnimation BIPED_STAFF_IDLE;
+	public static StaticAnimation BIPED_STAFF_RUN;
 
 	public static void registerAnimations(AnimationRegistryEvent event) {
 		event.getRegistryMap().put(EpicFightMod.MODID, Animations::build);
@@ -281,6 +283,8 @@ public class Animations {
 
 		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
 		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
+		BIPED_STAFF_IDLE = new StaticAnimation(true, "biped/living/staff_idle", biped);
+		BIPED_STAFF_RUN = new MovementAnimation(true, "biped/living/staff_run", biped);
 		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
 		BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", biped);
 		BIPED_CREATIVE_FLYING = new MovementAnimation(true, "biped/living/creative_fly", biped);

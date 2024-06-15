@@ -87,10 +87,10 @@ public class WeaponCapabilityPresets {
             .specialAttack(Styles.ONE_HAND, EpicFightSkills.HEARTPIERCER)
             .specialAttack(Styles.TWO_HAND, EpicFightSkills.GRASPING_SPIRE)
             .livingMotionModifier(Styles.ONE_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
-            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_HOLD_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.IDLE, Animations.BIPED_STAFF_IDLE)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.WALK, Animations.BIPED_WALK_SPEAR)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_WALK_SPEAR)
-            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
+            .livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_STAFF_RUN)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
             .livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
 
