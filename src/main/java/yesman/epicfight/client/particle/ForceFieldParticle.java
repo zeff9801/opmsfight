@@ -42,7 +42,7 @@ public class ForceFieldParticle extends TexturedCustomModelParticle {
 	
 	@Override
 	public IParticleRenderType getRenderType() {
-		return EpicFightParticleRenderTypes.PARTICLE_MODELED;
+		return EpicFightParticleRenderTypes.PARTICLE_MODEL_NO_NORMAL;
 	}
 	
 	@Override
