@@ -1,51 +1,58 @@
 package yesman.epicfight.api.utils.math;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.List;
 import java.util.Map;
 
-import org.lwjgl.BufferUtils;
-
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
+import javax.annotation.Nullable;
 
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
+
 import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
 		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFORM, JointTransform.RESULT1, JointTransform.RESULT2};
-		private Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
-		
+		private final Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
+
 		public void put(String entryPosition, OpenMatrix4f matrix) {
 			this.put(entryPosition, matrix, OpenMatrix4f::mul);
 		}
-		
+
 		public void put(String entryPosition, OpenMatrix4f matrix, MatrixOperation operation) {
 			if (this.matrices.containsKey(entryPosition)) {
-				Pair<OpenMatrix4f, MatrixOperation> entryValue = this.matrices.get(entryPosition);
-				OpenMatrix4f result = entryValue.getSecond().mul(entryValue.getFirst(), matrix, null);
+				Pair<OpenMatrix4f, MatrixOperation> appliedTransform = this.matrices.get(entryPosition);
+				OpenMatrix4f result = appliedTransform.getSecond().mul(appliedTransform.getFirst(), matrix, null);
 				this.matrices.put(entryPosition, Pair.of(result, operation));
 			} else {
 				this.matrices.put(entryPosition, Pair.of(new OpenMatrix4f(matrix), operation));
 			}
 		}
-		
+
 		public OpenMatrix4f getResult() {
 			OpenMatrix4f result = new OpenMatrix4f();
-			
+
 			for (String entryName : BINDING_PRIORITY) {
 				if (this.matrices.containsKey(entryName)) {
 					Pair<OpenMatrix4f, MatrixOperation> pair = this.matrices.get(entryName);
 					pair.getSecond().mul(result, pair.getFirst(), result);
 				}
 			}
-			
+
 			return result;
 		}
 	}
-	
+
+	private static final FloatBuffer MATRIX_TRANSFORMER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+
 	/*
 	 * m00 m01 m02 m03
 	 * m10 m11 m12 m13
@@ -53,19 +60,23 @@ public class OpenMatrix4f {
 	 * m30 m31 m32 m33
 	 */
 	public float m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33;
-	
+
 	public OpenMatrix4f() {
 		this.setIdentity();
 	}
-	
+
 	public OpenMatrix4f(final OpenMatrix4f src) {
 		load(src);
 	}
-	
+
+	public OpenMatrix4f(final JointTransform jointTransform) {
+		load(OpenMatrix4f.fromQuaternion(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
+	}
+
 	public OpenMatrix4f setIdentity() {
 		return setIdentity(this);
 	}
-	
+
 	/**
 	 * Set the given matrix to be the identity matrix.
 	 * @param m The matrix to set to the identity
@@ -90,15 +101,16 @@ public class OpenMatrix4f {
 		m.m33 = 1.0f;
 		return m;
 	}
-	
+
 	public OpenMatrix4f load(OpenMatrix4f src) {
 		return load(src, this);
 	}
 
-	public static OpenMatrix4f load(OpenMatrix4f src, OpenMatrix4f dest) {
+	public static OpenMatrix4f load(OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
+
 		dest.m00 = src.m00;
 		dest.m01 = src.m01;
 		dest.m02 = src.m02;
@@ -115,9 +127,33 @@ public class OpenMatrix4f {
 		dest.m31 = src.m31;
 		dest.m32 = src.m32;
 		dest.m33 = src.m33;
+
 		return dest;
 	}
-	
+
+	public static OpenMatrix4f load(OpenMatrix4f mat, float[] elements) {
+		if (mat == null) mat = new OpenMatrix4f();
+
+		mat.m00 = elements[0];
+		mat.m01 = elements[1];
+		mat.m02 = elements[2];
+		mat.m03 = elements[3];
+		mat.m10 = elements[4];
+		mat.m11 = elements[5];
+		mat.m12 = elements[6];
+		mat.m13 = elements[7];
+		mat.m20 = elements[8];
+		mat.m21 = elements[9];
+		mat.m22 = elements[10];
+		mat.m23 = elements[11];
+		mat.m30 = elements[12];
+		mat.m31 = elements[13];
+		mat.m32 = elements[14];
+		mat.m33 = elements[15];
+
+		return mat;
+	}
+
 	public static OpenMatrix4f load(OpenMatrix4f mat, FloatBuffer buf) {
 		if (mat == null) mat = new OpenMatrix4f();
 		buf.position(0);
@@ -139,11 +175,11 @@ public class OpenMatrix4f {
 		mat.m33 = buf.get();
 		return mat;
 	}
-	
+
 	public OpenMatrix4f load(FloatBuffer buf) {
 		return OpenMatrix4f.load(this, buf);
 	}
-	
+
 	public OpenMatrix4f store(FloatBuffer buf) {
 		buf.put(m00);
 		buf.put(m01);
@@ -163,8 +199,31 @@ public class OpenMatrix4f {
 		buf.put(m33);
 		return this;
 	}
-	
-	public static OpenMatrix4f add(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
+
+	public List<Float> toList() {
+		List<Float> elements = Lists.newArrayList();
+
+		elements.add(0, m00);
+		elements.add(1, m01);
+		elements.add(2, m02);
+		elements.add(3, m03);
+		elements.add(4, m10);
+		elements.add(5, m11);
+		elements.add(6, m12);
+		elements.add(7, m13);
+		elements.add(8, m20);
+		elements.add(9, m21);
+		elements.add(10, m22);
+		elements.add(11, m23);
+		elements.add(12, m30);
+		elements.add(13, m31);
+		elements.add(14, m32);
+		elements.add(15, m33);
+
+		return elements;
+	}
+
+	public static OpenMatrix4f add(OpenMatrix4f left, OpenMatrix4f right, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
@@ -188,19 +247,20 @@ public class OpenMatrix4f {
 
 		return dest;
 	}
-	
+
 	public OpenMatrix4f mulFront(OpenMatrix4f mulTransform) {
 		return OpenMatrix4f.mul(mulTransform, this, this);
 	}
-	
+
 	public OpenMatrix4f mulBack(OpenMatrix4f mulTransform) {
 		return OpenMatrix4f.mul(this, mulTransform, this);
 	}
-	
-	public static OpenMatrix4f mul(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f mul(OpenMatrix4f left, OpenMatrix4f right, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
+
 		float m00 = left.m00 * right.m00 + left.m10 * right.m01 + left.m20 * right.m02 + left.m30 * right.m03;
 		float m01 = left.m01 * right.m00 + left.m11 * right.m01 + left.m21 * right.m02 + left.m31 * right.m03;
 		float m02 = left.m02 * right.m00 + left.m12 * right.m01 + left.m22 * right.m02 + left.m32 * right.m03;
@@ -235,7 +295,7 @@ public class OpenMatrix4f {
 		dest.m33 = m33;
 		return dest;
 	}
-	
+
 	public static OpenMatrix4f mulAsOrigin(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
 		float x = right.m30;
 		float y = right.m31;
@@ -244,85 +304,66 @@ public class OpenMatrix4f {
 		result.m30 = x;
 		result.m31 = y;
 		result.m32 = z;
+
 		return result;
 	}
-	
-	public static OpenMatrix4f mulAsOriginFront(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f mulAsOriginInverse(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
 		return mulAsOrigin(right, left, dest);
 	}
-	
-	public static OpenMatrix4f overwriteRotation(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
-		if (dest == null) {
-			dest = new OpenMatrix4f();
-		}
-		
-		dest.m00 = right.m00;
-		dest.m10 = right.m10;
-		dest.m20 = right.m20;
-		dest.m01 = right.m01;
-		dest.m11 = right.m11;
-		dest.m21 = right.m21;
-		dest.m02 = right.m02;
-		dest.m12 = right.m12;
-		dest.m22 = right.m22;
-		dest.m30 = left.m30;
-		dest.m31 = left.m31;
-		dest.m32 = left.m32;
-		
-		return dest;
-	}
-	
-	public static Vec4f transform(OpenMatrix4f matrix, Vec4f src, Vec4f dest) {
+
+	public static Vec4f transform(OpenMatrix4f matrix, Vec4f src, @Nullable Vec4f dest) {
 		if (dest == null) {
 			dest = new Vec4f();
 		}
-		
+
 		float x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30 * src.w;
 		float y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31 * src.w;
 		float z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32 * src.w;
 		float w = matrix.m03 * src.x + matrix.m13 * src.y + matrix.m23 * src.z + matrix.m33 * src.w;
-		
+
 		dest.x = x;
 		dest.y = y;
 		dest.z = z;
 		dest.w = w;
-		
+
 		return dest;
 	}
-	
+
 	public static Vector3d transform(OpenMatrix4f matrix, Vector3d src) {
-		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30 * 1.0F;
-		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31 * 1.0F;
-		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32 * 1.0F;
-		
+		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30;
+		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31;
+		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32;
+
 		return new Vector3d(x, y ,z);
 	}
-	
-	public static Vec3f transform3v(OpenMatrix4f matrix, Vec3f src, Vec3f dest) {
+
+	public static Vec3f transform3v(OpenMatrix4f matrix, Vec3f src, @Nullable Vec3f dest) {
 		if (dest == null) {
 			dest = new Vec3f();
 		}
-		
+
 		Vec4f result = transform(matrix, new Vec4f(src.x, src.y, src.z, 1.0F), null);
 		dest.x = result.x;
 		dest.y = result.y;
 		dest.z = result.z;
-		
+
 		return dest;
 	}
-	
+
 	public OpenMatrix4f transpose() {
 		return transpose(this);
 	}
-	
+
 	public OpenMatrix4f transpose(OpenMatrix4f dest) {
 		return transpose(this, dest);
 	}
-	
-	public static OpenMatrix4f transpose(OpenMatrix4f src, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f transpose(OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
-		   dest = new OpenMatrix4f();
+			dest = new OpenMatrix4f();
 		}
+
 		float m00 = src.m00;
 		float m01 = src.m10;
 		float m02 = src.m20;
@@ -339,7 +380,7 @@ public class OpenMatrix4f {
 		float m31 = src.m13;
 		float m32 = src.m23;
 		float m33 = src.m33;
-		
+
 		dest.m00 = m00;
 		dest.m01 = m01;
 		dest.m02 = m02;
@@ -356,7 +397,7 @@ public class OpenMatrix4f {
 		dest.m31 = m31;
 		dest.m32 = m32;
 		dest.m33 = m33;
-		
+
 		return dest;
 	}
 
@@ -365,24 +406,26 @@ public class OpenMatrix4f {
 		f -= m01 * ((m10 * m22 * m33 + m12 * m23 * m30 + m13 * m20 * m32) - m13 * m22 * m30 - m10 * m23 * m32 - m12 * m20 * m33);
 		f += m02 * ((m10 * m21 * m33 + m11 * m23 * m30 + m13 * m20 * m31) - m13 * m21 * m30	- m10 * m23 * m31 - m11 * m20 * m33);
 		f -= m03 * ((m10 * m21 * m32 + m11 * m22 * m30 + m12 * m20 * m31) - m12 * m21 * m30 - m10 * m22 * m31 - m11 * m20 * m32);
-		
+
 		return f;
 	}
-	
+
 	private static float determinant3x3(float t00, float t01, float t02, float t10, float t11, float t12, float t20, float t21, float t22) {
 		return t00 * (t11 * t22 - t12 * t21) + t01 * (t12 * t20 - t10 * t22) + t02 * (t10 * t21 - t11 * t20);
 	}
-	
+
 	public OpenMatrix4f invert() {
 		return OpenMatrix4f.invert(this, this);
 	}
-	
-	public static OpenMatrix4f invert(OpenMatrix4f src, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f invert(OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		float determinant = src.determinant();
+
 		if (determinant != 0) {
 			if (dest == null) {
 				dest = new OpenMatrix4f();
 			}
+
 			float determinant_inv = 1.0F / determinant;
 
 			float t00 =  determinant3x3(src.m11, src.m12, src.m13, src.m21, src.m22, src.m23, src.m31, src.m32, src.m33);
@@ -423,60 +466,61 @@ public class OpenMatrix4f {
 			return null;
 		}
 	}
-	
+
 	public OpenMatrix4f translate(float x, float y, float z) {
 		return translate(new Vec3f(x, y ,z), this);
 	}
-	
+
 	public OpenMatrix4f translate(Vec3f vec) {
 		return translate(vec, this);
 	}
-	
+
 	public OpenMatrix4f translate(Vec3f vec, OpenMatrix4f dest) {
 		return translate(vec, this, dest);
 	}
 
-	public static OpenMatrix4f translate(Vec3f vec, OpenMatrix4f src, OpenMatrix4f dest) {
+	public static OpenMatrix4f translate(Vec3f vec, OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
-		
+
 		dest.m30 += src.m00 * vec.x + src.m10 * vec.y + src.m20 * vec.z;
 		dest.m31 += src.m01 * vec.x + src.m11 * vec.y + src.m21 * vec.z;
 		dest.m32 += src.m02 * vec.x + src.m12 * vec.y + src.m22 * vec.z;
 		dest.m33 += src.m03 * vec.x + src.m13 * vec.y + src.m23 * vec.z;
+
 		return dest;
 	}
-	
+
 	public static OpenMatrix4f createTranslation(float x, float y, float z) {
 		return new OpenMatrix4f().translate(new Vec3f(x, y ,z));
 	}
-	
+
 	public static OpenMatrix4f createScale(float x, float y, float z) {
 		return new OpenMatrix4f().scale(new Vec3f(x, y ,z));
 	}
-	
+
 	public OpenMatrix4f rotateDeg(float angle, Vec3f axis) {
 		return rotate((float)Math.toRadians(angle), axis);
 	}
-	
+
 	public OpenMatrix4f rotate(float angle, Vec3f axis) {
 		return rotate(angle, axis, this);
 	}
-	
+
 	public OpenMatrix4f rotate(float angle, Vec3f axis, OpenMatrix4f dest) {
 		return rotate(angle, axis, this, dest);
 	}
-	
+
 	public static OpenMatrix4f createRotatorDeg(float angle, Vec3f axis) {
 		return rotate((float)Math.toRadians(angle), axis, new OpenMatrix4f(), null);
 	}
-	
-	public static OpenMatrix4f rotate(float angle, Vec3f axis, OpenMatrix4f src, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f rotate(float angle, Vec3f axis, OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
-		
+
 		float c = (float) Math.cos(angle);
 		float s = (float) Math.sin(angle);
 		float oneminusc = 1.0f - c;
@@ -519,25 +563,26 @@ public class OpenMatrix4f {
 		dest.m11 = t11;
 		dest.m12 = t12;
 		dest.m13 = t13;
-		
+
 		return dest;
 	}
-	
+
 	public Vec3f toTranslationVector() {
 		return toVector(this);
 	}
-	
+
 	public static Vec3f toVector(OpenMatrix4f matrix) {
 		return new Vec3f(matrix.m30, matrix.m31, matrix.m32);
 	}
-	
+
 	public Quaternion toQuaternion() {
 		return OpenMatrix4f.toQuaternion(this);
 	}
-	
+
 	public static Quaternion toQuaternion(OpenMatrix4f matrix) {
 		float w, x, y, z;
 		float diagonal = matrix.m00 + matrix.m11 + matrix.m22;
+
 		if (diagonal > 0) {
 			float w4 = (float) (Math.sqrt(diagonal + 1f) * 2f);
 			w = w4 / 4f;
@@ -563,15 +608,16 @@ public class OpenMatrix4f {
 			y = (matrix.m12 + matrix.m21) / z4;
 			z = z4 / 4f;
 		}
+
 		return new Quaternion(x, y, z, w);
 	}
-	
+
 	public static OpenMatrix4f fromQuaternion(Quaternion quaternion) {
 		OpenMatrix4f matrix = new OpenMatrix4f();
-		float x = quaternion.i();
-		float y = quaternion.j();
-		float z = quaternion.k();
-		float w = quaternion.r();
+		float x = quaternion.i(); //x
+		float y = quaternion.j(); //y
+		float z = quaternion.k(); //z
+		float w = quaternion.r(); //w
 		float xy = x * y;
 		float xz = x * z;
 		float xw = x * w;
@@ -592,19 +638,20 @@ public class OpenMatrix4f {
 		matrix.m22 = 1.0F - xSquared - ySquared;
 		return matrix;
 	}
-	
+
 	public OpenMatrix4f scale(float x, float y, float z) {
 		return this.scale(new Vec3f(x, y, z));
 	}
-	
+
 	public OpenMatrix4f scale(Vec3f vec) {
 		return scale(vec, this, this);
 	}
-	
-	public static OpenMatrix4f scale(Vec3f vec, OpenMatrix4f src, OpenMatrix4f dest) {
+
+	public static OpenMatrix4f scale(Vec3f vec, OpenMatrix4f src, @Nullable OpenMatrix4f dest) {
 		if (dest == null) {
 			dest = new OpenMatrix4f();
 		}
+
 		dest.m00 = src.m00 * vec.x;
 		dest.m01 = src.m01 * vec.x;
 		dest.m02 = src.m02 * vec.x;
@@ -617,63 +664,62 @@ public class OpenMatrix4f {
 		dest.m21 = src.m21 * vec.z;
 		dest.m22 = src.m22 * vec.z;
 		dest.m23 = src.m23 * vec.z;
+
 		return dest;
 	}
-	
+
 	public Vec3f toScaleVector() {
 		return new Vec3f(new Vec3f(this.m00, this.m01, this.m02).length(), new Vec3f(this.m10, this.m11, this.m12).length(), new Vec3f(this.m20, this.m21, this.m22).length());
 	}
-	
+
 	public OpenMatrix4f removeTranslation() {
 		return removeTranslation(this);
 	}
-	
+
 	public static OpenMatrix4f removeTranslation(OpenMatrix4f src) {
 		OpenMatrix4f copy = new OpenMatrix4f(src);
 		copy.m30 = 0.0F;
 		copy.m31 = 0.0F;
 		copy.m32 = 0.0F;
-		
+
 		return copy;
 	}
-	
+
+	public OpenMatrix4f removeScale() {
+		return removeScale(this);
+	}
+
+	public static OpenMatrix4f removeScale(OpenMatrix4f src) {
+		float xScale = new Vec3f(src.m00, src.m01, src.m02).length();
+		float yScale = new Vec3f(src.m10, src.m11, src.m12).length();
+		float zScale = new Vec3f(src.m20, src.m21, src.m22).length();
+
+		OpenMatrix4f copy = new OpenMatrix4f(src);
+		copy.scale(1 / xScale, 1 / yScale, 1 / zScale);
+
+		return copy;
+	}
+
 	@Override
 	public String toString() {
-		StringBuilder buf = new StringBuilder();
-		buf.append('\n');
-		buf.append(m00).append(' ').append(m10).append(' ').append(m20).append(' ').append(m30).append('\n');
-		buf.append(m01).append(' ').append(m11).append(' ').append(m21).append(' ').append(m31).append('\n');
-		buf.append(m02).append(' ').append(m12).append(' ').append(m22).append(' ').append(m32).append('\n');
-		buf.append(m03).append(' ').append(m13).append(' ').append(m23).append(' ').append(m33).append('\n');
-		return buf.toString();
+		String buf = String.valueOf("\n" +
+				m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
+				m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
+				m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
+				m03 + " " + m13 + " " + m23 + " " + m33) + "\n";
+		return buf;
 	}
-	
+
 	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
-		float[] arr = new float[16];
-		arr[0] = visibleMat.m00;
-		arr[1] = visibleMat.m10;
-		arr[2] = visibleMat.m20;
-		arr[3] = visibleMat.m30;
-		arr[4] = visibleMat.m01;
-		arr[5] = visibleMat.m11;
-		arr[6] = visibleMat.m21;
-		arr[7] = visibleMat.m31;
-		arr[8] = visibleMat.m02;
-		arr[9] = visibleMat.m12;
-		arr[10] = visibleMat.m22;
-		arr[11] = visibleMat.m32;
-		arr[12] = visibleMat.m03;
-		arr[13] = visibleMat.m13;
-		arr[14] = visibleMat.m23;
-		arr[15] = visibleMat.m33;
-		
-		return new Matrix4f(arr);
+		MATRIX_TRANSFORMER.position(0);
+		visibleMat.store(MATRIX_TRANSFORMER);
+		MATRIX_TRANSFORMER.position(0);
+		return new Matrix4f(MATRIX_TRANSFORMER.array());
 	}
-	
+
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
-		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
-		buf.position(0);
-		mat4f.store(buf);
-		return OpenMatrix4f.load(null, buf);
+		MATRIX_TRANSFORMER.position(0);
+		mat4f.store(MATRIX_TRANSFORMER);
+		return OpenMatrix4f.load(null, MATRIX_TRANSFORMER);
 	}
 }

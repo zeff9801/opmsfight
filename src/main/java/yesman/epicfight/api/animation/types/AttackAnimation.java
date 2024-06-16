@@ -332,7 +332,7 @@ public class AttackAnimation extends ActionAnimation {
 			if (flag) {
 				float pitch = entitypatch.getAttackDirectionPitch();
 				JointTransform chest = pose.getOrDefaultTransform("Chest");
-				chest.frontResult(JointTransform.getRotation(MathUtils.quaternionFromDegree(Vector3f.XP, -pitch)), OpenMatrix4f::mulAsOriginFront);
+				chest.frontResult(JointTransform.getRotation(MathUtils.quaternionFromDegree(Vector3f.XP, -pitch)), OpenMatrix4f::mulAsOriginInverse);
 
 				if (entitypatch instanceof PlayerPatch) {
 					JointTransform head = pose.getOrDefaultTransform("Head");

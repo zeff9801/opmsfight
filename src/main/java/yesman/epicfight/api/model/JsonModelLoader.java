@@ -180,15 +180,17 @@ public class JsonModelLoader {
 		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
 		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
 		Map<String, Joint> jointMap = Maps.newHashMap();
-		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
+		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
 		joint.initOriginTransform(new OpenMatrix4f());
-		return new Armature(jointMap.size(), joint, jointMap);
-	}
+		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
 
-	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
+		return new Armature(armatureName, jointMap.size(), joint, jointMap);
+	}
+	public static Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
 		float[] floatArray = ParseUtil.toFloatArray(object.get("transform").getAsJsonArray());
-		OpenMatrix4f localMatrix = new OpenMatrix4f().load(FloatBuffer.wrap(floatArray));
+		OpenMatrix4f localMatrix = OpenMatrix4f.load(null, floatArray);
 		localMatrix.transpose();
+
 		if (start) {
 			localMatrix.mulFront(BLENDER_TO_MINECRAFT_COORD);
 		}
@@ -204,14 +206,16 @@ public class JsonModelLoader {
 		}
 
 		if (index == -1) {
-			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " not exist!");
+			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " doesn't exist!");
 		}
 
 		Joint joint = new Joint(name, index, localMatrix);
 		jointMap.put(name, joint);
 
-		for (JsonElement children : object.get("children").getAsJsonArray()) {
-			joint.addSubJoint(this.getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
+		if (object.has("children")) {
+			for (JsonElement children : object.get("children").getAsJsonArray()) {
+				joint.addSubJoint(getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
+			}
 		}
 
 		return joint;

@@ -65,7 +65,7 @@ public class FABRIK {
 			parentQuaternion = new Quaternion(axis.scale(-1.0F).toMojangVector(), radian, false);
 			
 			JointTransform jt = this.pose.getOrDefaultTransform(chain.jointName);
-			jt.frontResult(JointTransform.getRotation(rotationQuat), OpenMatrix4f::mulAsOriginFront);
+			jt.frontResult(JointTransform.getRotation(rotationQuat), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}
 	

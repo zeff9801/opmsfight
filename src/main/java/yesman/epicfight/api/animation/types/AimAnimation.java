@@ -77,7 +77,7 @@ public class AimAnimation extends StaticAnimation {
 			float ratio = (f - Math.abs(entitypatch.getOriginal().xRot)) / f;
 			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
 			MathUtils.mulQuaternion(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}
 	

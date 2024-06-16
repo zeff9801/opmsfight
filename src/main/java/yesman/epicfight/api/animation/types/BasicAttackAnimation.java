@@ -71,7 +71,6 @@ public class BasicAttackAnimation extends AttackAnimation {
 		return vec3;
 	}
 	boolean STIFF_COMBO_ATTACKS = false;
-
 	@Override
 	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
 		if (playerpatch.isLogicalClient()) {
