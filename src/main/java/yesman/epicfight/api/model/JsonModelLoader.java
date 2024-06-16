@@ -1,15 +1,11 @@
 package yesman.epicfight.api.model;
 
-import java.io.BufferedInputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import net.minecraft.client.Minecraft;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
@@ -39,6 +35,7 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
@@ -50,49 +47,64 @@ public class JsonModelLoader {
 
 	private JsonObject rootJson;
 	private IResourceManager resourceManager;
-	private static int[] toIntArray(JsonArray array) {
-		List<Integer> result = Lists.newArrayList();
-		for (JsonElement je : array) {
-			result.add(je.getAsInt());
-		}
+	private ResourceLocation resourceLocation;
 
-		return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
-	}
+	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
+		JsonReader jsonReader = null;
+		this.resourceManager = resourceManager;
+		this.resourceLocation = resourceLocation;
 
-	private static float[] toFloatArray(JsonArray array) {
-		List<Float> result = Lists.newArrayList();
-		for (JsonElement je : array) {
-			result.add(je.getAsFloat());
-		}
-
-		return ArrayUtils.toPrimitive(result.toArray(new Float[0]));
-	}
-
-
-	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) {
 		try {
-			if (resourceManager == null) {
-				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
-				BufferedInputStream inputstream = new BufferedInputStream(modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
-				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-				JsonReader in = new JsonReader(reader);
-				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();
-			} else {
-				this.resourceManager = resourceManager;
+			try {
 				IResource resource = resourceManager.getResource(resourceLocation);
+				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
+			} catch (NoSuchElementException e) {
+				// In this case, reads the animation data from mod.jar (Especially in a server)
+				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
+				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
 
-				//TODO Double check
-				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();
+				if (inputStream == null) {
+					throw new NoSuchElementException("Can't find specified file in mod resource " + resourceLocation);
+				}
+
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
+				jsonReader = new JsonReader(reader);
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
-		} catch (Exception e) {
-			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because of " + e);
-			e.printStackTrace();
+		} catch (IOException e) {
+			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
+		} finally {
+			if (jsonReader != null) {
+				try {
+					jsonReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
+	@OnlyIn(Dist.CLIENT)
+	public JsonModelLoader(InputStream inputstream, ResourceLocation resourceLocation) throws IOException {
+		JsonReader jsonReader = null;
+		this.resourceManager = Minecraft.getInstance().getResourceManager();
+		this.resourceLocation = resourceLocation;
 
+		jsonReader = new JsonReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
+		jsonReader.setLenient(true);
+		this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
+		jsonReader.close();
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public JsonModelLoader(JsonObject rootJson, ResourceLocation rl) throws IOException {
+		this.resourceManager = Minecraft.getInstance().getResourceManager();
+		this.rootJson = rootJson;
+		this.resourceLocation = rl;
+	}
 
 	public boolean isValidSource() {
 		return this.rootJson != null;
@@ -104,7 +116,7 @@ public class JsonModelLoader {
 
 		if (properties != null) {
 			return ClientModel.RenderProperties.builder()
-					.transparency(properties.has("transparent") ? properties.get("transparent").getAsBoolean() : false)
+					.transparency(properties.has("transparent") && properties.get("transparent").getAsBoolean())
 				.build();
 		} else {
 			return ClientModel.RenderProperties.builder().build();
@@ -129,7 +141,7 @@ public class JsonModelLoader {
 		JsonObject drawingIndices = obj.getAsJsonObject("indices");
 		JsonObject vcounts = obj.getAsJsonObject("vcounts");
 
-		float[] positionArray = toFloatArray(positions.get("array").getAsJsonArray());
+		float[] positionArray = ParseUtil.toFloatArray(positions.get("array").getAsJsonArray());
 
 		for (int i = 0; i < positionArray.length / 3; i++) {
 			int k = i * 3;
@@ -140,7 +152,7 @@ public class JsonModelLoader {
 			positionArray[k+2] = posVector.z;
 		}
 
-		float[] normalArray = toFloatArray(normals.get("array").getAsJsonArray());
+		float[] normalArray = ParseUtil.toFloatArray(normals.get("array").getAsJsonArray());
 
 		for (int i = 0; i < normalArray.length / 3; i++) {
 			int k = i * 3;
@@ -151,11 +163,14 @@ public class JsonModelLoader {
 			normalArray[k+2] = normVector.z;
 		}
 
-		float[] uvArray = toFloatArray(uvs.get("array").getAsJsonArray());
-		int[] animationIndexArray = toIntArray(vdincies.get("array").getAsJsonArray());
-		float[] weightArray = toFloatArray(weights.get("array").getAsJsonArray());
-		int[] drawingIndexArray = toIntArray(drawingIndices.get("array").getAsJsonArray());
-		int[] vcountArray = toIntArray(vcounts.get("array").getAsJsonArray());
+		int[] drawingIndexArray = ParseUtil.toIntArray(drawingIndices.get("array").getAsJsonArray());
+
+
+		float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
+		int[] animationIndexArray = ParseUtil.toIntArray(vdincies.get("array").getAsJsonArray());
+		float[] weightArray = ParseUtil.toFloatArray(weights.get("array").getAsJsonArray());
+		int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
+
 
 		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, drawingIndexArray, vcountArray);
 	}
@@ -171,7 +186,7 @@ public class JsonModelLoader {
 	}
 
 	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
-		float[] floatArray = toFloatArray(object.get("transform").getAsJsonArray());
+		float[] floatArray = ParseUtil.toFloatArray(object.get("transform").getAsJsonArray());
 		OpenMatrix4f localMatrix = new OpenMatrix4f().load(FloatBuffer.wrap(floatArray));
 		localMatrix.transpose();
 		if (start) {
@@ -323,8 +338,8 @@ public class JsonModelLoader {
 			Joint joint = armature.searchJointByName(name);
 
 			if (joint == null) {
-				throw new IllegalArgumentException("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation);
-			}
+				continue;
+            }
 
 			JsonArray timeArray = keyObject.getAsJsonArray("time");
 			JsonArray transformArray = keyObject.getAsJsonArray("transform");
@@ -353,10 +368,11 @@ public class JsonModelLoader {
 	}
 
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {
-		List<Keyframe> keyframeList = new ArrayList<Keyframe> ();
+		List<Keyframe> keyframeList = Lists.newArrayList();
 
 		for (int i = 0; i < times.length; i++) {
 			float timeStamp = times[i];
+
 			if (timeStamp < 0) {
 				continue;
 			}
@@ -365,7 +381,7 @@ public class JsonModelLoader {
 
             System.arraycopy(trasnformMatrix, i * 16, matrixElements, 0, 16);
 
-			OpenMatrix4f matrix = new OpenMatrix4f().load(FloatBuffer.wrap(matrixElements));
+			OpenMatrix4f matrix = OpenMatrix4f.load(null, FloatBuffer.wrap(matrixElements));
 			matrix.transpose();
 
 			if (correct) {
