@@ -37,6 +37,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -123,8 +124,21 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return this.original.getEntityData().get(AIRBORNE);
 	}
 
+	public float getCameraXRot() {
+		return MathHelper.wrapDegrees(this.original.xRot);
+	}
+
+	public float getCameraYRot() {
+		return MathHelper.wrapDegrees(this.original.yRot);
+	}
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
+	}
+	public void correctRotation() {
+	}
+	public void cancelAnyAction() {
+		this.original.stopUsingItem();
+		ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
 	}
 
 	@Override
@@ -150,7 +164,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 			this.aboutToDeath();
 		}
 	}
-
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return !this.isLogicalClient();
+	}
 	public void onDeath() {
 		this.getAnimator().playDeathAnimation();
 		this.currentLivingMotion = LivingMotions.DEATH;

@@ -301,7 +301,7 @@ public class Animations {
 		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_offhand", biped);
 		BIPED_FLOAT = new StaticAnimation(true, "biped/living/float", biped);
 		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
-		BIPED_FALL = new StaticAnimation(false, "biped/living/fall", biped);
+		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
 		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
 		BIPED_DIG = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
 		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
@@ -310,7 +310,7 @@ public class Animations {
 		BIPED_CROSSBOW_SHOT = new ReboundAnimation(false, "biped/combat/crossbow_shot_mid", "biped/combat/crossbow_shot_up", "biped/combat/crossbow_shot_down", "biped/combat/crossbow_shot_lying", biped);
 		BIPED_CROSSBOW_RELOAD = new StaticAnimation(false, "biped/combat/crossbow_reload", biped);
 		BIPED_JUMP = new StaticAnimation(0.083F, false, "biped/living/jump", biped);
-		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_holding_weapon", biped);
+		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", biped);
 		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mirror", biped);
 		BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
 		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", biped);
@@ -560,7 +560,7 @@ public class Animations {
 		BIPED_HIT_SHORT = new HitAnimation(0.05F, "biped/combat/hit_short", biped);
 		BIPED_HIT_LONG = new LongHitAnimation(0.08F, "biped/combat/hit_long", biped);
 		BIPED_HIT_ON_MOUNT = new LongHitAnimation(0.08F, "biped/combat/hit_on_mount", biped);
-		BIPED_LANDING = new LongHitAnimation(0.08F, "biped/living/landing", biped);
+		BIPED_LANDING = new LongHitAnimation(0.03F, "biped/living/landing", biped);
 		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, 2.1F, "biped/combat/knockdown", biped);
 		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 

@@ -26,7 +26,7 @@ public class HitAnimation extends MainFrameAnimation {
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		entitypatch.cancelUsingItem();
+		entitypatch.cancelAnyAction();
 	}
 	
 	@Override
@@ -50,7 +50,7 @@ public class HitAnimation extends MainFrameAnimation {
 			}
 		}
 	}
-	
+
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		return super.getPoseByTime(entitypatch, this.getTotalTime() - 0.000001F, 0.0F);

@@ -5,6 +5,7 @@ import javax.annotation.Nonnull;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.IRideable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -28,6 +29,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -57,20 +59,23 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		this.prevHeldItem = Items.AIR;
 		this.prevHeldItemOffHand = Items.AIR;
 	}
-	
+
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
-		} else if (this.state.movementLocked() && considerInaction) {
-			currentLivingMotion = LivingMotions.IDLE;
+		} else if (!this.state.updateLivingMotion() && considerInaction) {
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
-			
+
 			if (original.isFallFlying() || original.isAutoSpinAttack()) {
 				currentLivingMotion = LivingMotions.FLY;
 			} else if (original.getVehicle() != null) {
-				currentLivingMotion = LivingMotions.MOUNT;
+				if (original.getVehicle() instanceof IRideable)
+					currentLivingMotion = LivingMotions.MOUNT;
+				else
+					currentLivingMotion = LivingMotions.SIT;
 			} else if (original.isVisuallySwimming()) {
 				currentLivingMotion = LivingMotions.SWIM;
 			} else if (original.isSleeping()) {
@@ -78,43 +83,42 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 			} else if (!original.isOnGround() && original.onClimbable()) {
 				currentLivingMotion = LivingMotions.CLIMB;
 				double y = original.yCloak - original.yCloakO;
-				
+
 				if (Math.abs(y) < 0.04D) {
 					animator.baseLayer.pause();
 				} else {
 					animator.baseLayer.resume();
-					
-					if (y < 0)
-						animator.baseLayer.animationPlayer.setReversed(true);
-					else 
-						animator.baseLayer.animationPlayer.setReversed(false);
+
+					animator.baseLayer.animationPlayer.setReversed(y < 0);
 				}
-			} else {
+			} else if (!original.abilities.flying) {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
 					currentLivingMotion = LivingMotions.FLOAT;
-				else if (original.yCloak - original.yCloakO < -0.25F)
+				else if (original.yCloak - original.yCloakO < -0.4F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.01F) {
-					if (original.isShiftKeyDown())
+				else if (this.isMoving()) {
+					if (original.isCrouching())
 						currentLivingMotion = LivingMotions.SNEAK;
 					else if (original.isSprinting())
 						currentLivingMotion = LivingMotions.RUN;
 					else
 						currentLivingMotion = LivingMotions.WALK;
 
-					if (original.zza < 0)
-						animator.baseLayer.animationPlayer.setReversed(true);
-					else
-						animator.baseLayer.animationPlayer.setReversed(false);
-					
+					animator.baseLayer.animationPlayer.setReversed(original.zza < 0);
+
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
-					
-					if (original.isShiftKeyDown())
+
+					if (original.isCrouching())
 						currentLivingMotion = LivingMotions.KNEEL;
 					else
 						currentLivingMotion = LivingMotions.IDLE;
 				}
+			} else {
+				if (this.isMoving())
+					currentLivingMotion = LivingMotions.CREATIVE_FLY;
+				else
+					currentLivingMotion = LivingMotions.CREATIVE_IDLE;
 			}
 		}
 
@@ -138,12 +142,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentCompositeMotion = LivingMotions.DRINK;
 			else if (useAnim == UseAction.EAT)
 				currentCompositeMotion = LivingMotions.EAT;
-			//else if (useAnim == UseAction.SPYGLASS)
-			//	currentCompositeMotion = LivingMotions.SPECTATE;
+		//	else if (useAnim == UseAction.SPYGLASS)
+		//		currentCompositeMotion = LivingMotions.SPECTATE;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
-			if (this.original.getMainHandItem().getItem() instanceof ShootableItem && CrossbowItem.isCharged(this.original.getMainHandItem()))
+			if (this.original.getMainHandItem().getItem() instanceof ShootableItem  && CrossbowItem.isCharged(this.original.getMainHandItem()))
 				currentCompositeMotion = LivingMotions.AIM;
 			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation().isReboundAnimation())
 				currentCompositeMotion = LivingMotions.NONE;
@@ -159,7 +163,10 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.CompositeLayer(this, this.currentCompositeMotion));
 	}
-	
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return false;
+	}
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
 		this.prevYaw = this.yaw;
@@ -192,9 +199,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 			this.getClientAnimator().playDeathAnimation();
 		}
 	}
-	
+	protected boolean isMoving() {
+		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
+	}
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
-		this.cancelUsingItem();
+		this.cancelAnyAction();
 	}
 	
 	@Override

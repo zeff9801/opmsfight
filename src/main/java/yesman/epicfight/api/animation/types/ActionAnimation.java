@@ -14,6 +14,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -24,6 +26,7 @@ import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -50,21 +53,35 @@ public class ActionAnimation extends MainFrameAnimation {
 		this.properties.put(propertyType, value);
 		return this;
 	}
-	
+
+
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		entitypatch.cancelUsingItem();
-		
-		if (this.getProperty(AnimationProperty.MoveCoordFunctions.STOP_MOVEMENT).orElse(false)) {
-			entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
-		}
-		
-		AnimationProperty.MoveCoordSetter actionCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
-			transformSheet.readFrom(self.jointTransforms.get("Root"));
-		});
-		
-		entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionCoordSetter);
+
+		entitypatch.cancelAnyAction();
+
+	//	if (entitypatch.shouldMoveOnCurrentSide(this)) {
+			entitypatch.correctRotation();
+
+			if (this.getProperty(AnimationProperty.MoveCoordFunctions.STOP_MOVEMENT).orElse(false)) {
+				entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
+				entitypatch.getOriginal().xxa = 0.0F;
+				entitypatch.getOriginal().yya = 0.0F;
+				entitypatch.getOriginal().zza = 0.0F;
+			}
+
+			//AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse(AnimationProperty.AttackAnimationProperty.RAW_COORD);
+			//moveCoordSetter.set(this, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
+
+
+			AnimationProperty.MoveCoordSetter actionCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
+				transformSheet.readFrom(self.jointTransforms.get("Root"));
+			});
+
+			entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionCoordSetter);
+		//}
+
 	}
 	
 	@Override
@@ -97,21 +114,13 @@ public class ActionAnimation extends MainFrameAnimation {
 			livingentity.move(MoverType.SELF, new Vector3d(vec3.x * moveMultiplier, vec3.y, vec3.z * moveMultiplier * speedFactor));
 		}
 	}
-	
-	private boolean validateMovement(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
-		LivingEntity livingentity = entitypatch.getOriginal();
-		
-		if (entitypatch.isLogicalClient()) {
-			if (!(livingentity instanceof ClientPlayerEntity)) {
-				return false;
-			}
-		} else {
-			if ((livingentity instanceof ServerPlayerEntity)) {
-				return false;
-			}
+
+	protected boolean validateMovement(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		if (!entitypatch.shouldMoveOnCurrentSide(this)) {
+			return false;
 		}
-		
-		if (animation instanceof LinkAnimation) {
+
+		if (animation.isLinkAnimation()) {
 			if (!this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_ON_LINK).orElse(true)) {
 				return false;
 			} else {
@@ -121,7 +130,6 @@ public class ActionAnimation extends MainFrameAnimation {
 			return this.shouldMove(entitypatch.getAnimator().getPlayerFor(animation).getElapsedTime());
 		}
 	}
-	
 	private boolean shouldMove(float currentTime) {
 		if (this.properties.containsKey(AnimationProperty.MoveCoordFunctions.MOVE_TIME)) {
 			ActionTime[] actionTimes = this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_TIME).get();
@@ -238,7 +246,12 @@ public class ActionAnimation extends MainFrameAnimation {
 		
 		return new Vec3f(dx, dy, dz);
 	}
-	
+
+	@OnlyIn(Dist.CLIENT)
+	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
+		return playerpatch.isLogicalClient();
+	}
+
 	public static class ActionTime {
 		private float begin;
 		private float end;

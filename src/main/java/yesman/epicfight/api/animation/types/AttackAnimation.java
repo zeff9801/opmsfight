@@ -43,6 +43,7 @@ import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
@@ -128,7 +129,10 @@ public class AttackAnimation extends ActionAnimation {
 				.addState(EntityState.PHASE_LEVEL, 3);
 		}
 	}
-
+	@OnlyIn(Dist.CLIENT)
+	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
+		return playerpatch.isLogicalClient();
+	}
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);

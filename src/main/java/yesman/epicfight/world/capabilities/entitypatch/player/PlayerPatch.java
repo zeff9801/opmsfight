@@ -15,6 +15,7 @@ import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -66,6 +67,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
+	}
+
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return this.isLogicalClient();
 	}
 
 	@Override
@@ -133,7 +139,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public void changeYaw(float amount) {
 		this.yaw = amount;
 	}
-	
+	@Override
+	public void cancelAnyAction() {
+		super.cancelAnyAction();
+		//this.resetSkillCharging();
+	}
 	@Override
 	public void serverTick(LivingUpdateEvent event) {
 		super.serverTick(event);

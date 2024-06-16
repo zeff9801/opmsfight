@@ -106,11 +106,15 @@ public abstract class AnimationProperty<T> {
 		 * This property determines the basis of the speed factor. Without this value, the basis is the total animation time.
 		 */
 		public static final AttackAnimationProperty<Float> BASIS_ATTACK_SPEED = new AttackAnimationProperty<Float> ();
-		
+
 		/**
 		 * This property adds colliders when detecting hit entity by @MultiCollider.
 		 */
 		public static final AttackAnimationProperty<Integer> COLLIDER_ADDER = new AttackAnimationProperty<Integer> ();
+
+		public static final MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
+			transformSheet.readFrom(self.getCoord().copyAll());
+		};
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {

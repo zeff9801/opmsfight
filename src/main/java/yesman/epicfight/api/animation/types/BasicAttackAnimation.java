@@ -11,8 +11,10 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class BasicAttackAnimation extends AttackAnimation {
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
@@ -67,6 +69,20 @@ public class BasicAttackAnimation extends AttackAnimation {
 		}
 		
 		return vec3;
+	}
+	boolean STIFF_COMBO_ATTACKS = false;
+
+	@Override
+	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
+		if (playerpatch.isLogicalClient()) {
+			if (!STIFF_COMBO_ATTACKS) {
+				if (playerpatch.getOriginal().input.forwardImpulse != 0.0F || playerpatch.getOriginal().input.leftImpulse != 0.0F) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 	
 	@Override

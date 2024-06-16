@@ -175,10 +175,19 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		}
 	}
 
-	/*@Override
+	@Override
 	protected boolean isMoving() {
 		return Math.abs(this.original.xxa) > 0.0004F || Math.abs(this.original.zza) > 0.0004F;
-	}*/
+	}
+
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		if (!this.isLogicalClient()) {
+			return false;
+		}
+
+		return actionAnimation.shouldPlayerMove(this);
+	}
 
 	@Override
 	protected void playReboundAnimation() {
@@ -266,20 +275,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		return ClientEngine.instance.inputController.isKeyDown(this.minecraft.options.keyDown);
 	}
 
-	/*@Override
-	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
-		if (!this.isLogicalClient()) {
-			return false;
-		}
-
-		return actionAnimation.shouldPlayerMove(this);
-	}
-
-	@Override
-	public boolean consumeStamina(float amount) {
-		float currentStamina = this.getStamina();
-		return currentStamina >= amount;
-	}*/
+	//@Override
+	//public boolean consumeStamina(float amount) {
+	//	float currentStamina = this.getStamina();
+	//	return currentStamina >= amount;
+	//}
 
 	public float getPrevStamina() {
 		return this.prevStamina;
@@ -297,7 +297,25 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		return MathHelper.rotLerp((float)partial, this.lockOnYRotO, this.lockOnYRot);
 	}
 
-	/*@Override
+	@Override
+	public void correctRotation() {
+		if (this.targetLockedOn) {
+			if (this.rayTarget != null && !this.rayTarget.isDeadOrDying()) {
+				Vector3d playerPosition = this.original.position();
+				Vector3d targetPosition = this.rayTarget.position();
+				Vector3d toTarget = targetPosition.subtract(playerPosition);
+				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
+				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
+				this.original.yRot =(yaw);
+				this.original.xRot = (pitch);
+			} else {
+				this.original.yRot =(this.lockOnYRot);
+				this.original.xRot =(this.lockOnXRot);
+			}
+		}
+	}
+
+	@Override
 	public float getCameraXRot() {
 		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
 
@@ -309,7 +327,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
 
 		return MathHelper.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedYRot() : super.getCameraYRot());
-	}*/
+	}
 
 	public boolean isTargetLockedOn() {
 		return this.targetLockedOn;
