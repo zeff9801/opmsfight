@@ -6,6 +6,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 
 public class EpicFightParticles {
 	public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, EpicFightMod.MODID);
@@ -28,4 +29,9 @@ public class EpicFightParticles {
 	public static final RegistryObject<BasicParticleType> LASER = PARTICLES.register("laser", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> NEUTRALIZE = PARTICLES.register("neutralize", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> BOSS_CASTING = PARTICLES.register("boss_casting", () -> new BasicParticleType(true));
+	public static final RegistryObject<BasicParticleType> TSUNAMI_SPLASH = PARTICLES.register("tsunami_splash", () -> new BasicParticleType(true));
+	public static final RegistryObject<BasicParticleType> FEATHER = PARTICLES.register("feather", () -> new BasicParticleType(true));
+
+	public static final RegistryObject<HitParticleType> AIR_BURST = PARTICLES.register("air_burst", () -> new HitParticleType(true, HitParticleType.MIDDLE_OF_ENTITIES, HitParticleType.ATTACKER_Y_ROTATION));
+	public static final RegistryObject<BasicParticleType> SWING_TRAIL = PARTICLES.register("swing_trail", () -> new BasicParticleType(true));
 }

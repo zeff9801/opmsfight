@@ -26,6 +26,7 @@ public class ClientModels extends Models<ClientModel> implements IFutureReloadLi
 	public final ClientModel boots;
 	/** Particles **/
 	public final ClientModel forceField;
+	//public final ClientModel airBurst;
 	public final ClientModel laser;
 	
 	public ClientModels() {
@@ -38,7 +39,8 @@ public class ClientModels extends Models<ClientModel> implements IFutureReloadLi
 		this.chestplate = register(new ResourceLocation(EpicFightMod.MODID, "armor/chestplate_default"));
 		this.leggins = register(new ResourceLocation(EpicFightMod.MODID, "armor/leggings_default"));
 		this.boots = register(new ResourceLocation(EpicFightMod.MODID, "armor/boots_default"));
-		
+
+		//this.airBurst = register(new ResourceLocation(EpicFightMod.MODID, "particle/air_burst"));
 		this.forceField = register(new ResourceLocation(EpicFightMod.MODID, "particle/force_field"));
 		this.laser = register(new ResourceLocation(EpicFightMod.MODID, "particle/laser"));
 	}

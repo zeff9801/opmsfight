@@ -15,19 +15,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.particle.BladeRushParticle;
-import yesman.epicfight.client.particle.BloodParticle;
-import yesman.epicfight.client.particle.CutParticle;
-import yesman.epicfight.client.particle.DustParticle;
-import yesman.epicfight.client.particle.EnderParticle;
-import yesman.epicfight.client.particle.EntityAfterImageParticle;
-import yesman.epicfight.client.particle.EviscerateParticle;
-import yesman.epicfight.client.particle.ForceFieldEndParticle;
-import yesman.epicfight.client.particle.ForceFieldParticle;
-import yesman.epicfight.client.particle.GroundSlamParticle;
-import yesman.epicfight.client.particle.HitBluntParticle;
-import yesman.epicfight.client.particle.HitCutParticle;
-import yesman.epicfight.client.particle.LaserParticle;
+import yesman.epicfight.client.particle.*;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
@@ -60,7 +48,12 @@ public class ClientModBusEvent {
     	particleEngine.register(EpicFightParticles.LASER.get(), new LaserParticle.Provider());
     	particleEngine.register(EpicFightParticles.NEUTRALIZE.get(), new DustParticle.ExpansiveMetaParticle.Provider());
     	particleEngine.register(EpicFightParticles.BOSS_CASTING.get(), new DustParticle.ContractiveMetaParticle.Provider());
-    	
+
+		particleEngine.register(EpicFightParticles.TSUNAMI_SPLASH.get(), TsunamiSplashParticle.Provider::new);
+		particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), TrailParticle.Provider::new);
+		particleEngine.register(EpicFightParticles.FEATHER.get(), FeatherParticle.Provider::new);
+		particleEngine.register(EpicFightParticles.AIR_BURST.get(), new AirBurstParticle.Provider());
+
     	EntityRendererManager entityRenderManager = mc.getEntityRenderDispatcher();
     	ItemRenderer itemRenderer = mc.getItemRenderer();
     	

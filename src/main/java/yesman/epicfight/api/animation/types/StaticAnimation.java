@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -17,6 +18,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
@@ -24,6 +26,7 @@ import yesman.epicfight.api.client.animation.JointMask;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
+import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
@@ -101,9 +104,13 @@ public class StaticAnimation extends DynamicAnimation {
 	protected void onLoaded() {
 		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
-	
+
+
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
+		// Load if null
+		//this.getAnimationClip();
+
 		this.getProperty(StaticAnimationProperty.EVENTS).ifPresent((events) -> {
 			for (Event event : events) {
 				if (event.time == Event.ON_BEGIN) {
@@ -111,6 +118,34 @@ public class StaticAnimation extends DynamicAnimation {
 				}
 			}
 		});
+
+		if (entitypatch.isLogicalClient()) {
+			this.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent((trailInfos) -> {
+				int idx = 0;
+
+				for (TrailInfo trailInfo : trailInfos) {
+					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
+					double animid = Double.longBitsToDouble((long)this.animationId);
+					double jointId = Double.longBitsToDouble((long)this.getModel().getArmature().searchJointByName(trailInfo.joint).getId());
+					double index = Double.longBitsToDouble((long)idx++);
+
+					if (trailInfo.hand != null) {
+						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
+						//ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
+
+					//	if (itemSkin != null) {
+					//		trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
+					//	}
+					}
+
+					if (!trailInfo.playable()) {
+						continue;
+					}
+
+					entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, 0, animid, jointId, index, 0);
+				}
+			});
+		}
 	}
 	@Override
 	public boolean isStaticAnimation() {
@@ -148,6 +183,7 @@ public class StaticAnimation extends DynamicAnimation {
 			}
 		});
 	}
+
 
 	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
