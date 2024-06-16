@@ -79,6 +79,10 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
     public boolean isMainFrameAnimation() {
         return this.nextAnimation.isMainFrameAnimation();
     }
+    @Override
+    public boolean isLinkAnimation() {
+        return true;
+    }
 
     @Override
     public boolean isReboundAnimation() {

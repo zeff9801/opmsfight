@@ -6,6 +6,7 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.resources.ReloadListener;
+import net.minecraft.item.DyeColor;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -22,8 +23,14 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	private String modid;
 	private int namespaceHash;
 	private int counter = 0;
+	private static final AnimationManager INSTANCE = new AnimationManager();
+	private static IResourceManager resourceManager = null;
 
-	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
+	public static AnimationManager getInstance() {
+		return INSTANCE;
+	}
+
+    public StaticAnimation findAnimationById(int namespaceId, int animationId) {
 		if (this.animationById.containsKey(namespaceId)) {
 			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
 			if (map.containsKey(animationId)) {

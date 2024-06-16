@@ -215,4 +215,7 @@ public abstract class DynamicAnimation {
 	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
 		
 	}
+	public boolean isLinkAnimation() {
+		return false;
+	}
 }

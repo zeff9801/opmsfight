@@ -66,6 +66,10 @@ public class LinkAnimation extends DynamicAnimation {
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		this.nextAnimation.modifyPose(this, pose, entitypatch, time, partialTicks);
 	}
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
+	}
 	
 	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {

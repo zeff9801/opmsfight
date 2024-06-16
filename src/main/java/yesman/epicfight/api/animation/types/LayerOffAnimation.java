@@ -29,7 +29,10 @@ public class LayerOffAnimation extends DynamicAnimation {
 			entitypatch.getClientAnimator().baseLayer.disableLayer(this.layerPriority);
 		}
 	}
-	
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
+	}
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
