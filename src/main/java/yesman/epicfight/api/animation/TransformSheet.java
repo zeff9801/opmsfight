@@ -1,3 +1,4 @@
+
 package yesman.epicfight.api.animation;
 
 import java.util.List;
@@ -117,6 +118,24 @@ public class TransformSheet {
 		}
 	}
 
+	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
+		TransformSheet transform = this.copyAll();
+		float horizontalDistance = (float) (MathUtils.horizontalDistance(start.subtract(dest)) - (entitypatch.getTarget().getBbWidth()) + entitypatch.getOriginal().getBbWidth() * 0.75F); //TODO don't know if its correct
+
+		float verticalDistance = (float) Math.abs(dest.y - start.y);
+		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
+		JointTransform endJt = transform.getKeyframes()[endFrame].transform();
+		Vec3f jointCoord = new Vec3f(startJt.translation().x, verticalDistance, horizontalDistance);
+
+		startJt.translation().set(jointCoord);
+
+		for (int i = startFrame + 1; i < endFrame; i++) {
+			JointTransform middleJt = transform.getKeyframes()[i].transform();
+			middleJt.translation().set(MathUtils.lerpVector(startJt.translation(), endJt.translation(), transform.getKeyframes()[i].time() / transform.getKeyframes()[endFrame].time()));
+		}
+
+		return transform;
+	}
 
 	public TransformSheet extendsZCoord(float multiplier, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
@@ -180,8 +199,8 @@ public class TransformSheet {
 				prev++;
 				next++;
 			} else {
-				//EpicFightMod.LOGGER.error("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
-				//(new IllegalArgumentException()).printStackTrace();
+                EpicFightMod.LOGGER.error("time exceeded keyframe length. current : {} max : {}", currentTime, this.keyframes[this.keyframes.length - 1].time());
+				new IllegalArgumentException().printStackTrace();
 			}
 		}
 
@@ -192,7 +211,18 @@ public class TransformSheet {
 
 	@Override
 	public String toString() {
-		return "total " + this.keyframes.length + " frames";
+		StringBuilder sb = new StringBuilder();
+		int idx = 0;
+
+		for (Keyframe kf : this.keyframes) {
+			sb.append(kf);
+
+			if (++idx < this.keyframes.length) {
+				sb.append("\n");
+			}
+		}
+
+		return sb.toString();
 	}
 
 	private static class InterpolationInfo {

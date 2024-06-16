@@ -1,17 +1,14 @@
 package yesman.epicfight.api.animation;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import yesman.epicfight.api.client.animation.JointMask;
-
 
 public class Pose {
+	public static final Pose EMPTY_POSE = new Pose();
 	private final Map<String, JointTransform> jointTransformData = Maps.newHashMap();
 
 	public void putJointData(String name, JointTransform transform) {
@@ -34,16 +31,6 @@ public class Pose {
 		this.jointTransformData.entrySet().removeIf(predicate);
 	}
 
-	public void removeJointIf(List<JointMask> jointsToRemove) {
-		Set<String> joints = Sets.newHashSet(this.jointTransformData.keySet());
-
-		for (JointMask mask : jointsToRemove) {
-			joints.remove(mask.getJointName());
-		}
-
-		joints.forEach(this.jointTransformData::remove);
-	}
-
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
 		Pose pose = new Pose();
 
@@ -58,12 +45,13 @@ public class Pose {
 	}
 
 	public String toString() {
-		StringBuilder str = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
+		sb.append("Pose: ");
 
 		for (Map.Entry<String, JointTransform> entry : this.jointTransformData.entrySet()) {
-			str.append(String.format("%s{%s, %s}, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString())).append("\n");
+			sb.append(String.format("%s{%s, %s}, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString())).append("\n");
 		}
 
-		return str.toString();
+		return sb.toString();
 	}
 }

@@ -73,7 +73,7 @@ public class SPChangeLivingMotion {
 		}
 
 		for (int i = 0; i < msg.count; i++) {
-			animationList.add(EpicFightMod.getInstance().animationManager.findAnimationById(buf.readInt(), buf.readInt()));
+			animationList.add(EpicFightMod.getInstance().animationManager.byId(buf.readInt(), buf.readInt()));
 		}
 
 		msg.motionList = motionList;

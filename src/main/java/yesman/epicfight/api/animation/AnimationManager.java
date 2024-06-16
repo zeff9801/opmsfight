@@ -2,11 +2,11 @@ package yesman.epicfight.api.animation;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.resources.ReloadListener;
-import net.minecraft.item.DyeColor;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -30,7 +30,8 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		return INSTANCE;
 	}
 
-    public StaticAnimation findAnimationById(int namespaceId, int animationId) {
+    public StaticAnimation byId(int namespaceId, int animationId) {
+
 		if (this.animationById.containsKey(namespaceId)) {
 			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
 			if (map.containsKey(animationId)) {
@@ -39,7 +40,22 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		}
 		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
 	}
+	public StaticAnimation byKeyOrThrow(String resourceLocation) {
+		return this.byKeyOrThrow(new ResourceLocation(resourceLocation));
+	}
 
+	public StaticAnimation byKeyOrThrow(ResourceLocation rl) {
+		if (!this.animationByName.containsKey(rl)) {
+			throw new NoSuchElementException("No animation with registry name " + rl);
+		}
+
+		return this.byKey(rl);
+	}
+
+	public StaticAnimation byKey(ResourceLocation rl) {
+		return this.animationByName.get(rl);
+	}
+	
 	public StaticAnimation findAnimationByPath(String resourceLocation) {
 		ResourceLocation rl = new ResourceLocation(resourceLocation);
 
@@ -54,13 +70,13 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		Map<String, Runnable> registryMap = Maps.newHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 
-		registryMap.entrySet().forEach((entry) -> {
-			this.modid = entry.getKey();
-			this.namespaceHash = this.modid.hashCode();
-			this.animationById.put(this.namespaceHash, Maps.newHashMap());
-			this.counter = 0;
-			entry.getValue().run();
-		});
+		registryMap.forEach((key, value) -> {
+            this.modid = key;
+            this.namespaceHash = this.modid.hashCode();
+            this.animationById.put(this.namespaceHash, Maps.newHashMap());
+            this.counter = 0;
+            value.run();
+        });
 	}
 
 	public void loadAnimationsInit(IResourceManager resourceManager) {

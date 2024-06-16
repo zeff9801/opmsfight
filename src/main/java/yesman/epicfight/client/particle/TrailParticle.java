@@ -369,7 +369,7 @@ public class TrailParticle extends SpriteTexturedParticle {
 			if (entity != null) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
 				//StaticAnimation animation = AnimationManager.getInstance().byId(animid);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(animid, animid);
+				StaticAnimation animation = EpicFightMod.getInstance().animationManager.byId(animid, animid);
 				Optional<List<TrailInfo>> trailInfo = animation.getProperty(ClientAnimationProperties.TRAIL_EFFECT);
 				TrailInfo result = trailInfo.get().get(idx);
 				

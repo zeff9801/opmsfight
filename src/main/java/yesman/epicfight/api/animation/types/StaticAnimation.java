@@ -18,7 +18,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
@@ -91,7 +90,7 @@ public class StaticAnimation extends DynamicAnimation {
 	public void loadAnimation(IResourceManager resourceManager) {
 		try {
 			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(this.namespaceId, id);
+			StaticAnimation animation = EpicFightMod.getInstance().animationManager.byId(this.namespaceId, id);
 			this.jointTransforms = animation.jointTransforms;
 			this.setTotalTime(animation.totalTime);
 		} catch (NumberFormatException e) {

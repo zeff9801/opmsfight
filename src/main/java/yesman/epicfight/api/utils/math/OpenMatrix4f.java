@@ -15,7 +15,7 @@ import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
-		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFROM, JointTransform.RESULT1, JointTransform.RESULT2};
+		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFORM, JointTransform.RESULT1, JointTransform.RESULT2};
 		private Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
 		
 		public void put(String entryPosition, OpenMatrix4f matrix) {

@@ -39,13 +39,13 @@ public abstract class Animator {
 	public abstract void poseTick();
 
 	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
-		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id), convertTimeModifier);
+		this.playAnimation(EpicFightMod.getInstance().animationManager.byId(namespaceId, id), convertTimeModifier);
 	}
 	public <T> T getAnimationVariables(TypeFlexibleHashMap.TypeKey<T> key) {
 		return this.animationVariables.get(key);
 	}
 	public final void playAnimationInstantly(int namespaceId, int id) {
-		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id));
+		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.byId(namespaceId, id));
 	}
 
 	public Pose getPose(float partialTicks) {
