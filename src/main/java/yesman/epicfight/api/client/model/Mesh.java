@@ -20,14 +20,14 @@ public class Mesh {
 	final float[] uvs;
 	final float[] normals;
 	final float[] weights;
-	final List<VertexIndicator> vertexIndicators;
+	final List<VertexIndicator.AnimatedVertexIndicator> vertexIndicators;
 
 	public Mesh(float[] positions, float[] normals, float[] uvs, int[] animationIndices, float[] weights, int[] drawingIndices, int[] vCounts) {
 		this.positions = positions;
 		this.normals = normals;
 		this.uvs = uvs;
 		this.weights = weights;
-		this.vertexIndicators = VertexIndicator.create(drawingIndices, vCounts, animationIndices);
+		this.vertexIndicators = VertexIndicator.AnimatedVertexIndicator.createAnimated(drawingIndices, vCounts, animationIndices);
 	}
 
 	public JsonObject toJsonObject() {
@@ -60,11 +60,11 @@ public class Mesh {
 		int[] indices = new int[count * 3];
 		int[] vcounts = new int[positions.length / 3];
 		List<Integer> vIndexList = Lists.newArrayList();
-		Map<Integer, VertexIndicator> positionMap = Maps.newHashMap();
+		Map<Integer, VertexIndicator.AnimatedVertexIndicator> positionMap = Maps.newHashMap();
 		int[] vIndices;
 
 		for (int i = 0; i < this.vertexIndicators.size(); i++) {
-			VertexIndicator vertexIndicator = this.vertexIndicators.get(i);
+			VertexIndicator.AnimatedVertexIndicator vertexIndicator = this.vertexIndicators.get(i);
 			indices[i * 3] = vertexIndicator.position;
 			indices[i * 3 + 1] = vertexIndicator.uv;
 			indices[i * 3 + 2] = vertexIndicator.normal;
@@ -74,7 +74,7 @@ public class Mesh {
 
 		for (int i = 0; i < vcounts.length; i++) {
 			for (int j = 0; j < vcounts[i]; j++) {
-				VertexIndicator vi = positionMap.get(i);
+				VertexIndicator.AnimatedVertexIndicator vi = positionMap.get(i);
 				vIndexList.add(vi.joint.get(j));
 				vIndexList.add(vi.weight.get(j));
 			}

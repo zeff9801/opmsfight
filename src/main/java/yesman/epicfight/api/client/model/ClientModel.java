@@ -91,7 +91,7 @@ public class ClientModel extends Model {
 			posesNoTranslation[i] = poses[i].removeTranslation();
 		}
 		
-		for (VertexIndicator vi : mesh.vertexIndicators) {
+		for (VertexIndicator.AnimatedVertexIndicator vi : mesh.vertexIndicators) {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
 			int uv = vi.uv * 2;
@@ -126,7 +126,7 @@ public class ClientModel extends Model {
 			posesNoTranslation[i] = poses[i].removeTranslation();
 		}
 		
-		for (VertexIndicator vi : mesh.vertexIndicators) {
+		for (VertexIndicator.AnimatedVertexIndicator vi : mesh.vertexIndicators) {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
 			Vec4f position = new Vec4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
