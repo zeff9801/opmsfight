@@ -74,7 +74,7 @@ public class ClientModel extends Model {
 			int norm = vi.normal * 3;
 			int uv = vi.uv * 2;
 			Vector4f posVec = new Vector4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
-			Vector3f normVec = new Vector3f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2]);
+			Vector3f normVec = new Vector3f(mesh.normals[norm], mesh.normals[norm + 1], mesh.normals[norm + 2]);
 			posVec.transform(matrix4f);
 			normVec.transform(matrix3f);
 			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, mesh.uvs[uv], mesh.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
@@ -96,7 +96,7 @@ public class ClientModel extends Model {
 			int norm = vi.normal * 3;
 			int uv = vi.uv * 2;
 			Vec4f position = new Vec4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
-			Vec4f normal = new Vec4f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2], 1.0F);
+			Vec4f normal = new Vec4f(mesh.normals[norm], mesh.normals[norm + 1], mesh.normals[norm + 2], 1.0F);
 			Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			
@@ -130,7 +130,7 @@ public class ClientModel extends Model {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
 			Vec4f position = new Vec4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
-			Vec4f normal = new Vec4f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2], 1.0F);
+			Vec4f normal = new Vec4f(mesh.normals[norm], mesh.normals[norm + 1], mesh.normals[norm + 2], 1.0F);
 			Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			
