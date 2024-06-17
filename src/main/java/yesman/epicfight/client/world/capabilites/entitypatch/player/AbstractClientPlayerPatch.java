@@ -33,6 +33,7 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.forgeevent.RenderEpicFightPlayerEvent;
 import yesman.epicfight.api.client.forgeevent.UpdatePlayerMotionEvent;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -198,6 +199,15 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		if (this.original.deathTime == 1) {
 			this.getClientAnimator().playDeathAnimation();
 		}
+	}
+	@Override
+	public boolean overrideRender() {
+		boolean originalShouldRender = this.isBattleMode() || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
+
+		RenderEpicFightPlayerEvent renderepicfightplayerevent = new RenderEpicFightPlayerEvent(this, originalShouldRender);
+		MinecraftForge.EVENT_BUS.post(renderepicfightplayerevent);
+
+		return renderepicfightplayerevent.getShouldRender();
 	}
 	protected boolean isMoving() {
 		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;

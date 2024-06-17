@@ -46,4 +46,16 @@ public class ClientConfig {
 			return false;
 		});
 	}
+	public enum HealthBarShowOptions {
+		NONE, HURT, TARGET;
+
+		@Override
+		public String toString() {
+			return this.name().toLowerCase();
+		}
+
+		public HealthBarShowOptions nextOption() {
+			return HealthBarShowOptions.values()[(this.ordinal() + 1) % 3];
+		}
+	}
 }

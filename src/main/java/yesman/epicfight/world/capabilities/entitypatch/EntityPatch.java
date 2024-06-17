@@ -26,6 +26,7 @@ public abstract class EntityPatch<T extends Entity> {
 
 	protected void clientTick(LivingUpdateEvent event) {}
 	protected void serverTick(LivingUpdateEvent event) {}
+	public abstract boolean overrideRender();
 
 	public void onStartTracking(ServerPlayerEntity trackingPlayer) {
 	}

@@ -376,23 +376,38 @@ public class RenderEngine {
 		public static void renderLivingEvent(RenderLivingEvent.Pre<? extends LivingEntity, ? extends EntityModel<? extends LivingEntity>> event) {
 			LivingEntity livingentity = event.getEntity();
 
+			if (livingentity.level == null) {
+				return;
+			}
+
 			if (renderEngine.hasRendererFor(livingentity)) {
-				if (livingentity instanceof ClientPlayerEntity && event.getPartialRenderTick() == 1.0F) {
-					return;
+				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
+				LocalPlayerPatch playerpatch = null;
+				float originalYRot = 0.0F;
+
+				if ((event.getPartialRenderTick() == 0.0F || event.getPartialRenderTick() == 1.0F) && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
+					playerpatch = localPlayerPatch;
+					originalYRot = playerpatch.getCameraYRot();
+					//playerpatch.setModelYRotInGui(livingentity.yRot); TODO
+					event.getMatrixStack().translate(0, 0.1D, 0);
 				}
 
-				LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) livingentity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-
-				if (entitypatch != null && !entitypatch.shouldSkipRender()) {
+				if (entitypatch != null && entitypatch.overrideRender()) {
 					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getBuffers(), event.getMatrixStack(), event.getLight(), event.getPartialRenderTick());
 				}
+
+				if (playerpatch != null) {
+					//playerpatch.disableModelYRotInGui(originalYRot); TODO
+				}
 			}
 
-			if (!renderEngine.minecraft.options.hideGui && !livingentity.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+			if (ClientEngine.instance.getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
+
 				for (EntityIndicator entityIndicator : EntityIndicator.ENTITY_INDICATOR_RENDERERS) {
-					if (entityIndicator.shouldDraw(renderEngine.minecraft.player, event.getEntity())) {
-						entityIndicator.drawIndicator(event.getEntity(), event.getMatrixStack(), event.getBuffers(), event.getPartialRenderTick());
+					if (entityIndicator.shouldDraw(livingentity, entitypatch, ClientEngine.instance.getPlayerPatch())) {
+						entityIndicator.drawIndicator(livingentity, entitypatch, ClientEngine.instance.getPlayerPatch(), event.getMatrixStack(), event.getBuffers(), event.getPartialRenderTick());
 					}
 				}
 			}

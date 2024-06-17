@@ -57,10 +57,15 @@ public abstract class ProjectilePatch<T extends ProjectileEntity> {
 		}
 	}
 	
+	//@Override TODO
+	public boolean overrideRender() {
+		return false;
+	}
+
 	public boolean onProjectileImpact(ProjectileImpactEvent event) {
 		return false;
 	}
-	
+
 	protected abstract void setMaxStrikes(T projectileEntity, int maxStrikes);
 	
 	public IndirectEpicFightDamageSource getEpicFightDamageSource(DamageSource original) {

@@ -107,7 +107,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
 	}
-
+	@Override
+	public boolean overrideRender() {
+		return true;
+	}
 	@OnlyIn(Dist.CLIENT)
 	public abstract void initAnimator(ClientAnimator clientAnimator);
 	public abstract void updateMotion(boolean considerInaction);
