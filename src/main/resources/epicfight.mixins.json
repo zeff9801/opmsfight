@@ -9,8 +9,9 @@
 		"MixinMouseHelper"
 	],
 	"mixins": [
+		"MixinServerPlayer"
 	],
-	"injector": {
+	"injectors": {
 		"defaultRequire": 1
 	},
 	"refmap": "epicfight.mixins.refmap.json"
