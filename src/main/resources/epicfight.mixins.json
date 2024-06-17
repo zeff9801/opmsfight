@@ -6,7 +6,8 @@
 	"client": [
 		"MixinBufferBuilder",
 		"MixinKeyboardHandler",
-		"MixinMouseHelper"
+		"MixinMouseHelper",
+		"MixinLightTexture"
 	],
 	"mixins": [
 		"MixinServerPlayer"
