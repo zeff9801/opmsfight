@@ -26,6 +26,8 @@ import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.api.client.model.ItemSkin;
+import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
@@ -130,11 +132,11 @@ public class StaticAnimation extends DynamicAnimation {
 
 					if (trailInfo.hand != null) {
 						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
-						//ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
+						ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 
-					//	if (itemSkin != null) {
-					//		trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
-					//	}
+						if (itemSkin != null) {
+							trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
+						}
 					}
 
 					if (!trailInfo.playable()) {

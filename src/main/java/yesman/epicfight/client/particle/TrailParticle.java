@@ -32,6 +32,8 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.api.client.model.ItemSkin;
+import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.CubicBezierCurve;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -375,11 +377,11 @@ public class TrailParticle extends SpriteTexturedParticle {
 				
 				if (result.hand != null) {
 					ItemStack stack = entitypatch.getOriginal().getItemInHand(result.hand);
-					//ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem()); TODO
+					ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 					
-				//	if (itemSkin != null) {
-				//		result = itemSkin.trailInfo.overwrite(result);
-					//}
+					if (itemSkin != null) {
+						result = itemSkin.trailInfo.overwrite(result);
+					}
 				}
 				
 				if (entitypatch != null && animation != null && trailInfo.isPresent()) {

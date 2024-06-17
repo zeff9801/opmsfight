@@ -8,6 +8,9 @@ import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import com.mojang.blaze3d.vertex.IVertexConsumer;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -121,5 +124,36 @@ public class Mesh {
 		jsonObject.add("array", jsonArray);
 
 		return jsonObject;
+	}
+
+	@FunctionalInterface
+	public interface DrawingFunction {
+		public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
+		};
+
+		public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+			builder.color(r, g, b, a);
+			builder.uv2(packedLightIn);
+			builder.endVertex();
+		};
+
+		public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+			builder.color(r, g, b, a);
+			builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
+			builder.endVertex();
+		};
+
+		public static final DrawingFunction ENTITY_NO_LIGHTING = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+			builder.color(r, g, b, a);
+			builder.uv(u, v);
+			builder.uv2(packedLightIn);
+			builder.endVertex();
+		};
+
+		public void draw(IVertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLightIn, float r, float g, float b, float a, float u, float v, int overlay);
 	}
 }
