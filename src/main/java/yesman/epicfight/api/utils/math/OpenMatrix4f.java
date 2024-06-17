@@ -1,22 +1,19 @@
 package yesman.epicfight.api.utils.math;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
+import yesman.epicfight.api.animation.JointTransform;
+
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
-
-import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
@@ -702,21 +699,40 @@ public class OpenMatrix4f {
 
 	@Override
 	public String toString() {
-		String buf = String.valueOf("\n" +
-				m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
-				m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
-				m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
-				m03 + " " + m13 + " " + m23 + " " + m33) + "\n";
-		return buf;
+        return "\n" +
+                m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
+                m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
+                m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
+                m03 + " " + m13 + " " + m23 + " " + m33 + "\n";
 	}
 
-	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
+	/*public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
 		MATRIX_TRANSFORMER.position(0);
 		visibleMat.store(MATRIX_TRANSFORMER);
 		MATRIX_TRANSFORMER.position(0);
 		return new Matrix4f(MATRIX_TRANSFORMER.array());
-	}
+	}*/
+	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
+		float[] arr = new float[16];
+		arr[0] = visibleMat.m00;
+		arr[1] = visibleMat.m10;
+		arr[2] = visibleMat.m20;
+		arr[3] = visibleMat.m30;
+		arr[4] = visibleMat.m01;
+		arr[5] = visibleMat.m11;
+		arr[6] = visibleMat.m21;
+		arr[7] = visibleMat.m31;
+		arr[8] = visibleMat.m02;
+		arr[9] = visibleMat.m12;
+		arr[10] = visibleMat.m22;
+		arr[11] = visibleMat.m32;
+		arr[12] = visibleMat.m03;
+		arr[13] = visibleMat.m13;
+		arr[14] = visibleMat.m23;
+		arr[15] = visibleMat.m33;
 
+		return new Matrix4f(arr);
+	}
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
 		MATRIX_TRANSFORMER.position(0);
 		mat4f.store(MATRIX_TRANSFORMER);
