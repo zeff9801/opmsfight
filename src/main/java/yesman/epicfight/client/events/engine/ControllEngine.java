@@ -1,20 +1,13 @@
 package yesman.epicfight.client.events.engine;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-
-import net.minecraft.entity.Pose;
-import org.lwjgl.glfw.GLFW;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.entity.Pose;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
 import net.minecraftforge.api.distmarker.Dist;
@@ -28,6 +21,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import org.lwjgl.glfw.GLFW;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.client.gui.screen.SkillEditScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -39,6 +33,10 @@ import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.entity.eventlistener.MovementInputEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 @OnlyIn(Dist.CLIENT)
 public class ControllEngine {
@@ -307,7 +305,7 @@ public class ControllEngine {
 	public void unlockHotkeys() {
 		this.hotbarLocked = false;
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 	public static class Events {

@@ -122,7 +122,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
 	}
-
+	public void setLastAttackResult(AttackResult attackResult) {
+		this.lastResultType = attackResult.resultType;
+		this.lastDealDamage = attackResult.damage;
+	}
 	public boolean isAirborneState() {
 		return this.original.getEntityData().get(AIRBORNE);
 	}

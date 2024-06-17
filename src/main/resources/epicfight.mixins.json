@@ -10,6 +10,7 @@
 		"MixinLightTexture"
 	],
 	"mixins": [
+		"MixinLivingEntity",
 		"MixinServerPlayer"
 	],
 	"injectors": {

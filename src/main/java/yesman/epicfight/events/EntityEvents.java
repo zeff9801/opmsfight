@@ -7,7 +7,6 @@ import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -15,11 +14,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Items;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.CombatRules;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.IndirectEntityDamageSource;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.util.*;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.entity.PartEntity;
@@ -27,17 +22,9 @@ import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.EntityTeleportEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
+import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
@@ -266,60 +253,66 @@ public class EntityEvents {
 			}
 		}
 	}
-	
+
 	@SubscribeEvent
 	public static void attackEvent(LivingAttackEvent event) {
 		if (event.getEntity().level.isClientSide()) {
 			return;
 		}
-		
+
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		DamageSource damageSource = null;
-		
+
 		if (entitypatch != null && event.getEntityLiving().getHealth() > 0.0F) {
+			LivingEntityPatch<?> attackerPatch = EpicFightCapabilities.getEntityPatch(event.getSource().getEntity(), LivingEntityPatch.class);
 			if (damageSource == DamageSource.FALL && event.getEntity().level.getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)) {
 				if (!entitypatch.getEntityState().inaction()) {
 					float damage = event.getAmount();
-					
+
 					if (damage > 5.0F) {
 						StaticAnimation fallAnimation = entitypatch.getHitAnimation(StunType.FALL);
-						
+
 						if (fallAnimation != null) {
 							entitypatch.playAnimationSynchronized(fallAnimation, 0);
 						}
 					}
 				}
-				
+
 				return;
 			}
-			
+
 			if (event.getSource() instanceof IndirectEntityDamageSource && event.getSource().getDirectEntity() != null) {
 				ProjectilePatch<?> projectilepatch = event.getSource().getDirectEntity().getCapability(EpicFightCapabilities.CAPABILITY_PROJECTILE).orElse(null);
-				
+
 				if (projectilepatch != null) {
 					damageSource = projectilepatch.getEpicFightDamageSource(event.getSource());
 				}
 			}
-			
+
 			if (damageSource == null) {
 				damageSource = event.getSource();
 			}
-			
-			AttackResult result = entitypatch.tryHurt(damageSource, event.getAmount());
-			
+
+			AttackResult result = entitypatch != null ? entitypatch.tryHurt(damageSource, event.getAmount()) : AttackResult.success(event.getAmount());
+
+			if (attackerPatch != null) {
+				attackerPatch.setLastAttackResult(result);
+			}
+
+
 			if (!result.resultType.dealtDamage()) {
 				event.setCanceled(true);
 			} else if (event.getAmount() != result.damage) {
 				event.setCanceled(true);
-				
+
 				DamageSource damagesource = new DamageSource( event.getSource().getMsgId() );
 				damagesource.bypassInvul();
-				
+
 				event.getEntity().hurt(damagesource, result.damage);
 			}
 		}
 	}
-	
+
 	@SubscribeEvent
 	public static void dropEvent(LivingDropsEvent event) {
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getEntityLiving().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
