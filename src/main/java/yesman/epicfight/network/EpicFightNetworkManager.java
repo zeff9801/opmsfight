@@ -14,25 +14,7 @@ import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPRotatePlayerYaw;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
-import yesman.epicfight.network.server.SPAddSkill;
-import yesman.epicfight.network.server.SPChangeGamerule;
-import yesman.epicfight.network.server.SPChangeLivingMotion;
-import yesman.epicfight.network.server.SPChangePlayerMode;
-import yesman.epicfight.network.server.SPChangePlayerYaw;
-import yesman.epicfight.network.server.SPChangeSkill;
-import yesman.epicfight.network.server.SPClearSkills;
-import yesman.epicfight.network.server.SPDatapackSync;
-import yesman.epicfight.network.server.SPModifySkillData;
-import yesman.epicfight.network.server.SPPlayAnimation;
-import yesman.epicfight.network.server.SPPlayAnimationAndSetTarget;
-import yesman.epicfight.network.server.SPPlayAnimationAndSyncTransform;
-import yesman.epicfight.network.server.SPPlayAnimationInstant;
-import yesman.epicfight.network.server.SPPotion;
-import yesman.epicfight.network.server.SPRemoveSkill;
-import yesman.epicfight.network.server.SPSetAttackTarget;
-import yesman.epicfight.network.server.SPSetSkillValue;
-import yesman.epicfight.network.server.SPSkillExecutionFeedback;
-import yesman.epicfight.network.server.SPSpawnData;
+import yesman.epicfight.network.server.*;
 
 public class EpicFightNetworkManager {
 	private static final String PROTOCOL_VERSION = "1";
@@ -91,6 +73,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPDatapackSync.class, SPDatapackSync::toBytes, SPDatapackSync::fromBytes, SPDatapackSync::handle);
 		INSTANCE.registerMessage(id++, SPSetAttackTarget.class, SPSetAttackTarget::toBytes, SPSetAttackTarget::fromBytes, SPSetAttackTarget::handle);
 		INSTANCE.registerMessage(id++, SPClearSkills.class, SPClearSkills::toBytes, SPClearSkills::fromBytes, SPClearSkills::handle);
+		INSTANCE.registerMessage(id++, SPUpdatePlayerInput.class, SPUpdatePlayerInput::toBytes, SPUpdatePlayerInput::fromBytes, SPUpdatePlayerInput::handle);
 		INSTANCE.registerMessage(id++, SPRemoveSkill.class, SPRemoveSkill::toBytes, SPRemoveSkill::fromBytes, SPRemoveSkill::handle);
 	}
 }
