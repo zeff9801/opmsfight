@@ -56,6 +56,7 @@ import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class AttackAnimation extends ActionAnimation {
+
 	protected static final MoveCoordSetter COMMON_COORD_SETTER = (self, entitypatch, transformSheet) -> {
 		LivingEntity attackTarget = entitypatch.getTarget();
 
@@ -332,11 +333,11 @@ public class AttackAnimation extends ActionAnimation {
 			if (flag) {
 				float pitch = entitypatch.getAttackDirectionPitch();
 				JointTransform chest = pose.getOrDefaultTransform("Chest");
-				chest.frontResult(JointTransform.getRotation(MathUtils.quaternionFromDegree(Vector3f.XP, -pitch)), OpenMatrix4f::mulAsOriginInverse);
+				chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 
 				if (entitypatch instanceof PlayerPatch) {
 					JointTransform head = pose.getOrDefaultTransform("Head");
-					MathUtils.mulQuaternion(MathUtils.quaternionFromDegree(Vector3f.XP, pitch), head.rotation(), head.rotation());
+					MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
 				}
 			}
 		});

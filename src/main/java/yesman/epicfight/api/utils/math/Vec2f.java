@@ -8,7 +8,7 @@ public class Vec2f {
 		this.x = 0;
 		this.y = 0;
 	}
-	
+
 	public Vec2f(float x, float y) {
 		this.x = x;
 		this.y = y;
@@ -19,7 +19,7 @@ public class Vec2f {
 		this.y *= f;
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Vec2f[" + this.x + ", " + this.y + ", " + "]";
