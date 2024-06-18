@@ -39,9 +39,7 @@ public class RewindableButton extends Button {
 					return true;
 				}
 			}
-			return false;
-		} else {
-			return false;
-		}
-	}
+        }
+        return false;
+    }
 }

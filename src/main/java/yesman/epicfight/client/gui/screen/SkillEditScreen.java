@@ -95,7 +95,7 @@ public class SkillEditScreen extends Screen {
 			int lineHeight = 0;
 			
 			for (IReorderingProcessor s : this.font.split(NO_SKILLS, 110)) {
-				this.font.draw(poseStack, s, this.width / 2 - 50, this.height / 2 - 72 + lineHeight, 3158064);
+				this.font.draw(poseStack, s, (float) this.width / 2 - 50, (float) this.height / 2 - 72 + lineHeight, 3158064);
 				
 				lineHeight += 10;
 			}

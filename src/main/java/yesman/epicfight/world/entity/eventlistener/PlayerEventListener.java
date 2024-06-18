@@ -108,7 +108,7 @@ public class PlayerEventListener {
 		}
 		
 		public boolean shouldActive(boolean isRemote) {
-			return this.side == null ? true : this.side.isClient() == isRemote;
+			return this.side == null || this.side.isClient() == isRemote;
 		}
 	}
 }

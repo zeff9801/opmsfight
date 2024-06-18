@@ -294,12 +294,11 @@ public class JsonModelLoader {
 					TransformSheet sheet = getTransformSheet(times, transforms, new OpenMatrix4f(), true);
 					((ActionAnimation)animation).addProperty(AnimationProperty.MoveCoordFunctions.COORD, sheet);
 					root = false;
-					continue;
-				} else {
-					EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint " + name + " in the animation file, " + animation);
-					continue;
-				}
-			}
+                } else {
+                    EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint {} in the animation file, {}", name, animation);
+                }
+                continue;
+            }
 
 			JsonArray timeArray = keyObject.getAsJsonArray("time");
 			JsonArray transformArray = keyObject.getAsJsonArray("transform");

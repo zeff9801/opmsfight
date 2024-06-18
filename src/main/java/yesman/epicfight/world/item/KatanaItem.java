@@ -38,8 +38,6 @@ public class KatanaItem extends WeaponItem {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void appendHoverText(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-		for (ITextComponent txtComp : tooltipExpand) {
-			tooltip.add(txtComp);
-		}
+        tooltip.addAll(tooltipExpand);
 	}
 }

@@ -136,7 +136,7 @@ public class SkillDataManager {
 			
 			@Override
 			public Boolean get(Data data) {
-				return data != null ? ((BooleanData)data).data : false;
+				return data != null && ((BooleanData) data).data;
 			}
 			
 			@Override

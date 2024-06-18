@@ -25,7 +25,7 @@ public class PlayerEvent<T extends PlayerPatch<?>> {
 	}
 	
 	public boolean isCanceled() {
-		return this.cancelable ? this.canceled : false;
+		return this.cancelable && this.canceled;
 	}
 	
 	@Override

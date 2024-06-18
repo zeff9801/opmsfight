@@ -1,11 +1,5 @@
 package yesman.epicfight.main;
 
-import java.util.function.Function;
-
-import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
@@ -20,16 +14,15 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.DataSerializerEntry;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.animation.Animator;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.ServerAnimator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -45,8 +38,8 @@ import yesman.epicfight.events.EntityEvents;
 import yesman.epicfight.events.ModBusEvents;
 import yesman.epicfight.events.PlayerEvents;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -71,6 +64,8 @@ import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
+
+import java.util.function.Function;
 
 @Mod("epicfight")
 public class EpicFightMod {
@@ -154,12 +149,12 @@ public class EpicFightMod {
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		Models.LOGICAL_SERVER.loadArmatures(null);
-		this.animationManager.loadAnimationsInit(null);
+		//Models.LOGICAL_SERVER.loadArmatures(null);
+		//this.animationManager.loadAnimationsInit(null);
 		this.animatorProvider = ServerAnimator::getAnimator;
 		this.model = Models.LOGICAL_SERVER;
 	}
-	
+
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
 		event.enqueueWork(this.animationManager::registerAnimations);
 		event.enqueueWork(EpicFightCapabilities::registerCapabilities);

@@ -27,7 +27,7 @@ public class DustParticle extends SpriteTexturedParticle {
 	    this.bCol = 1.0F;
 	    this.quadSize = (physicsType == DustParticle.PhysicsType.NORMAL ? this.random.nextFloat() * 0.01F + 0.01F : this.random.nextFloat() * 0.02F + 0.02F);
 		this.lifetime = (physicsType == DustParticle.PhysicsType.NORMAL ? 12 : 2) + this.random.nextInt(6);
-		this.hasPhysics = physicsType == DustParticle.PhysicsType.NORMAL ? true : false;
+		this.hasPhysics = physicsType == PhysicsType.NORMAL;
 		this.gravity = physicsType == DustParticle.PhysicsType.NORMAL ? 0.68F : 0.0F;
 		float angle = this.random.nextFloat() * 360.0F;
 		this.roll = angle;

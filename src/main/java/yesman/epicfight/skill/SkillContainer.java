@@ -193,15 +193,15 @@ public class SkillContainer {
 	}
 	
 	public boolean hasSkill(Skill skill) {
-		return this.containingSkill != null ? this.containingSkill.equals(skill) : false;
+		return this.containingSkill != null && this.containingSkill.equals(skill);
 	}
 	
 	public boolean isFull() {
-		return this.containingSkill != null ? this.stack >= this.containingSkill.maxStackSize : true;
+		return this.containingSkill == null || this.stack >= this.containingSkill.maxStackSize;
 	}
 	
 	public boolean isReady() {
-		return this.containingSkill != null ? this.stack > 0 : true;
+		return this.containingSkill == null || this.stack > 0;
 	}
 	
 	public float getResource(float partialTicks) {

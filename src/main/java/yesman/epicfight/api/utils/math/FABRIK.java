@@ -103,7 +103,7 @@ public class FABRIK {
 		return list;
 	}
 	
-	class Chain {
+	static class Chain {
 		final String jointName;
 		float length;
 		Vec3f tail;

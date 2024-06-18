@@ -449,12 +449,12 @@ public class RenderEngine {
 											float weaponSpeed = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_SPEED).getBaseValue();
 
 											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_SPEED)) {
-												weaponSpeed += modifier.getAmount();
+												weaponSpeed += (float) modifier.getAmount();
 											}
 
 											if (itemCapability != null) {
 												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlotType.MAINHAND, playerpatch).get(Attributes.ATTACK_SPEED)) {
-													weaponSpeed += modifier.getAmount();
+													weaponSpeed += (float) modifier.getAmount();
 												}
 											}
 
@@ -465,13 +465,13 @@ public class RenderEngine {
 											weaponDamage += EnchantmentHelper.getDamageBonus(event.getItemStack(), CreatureAttribute.UNDEFINED);
 
 											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
-												weaponDamage += modifier.getAmount();
+												weaponDamage += (float) modifier.getAmount();
 											}
 
 											if (itemCapability != null) {
 
 												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlotType.MAINHAND, playerpatch).get(Attributes.ATTACK_DAMAGE)) {
-													weaponDamage += modifier.getAmount();
+													weaponDamage += (float) modifier.getAmount();
 												}
 											}
 

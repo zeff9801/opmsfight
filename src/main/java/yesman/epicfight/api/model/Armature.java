@@ -43,7 +43,7 @@ public class Armature {
 
 	protected Joint getOrLogException(Map<String, Joint> jointMap, String name) {
 		if (!jointMap.containsKey(name)) {
-			EpicFightMod.LOGGER.debug("Cannot find the joint named " + name + " in " + this.getClass().getCanonicalName());
+            EpicFightMod.LOGGER.debug("Cannot find the joint named {} in {}", name, this.getClass().getCanonicalName());
 
 			return Joint.EMPTY;
 		}

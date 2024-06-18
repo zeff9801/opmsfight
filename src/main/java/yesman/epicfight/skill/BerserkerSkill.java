@@ -63,7 +63,7 @@ public class BerserkerSkill extends PassiveSkill {
 	public void drawOnGui(BattleModeGui gui, SkillContainer container, MatrixStack matStackIn, float x, float y, float scale, int width, int height) {
 		matStackIn.pushPose();
 		matStackIn.scale(scale, scale, 1.0F);
-		matStackIn.translate(0, (float)gui.getSlidingProgression() * 1.0F / scale, 0);
+		matStackIn.translate(0, (float) gui.getSlidingProgression() / scale, 0);
 		
 		Minecraft mc = Minecraft.getInstance();
 		mc.textureManager.bind(this.getSkillTexture());

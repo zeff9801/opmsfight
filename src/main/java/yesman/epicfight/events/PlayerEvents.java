@@ -144,7 +144,7 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void attackEntityEvent(AttackEntityEvent event) {
-		boolean isLivingTarget = event.getTarget() instanceof LivingEntity ? ((LivingEntity)event.getTarget()).attackable() : false;
+		boolean isLivingTarget = event.getTarget() instanceof LivingEntity && ((LivingEntity) event.getTarget()).attackable();
 		if (!event.getEntity().level.getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget) {
 			event.setCanceled(true);
 		}

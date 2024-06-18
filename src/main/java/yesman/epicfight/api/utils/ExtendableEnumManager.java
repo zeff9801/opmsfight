@@ -27,10 +27,10 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 
 	public void registerEnumCls(String modid, Class<?> cls) {
 		if (this.enums.containsKey(modid)) {
-			EpicFightMod.LOGGER.error(modid + " is already registered in " + this.enumName);
+            EpicFightMod.LOGGER.error("{} is already registered in {}", modid, this.enumName);
 		}
 
-		EpicFightMod.LOGGER.debug("Registered Extendable Enum " + cls +" in " + this.enumName);
+        EpicFightMod.LOGGER.debug("Registered Extendable Enum {} in {}", cls, this.enumName);
 
 		this.enums.put(modid, cls);
 	}
@@ -47,16 +47,16 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 				Method m = cls.getMethod("values");
 				m.invoke(null);
 
-				EpicFightMod.LOGGER.debug("Loaded enums in " + cls);
+                EpicFightMod.LOGGER.debug("Loaded enums in {}", cls);
 			}
 		} catch (ClassCastException e) {
-			EpicFightMod.LOGGER.error(cls.getCanonicalName() + " is not an ExtendableEnum!");
+            EpicFightMod.LOGGER.error("{} is not an ExtendableEnum!", cls.getCanonicalName());
 			e.printStackTrace();
 		} catch (NoSuchMethodException e) {
-			EpicFightMod.LOGGER.error(cls.getCanonicalName() + " is not an Enum class!");
+            EpicFightMod.LOGGER.error("{} is not an Enum class!", cls.getCanonicalName());
 			e.printStackTrace();
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.warn("Error while loading extendable enum " + cls.getCanonicalName());
+            EpicFightMod.LOGGER.warn("Error while loading extendable enum {}", cls.getCanonicalName());
 			e.printStackTrace();
 		}
 	}

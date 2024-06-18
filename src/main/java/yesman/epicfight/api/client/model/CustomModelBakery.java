@@ -63,7 +63,7 @@ public class CustomModelBakery {
 			out.putNextEntry(zipEntry);
 			out.write(gson.toJson(entry.getValue().getMesh().toJsonObject()).getBytes());
 			out.closeEntry();
-			EpicFightMod.LOGGER.info("Exported custom armor model : " + entry.getKey());
+            EpicFightMod.LOGGER.info("Exported custom armor model : {}", entry.getKey());
 		}
 		
 		ZipEntry zipEntry = new ZipEntry("pack.mcmeta");

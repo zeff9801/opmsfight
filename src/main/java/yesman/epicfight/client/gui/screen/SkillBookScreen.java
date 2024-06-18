@@ -44,7 +44,7 @@ public class SkillBookScreen extends Screen {
 		LocalPlayerPatch playerpatch = (LocalPlayerPatch) this.opener.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		boolean isUsing = this.skill.equals(playerpatch.getSkill(this.skill.getCategory()).getSkill());
 		Skill priorSkill = this.skill.getPriorSkill();
-		boolean condition = priorSkill == null ? true : playerpatch.getSkill(priorSkill.getCategory()).getSkill() == priorSkill;
+		boolean condition = priorSkill == null || playerpatch.getSkill(priorSkill.getCategory()).getSkill() == priorSkill;
 		Button.ITooltip tooltip = Button.NO_TOOLTIP;
 		
 		if (!isUsing) {
@@ -100,23 +100,22 @@ public class SkillBookScreen extends Screen {
 		
 		String skillName = new TranslationTextComponent(translationName).getString();
 		int width = this.font.width(skillName);
-		this.font.draw(matrixStack, skillName, posX + 50 - width / 2, posY + 115, 0);
+		this.font.draw(matrixStack, skillName, posX + 50 - (float) width / 2, posY + 115, 0);
 		
 		String skillCategory = String.format("(%s)", new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
-		this.font.draw(matrixStack, skillCategory, posX + 50 - width / 2, posY + 130, 0);
+		this.font.draw(matrixStack, skillCategory, posX + 50 - (float) width / 2, posY + 130, 0);
 		
 		List<IReorderingProcessor> list = this.font.split(new TranslationTextComponent(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
 		int height = posY + 20;
-		
-		for (int l1 = 0; l1 < list.size(); ++l1) {
-			IReorderingProcessor ireorderingprocessor1 = list.get(l1);
+
+        for (IReorderingProcessor ireorderingprocessor1 : list) {
             if (ireorderingprocessor1 != null) {
-               this.font.draw(matrixStack, ireorderingprocessor1, posX + 105, height, 0);
+                this.font.draw(matrixStack, ireorderingprocessor1, posX + 105, height, 0);
             }
-            
-            height+=10;
-		}
+
+            height += 10;
+        }
 		
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
