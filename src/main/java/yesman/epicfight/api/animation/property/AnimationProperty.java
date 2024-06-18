@@ -11,10 +11,13 @@ import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
+import yesman.epicfight.api.utils.TimePairList;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
+
 
 public abstract class AnimationProperty<T> {
 	public static class StaticAnimationProperty<T> extends AnimationProperty<T> {
@@ -75,7 +78,79 @@ public abstract class AnimationProperty<T> {
 		 */
 		public static final MoveCoordFunctions<Boolean> CANCELABLE_MOVE = new MoveCoordFunctions<Boolean>();
 	}
-	
+	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
+		/**
+		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
+		 */
+		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * This property will move entity's coord also as y-axis if true.
+		 * Don't recommend using this property because it's old system. Use the coord joint instead.
+		 */
+		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * This property determines the time of entity not affected by gravity.
+		 */
+		public static final ActionAnimationProperty<TimePairList> NO_GRAVITY_TIME = new ActionAnimationProperty<TimePairList> ();
+
+		/**
+		 * Coord of action animation
+		 */
+		public static final ActionAnimationProperty<TransformSheet> COORD = new ActionAnimationProperty<TransformSheet> ();
+
+		/**
+		 * This property determines whether to move the entity in link animation or not.
+		 */
+		public static final ActionAnimationProperty<Boolean> MOVE_ON_LINK = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * You can specify the coord movement time in action animation. Must be registered in order of time.
+		 */
+		public static final ActionAnimationProperty<TimePairList> MOVE_TIME = new ActionAnimationProperty<TimePairList> ();
+
+		/**
+		 * Set the dynamic coordinates of action animation.
+		 */
+		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<MoveCoordSetter> ();
+
+		/**
+		 * Set the dynamic coordinates of action animation.
+		 */
+		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<MoveCoordSetter> ();
+
+		/**
+		 * Set the coordinates of action animation.
+		 */
+		public static final ActionAnimationProperty<MoveCoordGetter> COORD_GET = new ActionAnimationProperty<MoveCoordGetter> ();
+
+		/**
+		 * This property determines if the speed effect will increase the move distance.
+		 */
+		public static final ActionAnimationProperty<Boolean> AFFECT_SPEED = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * This property determines if the movement can be canceled by {@link LivingEntityPatch#shouldBlockMoving()}.
+		 */
+		public static final ActionAnimationProperty<Boolean> CANCELABLE_MOVE = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * Death animations won't be played if this value is true
+		 */
+		public static final ActionAnimationProperty<Boolean> IS_DEATH_ANIMATION = new ActionAnimationProperty<Boolean> ();
+
+		/**
+		 * This property determines the update time of {@link ActionAnimationProperty#COORD_SET_TICK}
+		 */
+		public static final ActionAnimationProperty<TimePairList> COORD_UPDATE_TIME = new ActionAnimationProperty<TimePairList> ();
+
+		/**
+		 * This property determines if it reset the player baic attack combo counter or not {@link BasicAttack}
+		 */
+		public static final ActionAnimationProperty<Boolean> RESET_PLAYER_COMBO_COUNTER = new ActionAnimationProperty<Boolean> ();
+	}
+
 	@FunctionalInterface
 	public interface MoveCoordSetter {
 		public void set(DynamicAnimation self, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
@@ -110,13 +185,14 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * This property adds colliders when detecting hit entity by @MultiCollider.
 		 */
-		public static final AttackAnimationProperty<Integer> COLLIDER_ADDER = new AttackAnimationProperty<Integer> ();
+		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ();
 
 		public static final MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
 			transformSheet.readFrom(self.getCoord().copyAll());
 		};
 	}
-	
+
+
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {
 		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES_MODIFIER = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<ValueModifier> DAMAGE = new AttackPhaseProperty<ValueModifier> ();

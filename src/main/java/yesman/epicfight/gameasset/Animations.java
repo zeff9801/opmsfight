@@ -4,11 +4,9 @@ import java.util.function.Consumer;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
@@ -469,7 +467,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null,toolR, "biped/combat/tachi_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 3);
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 3);
 		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, toolR, "biped/combat/tachi_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, toolR, "biped/combat/tachi_auto3", biped)
@@ -478,18 +476,18 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null,toolR, "biped/skill/rushing_tempo1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, toolR, "biped/skill/rushing_tempo2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null,toolR, "biped/skill/rushing_tempo3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 2)
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
@@ -568,7 +566,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 1);
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 1);
 
 		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", biped,
 				new Phase(0.0F, 0.2F, 0.31F, 0.4F, 0.4F, toolR, null), new Phase(0.4F, 0.5F, 0.61F, 0.65F, 0.65F, Hand.OFF_HAND, toolL, null),

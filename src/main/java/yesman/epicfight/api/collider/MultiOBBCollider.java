@@ -30,7 +30,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void draw(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
-		int numberOf = Math.max(Math.round((this.numberOfColliders + animation.getProperty(AttackAnimationProperty.COLLIDER_ADDER).orElse(0)) * attackSpeed), 1);
+		int numberOf = Math.max(Math.round((this.numberOfColliders + animation.getProperty(AttackAnimationProperty.EXTRA_COLLIDERS).orElse(0)) * attackSpeed), 1);
 		float partialScale = 1.0F / (numberOf - 1);
 		float interpolation = 0.0F;
 		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
