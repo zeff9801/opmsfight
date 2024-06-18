@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import com.mojang.datafixers.util.Pair;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
@@ -38,6 +39,7 @@ public abstract class Animator {
 	public abstract AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation);
 	public abstract void init();
 	public abstract void poseTick();
+	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
 
 	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
 		this.playAnimation(EpicFightMod.getInstance().animationManager.byId(namespaceId, id), convertTimeModifier);

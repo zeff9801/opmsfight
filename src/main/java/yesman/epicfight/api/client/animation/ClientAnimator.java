@@ -17,6 +17,7 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -176,7 +177,20 @@ public class ClientAnimator extends Animator {
 		this.prevPose = this.currentPose;
 		this.currentPose = this.getComposedLayerPose(1.0F);
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (animationType.isAssignableFrom(layer.animationPlayer.getAnimation().getClass())) {
+				return Pair.of(layer.animationPlayer, (T)layer.animationPlayer.getAnimation());
+			}
+		}
+
+		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T)this.baseLayer.animationPlayer.getAnimation()) : null;
+	}
+
+
 	@Override
 	public void tick() {
 		this.baseLayer.update(this.entitypatch);
@@ -204,13 +218,14 @@ public class ClientAnimator extends Animator {
 		this.currentMotion = this.entitypatch.currentLivingMotion;
 		this.currentCompositeMotion = this.entitypatch.currentCompositeMotion;
 	}
-	
+
 	@Override
 	public void playDeathAnimation() {
-		this.playAnimation(this.livingAnimations.get(LivingMotions.DEATH), 0.0F);
-		this.currentMotion = LivingMotions.DEATH;
+		if (!this.getPlayerFor(null).getAnimation().getProperty(AnimationProperty.ActionAnimationProperty.IS_DEATH_ANIMATION).orElse(false)) {
+			this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.DUMMY_ANIMATION), 0.0F);
+			this.currentMotion = LivingMotions.DEATH;
+		}
 	}
-	
 	public StaticAnimation getJumpAnimation() {
 		return this.livingAnimations.get(LivingMotions.JUMP);
 	}
@@ -320,7 +335,7 @@ public class ClientAnimator extends Animator {
 	public boolean isAiming() {
 		return this.currentCompositeMotion == LivingMotions.AIM;
 	}
-	
+
 	public void playReboundAnimation() {
 		if (this.compositeLivingAnimations.containsKey(LivingMotions.SHOT)) {
 			this.playAnimation(this.compositeLivingAnimations.get(LivingMotions.SHOT), 0.0F);
@@ -328,15 +343,15 @@ public class ClientAnimator extends Animator {
 			this.resetCompositeMotion();
 		}
 	}
-	
+
 	@Override
 	public AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation) {
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
-			if (layer.animationPlayer.getAnimation().equals(playingAnimation)) {
+			if (layer.animationPlayer.getAnimation().getRealAnimation().equals(playingAnimation)) {
 				return layer.animationPlayer;
 			}
 		}
-		
+
 		return this.baseLayer.animationPlayer;
 	}
 	public void offAllLayers() {

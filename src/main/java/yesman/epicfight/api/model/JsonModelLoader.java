@@ -35,6 +35,8 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.client.model.ModelPart;
+import yesman.epicfight.api.client.model.VertexIndicator;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -50,18 +52,18 @@ public class JsonModelLoader {
 	private ResourceLocation resourceLocation;
 
 	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
-		JsonReader jsonReader = null;
 		this.resourceManager = resourceManager;
 		this.resourceLocation = resourceLocation;
 
+		JsonReader jsonReader = null;
+
 		try {
-			try {
+			if (resourceManager != null) {
+				// Load resource using Minecraft's resource manager
 				IResource resource = resourceManager.getResource(resourceLocation);
 				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-				jsonReader.setLenient(true);
-				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
-			} catch (NoSuchElementException e) {
-				// In this case, reads the animation data from mod.jar (Especially in a server)
+			} else {
+				// Load resource from mod's JAR file
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
 
@@ -72,9 +74,10 @@ public class JsonModelLoader {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
 				jsonReader = new JsonReader(reader);
-				jsonReader.setLenient(true);
-				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
+
+			jsonReader.setLenient(true);
+			this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 		} catch (IOException e) {
 			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
 		} finally {
@@ -87,6 +90,8 @@ public class JsonModelLoader {
 			}
 		}
 	}
+
+
 	@OnlyIn(Dist.CLIENT)
 	public JsonModelLoader(InputStream inputstream, ResourceLocation resourceLocation) throws IOException {
 		JsonReader jsonReader = null;
@@ -134,12 +139,11 @@ public class JsonModelLoader {
 		JsonObject positions = obj.getAsJsonObject("positions");
 		JsonObject normals = obj.getAsJsonObject("normals");
 		JsonObject uvs = obj.getAsJsonObject("uvs");
-		JsonObject parts = obj.getAsJsonObject("parts");
-		JsonObject indices = obj.getAsJsonObject("indices");
 		JsonObject vdincies = obj.getAsJsonObject("vindices");
 		JsonObject weights = obj.getAsJsonObject("weights");
-		JsonObject drawingIndices = obj.getAsJsonObject("indices");
 		JsonObject vcounts = obj.getAsJsonObject("vcounts");
+		JsonObject parts = obj.getAsJsonObject("parts");
+		JsonObject indices = obj.getAsJsonObject("indices");
 
 		float[] positionArray = ParseUtil.toFloatArray(positions.get("array").getAsJsonArray());
 
@@ -163,16 +167,29 @@ public class JsonModelLoader {
 			normalArray[k+2] = normVector.z;
 		}
 
-		int[] drawingIndexArray = ParseUtil.toIntArray(drawingIndices.get("array").getAsJsonArray());
-
-
 		float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
 		int[] animationIndexArray = ParseUtil.toIntArray(vdincies.get("array").getAsJsonArray());
 		float[] weightArray = ParseUtil.toFloatArray(weights.get("array").getAsJsonArray());
 		int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
 
+		Map<String, float[]> arrayMap = Maps.newHashMap();
+		Map<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
 
-		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, drawingIndexArray, vcountArray);
+		arrayMap.put("positions", positionArray);
+		arrayMap.put("normals", normalArray);
+		arrayMap.put("uvs", uvArray);
+		arrayMap.put("weights", weightArray);
+
+		if (parts != null) {
+			for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
+				meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+			}
+		}
+
+		if (indices != null) {
+			meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+		}
+		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, animationIndexArray, vcountArray);
 	}
 
 	public Armature getArmature() {

@@ -149,8 +149,8 @@ public class EpicFightMod {
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		//Models.LOGICAL_SERVER.loadArmatures(null);
-		//this.animationManager.loadAnimationsInit(null);
+		Models.LOGICAL_SERVER.loadArmatures(null);
+		this.animationManager.loadAnimationsInit(null);
 		this.animatorProvider = ServerAnimator::getAnimator;
 		this.model = Models.LOGICAL_SERVER;
 	}
