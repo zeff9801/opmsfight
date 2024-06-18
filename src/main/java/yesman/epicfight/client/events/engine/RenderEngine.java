@@ -9,7 +9,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -77,7 +76,6 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.item.BowCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
@@ -421,9 +419,9 @@ public class RenderEngine {
 
 				if (cap != null && playerpatch != null) {
 					if (ClientEngine.instance.inputController.isKeyDown(EpicFightKeyMappings.SPECIAL_SKILL_TOOLTIP)) {
-						if (cap.getInnateSkill(playerpatch, event.getItemStack()) != null) {
+						if (cap.getInnateSkill(playerpatch) != null) {
 							event.getToolTip().clear();
-							List<ITextComponent> skilltooltip = cap.getInnateSkill(playerpatch, event.getItemStack()).getTooltipOnItem(event.getItemStack(), cap, playerpatch);
+							List<ITextComponent> skilltooltip = cap.getInnateSkill(playerpatch).getTooltipOnItem(event.getItemStack(), cap, playerpatch);
 
 							for (ITextComponent s : skilltooltip) {
 								event.getToolTip().add(s);

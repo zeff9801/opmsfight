@@ -77,7 +77,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		if (source.isBasicAttack()) {
 			SkillContainer container = this.getSkill(SkillCategories.WEAPON_INNATE);
 			
-			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(this, getValidItemInHand(Hand.MAIN_HAND)))) {
+			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(this))) {
 				float value = container.getResource() + amount;
 				
 				if (value > 0.0F) {
@@ -100,7 +100,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
-		mainHandCap.changeWeaponInnateSkill(this, to);
+		mainHandCap.changeWeaponInnateSkill(this);
 		
 		if (hand == Hand.OFF_HAND) {
 			if (!from.isEmpty()) {
