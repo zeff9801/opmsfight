@@ -40,7 +40,7 @@ public class ActiveGuardSkill extends GuardSkill {
 					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT2, Animations.SWORD_GUARD_ACTIVE_HIT3 })
 				.addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (itemCap, playerpatch) ->
 					new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 })
-				.addAdvancedGuardMotion(WeaponCategories.KATANA, (itemCap, playerpatch) ->
+				.addAdvancedGuardMotion(WeaponCategories.UCHIGATANA, (itemCap, playerpatch) ->
 					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 })
 				.addAdvancedGuardMotion(WeaponCategories.TACHI, (itemCap, playerpatch) ->
 					new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 });
@@ -159,7 +159,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgs() {
 		List<Object> list = Lists.<Object>newArrayList();
-		list.add(String.format("%s, %s, %s, %s", WeaponCategories.KATANA, WeaponCategories.LONGSWORD, WeaponCategories.SWORD, WeaponCategories.TACHI).toLowerCase());
+		list.add(String.format("%s, %s, %s, %s", WeaponCategories.UCHIGATANA, WeaponCategories.LONGSWORD, WeaponCategories.SWORD, WeaponCategories.TACHI).toLowerCase());
 		return list;
 	}
 }

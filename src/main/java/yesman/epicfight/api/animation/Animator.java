@@ -3,6 +3,7 @@ package yesman.epicfight.api.animation;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -64,9 +65,11 @@ public abstract class Animator {
 		this.livingAnimations.put(livingMotion, animation);
 	}
 
-	public Set<Map.Entry<LivingMotion, StaticAnimation>> getLivingAnimationEntrySet() {
-		return this.livingAnimations.entrySet();
+
+	public Map<LivingMotion, StaticAnimation> getLivingAnimations() {
+		return ImmutableMap.copyOf(this.livingAnimations);
 	}
+
 
 	public void resetLivingAnimations() {
 		this.livingAnimations.clear();
@@ -82,7 +85,9 @@ public abstract class Animator {
 		armature.initializeTransform();
 		return getBindedJointTransformByIndexInternal(pose, armature.getRootJoint(), new OpenMatrix4f(), pathIndex);
 	}
-
+	public StaticAnimation getLivingAnimation(LivingMotion livingMotion, StaticAnimation defaultGetter) {
+		return this.livingAnimations.getOrDefault(livingMotion, defaultGetter);
+	}
 	private static OpenMatrix4f getBindedJointTransformByIndexInternal(Pose pose, Joint joint, OpenMatrix4f parentTransform, int pathIndex) {
 		JointTransform jt = pose.getOrDefaultTransform(joint.getName());
 		OpenMatrix4f result = jt.getAnimationBindedMatrix(joint, parentTransform);

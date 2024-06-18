@@ -49,7 +49,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		if (executer.isLogicalClient()) {
 			return executer.getSkill(this.getCategory()).isReady() || executer.getOriginal().isCreative();
 		} else {
-			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginal().getVehicle() == null && (!executer.getSkill(this.category).isActivated() || this.activateType == ActivateType.TOGGLE);
+			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer, executer.getValidItemInHand(Hand.MAIN_HAND)) == this && executer.getOriginal().getVehicle() == null && (!executer.getSkill(this.category).isActivated() || this.activateType == ActivateType.TOGGLE);
 		}
 	}
 	

@@ -8,7 +8,7 @@ public enum SkillSlots implements SkillSlot {
     PASSIVE2(SkillCategories.PASSIVE),
     PASSIVE3(SkillCategories.PASSIVE),
     WEAPON_PASSIVE(SkillCategories.WEAPON_PASSIVE),
-    WEAPON_SPECIAL_ATTACK(SkillCategories.WEAPON_INNATE),
+    WEAPON_INNATE(SkillCategories.WEAPON_INNATE),
     GUARD(SkillCategories.GUARD),
     KNOCKDOWN_WAKEUP(SkillCategories.KNOCKDOWN_WAKEUP),
     MOVER(SkillCategories.MOVER),

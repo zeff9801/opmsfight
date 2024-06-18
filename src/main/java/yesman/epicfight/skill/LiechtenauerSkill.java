@@ -147,7 +147,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 		if (executer.isLogicalClient()) {
 			return super.canExecute(executer);
 		} else {
-			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginal().getVehicle() == null;
+			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer, executer.getValidItemInHand(Hand.MAIN_HAND)) == this && executer.getOriginal().getVehicle() == null;
 		}
 	}
 	

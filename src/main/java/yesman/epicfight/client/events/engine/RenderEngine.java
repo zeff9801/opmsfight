@@ -421,9 +421,9 @@ public class RenderEngine {
 
 				if (cap != null && playerpatch != null) {
 					if (ClientEngine.instance.inputController.isKeyDown(EpicFightKeyMappings.SPECIAL_SKILL_TOOLTIP)) {
-						if (cap.getSpecialAttack(playerpatch) != null) {
+						if (cap.getInnateSkill(playerpatch, event.getItemStack()) != null) {
 							event.getToolTip().clear();
-							List<ITextComponent> skilltooltip = cap.getSpecialAttack(playerpatch).getTooltipOnItem(event.getItemStack(), cap, playerpatch);
+							List<ITextComponent> skilltooltip = cap.getInnateSkill(playerpatch, event.getItemStack()).getTooltipOnItem(event.getItemStack(), cap, playerpatch);
 
 							for (ITextComponent s : skilltooltip) {
 								event.getToolTip().add(s);

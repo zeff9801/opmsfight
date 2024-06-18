@@ -186,7 +186,7 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		}
 		
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 	}
 	

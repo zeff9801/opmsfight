@@ -30,8 +30,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import org.apache.http.impl.entity.EntityDeserializer;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -156,6 +158,27 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		}
 	}
 
+	public void onFall(LivingFallEvent event) {
+		if (!this.getOriginal().level.isClientSide() && this.isAirborneState()) {
+			StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
+
+			if (fallAnimation != null) {
+				this.playAnimationSynchronized(fallAnimation, 0);
+			}
+		}
+
+		this.setAirborneState(false);
+	}
+
+	public void setAirborneState(boolean airborne) {
+		this.original.getEntityData().set(AIRBORNE, airborne);
+	}
+	@Override
+	public void onDeath(LivingDeathEvent event) {
+		this.getAnimator().playDeathAnimation();
+		this.currentLivingMotion = LivingMotions.DEATH;
+	}
+
 	@Override
 	public void tick(LivingUpdateEvent event) {
 		this.animator.tick();
@@ -172,10 +195,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
 		return !this.isLogicalClient();
-	}
-	public void onDeath() {
-		this.getAnimator().playDeathAnimation();
-		this.currentLivingMotion = LivingMotions.DEATH;
 	}
 
 	public void updateEntityState() {

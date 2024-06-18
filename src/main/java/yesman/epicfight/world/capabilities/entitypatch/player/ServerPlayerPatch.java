@@ -67,7 +67,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void onStartTracking(ServerPlayerEntity trackingPlayer) {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
 		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
 	}
@@ -77,7 +77,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		if (source.isBasicAttack()) {
 			SkillContainer container = this.getSkill(SkillCategories.WEAPON_INNATE);
 			
-			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getSpecialAttack(this))) {
+			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(this, getValidItemInHand(Hand.MAIN_HAND)))) {
 				float value = container.getResource() + amount;
 				
 				if (value > 0.0F) {
@@ -100,7 +100,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
-		mainHandCap.changeWeaponSpecialSkill(this);
+		mainHandCap.changeWeaponInnateSkill(this, to);
 		
 		if (hand == Hand.OFF_HAND) {
 			if (!from.isEmpty()) {
@@ -148,7 +148,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		}
 		
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
 		this.updatedMotionCurrentTick = true;

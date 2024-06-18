@@ -14,6 +14,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -33,6 +34,7 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.AttackSpeedModifyEvent;
 import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
+import yesman.epicfight.world.entity.eventlistener.FallEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
@@ -67,6 +69,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
+	}
+
+	@Override
+	public void onFall(LivingFallEvent event) {
+		FallEvent fallEvent = new FallEvent(this, event);
+		this.getEventListener().triggerEvents(EventType.FALL_EVENT, fallEvent);
+		super.onFall(event);
+
+		this.setAirborneState(false);
 	}
 
 	@Override
@@ -185,7 +196,16 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public SkillContainer getSkill(int categoryIndex) {
 		return this.getSkillCapability().skillContainers[categoryIndex];
 	}
-	
+	public SkillContainer getSkill(Skill skill) {
+		if (skill == null) {
+			return null;
+		}
+
+		return this.getSkillCapability().skillContainers[skill.getCategory().universalOrdinal()];
+	}
+	public SkillContainer getSkill(SkillSlot slot) {
+		return this.getSkill(slot.universalOrdinal());
+	}
 	public CapabilitySkill getSkillCapability() {
 		return this.original.getCapability(EpicFightCapabilities.CAPABILITY_SKILL).orElse(CapabilitySkill.EMPTY);
 	}

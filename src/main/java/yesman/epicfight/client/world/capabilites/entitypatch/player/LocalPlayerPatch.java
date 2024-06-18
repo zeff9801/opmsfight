@@ -342,10 +342,13 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	@Override
-	public void onDeath() {
-		this.original.xRot = this.lockOnXRot;
-		this.original.yRot = this.lockOnYRot;
+	public void onDeath(LivingDeathEvent event) {
+		super.onDeath(event);
+
+		this.original.xRot = (this.lockOnXRot);
+		this.original.yRot = (this.lockOnYRot);
 	}
+
 
 	/*@Override
 	public void changeModelYRot(float amount) {
