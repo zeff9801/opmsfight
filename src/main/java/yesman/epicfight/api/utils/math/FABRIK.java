@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
+import org.joml.Quaternionf;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -51,16 +52,16 @@ public class FABRIK {
 			this.forward();
 		}
 
-		Quaternion parentQuaternion = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternionf parentQuaternion = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 
 		for (Chain chain : this.chains) {
 			Vector3f tailToHeadM = chain.tailToHead.toMojangVector();
-			tailToHeadM.transform(parentQuaternion);
+			tailToHeadM.transform(QuaternionUtils.toVanillaQuaternion(parentQuaternion));
 			Vec3f tailToHead = Vec3f.fromMojangVector(tailToHeadM);
 			Vec3f tailToNewHead = chain.head.copy().sub(chain.tail);
 			Vec3f axis = Vec3f.cross(tailToNewHead, tailToHead, null).normalise();
 			float radian = Vec3f.getAngleBetween(tailToNewHead, tailToHead);
-			Quaternion rotationQuat = QuaternionUtils.rotation(axis.toMojangVector(), radian);
+			Quaternionf rotationQuat = QuaternionUtils.rotation(axis.toMojangVector(), radian);
 			parentQuaternion = QuaternionUtils.rotation(axis.scale(-1.0F).toMojangVector(), radian);
 
 			JointTransform jt = this.pose.getOrDefaultTransform(chain.jointName);

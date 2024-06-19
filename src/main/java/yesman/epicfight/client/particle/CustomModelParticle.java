@@ -8,12 +8,12 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Quaternionf;
 import yesman.epicfight.api.client.model.ClientModel;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class CustomModelParticle extends Particle {
@@ -54,13 +54,13 @@ public abstract class CustomModelParticle extends Particle {
 	public void prepareDraw(MatrixStack poseStack, float partialTicks) {}
 	
 	protected void setupMatrixStack(MatrixStack poseStack, ActiveRenderInfo camera, float partialTicks) {
-		Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 		float roll = MathHelper.lerp(partialTicks, this.oRoll, this.roll);
 		float pitch = MathHelper.lerp(partialTicks, this.pitchO, this.pitch);
 		float yaw = MathHelper.lerp(partialTicks, this.yawO, this.yaw);
-		rotation.mul(Vector3f.YP.rotation(yaw));
-		rotation.mul(Vector3f.XP.rotation(pitch));
-		rotation.mul(Vector3f.ZP.rotation(roll));
+		rotation.mul(QuaternionUtils.YP.rotation(yaw));
+		rotation.mul(QuaternionUtils.XP.rotation(pitch));
+		rotation.mul(QuaternionUtils.ZP.rotation(roll));
 		
 		Vector3d vec3 = camera.getPosition();
 		float x = (float)(MathHelper.lerp((double)partialTicks, this.xo, this.x) - vec3.x());
@@ -69,7 +69,7 @@ public abstract class CustomModelParticle extends Particle {
 		float scale = (float)MathHelper.lerp((double)partialTicks, this.scaleO, this.scale);
 		
 		poseStack.translate(x, y, z);
-		poseStack.mulPose(rotation);
+		poseStack.mulPose(QuaternionUtils.toVanillaQuaternion(rotation));
 		poseStack.scale(scale, scale, scale);
 	}
 }

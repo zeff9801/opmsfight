@@ -11,6 +11,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -76,8 +77,8 @@ public class AimAnimation extends StaticAnimation {
 			float f = 90.0F;
 			float ratio = (f - Math.abs(entitypatch.getOriginal().xRot)) / f;
 			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
-			MathUtils.mulQuaternion(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginInverse);
+			MathUtils.mulQuaternionf(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}
 	

@@ -186,10 +186,13 @@ public class JsonModelLoader {
 			}
 		}
 
+		int[] indicesArray = new int[]{};
+		
 		if (indices != null) {
-			meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+			indicesArray = ParseUtil.toIntArray(indices.get("array").getAsJsonArray());
+			meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(indicesArray, vcountArray, animationIndexArray)));
 		}
-		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, animationIndexArray, vcountArray);
+		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, indicesArray, vcountArray);
 	}
 
 	public Armature getArmature() {
@@ -410,7 +413,7 @@ public class JsonModelLoader {
 
 			matrix.mulFront(invLocalTransform);
 
-			JointTransform transform = new JointTransform(matrix.toTranslationVector(), matrix.toQuaternion(), matrix.toScaleVector());
+			JointTransform transform = new JointTransform(matrix.toTranslationVector(), matrix.toQuaternionf(), matrix.toScaleVector());
 			keyframeList.add(new Keyframe(timeStamp, transform));
 		}
 

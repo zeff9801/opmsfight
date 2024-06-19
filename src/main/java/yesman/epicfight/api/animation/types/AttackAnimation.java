@@ -39,10 +39,7 @@ import yesman.epicfight.api.utils.EpicFightDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList;
-import yesman.epicfight.api.utils.math.ExtraDamageType;
-import yesman.epicfight.api.utils.math.MathUtils;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.particle.HitParticleType;
@@ -333,11 +330,11 @@ public class AttackAnimation extends ActionAnimation {
 			if (flag) {
 				float pitch = entitypatch.getAttackDirectionPitch();
 				JointTransform chest = pose.getOrDefaultTransform("Chest");
-				chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
+				chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 
 				if (entitypatch instanceof PlayerPatch) {
 					JointTransform head = pose.getOrDefaultTransform("Head");
-					MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
+					MathUtils.mulQuaternionf(QuaternionUtils.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
 				}
 			}
 		});

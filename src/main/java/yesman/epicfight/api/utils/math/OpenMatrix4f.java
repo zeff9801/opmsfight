@@ -4,8 +4,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
+import org.joml.Quaternionf;
 import yesman.epicfight.api.animation.JointTransform;
 
 import javax.annotation.Nullable;
@@ -67,7 +67,7 @@ public class OpenMatrix4f {
 	}
 
 	public OpenMatrix4f(final JointTransform jointTransform) {
-		load(OpenMatrix4f.fromQuaternion(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
+		load(OpenMatrix4f.fromQuaternionf(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
 	}
 
 	public OpenMatrix4f setIdentity() {
@@ -572,11 +572,11 @@ public class OpenMatrix4f {
 		return new Vec3f(matrix.m30, matrix.m31, matrix.m32);
 	}
 
-	public Quaternion toQuaternion() {
-		return OpenMatrix4f.toQuaternion(this);
+	public Quaternionf toQuaternionf() {
+		return OpenMatrix4f.toQuaternionf(this);
 	}
 
-	public static Quaternion toQuaternion(OpenMatrix4f matrix) {
+	public static Quaternionf toQuaternionf(OpenMatrix4f matrix) {
 		float w, x, y, z;
 		float diagonal = matrix.m00 + matrix.m11 + matrix.m22;
 
@@ -606,15 +606,15 @@ public class OpenMatrix4f {
 			z = z4 / 4f;
 		}
 
-		return new Quaternion(x, y, z, w);
+		return new Quaternionf(x, y, z, w);
 	}
 
-	public static OpenMatrix4f fromQuaternion(Quaternion quaternion) {
+	public static OpenMatrix4f fromQuaternionf(Quaternionf Quaternionf) {
 		OpenMatrix4f matrix = new OpenMatrix4f();
-		float x = quaternion.i(); //x
-		float y = quaternion.j(); //y
-		float z = quaternion.k(); //z
-		float w = quaternion.r(); //w
+		float x = Quaternionf.x(); //x
+		float y = Quaternionf.y(); //y
+		float z = Quaternionf.z(); //z
+		float w = Quaternionf.w(); //w
 		float xy = x * y;
 		float xz = x * z;
 		float xw = x * w;
