@@ -65,7 +65,7 @@ public class ClientModBusEvent {
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onParticleRegistry(final ModelBakeEvent event) {
-		ClientEngine.instance.renderEngine.registerRenderer();
+		ClientEngine.getInstance().renderEngine.registerRenderer();
 		WearableItemLayer.clear();
 	}
 }

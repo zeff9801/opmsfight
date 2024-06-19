@@ -57,14 +57,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	public void onConstructed(ClientPlayerEntity entity) {
 		super.onConstructed(entity);
 		this.minecraft = Minecraft.getInstance();
-		ClientEngine.instance.inputController.setPlayerPatch(this);
+		ClientEngine.getInstance().controllEngine.setPlayerPatch(this);
 	}
 
 	@Override
 	public void onJoinWorld(ClientPlayerEntity entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
-			ClientEngine.instance.inputController.unlockHotkeys();
+			ClientEngine.getInstance().controllEngine.unlockHotkeys();
 		});
 	}
 
@@ -79,7 +79,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		if (!this.getClientAnimator().isAiming()) {
 			if (this.currentCompositeMotion == LivingMotions.AIM) {
 				this.original.getUseItemRemainingTicks();
-				ClientEngine.instance.renderEngine.zoomIn();
+				ClientEngine.getInstance().renderEngine.zoomIn();
 				}
 		}
 	}
@@ -90,7 +90,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		super.clientTick(event);
 
 		RayTraceResult cameraHitResult = this.minecraft.hitResult;
-		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
+		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 
 		if (renderEngine.isPlayerRotationLocked()) {
 			double pickRange = this.minecraft.gameMode.getPickRange();
@@ -192,7 +192,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	@Override
 	protected void playReboundAnimation() {
 		super.playReboundAnimation();
-		ClientEngine.instance.renderEngine.zoomOut(40);
+		ClientEngine.getInstance().renderEngine.zoomOut(40);
 	}
 
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
@@ -235,7 +235,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	@Override
 	public void toMiningMode(boolean synchronize) {
 		if (this.playerMode != PlayerMode.MINING) {
-			ClientEngine.instance.renderEngine.downSlideSkillUI();
+			ClientEngine.getInstance().renderEngine.downSlideSkillUI();
 			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(PointOfView.FIRST_PERSON);
 			}
@@ -251,7 +251,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	@Override
 	public void toBattleMode(boolean synchronize) {
 		if (this.playerMode != PlayerMode.BATTLE) {
-			ClientEngine.instance.renderEngine.upSlideSkillUI();
+			ClientEngine.getInstance().renderEngine.upSlideSkillUI();
 
 			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(PointOfView.THIRD_PERSON_BACK);
@@ -272,7 +272,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	@Override
 	public boolean shouldBlockMoving() {
-		return ClientEngine.instance.inputController.isKeyDown(this.minecraft.options.keyDown);
+		return ClientEngine.getInstance().controllEngine.isKeyDown(this.minecraft.options.keyDown);
 	}
 
 	//@Override
@@ -317,14 +317,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	@Override
 	public float getCameraXRot() {
-		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
+		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 
 		return MathHelper.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedXRot() : super.getCameraXRot());
 	}
 
 	@Override
 	public float getCameraYRot() {
-		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
+		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 
 		return MathHelper.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedYRot() : super.getCameraYRot());
 	}

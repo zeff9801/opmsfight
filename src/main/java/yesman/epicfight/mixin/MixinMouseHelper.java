@@ -65,7 +65,7 @@ public class MixinMouseHelper {
 			
 			if (this.minecraft.player != null) {
 				LocalPlayerPatch playerpatch = (LocalPlayerPatch)this.minecraft.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-				RenderEngine renderEngine = ClientEngine.instance.renderEngine;
+				RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 				
 				if (!playerpatch.getEntityState().turningLocked() || this.minecraft.player.isRidingJumpable()) {
 					

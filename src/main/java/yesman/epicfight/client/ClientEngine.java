@@ -12,30 +12,45 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEngine {
-	public static ClientEngine instance;
+	private static ClientEngine instance;
+
+	public static ClientEngine getInstance() {
+		return instance;
+	}
+
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
-	public ControllEngine inputController;
-	private boolean armorModelDebuggingMode;
-	
+	public ControllEngine controllEngine;
+	private boolean armorModelDebuggingMode = false;
+
 	public ClientEngine() {
 		instance = this;
 		this.minecraft = Minecraft.getInstance();
 		this.renderEngine = new RenderEngine();
-		this.inputController = new ControllEngine();
+		this.controllEngine = new ControllEngine();
 	}
-	
+
 	public boolean switchArmorModelDebuggingMode() {
 		this.armorModelDebuggingMode = !this.armorModelDebuggingMode;
 		return this.armorModelDebuggingMode;
 	}
-	
+
 	public boolean isArmorModelDebuggingMode() {
 		return this.armorModelDebuggingMode;
 	}
-	
+
 	@Nullable
 	public LocalPlayerPatch getPlayerPatch() {
-		return (LocalPlayerPatch) this.minecraft.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		return EpicFightCapabilities.getEntityPatch(this.minecraft.player, LocalPlayerPatch.class);
+	}
+
+	public boolean isBattleMode() {
+		LocalPlayerPatch localPlayerPatch = EpicFightCapabilities.getEntityPatch(this.minecraft.player, LocalPlayerPatch.class);
+
+		if (localPlayerPatch == null) {
+			return false;
+		}
+
+		return localPlayerPatch.isBattleMode();
 	}
 }

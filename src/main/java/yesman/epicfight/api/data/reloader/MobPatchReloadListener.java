@@ -90,7 +90,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 			TAGMAP.put(entityType, filterClientData(tag));
 			
 			if (EpicFightMod.isPhysicalClient()) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
+				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}
@@ -537,7 +537,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			
 			if (!disabled) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
+				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}

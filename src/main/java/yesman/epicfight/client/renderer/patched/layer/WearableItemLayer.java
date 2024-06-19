@@ -113,7 +113,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private ClientModel getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlotType slot) {
 		ResourceLocation registryName = armorItem.getRegistryName();
-		boolean debuggingMode = ClientEngine.instance.isArmorModelDebuggingMode();
+		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
 			return ARMOR_MODELS.get(registryName);

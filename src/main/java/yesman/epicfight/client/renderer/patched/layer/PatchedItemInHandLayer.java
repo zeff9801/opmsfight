@@ -21,7 +21,7 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, LayerRenderer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 		ItemStack mainHandStack = entitypatch.getOriginal().getMainHandItem();
-		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
+		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 		
 		if (mainHandStack.getItem() != Items.AIR) {
 			if (entitypatch.getOriginal().getVehicle() != null) {

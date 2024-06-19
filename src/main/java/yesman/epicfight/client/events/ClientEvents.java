@@ -136,7 +136,7 @@ public class ClientEvents {
 			ItemCapabilityReloadListener.reset();
 			ProviderItem.clear();
 			ProviderEntity.clear();
-			ClientEngine.instance.renderEngine.clearCustomEntityRenerer();
+			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
 		}
 	}
 }

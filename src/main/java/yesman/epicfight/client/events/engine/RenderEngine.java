@@ -217,7 +217,7 @@ public class RenderEngine {
 	}
 
 	private void setRangedWeaponThirdPerson(CameraSetup event, PointOfView pov, double partialTicks) {
-		if (ClientEngine.instance.getPlayerPatch() == null) {
+		if (ClientEngine.getInstance().getPlayerPatch() == null) {
 			return;
 		}
 
@@ -237,7 +237,7 @@ public class RenderEngine {
 			double entityPosZ = entity.zOld + (entity.getZ() - entity.zOld) * partialTicks;
 			float intpol = pov == PointOfView.THIRD_PERSON_BACK ? ((float) zoomCount / (float) zoomMaxCount) : 0;
 			Vec3f interpolatedCorrection = new Vec3f(AIMING_CORRECTION.x * intpol, AIMING_CORRECTION.y * intpol, AIMING_CORRECTION.z * intpol);
-			OpenMatrix4f rotationMatrix = ClientEngine.instance.getPlayerPatch().getMatrix((float)partialTicks);
+			OpenMatrix4f rotationMatrix = ClientEngine.getInstance().getPlayerPatch().getMatrix((float)partialTicks);
 			Vec3f rotateVec = OpenMatrix4f.transform3v(rotationMatrix, interpolatedCorrection, null);
 			double d3 = Math.sqrt((rotateVec.x * rotateVec.x) + (rotateVec.y * rotateVec.y) + (rotateVec.z * rotateVec.z));
 			double smallest = d3;
@@ -316,14 +316,14 @@ public class RenderEngine {
 	}
 
 	public void correctCamera(CameraSetup event, float partialTicks) {
-		LocalPlayerPatch localPlayerPatch = ClientEngine.instance.getPlayerPatch();
+		LocalPlayerPatch localPlayerPatch = ClientEngine.getInstance().getPlayerPatch();
 		ActiveRenderInfo camera = event.getInfo();
 		PointOfView cameraType = this.minecraft.options.getCameraType();
 
 		if (localPlayerPatch != null) {
 			if (localPlayerPatch.getTarget() != null && localPlayerPatch.isTargetLockedOn()) {
-				float xRot = localPlayerPatch.getLerpedLockOnX(partialTicks);
-				float yRot = localPlayerPatch.getLerpedLockOnY(partialTicks);
+				float xRot = localPlayerPatch.getLerpedLockOnX(event.getRenderPartialTicks());
+				float yRot = localPlayerPatch.getLerpedLockOnY(event.getRenderPartialTicks());
 
 				if (cameraType.isMirrored()) {
 					yRot += 180.0F;
@@ -400,12 +400,12 @@ public class RenderEngine {
 				}
 			}
 
-			if (ClientEngine.instance.getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+			if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
 
 				for (EntityIndicator entityIndicator : EntityIndicator.ENTITY_INDICATOR_RENDERERS) {
-					if (entityIndicator.shouldDraw(livingentity, entitypatch, ClientEngine.instance.getPlayerPatch())) {
-						entityIndicator.drawIndicator(livingentity, entitypatch, ClientEngine.instance.getPlayerPatch(), event.getMatrixStack(), event.getBuffers(), event.getPartialRenderTick());
+					if (entityIndicator.shouldDraw(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch())) {
+						entityIndicator.drawIndicator(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch(), event.getMatrixStack(), event.getBuffers(), event.getPartialRenderTick());
 					}
 				}
 			}
@@ -418,7 +418,7 @@ public class RenderEngine {
 				LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 
 				if (cap != null && playerpatch != null) {
-					if (ClientEngine.instance.inputController.isKeyDown(EpicFightKeyMappings.SPECIAL_SKILL_TOOLTIP)) {
+					if (ClientEngine.getInstance().controllEngine.isKeyDown(EpicFightKeyMappings.SPECIAL_SKILL_TOOLTIP)) {
 						if (cap.getInnateSkill(playerpatch) != null) {
 							event.getToolTip().clear();
 							List<ITextComponent> skilltooltip = cap.getInnateSkill(playerpatch).getTooltipOnItem(event.getItemStack(), cap, playerpatch);
@@ -510,7 +510,7 @@ public class RenderEngine {
 		public static void renderGameOverlayPre(RenderGameOverlayEvent.Pre event) {
 			if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
 				MainWindow window = Minecraft.getInstance().getWindow();
-				LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
+				LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 
 				if (playerpatch != null) {
 					for (SkillContainer skillContainer : playerpatch.getSkillCapability().skillContainers) {
@@ -538,7 +538,7 @@ public class RenderEngine {
 		@SuppressWarnings("unchecked")
 		@SubscribeEvent
 		public static void renderHand(RenderHandEvent event) {
-			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
+			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 
 			if (playerpatch != null) {
 				boolean isBattleMode = playerpatch.isBattleMode();

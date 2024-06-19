@@ -14,7 +14,7 @@ import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 public abstract class MixinLightTexture {
 	@Inject(at = @At(value = "HEAD"), method = "updateLightTexture(F)V", cancellable = true)
 	private void epicfight_head_updateLightTexture(CallbackInfo info) {
-		OverlayManager overlayManager = ClientEngine.instance.renderEngine.getOverlayManager();
+		OverlayManager overlayManager = ClientEngine.getInstance().renderEngine.getOverlayManager();
 		
 		if (overlayManager.isGammaChanged()) {
 			Minecraft minecraft = Minecraft.getInstance();
@@ -24,7 +24,7 @@ public abstract class MixinLightTexture {
 	
 	@Inject(at = @At(value = "TAIL"), method = "updateLightTexture(F)V", cancellable = true)
 	private void epicfight_tail_updateLightTexture(CallbackInfo info) {
-		OverlayManager overlayManager = ClientEngine.instance.renderEngine.getOverlayManager();
+		OverlayManager overlayManager = ClientEngine.getInstance().renderEngine.getOverlayManager();
 		
 		if (overlayManager.isGammaChanged()) {
 			Minecraft minecraft = Minecraft.getInstance();

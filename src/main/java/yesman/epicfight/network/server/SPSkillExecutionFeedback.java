@@ -52,7 +52,7 @@ public class SPSkillExecutionFeedback {
 	
 	public static void handle(SPSkillExecutionFeedback msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
+			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 			
 			if (playerpatch != null) {
 				if (!msg.active) {

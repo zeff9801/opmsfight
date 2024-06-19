@@ -116,7 +116,7 @@ public class PlayerEvents {
 	public static void itemUseStopEvent(LivingEntityUseItemEvent.Stop event) {
 		if (event.getEntity().level.isClientSide()) {
 			if (event.getEntity() instanceof ClientPlayerEntity) {
-				ClientEngine.instance.renderEngine.zoomOut(0);
+				ClientEngine.getInstance().renderEngine.zoomOut(0);
 			}
 		} else {
 			if (event.getEntity() instanceof ServerPlayerEntity) {
