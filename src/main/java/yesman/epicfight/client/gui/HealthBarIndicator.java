@@ -76,8 +76,7 @@ public class HealthBarIndicator extends EntityIndicator {
 					ResourceLocation rl;
 
 					if (effect instanceof VisibleMobEffect visibleMobEffect) {
-						//rl = visibleMobEffect.getIcon(effectInstance);
-						rl = ((VisibleMobEffect)effect).getIcon();
+						rl = visibleMobEffect.getIcon(effectInstance);
 					} else {
 						rl = new ResourceLocation(ForgeRegistries.POTIONS.getKey(effect).getNamespace(), "textures/mob_effect/" + ForgeRegistries.POTIONS.getKey(effect).getPath() + ".png");
 					}
