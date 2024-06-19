@@ -116,7 +116,7 @@ public class ClientModel extends Model {
 		}
 	}
 	
-	public void drawAnimatedModelNoTexture(MatrixStack posetStack, IVertexBuilder builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+	public void drawWithPoseNoTexture(MatrixStack posetStack, IVertexBuilder builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
 		Matrix4f matrix4f = posetStack.last().pose();
 		Matrix3f matrix3f = posetStack.last().normal();
 		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];

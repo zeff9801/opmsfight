@@ -85,7 +85,72 @@ public class MathUtils {
 
 		return f1;
 	}
+	public static Quaternionf lerpQuaternion(Quaternionf from, Quaternionf to, float lerpAmount) {
+		float fromX = from.x();
+		float fromY = from.y();
+		float fromZ = from.z();
+		float fromW = from.w();
+		float toX = to.x();
+		float toY = to.y();
+		float toZ = to.z();
+		float toW = to.w();
+		float resultX;
+		float resultY;
+		float resultZ;
+		float resultW;
+		float dot = fromW * toW + fromX * toX + fromY * toY + fromZ * toZ;
+		float blendI = 1.0F - lerpAmount;
 
+		if (dot < 0.0F) {
+			resultW = blendI * fromW + lerpAmount * -toW;
+			resultX = blendI * fromX + lerpAmount * -toX;
+			resultY = blendI * fromY + lerpAmount * -toY;
+			resultZ = blendI * fromZ + lerpAmount * -toZ;
+		} else {
+			resultW = blendI * fromW + lerpAmount * toW;
+			resultX = blendI * fromX + lerpAmount * toX;
+			resultY = blendI * fromY + lerpAmount * toY;
+			resultZ = blendI * fromZ + lerpAmount * toZ;
+		}
+
+		Quaternionf result = new Quaternionf(resultX, resultY, resultZ, resultW);
+		normalizeQuaternion(result);
+		return result;
+	}
+	private static void normalizeQuaternion(Quaternionf quaternion) {
+		float f = quaternion.x() * quaternion.x() + quaternion.y() * quaternion.y() + quaternion.z() * quaternion.z() + quaternion.w() * quaternion.w();
+		if (f > 1.0E-6F) {
+			float f1 = fastInvSqrt(f);
+			setQuaternion(quaternion, quaternion.x() * f1, quaternion.y() * f1, quaternion.z() * f1, quaternion.w() * f1);
+		} else {
+			setQuaternion(quaternion, 0.0F, 0.0F, 0.0F, 0.0F);
+		}
+	}	public static void setQuaternion(Quaternionf quat, float x, float y, float z, float w) {
+		quat.set(x, y, z, w);
+	}
+
+	public static Quaternionf mulQuaternion(Quaternionf left, Quaternionf right, Quaternionf dest) {
+		if (dest == null) {
+			dest = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
+		}
+
+		float f = left.x();
+		float f1 = left.y();
+		float f2 = left.z();
+		float f3 = left.w();
+		float f4 = right.x();
+		float f5 = right.y();
+		float f6 = right.z();
+		float f7 = right.w();
+		float i = f3 * f4 + f * f7 + f1 * f6 - f2 * f5;
+		float j = f3 * f5 - f * f6 + f1 * f7 + f2 * f4;
+		float k = f3 * f6 + f * f5 - f1 * f4 + f2 * f7;
+		float r = f3 * f7 - f * f4 - f1 * f5 - f2 * f6;
+
+		dest.set(i, j, k, r);
+
+		return dest;
+	}
 	public static float rotWrap(double d) {
 		while (d >= 180.0) {
 			d -= 360.0;

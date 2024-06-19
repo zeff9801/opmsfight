@@ -1,4 +1,3 @@
-
 package yesman.epicfight.api.animation;
 
 import java.util.List;
@@ -10,7 +9,6 @@ import org.joml.Quaternionf;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class TransformSheet {
@@ -88,7 +86,7 @@ public class TransformSheet {
 
 	public Quaternionf getInterpolatedRotation(float currentTime) {
 		InterpolationInfo interpolInfo = this.getInterpolationInfo(currentTime);
-		Quaternionf quat = MathUtils.lerpQuaternionf(this.keyframes[interpolInfo.prev].transform().rotation(), this.keyframes[interpolInfo.next].transform().rotation(), interpolInfo.zero2One);
+		Quaternionf quat = MathUtils.lerpQuaternion(this.keyframes[interpolInfo.prev].transform().rotation(), this.keyframes[interpolInfo.next].transform().rotation(), interpolInfo.zero2One);
 		return quat;
 	}
 
@@ -120,8 +118,7 @@ public class TransformSheet {
 
 	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
-		float horizontalDistance = (float) (MathUtils.horizontalDistance(start.subtract(dest)) - (entitypatch.getTarget().getBbWidth()) + entitypatch.getOriginal().getBbWidth() * 0.75F); //TODO don't know if its correct
-
+		float horizontalDistance = (float) dest.distanceTo(start);
 		float verticalDistance = (float) Math.abs(dest.y - start.y);
 		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
 		JointTransform endJt = transform.getKeyframes()[endFrame].transform();
@@ -188,6 +185,13 @@ public class TransformSheet {
 	}
 
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
+		float totalTime = this.keyframes[this.keyframes.length - 1].time();
+		currentTime %= totalTime;
+
+		if (currentTime < 0.0F) {
+			currentTime = totalTime + currentTime;
+		}
+
 		int prev = 0, next = 1;
 
 		for (int i = 1; i < this.keyframes.length; i++) {
@@ -198,9 +202,6 @@ public class TransformSheet {
 			if (this.keyframes.length > next + 1) {
 				prev++;
 				next++;
-			} else {
-                EpicFightMod.LOGGER.error("time exceeded keyframe length. current : {} max : {}", currentTime, this.keyframes[this.keyframes.length - 1].time());
-				new IllegalArgumentException().printStackTrace();
 			}
 		}
 
