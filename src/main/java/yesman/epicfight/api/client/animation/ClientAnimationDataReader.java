@@ -1,18 +1,20 @@
 package yesman.epicfight.api.client.animation;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.resources.IResource;
-import net.minecraft.resources.IResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.GsonHelper;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
+import yesman.epicfight.api.client.animation.property.LayerInfo;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.main.EpicFightMod;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,7 +22,6 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimationDataReader {
@@ -31,29 +32,69 @@ public class ClientAnimationDataReader {
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
 
-	public static void readAndApply(StaticAnimation animation, IResourceManager resourceManager, IResource iresource) {
+	public static void readAndApply(StaticAnimation animation, IResource iresource) {
+		InputStream inputstream = null;
 
-		InputStream inputstream = iresource.getInputStream();
-		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+        inputstream = iresource.getInputStream();
+
+        assert inputstream != null;
+		readAndApply(animation, inputstream);
+	}
+
+	public static void readAndApply(StaticAnimation animation, InputStream resourceReader) {
+		Reader reader = new InputStreamReader(resourceReader, StandardCharsets.UTF_8);
 		ClientAnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
-
-		if (propertySetter.layerInfo != null) {
-			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+		propertySetter.applyClientData(animation);
+	}
+	public void applyClientData(StaticAnimation animation) {
+		if (this.layerInfo != null) {
+			if (this.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, this.layerInfo.jointMaskEntry);
 			}
 
-			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
-		}
+			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.layerInfo.layerType);
+			animation.addProperty(ClientAnimationProperties.PRIORITY, this.layerInfo.priority);
 		}
 
+		if (this.multilayerInfo != null) {
+			//StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_multilayer", animation.getModel().getArmature(), true);
+			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(),animation.isRepeat(),animation.getRegistryName().toString() + "_multilayer",animation.getModel(),true);
+
+			if (this.multilayerInfo.jointMaskEntry.isValid()) {
+				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, this.multilayerInfo.jointMaskEntry);
+			}
+
+			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.multilayerInfo.layerType);
+			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, this.multilayerInfo.priority);
+			multilayerAnimation.addProperty(AnimationProperty.StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
+
+				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
+					return Pair.of(prevElapsedTime, elapsedTime);
+				}
+
+				if (!self.isStaticAnimation() && baseLayer.animationPlayer.getAnimation().isStaticAnimation()) {
+					return Pair.of(prevElapsedTime + speed, elapsedTime + speed);
+				}
+
+				return Pair.of(baseLayer.animationPlayer.getPrevElapsedTime(), baseLayer.animationPlayer.getElapsedTime());
+			});
+
+			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
+		}
+
+		if (!this.trailInfo.isEmpty()) {
+			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, this.trailInfo);
+		}
+	}
 	private ClientAnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
 		this.layerInfo = layerInfo;
 		this.trailInfo = trailInfo;
 	}
 
-	static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
+	@OnlyIn(Dist.CLIENT)
+	public static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
 			return deserializeLayerInfo(jsonObject, null);
 		}
@@ -66,17 +107,24 @@ public class ClientAnimationDataReader {
 			if (jsonObject.has("masks")) {
 				builder.defaultMask(JointMaskEntry.ALL);
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
+
 				maskArray.forEach(element -> {
 					JsonObject jointMaskEntry = element.getAsJsonObject();
 					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
+					String type = GsonHelper.getAsString(jointMaskEntry, "type");
+
+					if (!type.contains(":")) {
+						type = (new StringBuilder(EpicFightMod.MODID)).append(":").append(type).toString();
+					}
 
 					if (livingMotionName.equals("ALL")) {
-						builder.defaultMask(JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.defaultMask(JointMaskReloadListener.getJointMaskEntry(type));
 					} else {
-						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.get(livingMotionName), JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), JointMaskReloadListener.getJointMaskEntry(type));
 					}
 				});
 			}
+
 			return new LayerInfo(builder.create(), priority, (defaultLayerType == null) ? layerType : defaultLayerType);
 		}
 
@@ -103,10 +151,4 @@ public class ClientAnimationDataReader {
 			return new ClientAnimationDataReader(multilayerInfo, layerInfo, trailInfos);
 		}
 	}
-	private static final Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
-
-	public static void registerJointMask(String name, List<JointMask> jointMask) {
-		JOINT_MASKS.put(name, jointMask);
-	}
-
 }

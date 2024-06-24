@@ -1,9 +1,14 @@
 package yesman.epicfight.api.animation.types;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.Optional;
 
 public class ConcurrentLinkAnimation extends DynamicAnimation {
     protected DynamicAnimation nextAnimation;
@@ -66,6 +71,12 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
         return this.nextAnimation.getPlaySpeed(entitypatch);
     }
 
+    @Override
+    public boolean hasTransformFor(String joint) {
+        return this.nextAnimation.hasTransformFor(joint);
+    }
+
+
     public void setNextAnimation(DynamicAnimation animation) {
         this.nextAnimation = animation;
     }
@@ -83,7 +94,11 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
     public boolean isLinkAnimation() {
         return true;
     }
-
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+        return this.nextAnimation.getJointMaskEntry(entitypatch, useCurrentMotion);
+    }
     @Override
     public boolean isReboundAnimation() {
         return this.nextAnimation.isReboundAnimation();

@@ -1,22 +1,17 @@
 package yesman.epicfight.api.client.animation;
 
-import java.util.Arrays;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.types.ConcurrentLinkAnimation;
-import yesman.epicfight.api.animation.types.DynamicAnimation;
-import yesman.epicfight.api.animation.types.LayerOffAnimation;
-import yesman.epicfight.api.animation.types.LinkAnimation;
-import yesman.epicfight.api.animation.types.MainFrameAnimation;
-import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.Arrays;
+import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class Layer {
@@ -146,10 +141,9 @@ public class Layer {
 		layer.resume();
 	}*/
 
-	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
+	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion, float partialTick) {
 		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
-		DynamicAnimation animation = this.animationPlayer.getAnimation();
-		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
+		this.animationPlayer.getAnimation().getJointMaskEntry(entitypatch, useCurrentMotion).ifPresent((jointEntry) -> pose.removeJointIf((entry) -> jointEntry.isMasked(this.getLivingMotion(entitypatch, useCurrentMotion), entry.getKey())));
 
 		return pose;
 	}
@@ -157,7 +151,7 @@ public class Layer {
 	public void off(LivingEntityPatch<?> entitypatch) {
 		if (!this.isDisabled() && !(this.animationPlayer.getAnimation() instanceof LayerOffAnimation)) {
 			float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getConvertTime();
-			setLayerOffAnimation(this.animationPlayer.getAnimation(), this.getEnabledPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
+			setLayerOffAnimation(this.animationPlayer.getAnimation(), this.getEnabledPose(entitypatch, false, 1.0F), this.layerOffAnimation, convertTime);
 			this.playAnimationInstant(this.layerOffAnimation, entitypatch);
 		}
 	}
@@ -171,6 +165,10 @@ public class Layer {
 	@Override
 	public String toString() {
 		return (this.isBaseLayer() ? "" : this.priority) + (this.isBaseLayer() ? " Base Layer : " : " Composite Layer : ") + this.animationPlayer.getAnimation() +" "+ this.animationPlayer.getElapsedTime();
+	}
+
+	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
+		return current ? entitypatch.currentLivingMotion : entitypatch.getClientAnimator().currentMotion();
 	}
 
 	public static class BaseLayer extends Layer {

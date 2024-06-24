@@ -1,28 +1,24 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class DynamicAnimation {
 	protected Map<String, TransformSheet> jointTransforms;
@@ -54,6 +50,10 @@ public abstract class DynamicAnimation {
 		return pose;
 	}
 
+	public boolean hasTransformFor(String joint) {
+		return this.getTransfroms().containsKey(joint);
+	}
+
 	public boolean isStaticAnimation() {
 		return false;
 	}
@@ -74,6 +74,10 @@ public abstract class DynamicAnimation {
 		return pose;
 	}
 
+	@OnlyIn(Dist.CLIENT)
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return Optional.empty();
+	}
 	
 	/** Modify the pose which also modified in link animation. **/
 

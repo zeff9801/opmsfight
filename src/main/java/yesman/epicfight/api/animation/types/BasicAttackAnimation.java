@@ -1,20 +1,21 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.Locale;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.util.Hand;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-import yesman.epicfight.world.gamerule.EpicFightGamerules;
+
+import javax.annotation.Nullable;
+import java.util.Locale;
+import java.util.Optional;
 
 public class BasicAttackAnimation extends AttackAnimation {
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
@@ -83,7 +84,17 @@ public class BasicAttackAnimation extends AttackAnimation {
 
 		return true;
 	}
-	
+	@Override
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		if (entitypatch.isLogicalClient()) {
+			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
+				return Optional.of(JointMaskEntry.BASIC_ATTACK_MASK);
+			}
+		}
+
+		return super.getJointMaskEntry(entitypatch, useCurrentMotion);
+	}
+
 	@Override
 	public boolean isBasicAttackAnimation() {
 		return true;

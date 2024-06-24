@@ -1,13 +1,10 @@
 package yesman.epicfight.api.animation;
 
-import java.io.IOException;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import com.google.common.collect.Maps;
-
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
@@ -16,6 +13,11 @@ import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
 	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
@@ -55,7 +57,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	public StaticAnimation byKey(ResourceLocation rl) {
 		return this.animationByName.get(rl);
 	}
-	
+
 	public StaticAnimation findAnimationByPath(String resourceLocation) {
 		ResourceLocation rl = new ResourceLocation(resourceLocation);
 
@@ -83,7 +85,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		this.animationById.values().forEach((map) -> {
 			map.values().forEach((animation) -> {
 				animation.loadAnimation(resourceManager);
-				this.setAnimationProperties(resourceManager, animation);
+				this.readAnimationProperties(resourceManager, animation);
 			});
 		});
 	}
@@ -93,7 +95,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		if (EpicFightMod.isPhysicalClient()) {
 			this.animationById.values().forEach((map) -> {
 				map.values().forEach((animation) -> {
-					this.setAnimationProperties(resourceManager, animation);
+					this.readAnimationProperties(resourceManager, animation);
 				});
 			});
 		}
@@ -111,26 +113,42 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		});
 	}
 
-	private void setAnimationProperties(IResourceManager resourceManager, StaticAnimation animation) {
-		if (resourceManager == null) {
-			return;
+
+	public static void readAnimationProperties(IResourceManager resourceManager, StaticAnimation animation) {
+		if (resourceManager == null) return;
+		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
+
+		try {
+			Optional<IResource> resourceOptional = Optional.of(resourceManager.getResource(dataLocation));
+			resourceOptional.ifPresent((rs) -> {
+				ClientAnimationDataReader.readAndApply(animation, rs);
+			});
+		} catch (IOException e) {
+			// Handle the exception (e.g., log it, rethrow it, etc.)
+			System.err.println("Failed to get resource: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+
+	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
+		int splitIdx = location.getPath().lastIndexOf('/');
+
+		if (splitIdx < 0) {
+			splitIdx = 0;
 		}
 
-		ResourceLocation location = animation.getLocation();
-		String path = location.getPath();
-		int last = location.getPath().lastIndexOf('/');
+		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
+	}
 
-		if (last > 0) {
-			ResourceLocation dataLocation = new ResourceLocation(location.getNamespace(), String.format("%s/data%s.json", path.substring(0, last), path.substring(last)));
-
-			if (resourceManager.hasResource(dataLocation)) {
-				try {
-					ClientAnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+	private static void reloadResourceManager(IResourceManager pResourceManager) {
+		if (resourceManager != pResourceManager) {
+			resourceManager = pResourceManager;
 		}
+	}
+
+	public static IResourceManager getAnimationResourceManager() {
+		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
 	}
 
 	public String getModid() {

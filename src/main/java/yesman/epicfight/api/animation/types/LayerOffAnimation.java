@@ -1,14 +1,15 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.Optional;
-
 import net.minecraft.client.Minecraft;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer.Priority;
-import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.Optional;
 
 public class LayerOffAnimation extends DynamicAnimation {
 	private DynamicAnimation lastAnimation;
@@ -52,7 +53,14 @@ public class LayerOffAnimation extends DynamicAnimation {
 	public void setLastAnimation(DynamicAnimation animation) {
 		this.lastAnimation = animation;
 	}
-	
+	@Override
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return this.lastAnimation.getJointMaskEntry(entitypatch, useCurrentMotion);
+	}
+	@Override
+	public boolean hasTransformFor(String joint) {
+		return this.lastPose.getJointTransformData().containsKey(joint);
+	}
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.lastAnimation.getBindModifier(entitypatch, joint);

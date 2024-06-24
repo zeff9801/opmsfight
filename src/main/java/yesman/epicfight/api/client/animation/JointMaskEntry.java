@@ -7,6 +7,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.tuple.Pair;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.client.animation.property.JointMask;
 
 import java.util.List;
 import java.util.Map;

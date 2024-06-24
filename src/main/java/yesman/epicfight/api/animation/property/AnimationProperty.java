@@ -1,11 +1,11 @@
 package yesman.epicfight.api.animation.property;
 
-import java.util.function.Function;
-
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -16,7 +16,8 @@ import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
+
+import java.util.function.Function;
 
 
 public abstract class AnimationProperty<T> {
@@ -30,6 +31,10 @@ public abstract class AnimationProperty<T> {
 		 * You can set the fixed play speed of the animation.
 		 */
 		public static final StaticAnimationProperty<Float> PLAY_SPEED = new StaticAnimationProperty<Float> ();
+
+
+		public static final StaticAnimationProperty<PlaybackTimeModifier> ELAPSED_TIME_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
+
 	}
 	
 	public static class MoveCoordFunctions<T> extends AnimationProperty<T> {
@@ -206,5 +211,9 @@ public abstract class AnimationProperty<T> {
 		public static final AttackPhaseProperty<Priority> HIT_PRIORITY = new AttackPhaseProperty<Priority> ();
 		public static final AttackPhaseProperty<Boolean> FINISHER = new AttackPhaseProperty<Boolean> ();
 		public static final AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> SOURCE_LOCATION_PROVIDER = new AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> ();
+	}
+	@FunctionalInterface
+	public interface PlaybackTimeModifier {
+		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
 	}
 }
