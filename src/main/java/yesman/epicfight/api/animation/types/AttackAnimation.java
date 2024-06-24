@@ -312,9 +312,7 @@ public class AttackAnimation extends ActionAnimation {
 			extendedSource.setImpact(opt.getTotalValue(extendedSource.getImpact()));
 		});
 
-		phase.getProperty(AttackPhaseProperty.FINISHER).ifPresent((opt) -> {
-			extendedSource.setFinisher(opt);
-		});
+		phase.getProperty(AttackPhaseProperty.FINISHER).ifPresent(extendedSource::setFinisher);
 
 		phase.getProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER).ifPresent((opt) -> {
 			extendedSource.setInitialPosition(opt.apply(entitypatch));

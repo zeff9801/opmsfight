@@ -672,15 +672,6 @@ public class Animations {
 	@OnlyIn(Dist.CLIENT)
 	public static void buildClient() {
 
-		BIPED_HOLD_KATANA
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		BIPED_WALK_UNSHEATHING
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		BIPED_RUN_UNSHEATHING
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
 		BIPED_RUN_SPEAR
 				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create())
 				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);

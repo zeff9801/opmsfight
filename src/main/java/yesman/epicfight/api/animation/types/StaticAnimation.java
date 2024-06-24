@@ -1,15 +1,7 @@
 
 package yesman.epicfight.api.animation.types;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -34,6 +26,12 @@ import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class StaticAnimation extends DynamicAnimation {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
@@ -218,15 +216,8 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
-			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
-			int position = list.indexOf(JointMask.of(joint));
-			
-			if (position >= 0) {
-				return list.get(position).getBindModifier();
-			} else {
-				return null;
-			}
-		}).orElse(null);
+			JointMask.JointMaskSet list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
+			return list.getBindModifier(joint);}).orElse(null);
 	}
 	
 	@Override

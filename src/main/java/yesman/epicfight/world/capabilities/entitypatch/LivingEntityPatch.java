@@ -541,8 +541,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 
 
+	@OnlyIn(Dist.CLIENT)
 	public ClientAnimator getClientAnimator() {
-		return this.<ClientAnimator>getAnimator();
+		return this.getAnimator();
 	}
 
 	public ServerAnimator getServerAnimator() {
