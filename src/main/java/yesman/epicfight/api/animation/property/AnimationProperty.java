@@ -1,6 +1,6 @@
 package yesman.epicfight.api.animation.property;
 
-import com.mojang.datafixers.util.Pair;
+import com.ibm.icu.impl.Pair;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
@@ -34,6 +34,9 @@ public abstract class AnimationProperty<T> {
 
 
 		public static final StaticAnimationProperty<PlaybackTimeModifier> ELAPSED_TIME_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
+
+		public static final StaticAnimationProperty<PlaybackSpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackSpeedModifier> ();
+
 
 	}
 	
@@ -211,6 +214,10 @@ public abstract class AnimationProperty<T> {
 		public static final AttackPhaseProperty<Priority> HIT_PRIORITY = new AttackPhaseProperty<Priority> ();
 		public static final AttackPhaseProperty<Boolean> FINISHER = new AttackPhaseProperty<Boolean> ();
 		public static final AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> SOURCE_LOCATION_PROVIDER = new AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> ();
+	}
+	@FunctionalInterface
+	public interface PlaybackSpeedModifier {
+		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
 	}
 	@FunctionalInterface
 	public interface PlaybackTimeModifier {

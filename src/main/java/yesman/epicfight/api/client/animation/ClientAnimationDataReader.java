@@ -3,7 +3,7 @@ package yesman.epicfight.api.client.animation;
 import com.google.common.collect.Lists;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.mojang.datafixers.util.Pair;
+import com.ibm.icu.impl.Pair;
 import net.minecraft.resources.IResource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;

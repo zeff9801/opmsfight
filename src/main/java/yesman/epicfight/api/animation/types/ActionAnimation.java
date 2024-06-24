@@ -1,34 +1,34 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.Map;
-
 import net.minecraft.block.BlockState;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.client.animation.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class ActionAnimation extends MainFrameAnimation {
 	
@@ -164,62 +164,124 @@ public class ActionAnimation extends MainFrameAnimation {
 
 		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
 	}
-	
+
 	@Override
-	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
-		float totalTime = convertTimeModifier > 0.0F ? convertTimeModifier : 0.0F + this.convertTime;
-		float nextStart = 0.0F;
-		
-		if (convertTimeModifier < 0.0F) {
-			nextStart -= convertTimeModifier;
-			dest.startsAt = nextStart;
+	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose startPose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+		dest.resetNextStartTime();
+
+		float playTime = this.getPlaySpeed(entitypatch, dest);
+		AnimationProperty.PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(AnimationProperty.StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+
+		if (playSpeedModifier != null) {
+			playTime = playSpeedModifier.modify(this, entitypatch, playTime, 0.0F, playTime);
 		}
-		
+
+		playTime = Math.abs(playTime);
+		playTime *= EpicFightOptions.A_TICK;
+
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float totalTime = playTime * (int)Math.ceil(linkTime / playTime);
+		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
+		nextStartTime += totalTime - linkTime;
+
+		dest.setNextStartTime(nextStartTime);
 		dest.getTransfroms().clear();
-		dest.setTotalTime(totalTime);
-		dest.setNextAnimation(this);
-		Map<String, JointTransform> data1 = pose1.getJointTransformData();
-		Pose pose = this.getPoseByTime(entitypatch, nextStart, 1.0F);
-		JointTransform jt = pose.getOrDefaultTransform("Root");
-		Vec3f withPosition = entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord().getInterpolatedTranslation(nextStart);
-		
-		jt.translation().set(withPosition);
-		Map<String, JointTransform> data2 = pose.getJointTransformData();
-		
-		for (String jointName : data1.keySet()) {
-			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
-				Keyframe[] keyframes = new Keyframe[2];
-				keyframes[0] = new Keyframe(0, data1.get(jointName));
-				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+		dest.setTotalTime(totalTime + 0.001F);
+		dest.setConnectedAnimations(fromAnimation, this);
+
+		Pose nextStartPose = this.getPoseByTime(entitypatch, nextStartTime, 1.0F);
+
+		if (entitypatch.shouldMoveOnCurrentSide(this) && this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
+			this.removeRootTranslation(entitypatch, nextStartPose, nextStartTime);
+		}
+
+		Map<String, JointTransform> data1 = startPose.getJointTransformData();
+		Map<String, JointTransform> data2 = nextStartPose.getJointTransformData();
+		Set<String> joint1 = new HashSet<>(isOnSameLayer ? data1.keySet() : Set.of());
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+
+		if (entitypatch.isLogicalClient()) {
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
+
+			if (entry != null && entitypatch.isLogicalClient()) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+
+			if (entry2 != null && entitypatch.isLogicalClient()) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
+		}
+
+		joint1.addAll(joint2);
+
+		if (linkTime != totalTime) {
+			Pose pose = this.getPoseByTime(entitypatch, 0.0F, 0.0F);
+			Map<String, JointTransform> poseData = pose.getJointTransformData();
+
+			if (entitypatch.shouldMoveOnCurrentSide(this) && this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
+				this.removeRootTranslation(entitypatch, pose, 0.0F);
+			}
+
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[3];
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
+				keyframes[1] = new Keyframe(linkTime, poseData.get(jointName));
+				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+
 				TransformSheet sheet = new TransformSheet(keyframes);
-				dest.addSheet(jointName, sheet);
+				//dest.getAnimationClip().addJointTransform(jointName, sheet);
+				dest.addSheet(jointName,sheet);
+			}
+		} else {
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[2];
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
+				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+
+				TransformSheet sheet = new TransformSheet(keyframes);
+				//dest.getAnimationClip().addJointTransform(jointName, sheet);
+				dest.addSheet(jointName,sheet);
 			}
 		}
 	}
-	
+	public void removeRootTranslation(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {
+		JointTransform jt = pose.getOrDefaultTransform("Root");
+
+		if (this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isEmpty()) {
+			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
+			jt.translation().set(withPosition);
+		} else {
+			TransformSheet coordTransform = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).get();
+			Vec3f nextCoord = coordTransform.getKeyframes()[0].transform().translation();
+			jt.translation().add(0.0F, 0.0F, nextCoord.z);
+		}
+	}
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		if (this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).isPresent()) {
 			AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).orElse(null);
-			
+
 			if (animation instanceof LinkAnimation) {
 				moveCoordSetter.set(animation, entitypatch, animation.jointTransforms.get("Root"));
 			} else {
 				entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, moveCoordSetter);
 			}
 		}
-		
+
 		TransformSheet rootCoord;
-		
+
 		if (animation instanceof LinkAnimation) {
 			rootCoord = animation.jointTransforms.get("Root");
 		} else {
 			rootCoord = entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
-			
+
 			if (rootCoord == null) {
 				rootCoord = animation.jointTransforms.get("Root");
 			}
 		}
-		
+
 		LivingEntity livingentity = entitypatch.getOriginal();
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
 		JointTransform jt = rootCoord.getInterpolatedTransform(player.getElapsedTime());
@@ -238,12 +300,12 @@ public class ActionAnimation extends MainFrameAnimation {
 		float dz = prevpos.z - currentpos.z;
 		dx = Math.abs(dx) > 0.0000001F ? dx : 0.0F;
 		dz = Math.abs(dz) > 0.0000001F ? dz : 0.0F;
-		
+
 		if (moveVertical && currentpos.y > 0.0F && !hasNoGravity) {
 			Vector3d motion = livingentity.getDeltaMovement();
 			livingentity.setDeltaMovement(motion.x, motion.y <= 0 ? (motion.y + 0.08D) : motion.y, motion.z);
 		}
-		
+
 		return new Vec3f(dx, dy, dz);
 	}
 

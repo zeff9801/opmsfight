@@ -67,8 +67,8 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
     }
 
     @Override
-    public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
-        return this.nextAnimation.getPlaySpeed(entitypatch);
+    public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+        return this.nextAnimation.getPlaySpeed(entitypatch, animation);
     }
 
     @Override

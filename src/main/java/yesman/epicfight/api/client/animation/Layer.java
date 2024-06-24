@@ -12,6 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public class Layer {
@@ -25,7 +26,11 @@ public class Layer {
 	public final AnimationPlayer animationPlayer;
 
 	public Layer(Priority priority) {
-		this.animationPlayer = new AnimationPlayer();
+		this(priority, AnimationPlayer::new);
+	}
+
+	public Layer(Priority priority, Supplier<AnimationPlayer> animationPlayerProvider) {
+		this.animationPlayer = animationPlayerProvider.get();
 		this.linkAnimation = new LinkAnimation();
 		this.concurrentLinkAnimation = new ConcurrentLinkAnimation();
 		this.layerOffAnimation = new LayerOffAnimation(priority);
@@ -34,25 +39,29 @@ public class Layer {
 	}
 
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-		Pose lastPose = entitypatch.getAnimator().getPose(1.0F);
-
+		// Get pose before calling end()
+		Pose lastPose = entitypatch.getClientAnimator().getPose(0.0F, false);
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
 
 		if (!nextAnimation.isMetaAnimation()) {
 			this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
-			this.linkAnimation.putOnPlayer(this.animationPlayer);
+			this.linkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
 	}
 
+	/**
+	 * Plays an animation without a link animation
+	 */
 	public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
+
 		nextAnimation.begin(entitypatch);
-		nextAnimation.putOnPlayer(this.animationPlayer);
+		nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 		entitypatch.updateEntityState();
 		this.nextAnimation = null;
 	}
@@ -64,14 +73,20 @@ public class Layer {
 
 		if (!nextAnimation.isMetaAnimation()) {
 			this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
-			this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+			this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
 	}
 
-	protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
-		nextAnimation.setLinkAnimation(lastPose, convertTimeModifier, entitypatch, this.linkAnimation);
+	protected void setLinkAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+		DynamicAnimation fromAnimation = this.animationPlayer.isEmpty() ? entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() : this.animationPlayer.getAnimation();
+
+		if (fromAnimation instanceof LinkAnimation linkAnimation) {
+			fromAnimation = linkAnimation.getFromAnimation();
+		}
+
+		nextAnimation.setLinkAnimation(fromAnimation, lastPose, !this.animationPlayer.isEmpty(), convertTimeModifier, entitypatch, this.linkAnimation);
 	}
 
 	public void update(LivingEntityPatch<?> entitypatch) {
@@ -92,11 +107,11 @@ public class Layer {
 			if (this.nextAnimation != null) {
 				this.animationPlayer.getAnimation().end(entitypatch, this.nextAnimation, true);
 
-				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextAnimation instanceof LinkAnimation)) {
+				if (!this.animationPlayer.getAnimation().isLinkAnimation() && !this.nextAnimation.isLinkAnimation()) {
 					this.nextAnimation.begin(entitypatch);
 				}
 
-				this.nextAnimation.putOnPlayer(this.animationPlayer);
+				this.nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				this.nextAnimation = null;
 			} else {
 				if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
@@ -125,21 +140,9 @@ public class Layer {
 		return false;
 	}
 
-	/*public void copyLayerTo(Layer, float playbackTime) {
-		DynamicAnimation animation;
-
-		if (this.animationPlayer.getAnimation() == this.linkAnimation) {
-			this.linkAnimation.copyTo(layer.linkAnimation);
-			animation = layer.linkAnimation;
-		} else {
-			animation = this.animationPlayer.getAnimation();
-		}
-
-		layer.animationPlayer.setPlayAnimation(animation);
-		layer.animationPlayer.setElapsedTime(this.animationPlayer.getPrevElapsedTime() + playbackTime, this.animationPlayer.getElapsedTime() + playbackTime);
-		layer.nextAnimation = this.nextAnimation;
-		layer.resume();
-	}*/
+	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
+		return current ? entitypatch.currentLivingMotion : entitypatch.getClientAnimator().currentMotion();
+	}
 
 	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion, float partialTick) {
 		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
@@ -162,33 +165,43 @@ public class Layer {
 		offAnimation.setTotalTime(convertTime);
 	}
 
+	public DynamicAnimation getNextAnimation() {
+		return this.nextAnimation;
+	}
+
 	@Override
 	public String toString() {
-		return (this.isBaseLayer() ? "" : this.priority) + (this.isBaseLayer() ? " Base Layer : " : " Composite Layer : ") + this.animationPlayer.getAnimation() +" "+ this.animationPlayer.getElapsedTime();
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(this.isBaseLayer() ? "Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer(" + this.priority + ") : ");
+		sb.append(this.animationPlayer.getAnimation() + " ");
+		sb.append(", prev elapsed time: " + this.animationPlayer.getPrevElapsedTime() + " ");
+		sb.append(", elapsed time: " + this.animationPlayer.getElapsedTime() + " ");
+		sb.append(", total time: " + this.animationPlayer.getAnimation().getTotalTime() + " ");
+
+		return sb.toString();
 	}
 
-	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
-		return current ? entitypatch.currentLivingMotion : entitypatch.getClientAnimator().currentMotion();
-	}
-
+	@OnlyIn(Dist.CLIENT)
 	public static class BaseLayer extends Layer {
 		protected Map<Layer.Priority, Layer> compositeLayers = Maps.newLinkedHashMap();
 		protected Layer.Priority baseLayerPriority;
 
 		public BaseLayer(Layer.Priority priority) {
 			super(priority);
+
 			this.compositeLayers.computeIfAbsent(Priority.LOWEST, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.MIDDLE, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.HIGHEST, Layer::new);
 			this.baseLayerPriority = Priority.LOWEST;
+
 		}
 
 		@Override
 		public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-			Priority priority = nextAnimation.getPriority();
-			this.baseLayerPriority = priority;
 			this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
 			super.playAnimation(nextAnimation, entitypatch, convertTimeModifier);
+			this.baseLayerPriority = nextAnimation.getPriority();
 		}
 
 		@Override
@@ -199,13 +212,13 @@ public class Layer {
 
 			if (!nextAnimation.isMetaAnimation()) {
 				this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
-				this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+				this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				entitypatch.updateEntityState();
 				this.nextAnimation = nextAnimation;
 			}
 		}
 
-        @Override
+		@Override
 		public void update(LivingEntityPatch<?> entitypatch) {
 			super.update(entitypatch);
 
@@ -227,11 +240,15 @@ public class Layer {
 		public void disableLayer(Priority priority) {
 			Layer layer = this.compositeLayers.get(priority);
 			layer.disabled = true;
-			Animations.DUMMY_ANIMATION.putOnPlayer(layer.animationPlayer);
+			layer.animationPlayer.setPlayAnimation(Animations.DUMMY_ANIMATION);
 		}
 
 		public Layer getLayer(Priority priority) {
 			return this.compositeLayers.get(priority);
+		}
+
+		public Priority getBaseLayerPriority() {
+			return this.baseLayerPriority;
 		}
 
 		@Override
@@ -250,10 +267,12 @@ public class Layer {
 		}
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public enum LayerType {
 		BASE_LAYER, COMPOSITE_LAYER
 	}
 
+	@OnlyIn(Dist.CLIENT)
 	public enum Priority {
 		/**
 		 * LOWEST: Common living motions (Composite layer having this priority will be overrided if base layer is {@link MainFrameAnimation})
@@ -268,7 +287,7 @@ public class Layer {
 		}
 
 		public Priority[] uppers() {
-			return Arrays.copyOfRange(Priority.values(), this == LOWEST ? 0 : this.ordinal() + 1, 3);
+			return Arrays.copyOfRange(Priority.values(), this == LOWEST ? this.ordinal() : this.ordinal() + 1, 3);
 		}
 
 		public Priority[] lowerEquals() {

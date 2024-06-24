@@ -57,7 +57,9 @@ public abstract class DynamicAnimation {
 	public boolean isStaticAnimation() {
 		return false;
 	}
-
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		return 1.0F;
+	}
 	public ResourceLocation getRegistryName() {
 		return new ResourceLocation(EpicFightMod.MODID, "");
 	}
@@ -94,12 +96,12 @@ public abstract class DynamicAnimation {
 		float nextStart = isNeg ? -convertTimeModifier : 0.0F;
 		
 		if (isNeg) {
-			dest.startsAt = nextStart;
+			dest.nextStartTime = nextStart;
 		}
 		
 		dest.getTransfroms().clear();
 		dest.setTotalTime(totalTime);
-		dest.setNextAnimation(this);
+		dest.setToAnimation(this);
 		
 		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStart, 1.0F).getJointTransformData();
@@ -114,9 +116,11 @@ public abstract class DynamicAnimation {
 			}
 		}
 	}
-	
-	public void putOnPlayer(AnimationPlayer player) {
-		player.setPlayAnimation(this);
+
+	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
+		animationPlayer.setPlayAnimation(this);
+		animationPlayer.tick(entitypatch);
+		animationPlayer.begin(this, entitypatch);
 	}
 	
 	public void begin(LivingEntityPatch<?> entitypatch) {}
@@ -210,7 +214,7 @@ public abstract class DynamicAnimation {
 	public boolean isReboundAnimation() {
 		return false;
 	}
-	
+
 	public boolean isMetaAnimation() {
 		return false;
 	}

@@ -24,7 +24,10 @@ public class ServerAnimator extends Animator {
 		this.linkAnimation = new LinkAnimation();
 		this.animationPlayer = new AnimationPlayer();
 	}
+	@Override
+	public void init() {
 
+	}
 	/** Play an animation by animation instance **/
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float modifyTime) {
@@ -32,8 +35,8 @@ public class ServerAnimator extends Animator {
 		Pose lastPose = this.animationPlayer.getAnimation().getPoseByTime(this.entitypatch, 0.0F, 0.0F);
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		nextAnimation.setLinkAnimation(lastPose, modifyTime, this.entitypatch, this.linkAnimation);
-		this.linkAnimation.putOnPlayer(this.animationPlayer);
+		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), lastPose, true, modifyTime, this.entitypatch, this.linkAnimation);
+		this.linkAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
 		this.nextPlaying = nextAnimation;
 	}
@@ -43,7 +46,7 @@ public class ServerAnimator extends Animator {
 		this.pause = false;
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		nextAnimation.putOnPlayer(this.animationPlayer);
+		nextAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
 	}
 
@@ -75,18 +78,19 @@ public class ServerAnimator extends Animator {
 			this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, true);
 
 			if (this.nextPlaying == null) {
-				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer);
+				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.pause = true;
 			} else {
 				if (!(this.animationPlayer.getAnimation().isLinkAnimation()) && !(this.nextPlaying.isLinkAnimation())) {
 					this.nextPlaying.begin(this.entitypatch);
 				}
 
-				this.nextPlaying.putOnPlayer(this.animationPlayer);
+				this.nextPlaying.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.nextPlaying = null;
 			}
 		}
 	}
+
 
 	@Override
 	public Pose getPose(float partialTicks) {
@@ -96,11 +100,6 @@ public class ServerAnimator extends Animator {
 	@Override
 	public AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation) {
 		return this.animationPlayer;
-	}
-
-	@Override
-	public void init() {
-
 	}
 
 	@Override

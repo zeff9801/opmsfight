@@ -346,16 +346,18 @@ public class AttackAnimation extends ActionAnimation {
 	}
 
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
-		if (entitypatch instanceof PlayerPatch<?>) {
-			Phase phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+			Phase phase = this.getPhaseByTime(playerpatch.getAnimator().getPlayerFor(this).getElapsedTime());
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
 			Optional<Float> property = this.getProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED);
-			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand) / value).orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand));
+			float correctedSpeed = property.map((value) -> playerpatch.getAttackSpeed(phase.hand) / value).orElse(this.getTotalTime() * playerpatch.getAttackSpeed(phase.hand));
+			correctedSpeed = Math.round(correctedSpeed * 1000.0F) / 1000.0F;
+
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;
-		} else {
-			return 1.0F;
 		}
+
+		return 1.0F;
 	}
 
 	public <V> AttackAnimation addProperty(AttackAnimationProperty<V> propertyType, V value) {

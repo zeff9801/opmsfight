@@ -1,18 +1,22 @@
 package yesman.epicfight.api.animation;
 
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordSetter;
+import com.ibm.icu.impl.Pair;
+import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class AnimationPlayer {
-	private float elapsedTime;
-	private float prevElapsedTime;
-	private boolean isEnd;
-	private boolean doNotResetNext;
-	private boolean reversed;
-	private DynamicAnimation play;
+	protected float elapsedTime;
+	protected float prevElapsedTime;
+	protected boolean isEnd;
+	protected boolean doNotResetNext;
+	protected boolean reversed;
+	protected DynamicAnimation play;
 	private TransformSheet actionAnimationCoord = new TransformSheet();
 
 	public AnimationPlayer() {
@@ -21,12 +25,26 @@ public class AnimationPlayer {
 
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
-		this.elapsedTime += EpicFightOptions.A_TICK * this.getAnimation().getPlaySpeed(entitypatch) *
-				(this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
 
-		if (this.elapsedTime >= this.play.getTotalTime()) {
+		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch, this.getAnimation());
+		PlaybackSpeedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+
+		if (playSpeedModifier != null) {
+			playbackSpeed = playSpeedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
+		}
+
+		this.elapsedTime += EpicFightOptions.A_TICK * playbackSpeed * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
+		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
+
+		if (playTimeModifier != null) {
+			Pair<Float, Float> time = playTimeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
+			this.prevElapsedTime = time.first;
+			this.elapsedTime = time.second;
+		}
+
+		if (this.elapsedTime > this.play.getTotalTime()) {
 			if (this.play.isRepeat()) {
-				this.prevElapsedTime = 0;
+				this.prevElapsedTime = this.prevElapsedTime - this.play.getTotalTime();
 				this.elapsedTime %= this.play.getTotalTime();
 			} else {
 				this.elapsedTime = this.play.getTotalTime();
@@ -34,16 +52,15 @@ public class AnimationPlayer {
 			}
 		} else if (this.elapsedTime < 0) {
 			if (this.play.isRepeat()) {
-				this.prevElapsedTime = this.play.getTotalTime();
+				this.prevElapsedTime = this.play.getTotalTime() - this.elapsedTime;
 				this.elapsedTime = this.play.getTotalTime() + this.elapsedTime;
 			} else {
-				System.out.println("?? " + this.getAnimation());
 				this.elapsedTime = 0.0F;
 				this.isEnd = true;
 			}
 		}
 	}
-	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, MoveCoordSetter moveCoordSetter) {
+	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, AnimationProperty.MoveCoordSetter moveCoordSetter) {
 		moveCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
 	}
 

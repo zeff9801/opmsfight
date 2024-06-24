@@ -33,7 +33,7 @@ public class HitAnimation extends MainFrameAnimation {
 	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		dest.getTransfroms().clear();
 		dest.setTotalTime(convertTimeModifier + this.convertTime);
-		dest.setNextAnimation(this);
+		dest.setToAnimation(this);
 		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Map<String, JointTransform> data2 = super.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
 		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.totalTime - 0.00001F, 0.0F).getJointTransformData();
