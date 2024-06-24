@@ -1,24 +1,21 @@
 package yesman.epicfight.api.collider;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.entity.PartEntity;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class Collider {
 	protected final Vector3d modelCenter;
@@ -44,6 +41,7 @@ public abstract class Collider {
 			transformMatrix = new OpenMatrix4f();
 		} else {
 			transformMatrix = Animator.getBindedJointTransformByIndex(attackAnimation.getPoseByTime(entitypatch, elapsedTime, 1.0F), armature, pathIndex);
+			//transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(1.0F), armature, pathIndex);
 		}
 
 		OpenMatrix4f toWorldCoord = OpenMatrix4f.createTranslation(-(float)entitypatch.getOriginal().getX(), (float)entitypatch.getOriginal().getY(), -(float)entitypatch.getOriginal().getZ());
@@ -54,17 +52,8 @@ public abstract class Collider {
 	}
 
 	public List<Entity> getCollideEntities(Entity entity) {
-		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB(), (e) -> {
-			if (e instanceof PartEntity) {
-				if (((PartEntity<?>)e).getParent().is(entity)) {
-					return false;
-				}
-			}
-			if (e.isSpectator()) {
-				return false;
-			}
-			return this.isCollide(e);
-		});
+		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB());
+		list.removeIf((e) -> !this.isCollide(e));
 
 		return list;
 	}

@@ -1,7 +1,5 @@
 package yesman.epicfight.api.animation.types;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
@@ -13,9 +11,11 @@ import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import javax.annotation.Nullable;
+
 public class SpecialAttackAnimation extends AttackAnimation {
 	public SpecialAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, path, model, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, index, collider));
+		this(convertTime, path, model, new Phase(antic, preDelay, contact, recovery, index, collider));
 	}
 	
 	public SpecialAttackAnimation(float convertTime, String path, Model model, Phase... phases) {

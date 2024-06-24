@@ -73,7 +73,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 
 			if (entitypatch != null && ClientEngine.getInstance().renderEngine.hasRendererFor(entitypatch.getOriginal())) {
 				PatchedEntityRenderer renderer = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal());
-				Armature armature = entitypatch.getArmature();
+				Armature armature = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature();
 				MatrixStack poseStack = new MatrixStack();
 				OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);
 				renderer.mulPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);

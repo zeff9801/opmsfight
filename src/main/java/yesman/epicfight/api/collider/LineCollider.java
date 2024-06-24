@@ -21,7 +21,7 @@ public class LineCollider extends Collider {
 		this(getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ), posX, posY, posZ, vecX, vecY, vecZ);
 	}
 
-	protected LineCollider(AxisAlignedBB outerAABB, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
+	public LineCollider(AxisAlignedBB outerAABB, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
 		super(new Vector3d(posX, posY, posZ), outerAABB);
 		this.modelVec = new Vector3d(vecX, vecY, vecZ);
 		this.worldVec = new Vector3d(0.0D, 0.0D, 0.0D);
@@ -114,14 +114,13 @@ public class LineCollider extends Collider {
 		maxStart = Math.max(maxStart, startZ);
 		minEnd = Math.min(minEnd, endZ);
 
-		return !(maxStart >= minEnd);
-	}
-
+        return !(maxStart >= minEnd);
+    }
 	@Override
 	public LineCollider deepCopy() {
 		return new LineCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.modelVec.x, this.modelVec.y, this.modelVec.z);
 	}
-
+	
 	@Override
 	public void drawInternal(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, OpenMatrix4f pose, boolean red) {
 		IVertexBuilder vertexBuilder = buffer.getBuffer(EpicFightRenderTypes.debugCollider());
