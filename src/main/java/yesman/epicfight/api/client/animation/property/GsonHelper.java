@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import yesman.epicfight.api.client.animation.AnimationDataReader;
+import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 
 import java.io.Reader;
 
@@ -27,7 +27,7 @@ public class GsonHelper {
         return jsonObject.get(memberName).getAsJsonArray();
     }
 
-    public static AnimationDataReader fromJson(Gson gson, Reader reader, TypeToken<AnimationDataReader> type) {
+    public static ClientAnimationDataReader fromJson(Gson gson, Reader reader, TypeToken<ClientAnimationDataReader> type) {
         return gson.fromJson(reader, type.getType());
     }
 }

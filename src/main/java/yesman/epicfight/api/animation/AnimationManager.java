@@ -12,7 +12,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.AnimationDataReader;
+import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
@@ -125,7 +125,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 
 			if (resourceManager.hasResource(dataLocation)) {
 				try {
-					AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
+					ClientAnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

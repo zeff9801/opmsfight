@@ -23,11 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class AnimationDataReader {
-	static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AnimationDataReader.class, new Deserializer()).create();
-	static final TypeToken<AnimationDataReader> TYPE = new TypeToken<AnimationDataReader>() {
-	};
-
+public class ClientAnimationDataReader {
+	public static final ClientAnimationDataReader.Deserializer DESERIALIZER = new ClientAnimationDataReader.Deserializer();
+	private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(ClientAnimationDataReader.class, DESERIALIZER).create();
+	private static final TypeToken<ClientAnimationDataReader> TYPE = new TypeToken<ClientAnimationDataReader>() {};
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
@@ -36,7 +35,7 @@ public class AnimationDataReader {
 
 		InputStream inputstream = iresource.getInputStream();
 		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-		AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
+		ClientAnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 
 		if (propertySetter.layerInfo != null) {
 			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
@@ -48,13 +47,13 @@ public class AnimationDataReader {
 		}
 		}
 
-	private AnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
+	private ClientAnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
 		this.layerInfo = layerInfo;
 		this.trailInfo = trailInfo;
 	}
 
-	static class Deserializer implements JsonDeserializer<AnimationDataReader> {
+	static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
 			return deserializeLayerInfo(jsonObject, null);
 		}
@@ -81,7 +80,7 @@ public class AnimationDataReader {
 			return new LayerInfo(builder.create(), priority, (defaultLayerType == null) ? layerType : defaultLayerType);
 		}
 
-		public AnimationDataReader deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
+		public ClientAnimationDataReader deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject jsonObject = json.getAsJsonObject();
 			LayerInfo layerInfo = null;
 			LayerInfo multilayerInfo = null;
@@ -101,7 +100,7 @@ public class AnimationDataReader {
 				trailArray.forEach(element -> trailInfos.add(TrailInfo.deserialize(element)));
 			}
 
-			return new AnimationDataReader(multilayerInfo, layerInfo, trailInfos);
+			return new ClientAnimationDataReader(multilayerInfo, layerInfo, trailInfos);
 		}
 	}
 	private static final Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
