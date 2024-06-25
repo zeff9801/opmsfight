@@ -1,13 +1,5 @@
 package yesman.epicfight.api.model;
 
-import java.io.*;
-import java.nio.FloatBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import net.minecraft.client.Minecraft;
-import org.apache.commons.lang3.ArrayUtils;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -16,7 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
-
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -24,10 +16,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
@@ -42,6 +31,13 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.main.EpicFightMod;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
 
 public class JsonModelLoader {
 
@@ -390,6 +386,52 @@ public class JsonModelLoader {
 		}
 	}
 
+	public AnimationClip loadAnimationClip(Armature armature) {
+		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
+		AnimationClip clip = new AnimationClip();
+		boolean root = true;
+
+		for (JsonElement element : array) {
+			JsonObject keyObject = element.getAsJsonObject();
+			String name = keyObject.get("name").getAsString();
+			Joint joint = armature.searchJointByName(name);
+
+			if (joint == null) {
+				continue;
+			}
+
+			JsonArray timeArray = keyObject.getAsJsonArray("time");
+			JsonArray transformArray = keyObject.getAsJsonArray("transform");
+			int timeNum = timeArray.size();
+			int matrixNum = transformArray.size();
+			float[] times = new float[timeNum];
+			float[] transforms = new float[matrixNum * 16];
+
+			for (int i = 0; i < timeNum; i++) {
+				times[i] = timeArray.get(i).getAsFloat();
+			}
+
+			for (int i = 0; i < matrixNum; i++) {
+				JsonArray matrixJson = transformArray.get(i).getAsJsonArray();
+
+				for (int j = 0; j < 16; j++) {
+					transforms[i * 16 + j] = matrixJson.get(j).getAsFloat();
+				}
+			}
+
+			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
+			clip.addJointTransform(name, sheet);
+
+			if (clip.getClipTime() < times[times.length - 1]) {
+				clip.setClipTime(times[times.length - 1]);
+			}
+
+			root = false;
+		}
+
+		return clip;
+	}
+
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {
 		List<Keyframe> keyframeList = Lists.newArrayList();
 
@@ -404,7 +446,7 @@ public class JsonModelLoader {
 
             System.arraycopy(trasnformMatrix, i * 16, matrixElements, 0, 16);
 
-			OpenMatrix4f matrix = OpenMatrix4f.load(null, FloatBuffer.wrap(matrixElements));
+			OpenMatrix4f matrix = OpenMatrix4f.load(null, matrixElements);
 			matrix.transpose();
 
 			if (correct) {

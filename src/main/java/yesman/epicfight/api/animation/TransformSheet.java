@@ -1,8 +1,5 @@
 package yesman.epicfight.api.animation;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import org.joml.Quaternionf;
@@ -10,6 +7,9 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 public class TransformSheet {
 	private Keyframe[] keyframes;
@@ -118,6 +118,7 @@ public class TransformSheet {
 
 	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
+		//loat horizontalDistance = (float) dest.subtract(start).horizontalDistance();
 		float horizontalDistance = (float) dest.distanceTo(start);
 		float verticalDistance = (float) Math.abs(dest.y - start.y);
 		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
@@ -185,11 +186,8 @@ public class TransformSheet {
 	}
 
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
-		float totalTime = this.keyframes[this.keyframes.length - 1].time();
-		currentTime %= totalTime;
-
 		if (currentTime < 0.0F) {
-			currentTime = totalTime + currentTime;
+			currentTime = this.keyframes[this.keyframes.length - 1].time() + currentTime;
 		}
 
 		int prev = 0, next = 1;

@@ -5,6 +5,9 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
+import yesman.epicfight.api.collider.Collider;
+import yesman.epicfight.gameasset.ColliderPreset;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
@@ -28,7 +31,7 @@ public class InstantiateInvoker {
 		registerPrimitive("Z", boolean.class, Boolean::parseBoolean);
 		
 		registerKeyword(String.class, (s) -> s);
-		//registerKeyword(Collider.class, (s) -> ColliderPreset.get(new ResourceLocation(s)));
+		registerKeyword(Collider.class, (s) -> ColliderPreset.get(new ResourceLocation(s)));
 		//registerKeyword(Joint.class, (s) -> {
 		//	String[] armature$joint = s.split("\\.");
 		//	Armature armature = Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
