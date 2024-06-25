@@ -176,7 +176,8 @@ public class AttackAnimation extends ActionAnimation {
 		entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().initializeTransform();
 		float prevPoseTime = prevState.attacking() ? prevElapsedTime : phase.preDelay;
 		float poseTime = state.attacking() ? elapsedTime : phase.contact;
-		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
+		Joint joint = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName(phase.jointName);
+		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, joint, this.getPlaySpeed(entitypatch));
 
 		if (!list.isEmpty()) {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
@@ -399,11 +400,11 @@ public class AttackAnimation extends ActionAnimation {
 
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
+	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playbackTime, float partialTicks) {
 		AnimationPlayer animPlayer = entitypatch.getAnimator().getPlayerFor(this);
 		float prevElapsedTime = animPlayer.getPrevElapsedTime();
 		float elapsedTime = animPlayer.getElapsedTime();
-		this.getCollider(entitypatch, elapsedTime).draw(poseStack, buffer, entitypatch, this, prevElapsedTime, elapsedTime, partialTicks, this.getPlaySpeed(entitypatch));
+		//this.getCollider(entitypatch, elapsedTime).draw(poseStack, buffer, entitypatch, this, prevElapsedTime, elapsedTime, partialTicks, this.getPlaySpeed(entitypatch));
 	}
 
 	public static class Phase {

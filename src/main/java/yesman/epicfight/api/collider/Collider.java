@@ -1,14 +1,19 @@
 package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Models;
@@ -32,16 +37,19 @@ public abstract class Collider {
 		this.worldCenter = OpenMatrix4f.transform(mat, this.modelCenter);
 	}
 
-	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
+	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, Joint joint, float attackSpeed) {
 		OpenMatrix4f transformMatrix;
+		//Armature armature = entitypatch.getArmature();
 		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
-		int pathIndex = armature.searchPathIndex(jointName);
+		int pathIndex = armature.searchPathIndex(joint.getName());
 
 		if (pathIndex == -1) {
-			transformMatrix = new OpenMatrix4f();
+			Pose rootPose = new Pose();
+			rootPose.putJointData("Root", JointTransform.empty());
+			attackAnimation.modifyPose(attackAnimation, rootPose, entitypatch, elapsedTime, 1.0F);
+			transformMatrix = rootPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
-			transformMatrix = Animator.getBindedJointTransformByIndex(attackAnimation.getPoseByTime(entitypatch, elapsedTime, 1.0F), armature, pathIndex);
-			//transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(1.0F), armature, pathIndex);
+			transformMatrix = armature.getBindedTransformByJointIndex(attackAnimation.getPoseByTime(entitypatch, elapsedTime, 1.0F), pathIndex);
 		}
 
 		OpenMatrix4f toWorldCoord = OpenMatrix4f.createTranslation(-(float)entitypatch.getOriginal().getX(), (float)entitypatch.getOriginal().getY(), -(float)entitypatch.getOriginal().getZ());
@@ -50,7 +58,6 @@ public abstract class Collider {
 
 		return this.getCollideEntities(entitypatch.getOriginal());
 	}
-
 	public List<Entity> getCollideEntities(Entity entity) {
 		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB());
 		list.removeIf((e) -> !this.isCollide(e));
@@ -62,24 +69,37 @@ public abstract class Collider {
 
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
-	public abstract void drawInternal(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, OpenMatrix4f pose, boolean red);
+	public abstract void drawInternal(MatrixStack poseStack, IVertexBuilder vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int colliderColor);
 
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
-	public void draw(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+		//Armature armature = entitypatch.getArmature();
 		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
-		int pathIndex =  armature.searchPathIndex(animation.getPathIndexByTime(elapsedTime));
-		boolean flag3 = entitypatch.getEntityState().attacking();
-		OpenMatrix4f mat;
+		int pathIndex =  armature.searchPathIndex(joint.getName());
+		EntityState state = animation.getState(entitypatch, elapsedTime);
+		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
+		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
+		Pose prevPose;
+		Pose currentPose;
 
 		if (pathIndex == -1) {
-			mat = new OpenMatrix4f();
+			prevPose = new Pose();
+			currentPose = new Pose();
+			prevPose.putJointData("Root", JointTransform.empty());
+			currentPose.putJointData("Root", JointTransform.empty());
+			animation.modifyPose(animation, prevPose, entitypatch, prevElapsedTime, 0.0F);
+			animation.modifyPose(animation, currentPose, entitypatch, elapsedTime, 1.0F);
 		} else {
-			mat = Animator.getBindedJointTransformByIndex(animation.getPoseByTime(entitypatch, elapsedTime, 0.0F), armature, pathIndex);
+			prevPose = animation.getPoseByTime(entitypatch, partialTicks, 0.0F);
+			currentPose = animation.getPoseByTime(entitypatch, elapsedTime, 1.0F);
 		}
 
-		this.drawInternal(matrixStackIn, buffer, mat, flag3);
+		this.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, prevPose, currentPose, partialTicks, attacking ? 0xFFFF0000 : -1);
 	}
+
+	@OnlyIn(Dist.CLIENT)
+	public abstract RenderType getRenderType();
 
 	protected abstract boolean isCollide(Entity opponent);
 

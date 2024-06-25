@@ -2,13 +2,17 @@ package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
@@ -114,29 +118,43 @@ public class LineCollider extends Collider {
 		maxStart = Math.max(maxStart, startZ);
 		minEnd = Math.min(minEnd, endZ);
 
-        return !(maxStart >= minEnd);
-    }
+		return !(maxStart >= minEnd);
+	}
 	@Override
 	public LineCollider deepCopy() {
 		return new LineCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.modelVec.x, this.modelVec.y, this.modelVec.z);
 	}
-	
+
 	@Override
-	public void drawInternal(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, OpenMatrix4f pose, boolean red) {
-		IVertexBuilder vertexBuilder = buffer.getBuffer(EpicFightRenderTypes.debugCollider());
+	@OnlyIn(Dist.CLIENT)
+	public RenderType getRenderType() {
+		return EpicFightRenderTypes.debugCollider();
+	}
+
+	@Override
+	public void drawInternal(MatrixStack poseStack, IVertexBuilder vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
+		int pathIndex = armature.searchPathIndex(joint.getName());
+		OpenMatrix4f poseMatrix;
+		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
+
+		if (pathIndex == -1) {
+			poseMatrix = interpolatedPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+		} else {
+			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+		}
+
 		OpenMatrix4f transpose = new OpenMatrix4f();
-		OpenMatrix4f.transpose(pose, transpose);
-		MathUtils.translateStack(matrixStackIn, pose);
-		MathUtils.rotateStack(matrixStackIn, transpose);
-		Matrix4f matrix = matrixStackIn.last().pose();
+		OpenMatrix4f.transpose(poseMatrix, transpose);
+		MathUtils.translateStack(poseStack, poseMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+		Matrix4f matrix = poseStack.last().pose();
 		float startX = (float)this.modelCenter.x;
 		float startY = (float)this.modelCenter.y;
 		float startZ = (float)this.modelCenter.z;
 		float endX = (float)(this.modelCenter.x + this.modelVec.x);
 		float endY = (float)(this.modelCenter.y + this.modelVec.y);
 		float endZ = (float)(this.modelCenter.z + this.modelVec.z);
-		float color = red ? 0.0F : 1.0F;
-		vertexBuilder.vertex(matrix, startX, startY, startZ).color(1.0F, color, color, 1.0F).endVertex();
-		vertexBuilder.vertex(matrix, endX, endY, endZ).color(1.0F, color, color, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, startX, startY, startZ).color(1.0F, color, color, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, endX, endY, endZ).color(1.0F, color, color, 1.0F).endVertex();
 	}
 }

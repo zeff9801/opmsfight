@@ -2,18 +2,20 @@ package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 
 public class OBBCollider extends Collider {
 	protected final Vector3d[] modelVertex;
@@ -21,7 +23,7 @@ public class OBBCollider extends Collider {
 	protected Vector3d[] rotatedVertex;
 	protected Vector3d[] rotatedNormal;
 	protected Vec3f scale;
-	
+
 	/**
 	 * make 3d obb
 	 * @param pos1 left_back
@@ -30,10 +32,10 @@ public class OBBCollider extends Collider {
 	 * @param pos4 right_back
 	 * @param modelCenter central position
 	 */
-	public OBBCollider(double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
-		this(getInitialAABB(posX, posY, posZ, center_x, center_y, center_z), posX, posY, posZ, center_x, center_y, center_z);
+	public OBBCollider(double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+		this(getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ), vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
 	}
-	
+
 	public OBBCollider(AxisAlignedBB outerAABB, double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
 		super(new Vector3d(center_x, center_y, center_z), outerAABB);
 		this.modelVertex = new Vector3d[4];
@@ -55,7 +57,7 @@ public class OBBCollider extends Collider {
 		this.rotatedNormal[1] = new Vector3d(0.0D, 0.0D, 0.0D);
 		this.rotatedNormal[2] = new Vector3d(0.0D, 0.0D, 0.0D);
 	}
-	
+
 	static AxisAlignedBB getInitialAABB(double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
 		double xLength = Math.abs(posX) + Math.abs(center_x);
 		double yLength = Math.abs(posY) + Math.abs(center_y);
@@ -63,15 +65,15 @@ public class OBBCollider extends Collider {
 		double maxLength = Math.max(xLength, Math.max(yLength, zLength));
 		return new AxisAlignedBB(maxLength, maxLength, maxLength, -maxLength, -maxLength, -maxLength);
 	}
-	
+
 	/**
 	 * make 2d obb
 	 * @param pos1 left
 	 * @param pos2 right
 	 * @param modelCenter central position
 	 */
-	public OBBCollider(AxisAlignedBB entityCallAABB, double pos1_x, double pos1_y, double pos1_z, double pos2_x, double pos2_y, double pos2_z, 
-			double norm1_x, double norm1_y, double norm1_z, double norm2_x, double norm2_y, double norm2_z, double center_x, double center_y, double center_z) {
+	public OBBCollider(AxisAlignedBB entityCallAABB, double pos1_x, double pos1_y, double pos1_z, double pos2_x, double pos2_y, double pos2_z,
+					   double norm1_x, double norm1_y, double norm1_z, double norm2_x, double norm2_y, double norm2_z, double center_x, double center_y, double center_z) {
 		super(new Vector3d(center_x, center_y, center_z), entityCallAABB);
 		this.modelVertex = new Vector3d[2];
 		this.modelNormal = new Vector3d[2];
@@ -86,7 +88,7 @@ public class OBBCollider extends Collider {
 		this.rotatedNormal[0] = new Vector3d(0.0D, 0.0D, 0.0D);
 		this.rotatedNormal[1] = new Vector3d(0.0D, 0.0D, 0.0D);
 	}
-	
+
 	/**
 	 * make obb from aabb
 	 * @param aabbCopy
@@ -109,24 +111,24 @@ public class OBBCollider extends Collider {
 		this.rotatedNormal[1] = new Vector3d(0, 1, 0);
 		this.rotatedNormal[2] = new Vector3d(0, 0, 1);
 	}
-	
+
 	/**
 	 * Transform every element of this Bounding Box
 	 **/
 	@Override
 	public void transform(OpenMatrix4f modelMatrix) {
 		OpenMatrix4f noTranslation = modelMatrix.removeTranslation();
-		
+
 		for (int i = 0; i < this.modelVertex.length; i++) {
 			this.rotatedVertex[i] = OpenMatrix4f.transform(noTranslation, this.modelVertex[i]);
 		}
-		
+
 		for (int i = 0; i < this.modelNormal.length; i++) {
 			this.rotatedNormal[i] = OpenMatrix4f.transform(noTranslation, this.modelNormal[i]);
 		}
-		
+
 		this.scale = noTranslation.toScaleVector();
-		
+
 		super.transform(modelMatrix);
 	}
 
@@ -142,120 +144,151 @@ public class OBBCollider extends Collider {
 				(this.outerAABB.maxY - this.outerAABB.minY) * this.scale.y,
 				(this.outerAABB.maxZ - this.outerAABB.minZ) * this.scale.z).move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
 	}
-	
+
 	public boolean isCollide(OBBCollider opponent) {
 		Vector3d toOpponent = opponent.worldCenter.subtract(this.worldCenter);
-		
+
 		for (Vector3d seperateAxis : this.rotatedNormal) {
 			if (!collisionDetection(seperateAxis, toOpponent, this, opponent)) {
 				return false;
 			}
 		}
-		
+
 		for (Vector3d seperateAxis : opponent.rotatedNormal) {
 			if (!collisionDetection(seperateAxis, toOpponent, this, opponent)) {
 				return false;
 			}
 		}
-		
+
 		/** Below code detects whether the each line of obb is collide but it is disabled for better performance
-		for(Vector3f norm1 : this.rotatedNormal)
-		{
-			for(Vector3f norm2 : opponent.rotatedNormal)
-			{
-				Vector3f seperateAxis = Vector3f.cross(norm1, norm2, null);
-				
-				if(seperateAxis.x + seperateAxis.y + seperateAxis.z == 0)
-				{
-					continue;
-				}
-				
-				if(!collisionLogic(seperateAxis, toOpponent, this, opponent))
-				{
-					return false;
-				}
-			}
-		}**/
-		
+		 for(Vector3f norm1 : this.rotatedNormal)
+		 {
+		 for(Vector3f norm2 : opponent.rotatedNormal)
+		 {
+		 Vector3f seperateAxis = Vector3f.cross(norm1, norm2, null);
+
+		 if(seperateAxis.x + seperateAxis.y + seperateAxis.z == 0)
+		 {
+		 continue;
+		 }
+
+		 if(!collisionLogic(seperateAxis, toOpponent, this, opponent))
+		 {
+		 return false;
+		 }
+		 }
+		 }**/
+
 		return true;
 	}
-	
+
 	@Override
 	public boolean isCollide(Entity entity) {
 		OBBCollider obb = new OBBCollider(entity.getBoundingBox());
 		return isCollide(obb);
 	}
-	
+
 	private static boolean collisionDetection(Vector3d seperateAxis, Vector3d toOpponent, OBBCollider box1, OBBCollider box2) {
 		Vector3d maxProj1 = null, maxProj2 = null, distance;
 		double maxDot1 = -1, maxDot2 = -1;
 		distance = seperateAxis.dot(toOpponent) > 0.0F ? toOpponent : toOpponent.scale(-1.0D);
-		
+
 		for (Vector3d vertexVector : box1.rotatedVertex) {
 			Vector3d temp = seperateAxis.dot(vertexVector) > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
 			double dot = seperateAxis.dot(temp);
-			
+
 			if (dot > maxDot1) {
 				maxDot1 = dot;
 				maxProj1 = temp;
 			}
 		}
-		
+
 		for (Vector3d vertexVector : box2.rotatedVertex) {
 			Vector3d temp = seperateAxis.dot(vertexVector) > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
 			double dot = seperateAxis.dot(temp);
-			
+
 			if (dot > maxDot2) {
 				maxDot2 = dot;
 				maxProj2 = temp;
 			}
 		}
-		
+
 		if (MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length()) {
 			return false;
 		}
-		
+
 		return true;
 	}
-	
+
 	@Override
 	public String toString() {
 		return super.toString() + " direction : " + this.worldCenter;
 	}
-	
-	@OnlyIn(Dist.CLIENT) @Override
-	public void drawInternal(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, OpenMatrix4f pose, boolean red) {
-		IVertexBuilder vertexBuilder = buffer.getBuffer(EpicFightRenderTypes.debugCollider());
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public RenderType getRenderType() {
+		return RenderType.lines();
+	}
+
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void drawInternal(MatrixStack poseStack, IVertexBuilder vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
+		int pathIndex = armature.searchPathIndex(joint.getName());
+		OpenMatrix4f poseMatrix;
+		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
+
+		if (pathIndex == -1) {
+			JointTransform jt = interpolatedPose.getOrDefaultTransform("Root");
+			jt.rotation().x = 0.0F;
+			jt.rotation().y = 0.0F;
+			jt.rotation().z = 0.0F;
+			jt.rotation().w = 1.0F;
+
+			poseMatrix = jt.getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+		} else {
+			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+		}
+
 		OpenMatrix4f transpose = new OpenMatrix4f();
-		OpenMatrix4f.transpose(pose, transpose);
-		matrixStackIn.pushPose();
-		MathUtils.translateStack(matrixStackIn, pose);
-        MathUtils.rotateStack(matrixStackIn, transpose);
-        Matrix4f matrix = matrixStackIn.last().pose();
-        Vector3d vec = this.modelVertex[1];
-        float maxX = (float)(this.modelCenter.x + vec.x);
-        float maxY = (float)(this.modelCenter.y + vec.y);
-        float maxZ = (float)(this.modelCenter.z + vec.z);
-        float minX = (float)(this.modelCenter.x - vec.x);
-        float minY = (float)(this.modelCenter.y - vec.y);
-        float minZ = (float)(this.modelCenter.z - vec.z);
-        float color = red ? 0.0F : 1.0F;
-		vertexBuilder.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		vertexBuilder.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        matrixStackIn.popPose();
+		OpenMatrix4f.transpose(poseMatrix, transpose);
+		poseStack.pushPose();
+		MathUtils.translateStack(poseStack, poseMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+		Matrix4f matrix = poseStack.last().pose();
+		Vector3d vec = this.modelVertex[1];
+		float maxX = (float)(this.modelCenter.x + vec.x);
+		float maxY = (float)(this.modelCenter.y + vec.y);
+		float maxZ = (float)(this.modelCenter.z + vec.z);
+		float minX = (float)(this.modelCenter.x - vec.x);
+		float minY = (float)(this.modelCenter.y - vec.y);
+		float minZ = (float)(this.modelCenter.z - vec.z);
+
+		vertexConsumer.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, -1.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, 1.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 0.0F, -1.0F).endVertex();
+		vertexConsumer.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(-1.0F, 0.0F, 0.0F).endVertex();
+
+		poseStack.popPose();
 	}
 }
