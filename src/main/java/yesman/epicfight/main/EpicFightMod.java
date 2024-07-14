@@ -22,10 +22,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.DataSerializerEntry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import yesman.epicfight.api.animation.Animator;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -80,12 +77,10 @@ public class EpicFightMod {
 		return instance;
 	}
 
-	//public final AnimationManager animationManager;
 	private Function<LivingEntityPatch<?>, Animator> animatorProvider;
 	//private Models<?> model;
 	
     public EpicFightMod() {
-    	//this.animationManager = new AnimationManager();
     	instance = this;
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
     	
@@ -143,11 +138,8 @@ public class EpicFightMod {
 		//ClientModels.LOGICAL_CLIENT.loadModels(resourceManager);
 		//ClientModels.LOGICAL_CLIENT.loadArmatures(resourceManager);
 		//Models.LOGICAL_SERVER.loadArmatures(resourceManager);
-		//this.animationManager.loadAnimationsInit(resourceManager);
-		//Animations.buildClient();
 		EpicFightKeyMappings.registerKeys();
-        ((IReloadableResourceManager)resourceManager).registerReloadListener(ClientModels.LOGICAL_CLIENT);
-       // ((IReloadableResourceManager)resourceManager).registerReloadListener(this.animationManager);
+
 
     }
 	
@@ -174,6 +166,8 @@ public class EpicFightMod {
 	private void reloadListnerEvent(final AddReloadListenerEvent event) {
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
+		event.addListener(AnimationManager.getInstance());
+		event.addListener(ClientModels.LOGICAL_CLIENT);
 	}
 
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {
