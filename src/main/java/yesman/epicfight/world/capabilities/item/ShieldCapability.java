@@ -29,9 +29,6 @@ public class ShieldCapability extends CapabilityItem {
 
 	@Override
 	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerdata, Hand hand) {
-		// Cast the StaticAnimation to AnimationProvider<?> if necessary
-		AnimationProvider<?> blockAnimation = (AnimationProvider<?>) Animations.BIPED_BLOCK;
-
-		return ImmutableMap.of(LivingMotions.BLOCK_SHIELD, blockAnimation);
+		return ImmutableMap.of(LivingMotions.BLOCK_SHIELD, Animations.BIPED_BLOCK);
 	}
 }

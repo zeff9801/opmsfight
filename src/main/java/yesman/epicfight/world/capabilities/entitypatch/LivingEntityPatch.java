@@ -102,10 +102,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public boolean overrideRender() {
 		return true;
 	}
-	@OnlyIn(Dist.CLIENT)
+
 	public abstract void initAnimator(Animator clientAnimator);
 
 	public abstract void updateMotion(boolean considerInaction);
+
 	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
 
 	protected void initAttributes() {

@@ -58,7 +58,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 		}
 
 		public Builder addAnimationsModifier(LivingMotion livingMotion, StaticAnimation animations) {
-			this.rangeAnimationModifiers.put(livingMotion, (AnimationProvider<?>) animations); //TODO dunno if correct
+			this.rangeAnimationModifiers.put(livingMotion, animations); //TODO dunno if correct
 			return this;
 		}
 	}

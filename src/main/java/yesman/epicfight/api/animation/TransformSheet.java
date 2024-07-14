@@ -2,7 +2,7 @@ package yesman.epicfight.api.animation;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import org.joml.Quaternionf;
+import com.joml.Quaternionf;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;

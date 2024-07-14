@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class StaticAnimation extends DynamicAnimation {
+public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 
 	/**
@@ -477,6 +477,11 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public ResourceLocation getRegistryName() {
 		return this.resourceLocation;
+	}
+
+	@Override
+	public StaticAnimation get() {
+		return AnimationManager.getInstance().refreshAnimation(this);
 	}
 
 	public static class Event implements Comparable<Event> {

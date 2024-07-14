@@ -220,7 +220,7 @@ public class WeaponCapability extends CapabilityItem {
 				this.livingMotionModifiers.put(wieldStyle, Maps.newHashMap());
 			}
 
-			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, (AnimationProvider<?>) animation); //TODO dunno if correct
+			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, animation); //TODO dunno if correct
 
 			return this;
 		}

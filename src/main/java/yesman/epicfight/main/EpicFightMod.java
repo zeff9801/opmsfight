@@ -1,9 +1,9 @@
 package yesman.epicfight.main;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IReloadableResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -33,10 +33,7 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
-import yesman.epicfight.events.CapabilityEvent;
-import yesman.epicfight.events.EntityEvents;
-import yesman.epicfight.events.ModBusEvents;
-import yesman.epicfight.events.PlayerEvents;
+import yesman.epicfight.events.*;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -108,7 +105,9 @@ public class EpicFightMod {
         EpicFightParticles.PARTICLES.register(bus);
         EpicFightEntities.ENTITIES.register(bus);
         
-        MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
+        MinecraftForge.EVENT_BUS.addListener(this::reloadDataListenerEvent); //Forge side event
+		bus.addListener(this::reloadAssetsListenerEvent); //Minecraft side event
+
         MinecraftForge.EVENT_BUS.register(EntityEvents.class);
         MinecraftForge.EVENT_BUS.register(ModBusEvents.class);
         MinecraftForge.EVENT_BUS.register(CapabilityEvent.class);
@@ -134,9 +133,6 @@ public class EpicFightMod {
         //this.model = ClientModels.LOGICAL_CLIENT;
     	
 		ProviderEntity.registerEntityPatchesClient();
-		IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-		//ClientModels.LOGICAL_CLIENT.loadModels(resourceManager);
-		//ClientModels.LOGICAL_CLIENT.loadArmatures(resourceManager);
 		//Models.LOGICAL_SERVER.loadArmatures(resourceManager);
 		EpicFightKeyMappings.registerKeys();
 
@@ -163,11 +159,15 @@ public class EpicFightMod {
 		event.enqueueWork(WeaponCapabilityPresets::register);
     }
 	
-	private void reloadListnerEvent(final AddReloadListenerEvent event) {
+	private void reloadDataListenerEvent(final AddReloadListenerEvent event) {
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
-		event.addListener(AnimationManager.getInstance());
-		event.addListener(ClientModels.LOGICAL_CLIENT);
+	}
+
+
+	private void reloadAssetsListenerEvent(final RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(ClientModels.LOGICAL_CLIENT); //Order matters. Model stuff like armature has to be populated first. Animations uses them
+		event.registerReloadListener(AnimationManager.getInstance());
 	}
 
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {

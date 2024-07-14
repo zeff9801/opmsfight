@@ -5,7 +5,7 @@ import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import org.joml.Quaternionf;
+import com.joml.Quaternionf;
 import yesman.epicfight.api.animation.JointTransform;
 
 import javax.annotation.Nullable;

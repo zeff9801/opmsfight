@@ -14,6 +14,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardKeyPressedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseClickedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseReleasedEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -123,7 +124,8 @@ public class ClientEvents {
 		
 		if (oldCap != null) {
 			LocalPlayerPatch newCap = (LocalPlayerPatch)event.getNewPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			
+
+//			newCap.copySkillsFrom(oldCap); //TODO Uncomment this if skills do not get copied over after player respawned
 			newCap.onRespawnLocalPlayer(event);
 			newCap.copySkillsFrom(oldCap);
 			newCap.toMode(oldCap.getPlayerMode(), false);
@@ -136,7 +138,18 @@ public class ClientEvents {
 			ItemCapabilityReloadListener.reset();
 			ProviderItem.clear();
 			ProviderEntity.clear();
+
+			ClientEngine.getInstance().renderEngine.zoomOut(0);
 			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
+		}
+	}
+
+	@SubscribeEvent
+	public static void clientLoggingInEvent(ClientPlayerNetworkEvent.LoggedInEvent event) {
+		LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), LocalPlayerPatch.class);
+
+		if (playerpatch != null) {
+			ClientEngine.getInstance().controllEngine.setPlayerPatch(playerpatch);
 		}
 	}
 }

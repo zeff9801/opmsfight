@@ -5,7 +5,7 @@ import java.util.Map;
 import net.minecraft.util.math.MathHelper;
 import com.google.common.collect.Maps;
 
-import org.joml.Quaternionf;
+import com.joml.Quaternionf;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.MatrixOperation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;

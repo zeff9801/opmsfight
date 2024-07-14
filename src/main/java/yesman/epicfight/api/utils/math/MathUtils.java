@@ -5,7 +5,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import org.joml.Quaternionf;
+import com.joml.Quaternionf;
 
 public class MathUtils {
 	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {

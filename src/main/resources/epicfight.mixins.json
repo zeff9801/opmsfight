@@ -1,20 +1,21 @@
 {
-	"required": true,
-	"minVersion": "0.8",
-	"compatibilityLevel": "JAVA_8",
-	"package": "yesman.epicfight.mixin",
-	"client": [
-		"MixinBufferBuilder",
-		"MixinKeyboardHandler",
-		"MixinMouseHelper",
-		"MixinLightTexture"
-	],
-	"mixins": [
-		"MixinLivingEntity",
-		"MixinServerPlayer"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"refmap": "epicfight.mixins.refmap.json"
+  "required": true,
+  "minVersion": "0.8",
+  "compatibilityLevel": "JAVA_8",
+  "package": "yesman.epicfight.mixin",
+  "client": [
+    "MixinBufferBuilder",
+    "MixinKeyboardHandler",
+    "MixinLightTexture",
+    "MixinMouseHelper",
+    "MixinResourceLoadProgressGui"
+  ],
+  "mixins": [
+    "MixinLivingEntity",
+    "MixinServerPlayer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "refmap": "epicfight.mixins.refmap.json"
 }

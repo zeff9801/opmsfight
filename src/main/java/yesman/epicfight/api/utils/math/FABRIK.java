@@ -4,9 +4,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
-import org.joml.Quaternionf;
+import com.joml.Quaternionf;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
