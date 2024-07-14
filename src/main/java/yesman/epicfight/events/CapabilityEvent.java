@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -16,7 +17,7 @@ import yesman.epicfight.world.capabilities.provider.ProviderSkill;
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
 public class CapabilityEvent {
 
-	//@SubscribeEvent
+	@SubscribeEvent
 	public static void attachItemCapability(AttachCapabilitiesEvent<ItemStack> event) {
 		if (event.getObject() != null) {
 			ProviderItem prov = new ProviderItem(event.getObject());
@@ -28,7 +29,7 @@ public class CapabilityEvent {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	//@SubscribeEvent
+	@SubscribeEvent
 	public static void attachEntityCapability(AttachCapabilitiesEvent<Entity> event) {
 		EntityPatch oldEntitypatch = EpicFightCapabilities.getEntityPatch(event.getObject(), EntityPatch.class);
 

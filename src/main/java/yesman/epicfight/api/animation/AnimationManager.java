@@ -17,7 +17,6 @@ import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.IOException;
@@ -151,7 +150,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		this.animationIdMap.clear();
 		this.animationRegistry.clear();
 		//Armatures.build(resourceManager);
-		Animations.buildClient();
+		//Animations.buildClient();
 
 		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));

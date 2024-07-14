@@ -97,7 +97,6 @@ public class EpicFightMod {
 
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
-    	//bus.addListener(Animations::registerAnimations);
     	bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
     	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
 
@@ -160,7 +159,6 @@ public class EpicFightMod {
 	}
 
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
-		//event.enqueueWork(this.animationManager::registerAnimations);
 		event.enqueueWork(EpicFightCapabilities::registerCapabilities);
 		event.enqueueWork(EpicFightSkills::registerSkills);
 		event.enqueueWork(SkillArgument::registerArgumentTypes);

@@ -1,11 +1,15 @@
 package yesman.epicfight.gameasset;
 
 import net.minecraft.entity.EntitySize;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
@@ -14,6 +18,9 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProp
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
+import yesman.epicfight.api.client.animation.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.model.Armature;
@@ -26,8 +33,21 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.function.Consumer;
 
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Animations {
-	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
+	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation() {
+
+		AnimationClip animatinoClip = new AnimationClip();
+
+		@Override
+		public void loadAnimation(IResourceManager resourceManager) {
+		}
+
+		@Override
+		public AnimationClip getAnimationClip() {
+			return this.animatinoClip;
+		}
+	};
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
 	public static StaticAnimation BIPED_RUN;
@@ -260,9 +280,11 @@ public class Animations {
 	public static StaticAnimation BIPED_STAFF_IDLE;
 	public static StaticAnimation BIPED_STAFF_RUN;
 
+	@SubscribeEvent
 	public static void registerAnimations(AnimationRegistryEvent event) {
 		event.getRegistryMap().put(EpicFightMod.MODID, Animations::build);
 	}
+
 
 	private static void build() {
 		Models<?> models = FMLEnvironment.dist == Dist.CLIENT ? ClientModels.LOGICAL_CLIENT : Models.LOGICAL_SERVER;
@@ -341,7 +363,7 @@ public class Animations {
 		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
 
 		BIPED_KATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", biped)
-				.addEvents(AnimationEvent.TimeStampedEvent.create(0.15F, PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN));
+				.addEvents(AnimationEvent.TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN));
 
 		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);
 
@@ -671,17 +693,17 @@ public class Animations {
 		public static final AnimationEvent.AnimationEventConsumer RESTORE_BOUNDING_BOX = (entitypatch, animation, params) -> {
 			entitypatch.getOriginal().refreshDimensions();
 		};
+		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 	}
-	public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 
 	@OnlyIn(Dist.CLIENT)
 	public static void buildClient() {
 
-		//BIPED_RUN_SPEAR.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create()).addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
+		BIPED_RUN_SPEAR.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create()).addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
 
-		//OFF_ANIMATION_HIGHEST.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.HIGHEST);
-		//OFF_ANIMATION_MIDDLE.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
+		OFF_ANIMATION_HIGHEST.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.HIGHEST);
+		OFF_ANIMATION_MIDDLE.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
 
-		//BIPED_LANDING.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.LOWEST);
+		BIPED_LANDING.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.LOWEST);
 	}
 }
