@@ -57,8 +57,7 @@ public class ClientAnimationDataReader {
 		}
 
 		if (this.multilayerInfo != null) {
-			//StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_multilayer", animation.getModel().getArmature(), true);
-			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(),animation.isRepeat(),animation.getRegistryName().toString() + "_multilayer",animation.getModel(),true);
+			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_multilayer", animation.getArmature(), true);
 
 			if (this.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, this.multilayerInfo.jointMaskEntry);

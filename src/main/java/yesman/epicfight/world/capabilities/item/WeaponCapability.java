@@ -1,18 +1,14 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -25,6 +21,10 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
 public class WeaponCapability extends CapabilityItem {
 	protected final Function<LivingEntityPatch<?>, Style> stylegetter;
 	protected final Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
@@ -34,7 +34,7 @@ public class WeaponCapability extends CapabilityItem {
 	protected final Collider weaponCollider;
 	protected final Map<Style, List<StaticAnimation>> autoAttackMotions;
 	protected final Map<Style, Skill> innateSkill;
-	protected final Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
+	protected final Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
 	protected final boolean canBePlacedOffhand;
 	
 	protected WeaponCapability(CapabilityItem.Builder builder) {
@@ -109,17 +109,17 @@ public class WeaponCapability extends CapabilityItem {
 	}
 
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> player, Hand hand) {
+	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> player, Hand hand) {
 		if (this.livingMotionModifiers == null || hand == Hand.OFF_HAND) {
 			return super.getLivingMotionModifier(player, hand);
 		}
 
-		Map<LivingMotion, StaticAnimation> motions = this.livingMotionModifiers.getOrDefault(this.getStyle(player), Maps.newHashMap());
+		Map<LivingMotion, AnimationProvider<?>> motions = this.livingMotionModifiers.getOrDefault(this.getStyle(player), Maps.newHashMap());
 		this.livingMotionModifiers.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(motions::putIfAbsent);
 
 		return motions;
 	}
-	
+
 	@Override
 	public UseAction getUseAnimation(LivingEntityPatch<?> playerpatch) {
 		if (this.livingMotionModifiers != null) {
@@ -158,7 +158,7 @@ public class WeaponCapability extends CapabilityItem {
 		Collider collider;
 		Map<Style, List<StaticAnimation>> autoAttackMotionMap;
 		Map<Style, Skill> specialAttackMap;
-		Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
+		Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
 		boolean canBePlacedOffhand;
 		
 		protected Builder() {
@@ -210,18 +210,18 @@ public class WeaponCapability extends CapabilityItem {
 			this.canBePlacedOffhand = canBePlacedOffhand;
 			return this;
 		}
-		
+
 		public Builder livingMotionModifier(Style wieldStyle, LivingMotion livingMotion, StaticAnimation animation) {
 			if (this.livingMotionModifiers == null) {
-				this.livingMotionModifiers = Maps.<Style, Map<LivingMotion, StaticAnimation>>newHashMap();
+				this.livingMotionModifiers = Maps.newHashMap();
 			}
-			
+
 			if (!this.livingMotionModifiers.containsKey(wieldStyle)) {
-				this.livingMotionModifiers.put(wieldStyle, Maps.<LivingMotion, StaticAnimation>newHashMap());
+				this.livingMotionModifiers.put(wieldStyle, Maps.newHashMap());
 			}
-			
-			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, animation);
-			
+
+			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, (AnimationProvider<?>) animation); //TODO dunno if correct
+
 			return this;
 		}
 		

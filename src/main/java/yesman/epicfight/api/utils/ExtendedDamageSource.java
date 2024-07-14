@@ -5,7 +5,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.TextFormatting;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 
 public interface ExtendedDamageSource {
@@ -34,24 +33,32 @@ public interface ExtendedDamageSource {
 	public StunType getStunType();
 	public Entity getOwner();
 	public String getType();
-	
-	public static enum StunType {
-		NONE(TextFormatting.GRAY + "NONE"),
-		SHORT(TextFormatting.GREEN + "SHORT" + TextFormatting.DARK_GRAY + " stun"),
-		LONG(TextFormatting.GOLD + "LONG" + TextFormatting.DARK_GRAY + " stun"),
-		HOLD(TextFormatting.RED + "HOLD"),
-		KNOCKDOWN(TextFormatting.RED + "KNOCKDOWN"),
-		FALL(TextFormatting.GRAY + "FALL");
-		
-		private String tooltip;
-		
-		StunType(String tooltip) {
+
+
+	public enum StunType {
+		NONE("damage_source.epicfight.stun_none", true),
+		SHORT("damage_source.epicfight.stun_short", false),
+		LONG("damage_source.epicfight.stun_long", true),
+		HOLD("damage_source.epicfight.stun_hold", false),
+		KNOCKDOWN("damage_source.epicfight.stun_knockdown", true),
+		NEUTRALIZE("damage_source.epicfight.stun_neutralize", true),
+		FALL("damage_source.epicfight.stun_fall", true);
+
+		private final String tooltip;
+		private final boolean fixedStunTime;
+
+		StunType(String tooltip, boolean fixedStunTime) {
 			this.tooltip = tooltip;
+			this.fixedStunTime = fixedStunTime;
 		}
-		
+
+		public boolean hasFixedStunTime() {
+			return this.fixedStunTime;
+		}
+
 		@Override
 		public String toString() {
-			return tooltip;
+			return this.tooltip;
 		}
 	}
 }

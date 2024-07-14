@@ -8,6 +8,7 @@ import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -21,17 +22,17 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
 		this(convertTime, antic, antic, contact, recovery, collider, index, path, model);
 	}
-	
+
 	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
-		
+
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
 	}
-	
+
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, Hand hand, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
-		
+
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
 	}
@@ -60,7 +61,17 @@ public class BasicAttackAnimation extends AttackAnimation {
 		}
 		
 	}
-	
+	@Override
+	protected TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, time);
+
+		if (!STIFF_COMBO_ATTACKS){
+			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
+			stateMap.put(EntityState.UPDATE_LIVING_MOTION, (Object)true);
+		}
+
+		return stateMap;
+	}
 	@Override
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
 		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);

@@ -1,7 +1,5 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
-import java.util.UUID;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.PointOfView;
@@ -40,6 +38,8 @@ import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
+import java.util.UUID;
+
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEntity> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("d1a1e102-1621-11ed-861d-0242ac120002");
@@ -57,7 +57,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	public void onConstructed(ClientPlayerEntity entity) {
 		super.onConstructed(entity);
 		this.minecraft = Minecraft.getInstance();
-		ClientEngine.getInstance().controllEngine.setPlayerPatch(this);
 	}
 
 	@Override
@@ -197,12 +196,12 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
 		this.animator.playAnimation(animation, convertTimeModifier);
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, false));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, false));
 	}
 
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, true));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, true));
 	}
 
 	@Override

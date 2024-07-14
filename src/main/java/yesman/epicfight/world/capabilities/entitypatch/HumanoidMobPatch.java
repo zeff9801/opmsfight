@@ -1,14 +1,9 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
@@ -17,13 +12,9 @@ import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShootableItem;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolItem;
-import net.minecraft.item.TridentItem;
+import net.minecraft.item.*;
 import net.minecraft.util.Hand;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -40,6 +31,10 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatch<T> {
 	protected Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
@@ -75,28 +70,28 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
 			)
 		));
-		
+
 		this.weaponAttackMotions = Maps.newHashMap();
 	}
-	
+
 	protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
 		CapabilityItem itemCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
-		
+
 		if (this.weaponAttackMotions.containsKey(itemCap.getWeaponCategory())) {
 			Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>> motionByStyle = this.weaponAttackMotions.get(itemCap.getWeaponCategory());
 			Style style = itemCap.getStyle(this);
-			
+
 			if (motionByStyle.containsKey(style) || motionByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
 				return motionByStyle.getOrDefault(style, motionByStyle.get(CapabilityItem.Styles.COMMON));
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
-		
+
 		if (builder != null) {
 			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
 			this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.0D, true));
@@ -158,33 +153,33 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		
 		this.modifyLivingMotionByCurrentItem();
 	}
-	
+
 	public void modifyLivingMotionByCurrentItem() {
 		this.getAnimator().resetLivingAnimations();
 
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
 
-		Map<LivingMotion, StaticAnimation> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
+		Map<LivingMotion, AnimationProvider<?>> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
 		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND));
-		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
-			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
+
+		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : motionModifier.entrySet()) {
+			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue().get());
 		}
-		
+
 		if (this.weaponLivingMotions != null && this.weaponLivingMotions.containsKey(mainhandCap.getWeaponCategory())) {
 			Map<Style, Set<Pair<LivingMotion, StaticAnimation>>> mapByStyle = this.weaponLivingMotions.get(mainhandCap.getWeaponCategory());
 			Style style = mainhandCap.getStyle(this);
-			
+
 			if (mapByStyle.containsKey(style) || mapByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
 				Set<Pair<LivingMotion, StaticAnimation>> animModifierSet = mapByStyle.getOrDefault(style, mapByStyle.get(CapabilityItem.Styles.COMMON));
-				
+
 				for (Pair<LivingMotion, StaticAnimation> pair : animModifierSet) {
 					this.animator.addLivingAnimation(pair.getFirst(), pair.getSecond());
 				}
 			}
 		}
-		
+
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
 		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
@@ -213,28 +208,21 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 			}
 		}
 	}
-	
+
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		if (this.original.getVehicle() != null) {
 			return Animations.BIPED_HIT_ON_MOUNT;
 		} else {
-			switch (stunType) {
-			case LONG:
-				return Animations.BIPED_HIT_LONG;
-			case SHORT:
-				return Animations.BIPED_HIT_SHORT;
-			case HOLD:
-				return Animations.BIPED_HIT_SHORT;
-			case KNOCKDOWN:
-				return Animations.BIPED_KNOCKDOWN;
-			case FALL:
-				return Animations.BIPED_LANDING;
-			case NONE:
-				return null;
-			}
+            return switch (stunType) {
+                case LONG -> Animations.BIPED_HIT_LONG;
+                case SHORT -> Animations.BIPED_HIT_SHORT;
+                case HOLD -> Animations.BIPED_HIT_SHORT;
+                case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
+                case NEUTRALIZE -> Animations.BIPED_COMMON_NEUTRALIZED;
+                case FALL -> Animations.BIPED_LANDING;
+                case NONE -> null;
+            };
 		}
-		
-		return null;
 	}
 }

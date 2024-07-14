@@ -98,32 +98,9 @@ public class ClientAnimator extends Animator {
 		}
 	}
 
-	protected void addBaseLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
-		this.livingAnimations.put(livingMotion, animation);
 
-		if (livingMotion == this.currentMotion) {
-			EntityState state = this.getEntityState();
-
-			if (!state.inaction()) {
-				this.playAnimation(animation, 0.0F);
-			}
-		}
-	}
 	public LivingMotion currentMotion() {
 		return this.currentMotion;
-	}
-	protected void addCompositeLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
-		if (animation != null) {
-			this.compositeLivingAnimations.put(livingMotion, animation);
-
-			if (livingMotion == this.currentCompositeMotion) {
-				EntityState state = this.getEntityState();
-
-				if (!state.inaction()) {
-					this.playAnimation(animation, 0.0F);
-				}
-			}
-		}
 	}
 
 	public void setCurrentMotionsAsDefault() {
@@ -163,16 +140,14 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public void init() {
-		this.entitypatch.initAnimator(this);
+		super.init();
+
+		this.setCurrentMotionsAsDefault();
+
 		StaticAnimation idleMotion = this.livingAnimations.get(this.currentMotion);
 		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
 
-	@Override
-	public void poseTick() {
-		this.prevPose = this.currentPose;
-		this.currentPose = this.getPose(1.0F);
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -189,25 +164,49 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public void tick() {
+		// Layer debugging
+		/**
+		 for (Layer layer : this.getAllLayers()) {
+		 System.out.println(layer);
+		 }
+		 System.out.println();
+		 **/
 		this.baseLayer.update(this.entitypatch);
-		this.poseTick();
 
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
 			this.entitypatch.updateMotion(false);
-			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
-		}
 
-		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
 			if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
 				this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
-			} else {
-				this.getCompositeLayer(Layer.Priority.MIDDLE).off(this.entitypatch);
 			}
-		}
 
-		if (!this.compareMotion(this.entitypatch.currentLivingMotion)) {
-			if (this.livingAnimations.containsKey(this.entitypatch.currentLivingMotion)) {
-				this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
+			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
+		} else {
+			if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
+				/* Turns off the multilayer of the base layer */
+				this.getLivingMotion(this.currentCompositeMotion).getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent((multilayerAnimation) -> {
+					if (!this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
+						this.getCompositeLayer(multilayerAnimation.getPriority()).off(this.entitypatch);
+					}
+				});
+
+				if (this.compositeLivingAnimations.containsKey(this.currentCompositeMotion)) {
+					StaticAnimation nextLivingAnimation = this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion);
+
+					if (nextLivingAnimation == null || nextLivingAnimation.getPriority() != this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()) {
+						this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);
+					}
+				}
+
+				if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
+					this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
+				}
+			}
+
+			if (!this.compareMotion(this.entitypatch.currentLivingMotion) && this.entitypatch.currentLivingMotion != LivingMotions.DEATH) {
+				if (this.livingAnimations.containsKey(this.entitypatch.currentLivingMotion)) {
+					this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
+				}
 			}
 		}
 

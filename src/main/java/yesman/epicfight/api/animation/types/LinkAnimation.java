@@ -1,5 +1,6 @@
 package yesman.epicfight.api.animation.types;
 
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
@@ -13,6 +14,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import java.util.Map;
 
 public class LinkAnimation extends DynamicAnimation {
+	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation fromAnimation;
 	protected DynamicAnimation toAnimation;
 	protected float nextStartTime;
@@ -40,6 +42,11 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 
 	@Override
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
+	}
+
+	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
 		return this.toAnimation.getState(entitypatch, 0.0F);
 	}
@@ -53,9 +60,12 @@ public class LinkAnimation extends DynamicAnimation {
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose nextStartingPose = this.toAnimation.getPoseByTime(entitypatch, this.nextStartTime, 1.0F);
 
+		/**
+		 * Update dest pose
+		 */
 		for (Map.Entry<String, JointTransform> entry : nextStartingPose.getJointTransformData().entrySet()) {
-			if (this.jointTransforms.containsKey(entry.getKey())) {
-				Keyframe[] keyframe = this.jointTransforms.get(entry.getKey()).getKeyframes();
+			if (this.animationClip.hasJointTransform(entry.getKey())) {
+				Keyframe[] keyframe = this.animationClip.getJointTransform(entry.getKey()).getKeyframes();
 				JointTransform jt = keyframe[keyframe.length - 1].transform();
 				JointTransform newJt = nextStartingPose.getJointTransformData().get(entry.getKey());
 				newJt.translation().set(jt.translation());

@@ -16,4 +16,8 @@ public class ClearableIdMapper<I> extends ObjectIntIdentityMap<I> {
 		this.idToT.clear();
 		this.nextId = 0;
 	}
+
+	public boolean contains(int animationId) {
+		return animationId >= 0 && animationId < this.idToT.size() && this.idToT.get(animationId) != null;
+	}
 }

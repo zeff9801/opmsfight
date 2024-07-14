@@ -3,34 +3,40 @@ package yesman.epicfight.api.animation.types;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.List;
+
 public class AimAnimation extends StaticAnimation {
 	public StaticAnimation lookUp;
 	public StaticAnimation lookDown;
 	public StaticAnimation lying;
-	
-	public AimAnimation(float convertTime, boolean repeatPlay, String path1, String path2, String path3, String path4, Model model) {
-		super(convertTime, repeatPlay, path1, model);
-		this.lookUp = new StaticAnimation(convertTime, repeatPlay, path2, model, true);
-		this.lookDown = new StaticAnimation(convertTime, repeatPlay, path3, model, true);
-		this.lying = new StaticAnimation(convertTime, repeatPlay, path4, model, true);
+
+	public AimAnimation(float convertTime, boolean repeatPlay, String path1, String path2, String path3, String path4, Armature armature) {
+		super(convertTime, repeatPlay, path1, armature);
+		this.lookUp = new StaticAnimation(convertTime, repeatPlay, path2, armature, true);
+		this.lookDown = new StaticAnimation(convertTime, repeatPlay, path3, armature, true);
+		this.lying = new StaticAnimation(convertTime, repeatPlay, path4, armature, true);
 	}
-	
-	public AimAnimation(boolean repeatPlay, String path1, String path2, String path3, String path4, Model model) {
-		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path1, path2, path3, path4, model);
+
+	public AimAnimation(boolean repeatPlay, String path1, String path2, String path3, String path4, Armature armature) {
+		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path1, path2, path3, path4, armature);
 	}
-	
+
+	@Override
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this, this.lookUp, this.lookDown, this.lying);
+	}
+
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);

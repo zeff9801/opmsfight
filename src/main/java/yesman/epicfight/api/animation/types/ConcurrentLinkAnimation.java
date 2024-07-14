@@ -2,6 +2,7 @@ package yesman.epicfight.api.animation.types;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.JointMaskEntry;
@@ -11,6 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import java.util.Optional;
 
 public class ConcurrentLinkAnimation extends DynamicAnimation {
+    private final AnimationClip animationClip = new AnimationClip();
     protected DynamicAnimation nextAnimation;
     protected DynamicAnimation currentAnimation;
     protected float startsAt;
@@ -70,7 +72,10 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
     public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
         return this.nextAnimation.getPlaySpeed(entitypatch, animation);
     }
-
+    @Override
+    public AnimationClip getAnimationClip() {
+        return this.animationClip;
+    }
     @Override
     public boolean hasTransformFor(String joint) {
         return this.nextAnimation.hasTransformFor(joint);

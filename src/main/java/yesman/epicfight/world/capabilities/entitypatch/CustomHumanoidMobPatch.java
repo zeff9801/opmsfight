@@ -1,7 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.brain.Brain;
@@ -11,10 +10,10 @@ import net.minecraft.entity.ai.brain.task.SupplementedTask;
 import net.minecraft.entity.ai.brain.task.WalkToTargetTask;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.UseAction;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.model.Model;
@@ -88,16 +87,14 @@ public class CustomHumanoidMobPatch<T extends CreatureEntity> extends HumanoidMo
 			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().get(Attributes.ATTACK_DAMAGE));
 		}
 	}
-	
+
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator clientAnimator) {
 		for (Pair<LivingMotion, StaticAnimation> pair : this.provider.getDefaultAnimations()) {
 			clientAnimator.addLivingAnimation(pair.getFirst(), pair.getSecond());
 		}
-		
-		clientAnimator.setCurrentMotionsAsDefault();
 	}
-	
+
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		super.commonAggressiveMobUpdateMotion(considerInaction);

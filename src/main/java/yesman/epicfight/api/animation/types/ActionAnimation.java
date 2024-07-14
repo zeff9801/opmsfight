@@ -17,7 +17,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
@@ -31,22 +31,33 @@ import java.util.Map;
 import java.util.Set;
 
 public class ActionAnimation extends MainFrameAnimation {
-	
-	public ActionAnimation(float convertTime, String path, Model model) {
-		this(convertTime, Float.MAX_VALUE, path, model);
+	public ActionAnimation(float convertTime, String path, Armature armature) {
+		this(convertTime, Float.MAX_VALUE, path, armature);
 	}
-	
-	public ActionAnimation(float convertTime, float postDelay, String path, Model model) {
-		super(convertTime, path, model);
-		
+
+	public ActionAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		this(convertTime, Float.MAX_VALUE, path, armature, noRegister);
+	}
+
+	public ActionAnimation(float convertTime, float postDelay, String path, Armature armature) {
+		this(convertTime, postDelay, path, armature, false);
+	}
+
+	public ActionAnimation(float convertTime, float postDelay, String path, Armature armature, boolean noRegister) {
+		super(convertTime, path, armature, noRegister);
+
 		this.stateSpectrumBlueprint.clear()
-			.newTimePair(0.0F, postDelay)
-			.addState(EntityState.TURNING_LOCKED, true)
-			.addState(EntityState.MOVEMENT_LOCKED, true)
-			.addState(EntityState.CAN_BASIC_ATTACK, false)
-			.addState(EntityState.CAN_SKILL_EXECUTION, false)
-			.newTimePair(0.0F, Float.MAX_VALUE)
-			.addState(EntityState.INACTION, true);
+				.newTimePair(0.0F, postDelay)
+				.addState(EntityState.MOVEMENT_LOCKED, true)
+				.addState(EntityState.UPDATE_LIVING_MOTION, false)
+				.addState(EntityState.CAN_BASIC_ATTACK, false)
+				.addState(EntityState.CAN_SKILL_EXECUTION, false)
+				.newTimePair(0.01F, postDelay)
+				.addState(EntityState.TURNING_LOCKED, true)
+				.newTimePair(0.0F, Float.MAX_VALUE)
+				.addState(EntityState.INACTION, true);
+
+		this.addProperty(AnimationProperty.StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 	}
 	
 	public <V> ActionAnimation addProperty(AnimationProperty.MoveCoordFunctions<V> propertyType, V value) {
@@ -232,8 +243,7 @@ public class ActionAnimation extends MainFrameAnimation {
 				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
 
 				TransformSheet sheet = new TransformSheet(keyframes);
-				//dest.getAnimationClip().addJointTransform(jointName, sheet);
-				dest.addSheet(jointName,sheet);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		} else {
 			for (String jointName : joint1) {
@@ -242,8 +252,7 @@ public class ActionAnimation extends MainFrameAnimation {
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
 
 				TransformSheet sheet = new TransformSheet(keyframes);
-				//dest.getAnimationClip().addJointTransform(jointName, sheet);
-				dest.addSheet(jointName,sheet);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		}
 	}

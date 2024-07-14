@@ -3,6 +3,7 @@ package yesman.epicfight.network;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
@@ -36,16 +37,20 @@ public class EpicFightNetworkManager {
 	public static <MSG> void sendToAllPlayerTrackingThisEntity(MSG message, Entity entity) {
 		sendToClient(message, PacketDistributor.TRACKING_ENTITY.with(() -> entity));
 	}
-	
+
 	public static <MSG> void sendToPlayer(MSG message, ServerPlayerEntity player) {
 		sendToClient(message, PacketDistributor.PLAYER.with(() -> player));
 	}
 
 	public static <MSG> void sendToAllPlayerTrackingThisEntityWithSelf(MSG message, ServerPlayerEntity entity) {
-		sendToPlayer(message, entity);
-		sendToClient(message, PacketDistributor.TRACKING_ENTITY.with(() -> entity));
+		sendToClient(message, PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity));
 	}
-	
+
+	public static <MSG> void sendToAllPlayerTrackingThisChunkWithSelf(MSG message, Chunk chunk) {
+		sendToClient(message, PacketDistributor.TRACKING_CHUNK.with(() -> chunk));
+	}
+
+
 	public static void registerPackets() {
 		int id = 0;
 		INSTANCE.registerMessage(id++, CPExecuteSkill.class, CPExecuteSkill::toBytes, CPExecuteSkill::fromBytes, CPExecuteSkill::handle);

@@ -1,12 +1,11 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
@@ -44,14 +43,12 @@ public class CustomMobPatch<T extends CreatureEntity> extends MobPatch<T> {
 			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().get(Attributes.ATTACK_DAMAGE));
 		}
 	}
-	
+
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator animator) {
 		for (Pair<LivingMotion, StaticAnimation> pair : this.provider.getDefaultAnimations()) {
-			clientAnimator.addLivingAnimation(pair.getFirst(), pair.getSecond());
+			animator.addLivingAnimation(pair.getFirst(), pair.getSecond());
 		}
-		
-		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override

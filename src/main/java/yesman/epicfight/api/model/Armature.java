@@ -1,14 +1,9 @@
 
 package yesman.epicfight.api.model;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -20,6 +15,10 @@ import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.main.EpicFightMod;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
 public class Armature {
 	private final String name;
 	private final Int2ObjectMap<Joint> jointById;
@@ -28,8 +27,12 @@ public class Armature {
 	private final int jointNumber;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
-
-	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+	public final String root = ("Root");
+	public final String toolR = ("Tool_R");
+	public final String toolL = ("Tool_L");
+	public final String shoulderR = ("Shoulder_R");
+	public final String torso = ("Torso");
+    public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
 		this.name = name;
 		this.jointNumber = jointNumber;
 		this.rootJoint = rootJoint;

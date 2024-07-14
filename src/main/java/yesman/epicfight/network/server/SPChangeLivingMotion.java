@@ -1,22 +1,21 @@
 package yesman.epicfight.network.server;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-
 import com.google.common.collect.Lists;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class SPChangeLivingMotion {
 	private final int entityId;
@@ -69,11 +68,11 @@ public class SPChangeLivingMotion {
 		List<StaticAnimation> animationList = Lists.newArrayList();
 
 		for (int i = 0; i < msg.count; i++) {
-			motionList.add(LivingMotion.ENUM_MANAGER.get(buf.readInt()));
+			motionList.add(LivingMotion.ENUM_MANAGER.getOrThrow(buf.readInt()));
 		}
 
 		for (int i = 0; i < msg.count; i++) {
-			animationList.add(EpicFightMod.getInstance().animationManager.byId(buf.readInt(), buf.readInt()));
+			animationList.add(AnimationManager.getInstance().byId(buf.readInt()));
 		}
 
 		msg.motionList = motionList;
@@ -81,6 +80,7 @@ public class SPChangeLivingMotion {
 
 		return msg;
 	}
+
 
 	public static void toBytes(SPChangeLivingMotion msg, PacketBuffer buf) {
 		buf.writeInt(msg.entityId);
@@ -92,7 +92,6 @@ public class SPChangeLivingMotion {
 		}
 
 		for (StaticAnimation anim : msg.animationList) {
-			buf.writeInt(anim.getNamespaceId());
 			buf.writeInt(anim.getId());
 		}
 	}

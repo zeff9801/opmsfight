@@ -1,15 +1,15 @@
 package yesman.epicfight.api.animation.types;
 
-import net.minecraft.util.EntityDamageSource;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.EpicFightDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
 
 public class KnockdownAnimation extends LongHitAnimation {
-	public KnockdownAnimation(float convertTime, float delayTime, String path, Model model) {
-		super(convertTime, path, model);
-
+	public KnockdownAnimation(float convertTime, String path, Armature armature) {
+		this(convertTime, path, armature, false);
+	}
+	public KnockdownAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		super(convertTime, path, armature, noRegister);
 		this.stateSpectrumBlueprint
 				.addState(EntityState.KNOCKDOWN, true)
 				.addState(EntityState.ATTACK_RESULT, (damagesource) -> {

@@ -1,22 +1,22 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.function.Function;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.util.DamageSource;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.animation.property.AnimationEvent;
+import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPRotatePlayerYaw;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class DodgeAnimation extends ActionAnimation {
-	private final EntitySize size;
+import java.util.function.Function;
 
-	public DodgeAnimation(float convertTime, String path, float width, float height, Model model) {
-		this(convertTime, 0.0F, path, width, height, model);
+public class DodgeAnimation extends ActionAnimation {
+
+	public DodgeAnimation(float convertTime, String path, float width, float height, Armature armature) {
+		this(convertTime, 10.0F, path, width, height, armature);
 	}
+
 	public static final Function<DamageSource, AttackResult.ResultType> DODGEABLE_SOURCE_VALIDATOR = (damagesource) -> {
 		if (damagesource.getEntity() != null && !damagesource.isExplosion()
 				&& !damagesource.isMagic() && !damagesource.isBypassArmor()
@@ -28,14 +28,8 @@ public class DodgeAnimation extends ActionAnimation {
 		return AttackResult.ResultType.SUCCESS;
 	};
 
-	public DodgeAnimation(float convertTime, float delayTime, String path, float width, float height, Model model) {
-		super(convertTime, delayTime, path, model);
-
-		if (width > 0.0F || height > 0.0F) {
-			this.size = EntitySize.scalable(width, height);
-		} else {
-			this.size = null;
-		}
+	public DodgeAnimation(float convertTime, float delayTime, String path, float width, float height, Armature armature) {
+		super(convertTime, delayTime, path, armature);
 
 		this.stateSpectrumBlueprint.clear()
 				.newTimePair(0.0F, delayTime)
@@ -48,32 +42,17 @@ public class DodgeAnimation extends ActionAnimation {
 				.newTimePair(0.0F, Float.MAX_VALUE)
 				.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
 
-
-		this.addProperty(MoveCoordFunctions.AFFECT_SPEED, true);
-		//this.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
-		//this.addEvents(StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntityDimensions.scalable(width, height)))
+		this.addProperty(AnimationProperty.MoveCoordFunctions.AFFECT_SPEED, true);
+		this.addEvents(AnimationProperty.StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
+		this.addEvents(AnimationProperty.StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntitySize.scalable(width, height)));
 	}
-
 	@Override
-	public void tick(LivingEntityPatch<?> entitypatch) {
-		super.tick(entitypatch);
+	public void begin(LivingEntityPatch<?> entitypatch) {
+		super.begin(entitypatch);
 
-		if (this.size != null) {
-			entitypatch.resetSize(this.size);
+		if (!entitypatch.isLogicalClient() && entitypatch != null) {
+			//entitypatch.getOriginal().level.addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}
 
-	@Override
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
-		super.end(entitypatch, isEnd);
-
-		if (this.size != null) {
-			entitypatch.getOriginal().refreshDimensions();
-		}
-
-		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch) {
-			((LocalPlayerPatch)entitypatch).changeYaw(0);
-			EpicFightNetworkManager.sendToServer(new CPRotatePlayerYaw(0));
-		}
-	}
 }

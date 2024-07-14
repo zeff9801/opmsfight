@@ -1,11 +1,7 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Lists;
-
+import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -17,17 +13,13 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.server.SPAddSkill;
-import yesman.epicfight.network.server.SPChangeLivingMotion;
-import yesman.epicfight.network.server.SPChangePlayerMode;
-import yesman.epicfight.network.server.SPChangePlayerYaw;
-import yesman.epicfight.network.server.SPChangeSkill;
-import yesman.epicfight.network.server.SPPlayAnimation;
+import yesman.epicfight.network.server.*;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
@@ -36,6 +28,10 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	private LivingEntity attackTarget;
@@ -130,30 +126,52 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		
 		this.modifyLivingMotionByCurrentItem();
 	}
-	
+
 	public void modifyLivingMotionByCurrentItem() {
 		if (this.updatedMotionCurrentTick) {
 			return;
 		}
-		
-		this.getAnimator().resetLivingAnimations();
+
+		Map<LivingMotion, StaticAnimation> oldLivingAnimations = this.getAnimator().getLivingAnimations();
+		Map<LivingMotion, StaticAnimation> newLivingAnimations = Maps.newHashMap();
+
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(Hand.OFF_HAND);
 
-		Map<LivingMotion, StaticAnimation> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
-		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND));
-		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
-			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
+		Map<LivingMotion, AnimationProvider<?>> livingMotionModifiers = new HashMap<>(mainhandCap.getLivingMotionModifier(this, Hand.MAIN_HAND));
+		livingMotionModifiers.putAll(offhandCap.getLivingMotionModifier(this, Hand.OFF_HAND));
+
+		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : livingMotionModifiers.entrySet()) {
+			StaticAnimation aniamtion = entry.getValue().get();
+
+			if (!oldLivingAnimations.containsKey(entry.getKey())) {
+				this.updatedMotionCurrentTick = true;
+			} else if (oldLivingAnimations.get(entry.getKey()) != aniamtion) {
+				this.updatedMotionCurrentTick = true;
+			}
+
+			newLivingAnimations.put(entry.getKey(), aniamtion);
 		}
-		
-		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
-		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
-		
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
-		this.updatedMotionCurrentTick = true;
+
+		for (LivingMotion oldLivingMotion : oldLivingAnimations.keySet()) {
+			if (!newLivingAnimations.containsKey(oldLivingMotion)) {
+				this.updatedMotionCurrentTick = true;
+				break;
+			}
+		}
+
+		if (this.updatedMotionCurrentTick) {
+			this.getAnimator().resetLivingAnimations();
+			newLivingAnimations.forEach(this.getAnimator()::addLivingAnimation);
+
+			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
+			msg.putEntries(newLivingAnimations.entrySet());
+
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
+		}
 	}
-	
+
+
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
 		super.playAnimationSynchronized(animation, convertTimeModifier, packetProvider);

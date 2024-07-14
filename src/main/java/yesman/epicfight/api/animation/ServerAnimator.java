@@ -24,10 +24,7 @@ public class ServerAnimator extends Animator {
 		this.linkAnimation = new LinkAnimation();
 		this.animationPlayer = new AnimationPlayer();
 	}
-	@Override
-	public void init() {
 
-	}
 	/** Play an animation by animation instance **/
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float modifyTime) {
@@ -48,12 +45,6 @@ public class ServerAnimator extends Animator {
 		nextAnimation.begin(this.entitypatch);
 		nextAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
-	}
-
-	@Override
-	public void poseTick() {
-		//this.prevPose = this.currentPose;
-		//this.currentPose = this.animationPlayer.getCurrentPose(this.entitypatch, 1.0F);
 	}
 
 	@Override
@@ -90,7 +81,6 @@ public class ServerAnimator extends Animator {
 			}
 		}
 	}
-
 
 	@Override
 	public Pose getPose(float partialTicks) {

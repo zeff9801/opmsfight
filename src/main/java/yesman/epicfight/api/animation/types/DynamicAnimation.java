@@ -112,7 +112,7 @@ public abstract class DynamicAnimation {
 				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
-				dest.addSheet(jointName, sheet);
+				dest.getAnimationClip().addJointTransform(jointName,sheet);
 			}
 		}
 	}
@@ -159,14 +159,16 @@ public abstract class DynamicAnimation {
 	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
 		return stateFactor.defaultValue();
 	}
-	
+
+	public abstract AnimationClip getAnimationClip();
+
 	public Map<String, TransformSheet> getTransfroms() {
-		return this.jointTransforms;
+		return this.getAnimationClip().getJointTransforms();
 	}
-	
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		return 1.0F;
 	}
+
 	public TransformSheet getCoord() {
 		return this.jointTransforms.get("Root");
 	}
@@ -193,10 +195,6 @@ public abstract class DynamicAnimation {
 	
 	public boolean canBePlayedReverse() {
 		return false;
-	}
-	
-	public int getNamespaceId() {
-		return -1;
 	}
 	
 	public int getId() {

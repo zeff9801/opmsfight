@@ -1,19 +1,10 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.command.impl.data.EntityDataAccessor;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.CreatureAttribute;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MoverType;
+import net.minecraft.entity.Pose;
+import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -34,13 +25,8 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
-import org.apache.http.impl.entity.EntityDeserializer;
-import yesman.epicfight.api.animation.Animator;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -60,15 +46,18 @@ import yesman.epicfight.network.server.SPPlayAnimation;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
 	public static final DataParameter<Float> STUN_SHIELD = new DataParameter<Float> (251, DataSerializers.FLOAT);
 	public static final DataParameter<Float> MAX_STUN_SHIELD = new DataParameter<Float> (252, DataSerializers.FLOAT);
 	public static final DataParameter<Integer> EXECUTION_RESISTANCE = new DataParameter<Integer> (254, DataSerializers.INT);
 	public static final DataParameter<Boolean> AIRBORNE = new DataParameter<Boolean> (250, DataSerializers.BOOLEAN);
+	protected static final double WEIGHT_CORRECTION = 37.037D;
 
 	private float stunTimeReduction;
 	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
@@ -94,32 +83,34 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
 
+		//this.armature = Armatures.getArmatureFor(this);
 		this.animator = EpicFightMod.getAnimator(this);
 		this.animator.init();
-		this.currentlyAttackedEntity = new ArrayList<LivingEntity>();
 		this.original.getEntityData().define(STUN_SHIELD, Float.valueOf(0.0F));
 		this.original.getEntityData().define(MAX_STUN_SHIELD, Float.valueOf(0.0F));
-		this.original.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(1));
+		this.original.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(0));
 		this.original.getEntityData().define(AIRBORNE, Boolean.valueOf(false));
 	}
 
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
-		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
 	}
+
 	@Override
 	public boolean overrideRender() {
 		return true;
 	}
 	@OnlyIn(Dist.CLIENT)
-	public abstract void initAnimator(ClientAnimator clientAnimator);
+	public abstract void initAnimator(Animator clientAnimator);
+
 	public abstract void updateMotion(boolean considerInaction);
 	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
 
 	protected void initAttributes() {
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
+		EntitySize dimension = this.original.getDimensions(Pose.STANDING);
+		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
@@ -181,18 +172,28 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 	@Override
 	public void tick(LivingUpdateEvent event) {
-		this.animator.tick();
+		if (this.original.getHealth() <= 0.0F) {
+			this.original.xRot = (0);
 
-		if (this.isLogicalClient()) {
-			this.clientTick(event);
-		} else {
-			this.serverTick(event);
+			AnimationPlayer animPlayer = this.getAnimator().getPlayerFor(null);
+
+			if (this.original.deathTime >= 19 && !animPlayer.isEmpty() && !animPlayer.isEnd()) {
+				this.original.deathTime--;
+			}
 		}
+
+		this.animator.tick();
+		super.tick(event);
 
 		if (this.original.deathTime == 19) {
 			this.aboutToDeath();
 		}
+
+		if (!this.getEntityState().inaction() && this.original.isOnGround() && this.isAirborneState()) {
+			this.setAirborneState(false);
+		}
 	}
+
 	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
 		return !this.isLogicalClient();
 	}

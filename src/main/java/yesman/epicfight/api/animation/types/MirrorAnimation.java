@@ -7,19 +7,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class MirrorAnimation extends StaticAnimation {
 	public StaticAnimation original;
 	public StaticAnimation mirror;
 
-	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Model model) {
-		super(0.0F, false, path1, model);
-		this.original = new StaticAnimation(convertTime, repeatPlay, path1, model, true);
-		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, model, true);
+	public MirrorAnimation(float convertTime, boolean repeatPlay, String registryName, String path1, String path2, Armature armature) {
+		super(0.0F, false, registryName, armature);
+
+		this.original = new StaticAnimation(convertTime, repeatPlay, path1, armature, true);
+		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, armature, true);
 	}
 
 	@Override
@@ -30,9 +33,24 @@ public class MirrorAnimation extends StaticAnimation {
 	}
 
 	@Override
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this.original, this.mirror);
+	}
+	@Override
 	public void loadAnimation(IResourceManager resourceManager) {
-		load(resourceManager, this.original);
-		load(resourceManager, this.mirror);
+		try {
+			loadClip(resourceManager, this.original);
+			loadClip(resourceManager, this.mirror);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
+
+		//this.original.onLoaded();
+		//this.mirror.onLoaded();
+
+		this.original.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
+		this.mirror.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
 
 	@Override

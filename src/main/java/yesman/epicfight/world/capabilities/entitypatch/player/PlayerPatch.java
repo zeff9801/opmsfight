@@ -1,9 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
-import java.util.UUID;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -15,17 +11,17 @@ import net.minecraft.util.Hand;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -37,6 +33,9 @@ import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.FallEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import javax.annotation.Nullable;
+import java.util.UUID;
 
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
@@ -93,34 +92,33 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
-		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
-		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+		public void initAnimator(Animator animator) {
+		/* Living Animations */
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
+		animator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
+		animator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		animator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
+		animator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
+		animator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		animator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		animator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
+		animator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
 
-		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
 		/* Mix Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
-		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
-		//clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
-
-		clientAnimator.setCurrentMotionsAsDefault();
+		animator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
+		animator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
+		animator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+		animator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
+		animator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
+		//animator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
 	}
 	
 	public void copySkillsFrom(PlayerPatch<?> old) {

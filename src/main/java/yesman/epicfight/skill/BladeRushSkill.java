@@ -1,12 +1,6 @@
 package yesman.epicfight.skill;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.lwjgl.opengl.GL11;
-
 import com.mojang.blaze3d.platform.GlStateManager;
-
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -18,6 +12,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.lwjgl.opengl.GL11;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -30,6 +25,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.List;
+import java.util.UUID;
 
 public class BladeRushSkill extends SpecialAttackSkill {
 	private static final SkillDataKey<Integer> COMBO_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
@@ -81,7 +79,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 		} else {
 			int firstComboId = Animations.BLADE_RUSH_FIRST.getId();
 			int animationId = firstComboId + executer.getSkill(this.category).getDataManager().getDataValue(COMBO_COUNT);
-			executer.playAnimationSynchronized(EpicFightMod.getInstance().animationManager.byId(EpicFightMod.MODID.hashCode(), animationId), 0);
+			executer.playAnimationSynchronized(Animations.BLADE_RUSH_TRY, 0);
 			executer.getSkill(this.category).getDataManager().setDataF(COMBO_COUNT, (v) -> (v + 1) % 4);
 			this.setDurationSynchronize(executer, this.maxDuration);
 			this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);

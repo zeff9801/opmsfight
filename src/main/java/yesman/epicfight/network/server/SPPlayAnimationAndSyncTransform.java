@@ -1,7 +1,5 @@
 package yesman.epicfight.network.server;
 
-import java.util.function.Supplier;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -10,6 +8,8 @@ import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.function.Supplier;
+
 public class SPPlayAnimationAndSyncTransform extends SPPlayAnimationAndSetTarget {
 	protected double posX;
 	protected double posY;
@@ -17,7 +17,7 @@ public class SPPlayAnimationAndSyncTransform extends SPPlayAnimationAndSetTarget
 	protected float yRot;
 	
 	public SPPlayAnimationAndSyncTransform(int namespaceId, int animation, int entityId, float modifyTime, int targetId, double posX, double posY, double posZ, float yRot) {
-		super(namespaceId, animation, entityId, modifyTime, targetId);
+		super(animation, entityId, modifyTime, targetId);
 		this.posX = posX;
 		this.posY = posY;
 		this.posZ = posZ;
@@ -55,7 +55,6 @@ public class SPPlayAnimationAndSyncTransform extends SPPlayAnimationAndSetTarget
 	}
 	
 	public static void toBytes(SPPlayAnimationAndSyncTransform msg, PacketBuffer buf) {
-		buf.writeInt(msg.namespaceId);
 		buf.writeInt(msg.animationId);
 		buf.writeInt(msg.entityId);
 		buf.writeFloat(msg.convertTimeModifier);

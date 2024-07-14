@@ -1,13 +1,5 @@
 package yesman.epicfight.api.data.reloader;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,35 +8,27 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.*;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
-import yesman.epicfight.world.capabilities.entitypatch.CustomHumanoidMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.Faction;
-import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.capabilities.entitypatch.*;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.provider.ProviderEntity;
@@ -53,6 +37,14 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorPredicate;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class MobPatchReloadListener extends JsonReloadListener {
 	private static final Gson GSON = (new GsonBuilder()).create();
@@ -295,26 +287,29 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		
 		return combatBehaviorsMapBuilder;
 	}
-	
+
 	public static List<Pair<LivingMotion, StaticAnimation>> deserializeDefaultAnimations(CompoundNBT defaultLivingmotions) {
 		List<Pair<LivingMotion, StaticAnimation>> defaultAnimations = Lists.newArrayList();
-		
+
 		for (String key : defaultLivingmotions.getAllKeys()) {
 			String animation = defaultLivingmotions.getString(key);
-			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(animation)));
+			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.getOrThrow(key), AnimationManager.getInstance().byKeyOrThrow(animation)));
 		}
-		
+
 		return defaultAnimations;
 	}
-	
+
 	public static Map<StunType, StaticAnimation> deserializeStunAnimations(CompoundNBT tag) {
 		Map<StunType, StaticAnimation> stunAnimations = Maps.newHashMap();
-		stunAnimations.put(StunType.SHORT, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
-		stunAnimations.put(StunType.LONG, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("long")));
-		stunAnimations.put(StunType.FALL, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("fall")));
-		stunAnimations.put(StunType.KNOCKDOWN, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("knockdown")));
-		stunAnimations.put(StunType.HOLD, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
-		
+
+		for (StunType stunType : StunType.values()) {
+			String lowerCaseName = tag.getString(stunType.name().toLowerCase(Locale.ROOT));
+
+			if (!StringUtil.isNullOrEmpty(lowerCaseName)) {
+				stunAnimations.put(stunType, AnimationManager.getInstance().byKeyOrThrow(lowerCaseName));
+			}
+		}
+
 		return stunAnimations;
 	}
 	
@@ -329,32 +324,32 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		
 		return attributes;
 	}
-	
+
 	public static Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> deserializeHumanoidWeaponMotions(ListNBT tag) {
 		Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> map = Maps.newHashMap();
-		
+
 		for (int i = 0; i < tag.size(); i++) {
 			ImmutableSet.Builder<Pair<LivingMotion, StaticAnimation>> motions = ImmutableSet.builder();
 			CompoundNBT weaponMotionTag = tag.getCompound(i);
 			Style style = Style.ENUM_MANAGER.get(weaponMotionTag.getString("style"));
 			CompoundNBT motionsTag = weaponMotionTag.getCompound("livingmotions");
-			
+
 			for (String key : motionsTag.getAllKeys()) {
-				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(motionsTag.getString(key))));
+				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.getOrThrow(key), AnimationManager.getInstance().byKeyOrThrow(motionsTag.getString(key))));
 			}
-			
+
 			INBT weponTypeTag = weaponMotionTag.get("weapon_categories");
-			
+
 			if (weponTypeTag instanceof StringNBT) {
 				WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypeTag.getAsString());
 				if (!map.containsKey(weaponCategory)) {
 					map.put(weaponCategory, Maps.newHashMap());
 				}
 				map.get(weaponCategory).put(style, motions.build());
-				
+
 			} else if (weponTypeTag instanceof ListNBT) {
 				ListNBT weponTypesTag = ((ListNBT)weponTypeTag);
-				
+
 				for (int j = 0; j < weponTypesTag.size(); j++) {
 					WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypesTag.getString(j));
 					if (!map.containsKey(weaponCategory)) {
@@ -364,7 +359,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 				}
 			}
 		}
-		
+
 		return map;
 	}
 	
@@ -384,7 +379,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 			for (int j = 0; j < behaviorList.size(); j++) {
 				Behavior.Builder<T> behaviorBuilder = Behavior.builder();
 				CompoundNBT behavior = behaviorList.getCompound(j);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByPath(behavior.getString("animation"));
+				StaticAnimation animation = AnimationManager.getInstance().byKeyOrThrow(behavior.getString("animation"));
 				ListNBT conditionList = behavior.getList("conditions", 10);
 				behaviorBuilder.animationBehavior(animation);
 				
