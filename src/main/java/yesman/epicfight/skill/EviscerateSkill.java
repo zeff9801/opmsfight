@@ -1,8 +1,5 @@
 package yesman.epicfight.skill;
 
-import java.util.List;
-import java.util.UUID;
-
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -14,6 +11,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.List;
+import java.util.UUID;
 
 public class EviscerateSkill extends SpecialAttackSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("f082557a-b2f9-11eb-8529-0242ac130003");
@@ -30,10 +30,10 @@ public class EviscerateSkill extends SpecialAttackSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
-			if (event.getAnimationId() == Animations.EVISCERATE_FIRST.getId()) {
-				List<LivingEntity> hitEnemies = event.getHitEntity();
-				
-				if (!hitEnemies.isEmpty() && hitEnemies.get(0).isAlive()) {
+			if (Animations.EVISCERATE_FIRST.equals(event.getAnimation())) {
+				List<LivingEntity> hurtEntities = event.getPlayerPatch().getCurrenltyHurtEntities();
+
+				if (!hurtEntities.isEmpty() && hurtEntities.get(0).isAlive()) {
 					event.getPlayerPatch().reserveAnimation(this.second);
 					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).reset();
 					event.getPlayerPatch().currentlyAttackedEntity.clear();
