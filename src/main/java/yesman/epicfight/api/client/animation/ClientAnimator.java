@@ -148,20 +148,6 @@ public class ClientAnimator extends Animator {
 		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
 
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
-		for (Layer layer : this.baseLayer.compositeLayers.values()) {
-			if (animationType.isAssignableFrom(layer.animationPlayer.getAnimation().getClass())) {
-				return Pair.of(layer.animationPlayer, (T)layer.animationPlayer.getAnimation());
-			}
-		}
-
-		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T)this.baseLayer.animationPlayer.getAnimation()) : null;
-	}
-
-
 	@Override
 	public void tick() {
 		// Layer debugging
@@ -319,37 +305,18 @@ public class ClientAnimator extends Animator {
 			this.applyBindModifier(basePose, result, subJoints, poses, useCurrentMotion);
 		}
 	}
-	public Layer.Priority getPriorityFor(DynamicAnimation playingAnimation) {
-		for (Layer layer : this.baseLayer.compositeLayers.values()) {
-			if (layer.animationPlayer.getAnimation().getRealAnimation().equals(playingAnimation)) {
-				return layer.priority;
-			}
-		}
-
-		return this.baseLayer.priority;
-	}
-	public LivingMotion getLivingMotionFor(DynamicAnimation animation) {
-		Layer.LayerType layerType = animation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER);
-
-		if (layerType == Layer.LayerType.BASE_LAYER) {
-			return animation == this.baseLayer.animationPlayer.getAnimation() ? this.currentMotion : this.entitypatch.currentLivingMotion;
-		} else {
-			Layer.Priority priority = animation.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.LOWEST);
-			return animation == this.baseLayer.compositeLayers.get(priority).animationPlayer.getAnimation() ? this.currentCompositeMotion : this.entitypatch.currentCompositeMotion;
-		}
-	}
 
 	public LivingMotion currentCompositeMotion() {
 		return this.currentCompositeMotion;
 	}
 
-	public boolean compareMotion(LivingMotion motion) {
 
-		return this.currentMotion == motion;
+	public boolean compareMotion(LivingMotion motion) {
+		return this.currentMotion.isSame(motion);
 	}
 
 	public boolean compareCompositeMotion(LivingMotion motion) {
-		return this.currentCompositeMotion == motion;
+		return this.currentCompositeMotion.isSame(motion);
 	}
 
 	public void resetMotion() {
@@ -361,7 +328,11 @@ public class ClientAnimator extends Animator {
 		this.currentCompositeMotion = LivingMotions.NONE;
 		this.entitypatch.currentCompositeMotion = LivingMotions.NONE;
 	}
-
+	public void offAllLayers() {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			layer.off(this.entitypatch);
+		}
+	}
 	public boolean isAiming() {
 		return this.currentCompositeMotion == LivingMotions.AIM;
 	}
@@ -384,10 +355,35 @@ public class ClientAnimator extends Animator {
 
 		return this.baseLayer.animationPlayer;
 	}
-	public void offAllLayers() {
+	public Layer.Priority getPriorityFor(DynamicAnimation playingAnimation) {
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
-			layer.off(this.entitypatch);
+			if (layer.animationPlayer.getAnimation().getRealAnimation().equals(playingAnimation)) {
+				return layer.priority;
+			}
 		}
+
+		return this.baseLayer.priority;
+	}
+	public LivingMotion getLivingMotionFor(DynamicAnimation animation) {
+		Layer.LayerType layerType = animation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER);
+
+		if (layerType == Layer.LayerType.BASE_LAYER) {
+			return animation == this.baseLayer.animationPlayer.getAnimation() ? this.currentMotion : this.entitypatch.currentLivingMotion;
+		} else {
+			Layer.Priority priority = animation.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.LOWEST);
+			return animation == this.baseLayer.compositeLayers.get(priority).animationPlayer.getAnimation() ? this.currentCompositeMotion : this.entitypatch.currentCompositeMotion;
+		}
+	}
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (animationType.isAssignableFrom(layer.animationPlayer.getAnimation().getClass())) {
+				return Pair.of(layer.animationPlayer, (T)layer.animationPlayer.getAnimation());
+			}
+		}
+
+		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T)this.baseLayer.animationPlayer.getAnimation()) : null;
 	}
 
 	public LivingEntityPatch<?> getOwner() {
