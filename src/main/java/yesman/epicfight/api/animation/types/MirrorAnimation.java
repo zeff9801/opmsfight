@@ -86,6 +86,11 @@ public class MirrorAnimation extends StaticAnimation {
 	}
 
 	@Override
+	public boolean isClientAnimation() {
+		return true;
+	}
+
+	@Override
 	public <T> StaticAnimation addState(EntityState.StateFactor<T> factor, T val) {
 		super.addState(factor, val);
 

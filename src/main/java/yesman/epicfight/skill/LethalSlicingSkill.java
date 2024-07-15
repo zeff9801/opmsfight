@@ -1,8 +1,5 @@
 package yesman.epicfight.skill;
 
-import java.util.List;
-import java.util.UUID;
-
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
@@ -13,6 +10,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.List;
+import java.util.UUID;
 
 public class LethalSlicingSkill extends SpecialAttackSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("bfa79c04-97a5-11eb-a8b3-0242ac130003");
@@ -31,11 +31,11 @@ public class LethalSlicingSkill extends SpecialAttackSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
-			if (event.getAnimationId() == Animations.LETHAL_SLICING.getId()) {
-				List<LivingEntity> hitEnemies = event.getHitEntity();
-				if (hitEnemies.size() <= 1) {
+			if (Animations.LETHAL_SLICING.equals(event.getAnimation())) {
+				List<LivingEntity> hurtEntities = event.getPlayerPatch().getCurrenltyHurtEntities();
+				if (hurtEntities.size() <= 1) {
 					event.getPlayerPatch().reserveAnimation(this.swing);
-				} else if (hitEnemies.size() > 1) {
+				} else if (hurtEntities.size() > 1) {
 					event.getPlayerPatch().reserveAnimation(this.doubleSwing);
 				}
 			}
