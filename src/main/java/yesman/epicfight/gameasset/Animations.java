@@ -6,14 +6,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.*;
+import net.minecraft.util.math.*;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -41,6 +36,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -597,42 +593,69 @@ public class Animations {
 		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, "biped/combat/knockdown", biped);
 		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 
-		SWEEPING_EDGE = new SpecialAttackAnimation(0.16F, 0.1F, 0.35F, 0.46F, 0.79F, null, biped.toolR, "biped/skill/sweeping_edge", biped)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true)
+		SWEEPING_EDGE = new AttackAnimation(0.1F, 0.0F, 0.15F, 0.3F, 0.8F, null, biped.toolR, "biped/skill/sweeping_edge", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 1);
+				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 1)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", biped,
-				new Phase(0.2F, 0.2F, 0.31F, 0.31F, biped.toolR, null), new Phase(0.5F, 0.5F, 0.61F, 0.61F, Hand.OFF_HAND, biped.toolL, null),
-				new Phase(0.75F, 0.75F, 0.85F, 1.15F, biped.toolR, null))
+		DANCING_EDGE = new AttackAnimation(0.1F, "biped/skill/dancing_edge", biped,
+				new Phase(0.0F, 0.25F, 0.4F, 0.4F, 0.4F, biped.toolR, null), new Phase(0.4F, 0.4F, 0.5F, 0.55F, 0.6F, Hand.OFF_HAND, biped.toolL, null),
+				new Phase(0.6F, 0.6F, 0.7F, 1.15F, Float.MAX_VALUE, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true);
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true);
 
-		GUILLOTINE_AXE = new SpecialAttackAnimation(0.08F, 0.2F, 0.5F, 0.65F, 1.0F, null, biped.toolR, "biped/skill/guillotine_axe", biped)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
+		THE_GUILLOTINE = new AttackAnimation(0.15F, 0.2F, 0.7F, 0.75F, 1.1F, null, biped.toolR, "biped/skill/the_guillotine", biped)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 
-		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", biped,
-				new Phase(0.3F, 0.3F, 0.36F, 0.51F, biped.toolR, null), new Phase(0.51F, 0.51F, 0.56F, 0.73F, biped.toolR, null),
-				new Phase(0.73F, 0.73F, 0.78F, 1.05F, biped.toolR, null))
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		HEARTPIERCER = new AttackAnimation(0.11F, "biped/skill/heartpiercer", biped,
+				new Phase(0.0F, 0.3F, 0.36F, 0.5F, 0.5F, biped.toolR, null), new Phase(0.5F, 0.5F, 0.56F, 0.75F, 0.75F, biped.toolR, null),
+				new Phase(0.75F, 0.75F, 0.81F, 1.05F, Float.MAX_VALUE, biped.toolR, null))
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		SPEAR_SLASH = new SpecialAttackAnimation(0.1F, "biped/skill/spear_slash", biped,
-				new Phase(0.2F, 0.2F, 0.41F, 0.5F, biped.toolR, null), new Phase(0.5F, 0.75F, 0.95F, 1.25F, biped.toolR, null))
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		GRASPING_SPIRAL_FIRST = new AttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/skill/grasping_spire_first", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER)
+				.setResourceLocation("biped/combat/spear_dash")
+				.addEvents(StaticAnimationProperty.ON_END_EVENTS,
+						AnimationEvent.create((entitypatch, animation, params) -> {
+							List<LivingEntity> hitEnemies = entitypatch.getCurrenltyHurtEntities();
+							Vector3d vec = entitypatch.getOriginal().position().add(Vector3d.directionFromRotation(new Vector2f(0.0F, entitypatch.getOriginal().xRot)));
+							AttackAnimation attackAnimation = (AttackAnimation)animation;
 
-		GIANT_WHIRLWIND = new SpecialAttackAnimation(0.41F, "biped/skill/giant_whirlwind", biped,
-				new Phase(0.3F, 0.35F, 0.55F, 0.85F, biped.toolR, null), new Phase(0.95F, 1.05F, 1.2F, 1.35F, biped.toolR, null),
-				new Phase(1.65F, 1.75F, 1.95F, 2.5F, biped.toolR, null))
-				.addProperty(AttackAnimationProperty.ROTATE_X, true)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
+							for (LivingEntity e : hitEnemies) {
+								if (e.isAlive()) {
+									LivingEntityPatch<?> targetpatch = EpicFightCapabilities.getEntityPatch(e, LivingEntityPatch.class);
+
+									if (targetpatch != null) {
+										//TODO Uncomment damage source, atm it uses one that does not exist
+//										DamageSource dmgSource = attackAnimation.getEpicFightDamageSource(entitypatch, e, attackAnimation.phases[0]);
+//
+//										if (!targetpatch.tryHurt(dmgSource, 0).resultType.dealtDamage()) {
+//											continue;
+//										}
+									}
+
+									Vector3d toAttacker = e.position().subtract(vec).multiply(0.3F, 0.3F, 0.3F);
+									Vector3d finalVector = vec.add(toAttacker);
+									e.setPos(finalVector.x, finalVector.y, finalVector.z);
+								}
+							}
+						}, AnimationEvent.Side.SERVER))
+				.addEvents(
+						AnimationEvent.TimeStampedEvent.create(0.75F, (entitypatch, animation, params) -> {
+							if (entitypatch.isLastAttackSuccess()) {
+								entitypatch.playAnimationSynchronized(GRASPING_SPIRAL_SECOND, 0.0F);
+							}
+						}, AnimationEvent.Side.SERVER)
+				);
+
+		GRASPING_SPIRAL_SECOND = new AttackAnimation(0.1F, 0.0F, 0.5F, 0.6F, 0.95F, null, biped.toolR, "biped/skill/grasping_spire_second", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+
+		//TODO Continue with the rest of special skills ports
 
 		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/combat/uchigatana_sheath_auto", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
@@ -645,17 +668,17 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 
-		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, ColliderPreset.FIST_FIXED, biped.root, "biped/skill/lethal_slicing_start", biped)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, 1.0F);
-
-		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, ColliderPreset.FATAL_DRAW, biped.root, "biped/skill/lethal_slicing_once", biped)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-
-		LETHAL_SLICING_TWICE = new SpecialAttackAnimation(0.016F, "biped/skill/lethal_slicing_twice", biped,
-				new Phase(0.0F, 0.0F, 0.1F, 0.15F, biped.root, ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, biped.root, ColliderPreset.FATAL_DRAW)).addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
+//		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, ColliderPreset.FIST_FIXED, biped.root, "biped/skill/lethal_slicing_start", biped)
+//				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
+//				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, 1.0F);
+//
+//		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, ColliderPreset.FATAL_DRAW, biped.root, "biped/skill/lethal_slicing_once", biped)
+//				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
+//				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
+//
+//		LETHAL_SLICING_TWICE = new SpecialAttackAnimation(0.016F, "biped/skill/lethal_slicing_twice", biped,
+//				new Phase(0.0F, 0.0F, 0.1F, 0.15F, biped.root, ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, biped.root, ColliderPreset.FATAL_DRAW)).addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
+//				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 
 		RELENTLESS_COMBO = new AttackAnimation(0.05F, "biped/skill/relentless_combo", biped,
 				new Phase(0.0F, 0.016F, 0.066F, 0.133F, 0.133F, Hand.OFF_HAND, biped.rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, 0.25F, biped.rootJoint, ColliderPreset.FIST_FIXED),
@@ -713,10 +736,10 @@ public class Animations {
 				.newTimePair(0.0F, 0.6F)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BLADE_RUSH_FINISHER = new SpecialAttackAnimation(0.15F, 0.0F, 0.1F, 0.16F, 0.65F, ColliderPreset.BLADE_RUSH, biped.root, "biped/skill/blade_rush_finisher", biped)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, 1.0F);
+//		BLADE_RUSH_FINISHER = new SpecialAttackAnimation(0.15F, 0.0F, 0.1F, 0.16F, 0.65F, ColliderPreset.BLADE_RUSH, biped.root, "biped/skill/blade_rush_finisher", biped)
+//				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
+//				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
+//				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, 1.0F);
 	}
 
 	private static class ReuseableEvents {
@@ -748,80 +771,82 @@ public class Animations {
 			RayTraceResult hitResult = level.clip(new RayTraceContext(position.add(0.0D, 0.1D, 0.0D), weaponEdge, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entitypatch.getOriginal()));
 
 			if (hitResult.getType() == RayTraceResult.Type.BLOCK) {
-				Direction direction = hitResult.getDirection();
-				BlockPos collidePos = hitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
+				BlockRayTraceResult blockHitResult = (BlockRayTraceResult) hitResult;
+				Direction direction = blockHitResult.getDirection();
+				BlockPos collidePos = blockHitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
 
-				if (!LevelUtil.canTransferShockWave(level, collidePos, level.getBlockState(collidePos))) {
-					collidePos = collidePos.below();
-				}
+				//TODO IMPLEMENT FRACTURE BLOCK
+//				if (!LevelUtil.canTransferShockWave(level, collidePos, level.getBlockState(collidePos))) {
+//					collidePos = collidePos.below();
+//				}
 
 				slamStartPos = new Vector3d(collidePos.getX(), collidePos.getY(), collidePos.getZ());
 			} else {
 				slamStartPos = weaponEdge.subtract(0.0D, 1.0D, 0.0D);
 			}
-
-			LevelUtil.circleSlamFracture(entitypatch.getOriginal(), level, slamStartPos, (double)params[2], false, false);
+			//TODO Needs FractureBlock implemented
+//			LevelUtil.circleSlamFracture(entitypatch.getOriginal(), level, slamStartPos, (double)params[2], false, false);
 		};
 
-		public static final AnimationEvent.AnimationEventConsumer FRACTURE_METEOR_STRIKE = (entitypatch, animation, params) -> {
-			if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-				SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
+//		public static final AnimationEvent.AnimationEventConsumer FRACTURE_METEOR_STRIKE = (entitypatch, animation, params) -> {
+//			if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+//				SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
+//
+//				if (skill != null) {
+//					double slamPower = (float)(Math.log(MeteorSlamSkill.getFallDistance(skill) * entitypatch.getOriginal().getAttributeValue(EpicFightAttributes.IMPACT.get())));
+//					FRACTURE_GROUND_SIMPLE.fire(entitypatch, animation, params[0], params[1], slamPower, params[2]);
+//				}
+//			}
+//		};
 
-				if (skill != null) {
-					double slamPower = (float)(Math.log(MeteorSlamSkill.getFallDistance(skill) * entitypatch.getOriginal().getAttributeValue(EpicFightAttributes.IMPACT.get())));
-					FRACTURE_GROUND_SIMPLE.fire(entitypatch, animation, params[0], params[1], slamPower, params[2]);
-				}
-			}
-		};
-
-		public static final AnimationEvent.AnimationEventConsumer SUMMON_THUNDER = (entitypatch, animation, params) -> {
-			if (entitypatch.isLogicalClient()) {
-				return;
-			}
-
-			if (animation instanceof AttackAnimation attackAnimation) {
-				Phase phase = attackAnimation.phases[1];
-
-				int i = (int)phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).orElse(ValueModifier.setter(3)).getTotalValue(0);
-				float damage = phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).orElse(ValueModifier.setter(8.0F)).getTotalValue(0);
-
-				LivingEntity original = entitypatch.getOriginal();
-				ServerWorld level = (ServerWorld)original.level;
-				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(Hand.MAIN_HAND), null, damage);
-
-				List<Entity> list = level.getEntities(original, original.getBoundingBox().inflate(10.0D, 4.0D, 10.0D), (e) -> {
-					return !(e.distanceToSqr(original) > 100.0D) && !e.isAlliedTo(original) && entitypatch.getOriginal().canSee(e);
-				});
-
-				list = HitEntityList.Priority.HOSTILITY.sort(entitypatch, list);
-				int count = 0;
-
-				while (count < i && count < list.size()) {
-					Entity e = list.get(count++);
-					BlockPos blockpos = e.blockPosition();
-					LightningBoltEntity lightningbolt = EntityType.LIGHTNING_BOLT.create(level);
-					lightningbolt.setVisualOnly(true);
-					lightningbolt.moveTo(Vector3d.atBottomCenterOf(blockpos));
-					lightningbolt.setDamage(0.0F);
-					lightningbolt.setCause(entitypatch instanceof ServerPlayerPatch serverPlayerPatch ? serverPlayerPatch.getOriginal() : null);
-
-					DamageSource dmgSource = new DamageSource(e.level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), entitypatch.getOriginal());
-					EpicFightDamageSource damageSource = attackAnimation.getEpicFightDamageSource(dmgSource, entitypatch, e, phase).setHurtItem(entitypatch.getOriginal().getItemInHand(Hand.MAIN_HAND));
-					e.hurt(damageSource, total);
-					e.thunderHit(level, lightningbolt);
-
-					level.addFreshEntity(lightningbolt);
-				}
-
-				if (count > 0) {
-					if (level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && level.random.nextFloat() < 0.08F && level.getThunderLevel(1.0F) < 1.0F) {
-						level.setWeatherParameters(0, MathUtils.randomBetweenInclusive(level.random, 12000, 180000), true, true);
-					}
-
-					original.playSound(SoundEvents.TRIDENT_THUNDER, 5.0F, 1.0F);
-				}
-			}
-		};
+//		public static final AnimationEvent.AnimationEventConsumer SUMMON_THUNDER = (entitypatch, animation, params) -> {
+//			if (entitypatch.isLogicalClient()) {
+//				return;
+//			}
+//
+//			if (animation instanceof AttackAnimation attackAnimation) {
+//				Phase phase = attackAnimation.phases[1];
+//
+//				int i = (int)phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).orElse(ValueModifier.setter(3)).getTotalValue(0);
+//				float damage = phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).orElse(ValueModifier.setter(8.0F)).getTotalValue(0);
+//
+//				LivingEntity original = entitypatch.getOriginal();
+//				ServerWorld level = (ServerWorld)original.level;
+//				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(Hand.MAIN_HAND), null, damage);
+//
+//				List<Entity> list = level.getEntities(original, original.getBoundingBox().inflate(10.0D, 4.0D, 10.0D), (e) -> {
+//					return !(e.distanceToSqr(original) > 100.0D) && !e.isAlliedTo(original) && entitypatch.getOriginal().canSee(e);
+//				});
+//
+//				list = HitEntityList.Priority.HOSTILITY.sort(entitypatch, list);
+//				int count = 0;
+//
+//				while (count < i && count < list.size()) {
+//					Entity e = list.get(count++);
+//					BlockPos blockpos = e.blockPosition();
+//					LightningBoltEntity lightningbolt = EntityType.LIGHTNING_BOLT.create(level);
+//					lightningbolt.setVisualOnly(true);
+//					lightningbolt.moveTo(Vector3d.atBottomCenterOf(blockpos));
+//					lightningbolt.setDamage(0.0F);
+//					lightningbolt.setCause(entitypatch instanceof ServerPlayerPatch serverPlayerPatch ? serverPlayerPatch.getOriginal() : null);
+//
+//					DamageSource dmgSource = new DamageSource(e.level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), entitypatch.getOriginal());
+//					EpicFightDamageSource damageSource = attackAnimation.getEpicFightDamageSource(dmgSource, entitypatch, e, phase).setHurtItem(entitypatch.getOriginal().getItemInHand(Hand.MAIN_HAND));
+//					e.hurt(damageSource, total);
+//					e.thunderHit(level, lightningbolt);
+//
+//					level.addFreshEntity(lightningbolt);
+//				}
+//
+//				if (count > 0) {
+//					if (level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && level.random.nextFloat() < 0.08F && level.getThunderLevel(1.0F) < 1.0F) {
+//						level.setWeatherParameters(0, MathUtils.randomBetweenInclusive(level.random, 12000, 180000), true, true);
+//					}
+//
+//					original.playSound(SoundEvents.TRIDENT_THUNDER, 5.0F, 1.0F);
+//				}
+//			}
+//		};
 
 		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 
@@ -850,42 +875,42 @@ public class Animations {
 			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 		};
 
-		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
-			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
-			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-			double d0 = vec3d1.horizontalDistanceSqr();
-			double d1 = vec3d.horizontalDistanceSqr();
+//		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+//			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+//			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+//			double d0 = vec3d1.horizontalDistanceSqr();
+//			double d1 = vec3d.horizontalDistanceSqr();
+//
+//			if (d0 > 0.0D && d1 > 0.0D) {
+//				JointTransform root = pose.getOrDefaultTransform("Root");
+//				JointTransform head = pose.getOrDefaultTransform("Head");
+//				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
+//				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
+//				float zRot = MathHelper.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
+//
+//				root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
+//
+//				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+//
+//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
+//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
+//			}
+//		};
 
-			if (d0 > 0.0D && d1 > 0.0D) {
-				JointTransform root = pose.getOrDefaultTransform("Root");
-				JointTransform head = pose.getOrDefaultTransform("Head");
-				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
-				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
-				float zRot = MathHelper.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
-
-				root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
-
-				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
-			}
-		};
-
-		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
-			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
-			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-			double d0 = vec3d1.horizontalDistanceSqr();
-			double d1 = vec3d.horizontalDistanceSqr();
-
-			if (d0 > 0.0D && d1 > 0.0D) {
-				JointTransform root = pose.getOrDefaultTransform("Root");
-				JointTransform head = pose.getOrDefaultTransform("Head");
-				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
-			}
-		};
+//		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+//			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+//			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+//			double d0 = vec3d1.horizontalDistanceSqr();
+//			double d1 = vec3d.horizontalDistanceSqr();
+//
+//			if (d0 > 0.0D && d1 > 0.0D) {
+//				JointTransform root = pose.getOrDefaultTransform("Root");
+//				JointTransform head = pose.getOrDefaultTransform("Head");
+//				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
+//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
+//			}
+//		};
 
 		public static final AnimationProperty.PoseModifier MAP_ARMS_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
 			float xRot = 50.0F - (entitypatch.getOriginal().xRotO + (entitypatch.getOriginal().xRot - entitypatch.getOriginal().xRotO) * partialTicks);

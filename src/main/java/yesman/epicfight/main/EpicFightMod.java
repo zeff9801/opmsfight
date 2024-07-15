@@ -24,6 +24,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.client.model.ItemSkins;
+import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.client.ClientEngine;
@@ -106,7 +107,6 @@ public class EpicFightMod {
         EpicFightEntities.ENTITIES.register(bus);
         
         MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent); //Forge side event
-		bus.addListener(this::reloadAssetsListenerEvent); //Minecraft side event
 
         MinecraftForge.EVENT_BUS.register(EntityEvents.class);
         MinecraftForge.EVENT_BUS.register(ModBusEvents.class);
@@ -176,13 +176,9 @@ public class EpicFightMod {
 
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(new JointMaskReloadListener());
-		//event.registerReloadListener(Meshes.INSTANCE);
+		event.registerReloadListener(Meshes.INSTANCE);
 		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
-	}
-
-	private void reloadAssetsListenerEvent(final RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener(ClientModels.LOGICAL_CLIENT); //Order matters. Model stuff like armature has to be populated first. Animations uses them
 	}
 
 	/**

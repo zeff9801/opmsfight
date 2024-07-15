@@ -4,6 +4,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.Hand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.Layer;
@@ -33,10 +34,6 @@ public class MirrorAnimation extends StaticAnimation {
 	}
 
 	@Override
-	public List<StaticAnimation> getClipHolders() {
-		return List.of(this.original, this.mirror);
-	}
-	@Override
 	public void loadAnimation(IResourceManager resourceManager) {
 		try {
 			loadClip(resourceManager, this.original);
@@ -54,8 +51,23 @@ public class MirrorAnimation extends StaticAnimation {
 	}
 
 	@Override
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this.original, this.mirror);
+	}
+
+	@Override
 	public boolean isMetaAnimation() {
 		return true;
+	}
+
+	@Override
+	public boolean isClientAnimation() {
+		return true;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.original.getAnimationClip();
 	}
 
 	@Override
@@ -85,10 +97,6 @@ public class MirrorAnimation extends StaticAnimation {
 		return this;
 	}
 
-	@Override
-	public boolean isClientAnimation() {
-		return true;
-	}
 
 	@Override
 	public <T> StaticAnimation addState(EntityState.StateFactor<T> factor, T val) {

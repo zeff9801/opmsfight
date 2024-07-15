@@ -49,7 +49,7 @@ public class DodgeAnimation extends ActionAnimation {
 		super.begin(entitypatch);
 
 		if (!entitypatch.isLogicalClient() && entitypatch != null) {
-			//entitypatch.getOriginal().level.addFreshEntity(new DodgeLeft(entitypatch)); TODO
+//			entitypatch.getOriginal().level.addFreshEntity(new DodgeLeft(entitypatch)); //TODO Implement DodgeLeft
 		}
 	}
 }

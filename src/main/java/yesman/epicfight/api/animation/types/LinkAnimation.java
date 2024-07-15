@@ -1,10 +1,10 @@
 package yesman.epicfight.api.animation.types;
 
-import yesman.epicfight.api.animation.AnimationClip;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.Pose;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -12,11 +12,12 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class LinkAnimation extends DynamicAnimation {
 	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation fromAnimation;
-	protected DynamicAnimation toAnimation;
+	protected StaticAnimation toAnimation;
 	protected float nextStartTime;
 	
 	@Override
@@ -39,11 +40,6 @@ public class LinkAnimation extends DynamicAnimation {
 	@Override
 	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		return this.toAnimation.getStatesMap(entitypatch, time);
-	}
-
-	@Override
-	public AnimationClip getAnimationClip() {
-		return this.animationClip;
 	}
 
 	@Override
@@ -82,7 +78,7 @@ public class LinkAnimation extends DynamicAnimation {
 		if (this.toAnimation instanceof ActionAnimation) {
 			JointTransform jt = pose.getOrDefaultTransform("Root");
 			Vec3f jointPosition = jt.translation();
-			OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+			OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
 			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
 			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
 			worldPosition.x = 0.0F;
@@ -94,26 +90,59 @@ public class LinkAnimation extends DynamicAnimation {
 			jointPosition.z = worldPosition.z;
 		}
 	}
-	@Override
-	public boolean isLinkAnimation() {
-		return true;
-	}
 
 	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		return this.toAnimation.getPlaySpeed(entitypatch, animation);
 	}
 
-	public void setToAnimation(DynamicAnimation animation) {
-		this.toAnimation = animation;
+	public void setConnectedAnimations(DynamicAnimation from, StaticAnimation to) {
+		this.fromAnimation = from.getRealAnimation();
+		this.toAnimation = to;
+	}
+
+	public DynamicAnimation getNextAnimation() {
+		return this.toAnimation;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return useCurrentMotion ? this.toAnimation.getJointMaskEntry(entitypatch, true) : this.fromAnimation.getJointMaskEntry(entitypatch, false);
+	}
+
+	@Override
+	public boolean isMainFrameAnimation() {
+		return this.toAnimation.isMainFrameAnimation();
+	}
+
+	@Override
+	public boolean isReboundAnimation() {
+		return this.toAnimation.isReboundAnimation();
+	}
+
+	@Override
+	public boolean doesHeadRotFollowEntityHead() {
+		return this.fromAnimation.doesHeadRotFollowEntityHead() && this.toAnimation.doesHeadRotFollowEntityHead();
+	}
+
+	@Override
+	public DynamicAnimation getRealAnimation() {
+		return this.toAnimation;
 	}
 
 	public DynamicAnimation getFromAnimation() {
 		return this.fromAnimation;
 	}
-	public DynamicAnimation getToAnimation() {
-		return this.toAnimation;
+
+	public void copyTo(LinkAnimation dest) {
+		dest.setConnectedAnimations(this.fromAnimation, this.toAnimation);
+		dest.setTotalTime(this.getTotalTime());
+
+		Map<String, TransformSheet> trnasforms = dest.getTransfroms();
+		trnasforms.clear();
+		trnasforms.putAll(this.getTransfroms());
 	}
+
 	public void setNextStartTime(float nextStartTime) {
 		this.nextStartTime = nextStartTime;
 	}
@@ -122,33 +151,18 @@ public class LinkAnimation extends DynamicAnimation {
 		this.nextStartTime = 0.0F;
 	}
 
-	public void setConnectedAnimations(DynamicAnimation from, StaticAnimation to) {
-		this.fromAnimation = from.getRealAnimation();
-		this.toAnimation = to;
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
 	}
 
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.toAnimation.isJointEnabled(entitypatch, joint);
-	}
-	
-	@Override
-	public boolean isMainFrameAnimation() {
-		return this.toAnimation.isMainFrameAnimation();
-	}
-	
-	@Override
-	public boolean isReboundAnimation() {
-		return this.toAnimation.isReboundAnimation();
-	}
-	
-	@Override
-	public DynamicAnimation getRealAnimation() {
-		return this.toAnimation;
-	}
-	
-	@Override
 	public String toString() {
 		return "LinkAnimation " + this.toAnimation;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
 	}
 }

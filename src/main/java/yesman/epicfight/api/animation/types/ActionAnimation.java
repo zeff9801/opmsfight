@@ -227,12 +227,12 @@ public class ActionAnimation extends MainFrameAnimation {
 			}
 		}
 	}
+
 	public void removeRootTranslation(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {
 		JointTransform jt = pose.getOrDefaultTransform("Root");
 
 		if (this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isEmpty()) {
 			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
-			//Vec3f withPosition = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
 			jt.translation().set(withPosition);
 		} else {
 			TransformSheet coordTransform = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).get();
@@ -240,6 +240,8 @@ public class ActionAnimation extends MainFrameAnimation {
 			jt.translation().add(0.0F, 0.0F, nextCoord.z);
 		}
 	}
+
+
 	protected Vector3d getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
 		TimePairList coordUpdateTime = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME).orElse(null);

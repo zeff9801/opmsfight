@@ -140,6 +140,22 @@ public class Layer {
 		return false;
 	}
 
+	public void copyLayerTo(Layer layer, float playbackTime) {
+		DynamicAnimation animation;
+
+		if (this.animationPlayer.getAnimation() == this.linkAnimation) {
+			this.linkAnimation.copyTo(layer.linkAnimation);
+			animation = layer.linkAnimation;
+		} else {
+			animation = this.animationPlayer.getAnimation();
+		}
+
+		layer.animationPlayer.setPlayAnimation(animation);
+		layer.animationPlayer.setElapsedTime(this.animationPlayer.getPrevElapsedTime() + playbackTime, this.animationPlayer.getElapsedTime() + playbackTime);
+		layer.nextAnimation = this.nextAnimation;
+		layer.resume();
+	}
+
 	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
 		return current ? entitypatch.currentLivingMotion : entitypatch.getClientAnimator().currentMotion();
 	}
@@ -265,6 +281,7 @@ public class Layer {
 		protected boolean isBaseLayer() {
 			return true;
 		}
+
 	}
 
 	@OnlyIn(Dist.CLIENT)

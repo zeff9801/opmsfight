@@ -15,7 +15,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.CustomModelBakery;
+import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.client.gui.widget.RewindableButton;
 import yesman.epicfight.config.Option;

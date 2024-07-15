@@ -3,7 +3,6 @@ package yesman.epicfight.world.capabilities.entitypatch;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Pose;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -26,10 +25,8 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.*;
-import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation;
-import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -40,6 +37,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
@@ -111,7 +109,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
 
 	protected void initAttributes() {
-		EntitySize dimension = this.original.getDimensions(Pose.STANDING);
+		EntitySize dimension = this.original.getDimensions(net.minecraft.entity.Pose.STANDING);
 		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
@@ -206,6 +204,21 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 		if (!this.getEntityState().inaction() && this.original.isOnGround() && this.isAirborneState()) {
 			this.setAirborneState(false);
+		}
+	}
+
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		if (pose.getJointTransformData().containsKey("Head")) {
+			if (animation.doesHeadRotFollowEntityHead()) {
+				float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
+				float headRot = this.original.yBodyRot - this.original.yHeadRot;
+				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+				OpenMatrix4f toOriginalRotation = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).removeScale().removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.xRot, xAxis).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, yAxis));
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+			}
 		}
 	}
 

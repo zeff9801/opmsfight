@@ -33,47 +33,49 @@ public class LayerOffAnimation extends DynamicAnimation {
 			entitypatch.getClientAnimator().baseLayer.disableLayer(this.layerPriority);
 		}
 	}
-	@Override
-	public boolean isLinkAnimation() {
-		return true;
-	}
+
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
 		return Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.totalTime);
 	}
-	
-	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.lastPose.getJointTransformData().containsKey(joint);
-	}
-	@Override
-	public AnimationClip getAnimationClip() {
-		return this.animationClip;
-	}
-	@Override
-	public <V> Optional<V> getProperty(AnimationProperty<V> propertyType) {
-		return this.lastAnimation.getProperty(propertyType);
-	}
-	
-	public void setLastAnimation(DynamicAnimation animation) {
-		this.lastAnimation = animation;
-	}
+
 	@Override
 	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
 		return this.lastAnimation.getJointMaskEntry(entitypatch, useCurrentMotion);
 	}
+
+	@Override
+	public <V> Optional<V> getProperty(AnimationProperty<V> propertyType) {
+		return this.lastAnimation.getProperty(propertyType);
+	}
+
+	public void setLastAnimation(DynamicAnimation animation) {
+		this.lastAnimation = animation;
+	}
+
+	@Override
+	public boolean doesHeadRotFollowEntityHead() {
+		return this.lastAnimation.doesHeadRotFollowEntityHead();
+	}
+
+	@Override
+	public DynamicAnimation getRealAnimation() {
+		return Animations.DUMMY_ANIMATION;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
+	}
+
 	@Override
 	public boolean hasTransformFor(String joint) {
 		return this.lastPose.getJointTransformData().containsKey(joint);
 	}
+
 	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.lastAnimation.getBindModifier(entitypatch, joint);
-	}
-	
-	@Override
-	public DynamicAnimation getRealAnimation() {
-		return Animations.DUMMY_ANIMATION;
+	public boolean isLinkAnimation() {
+		return true;
 	}
 }

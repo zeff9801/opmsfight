@@ -1,4 +1,4 @@
-package yesman.epicfight.api.client.model;
+package yesman.epicfight.api.client.model.armor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,6 +30,9 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.ClientModel;
+import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
