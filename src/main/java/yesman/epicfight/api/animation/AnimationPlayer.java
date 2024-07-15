@@ -1,10 +1,10 @@
 package yesman.epicfight.api.animation;
 
 import com.ibm.icu.impl.Pair;
-import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
@@ -60,7 +60,7 @@ public class AnimationPlayer {
 			}
 		}
 	}
-	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, AnimationProperty.MoveCoordSetter moveCoordSetter) {
+	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, MoveCoordFunctions.MoveCoordSetter moveCoordSetter) {
 		moveCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
 	}
 

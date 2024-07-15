@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation.property;
 
-import com.joml.Quaternionf;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -238,22 +237,4 @@ public class MoveCoordFunctions {
 
         transformSheet.readFrom(sheet);
     };
-
-//    public static final MoveCoordSetter VEX_TRACE = (self, entitypatch, transformSheet) -> {
-//        TransformSheet transform = self.getCoord().copyAll();
-//        Keyframe[] keyframes = transform.getKeyframes();
-//        int startFrame = 0;
-//        int endFrame = 6;
-//        Vector3d pos = entitypatch.getOriginal().position();
-//        Vector3d targetpos = entitypatch.getTarget().position();
-//        float verticalDistance = (float) (targetpos.y - pos.y);
-//        Quaternionf rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, 1.0F));
-//
-//        for (int i = startFrame; i <= endFrame; i++) {
-//            Vec3f translation = keyframes[i].transform().translation();
-//            OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
-//        }
-//
-//        transformSheet.readFrom(transform);
-//    };
 }

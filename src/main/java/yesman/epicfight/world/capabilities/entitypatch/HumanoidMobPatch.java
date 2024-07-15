@@ -45,23 +45,23 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		super(faction);
 		this.setWeaponMotions();
 	}
-	
+
 	@Override
 	protected void initAI() {
 		super.initAI();
-		
+
 		if (this.original.getVehicle() != null && this.original.getVehicle() instanceof MobEntity) {
 			this.setAIAsMounted(this.original.getVehicle());
 		} else {
 			this.setAIAsInfantry(this.original.getMainHandItem().getItem() instanceof ShootableItem);
 		}
 	}
-	
+
 	@Override
 	public void onStartTracking(ServerPlayerEntity trackingPlayer) {
 		this.modifyLivingMotionByCurrentItem();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected void setWeaponMotions() {
 		this.weaponLivingMotions = Maps.newHashMap();
@@ -125,14 +125,13 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
-	
+
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
 		this.initAI();
-		
+
 		if (hand == Hand.OFF_HAND) {
 			if (!from.isEmpty()) {
-				from.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::removeModifier);
 				from.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
 			if (!fromCap.isEmpty()) {
@@ -140,9 +139,8 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::removeModifier);
 				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::removeModifier);
 			}
-			
+
 			if (!to.isEmpty()) {
-				to.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::addTransientModifier);
 				to.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
 			if (!toCap.isEmpty()) {
@@ -151,8 +149,10 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::addTransientModifier);
 			}
 		}
-		
+
 		this.modifyLivingMotionByCurrentItem();
+
+		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 
 	@Override

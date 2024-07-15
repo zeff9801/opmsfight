@@ -1,14 +1,25 @@
 package yesman.epicfight.gameasset;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.resources.IResourceManager;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
@@ -17,23 +28,24 @@ import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.client.animation.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.JointMaskEntry;
-import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
-import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.utils.EpicFightDamageSource;
+import yesman.epicfight.api.utils.HitEntityList;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
+import yesman.epicfight.api.utils.TimePairList;
 import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -360,8 +372,7 @@ public class Animations {
 
 		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
 		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
-		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
+		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
@@ -389,168 +400,179 @@ public class Animations {
 
 		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, toolR, "biped/combat/fist_auto2", bipedModel)
+		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, biped.toolR, "biped/combat/fist_auto2", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_AUTO3 = new BasicAttackAnimation(0.08F, 0.05F, 0.16F, 0.5F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto3", bipedModel)
+		FIST_AUTO3 = new BasicAttackAnimation(0.08F, 0.05F, 0.16F, 0.5F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto3", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, shoulderR, "biped/combat/fist_dash", bipedModel)
+		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, biped.shoulderR, "biped/combat/fist_dash", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
-		;
-		SWORD_AUTO1 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, toolR, "biped/combat/sword_auto1", bipedModel);
-		SWORD_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, toolR, "biped/combat/sword_auto2", bipedModel);
-		SWORD_AUTO3 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.6F, null, toolR, "biped/combat/sword_auto3", bipedModel);
-		SWORD_DASH = new DashAttackAnimation(0.12F, 0.1F, 0.25F, 0.4F, 0.65F, null, toolR, "biped/combat/sword_dash", bipedModel)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
+		SWORD_AUTO1 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, biped.toolR, "biped/combat/sword_auto1", biped);
+		SWORD_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, biped.toolR, "biped/combat/sword_auto2", biped);
+		SWORD_AUTO3 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.6F, null, biped.toolR, "biped/combat/sword_auto3", biped);
+		SWORD_DASH = new DashAttackAnimation(0.12F, 0.1F, 0.25F, 0.4F, 0.65F, null, biped.toolR, "biped/combat/sword_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, toolR, "biped/combat/greatsword_auto1", bipedModel);
-		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, toolR, "biped/combat/greatsword_auto2", bipedModel);
-		GREATSWORD_DASH = new DashAttackAnimation(0.11F, 0.4F, 0.65F, 0.8F, 1.2F, null, toolR, "biped/combat/greatsword_dash", false, bipedModel)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
-				.addProperty(AttackPhaseProperty.FINISHER, true);
-		SPEAR_ONEHAND_AUTO = new BasicAttackAnimation(0.16F, 0.1F, 0.2F, 0.45F, null, toolR, "biped/combat/spear_onehand_auto", bipedModel);
-		SPEAR_TWOHAND_AUTO1 = new BasicAttackAnimation(0.25F, 0.05F, 0.15F, 0.45F, null, toolR, "biped/combat/spear_twohand_auto1", bipedModel);
-		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.25F, 0.05F, 0.15F, 0.45F, null, toolR, "biped/combat/spear_twohand_auto2", bipedModel);
-		SPEAR_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.2F, 0.3F, 0.7F, null, toolR, "biped/combat/spear_dash", bipedModel)
+		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, biped.toolR, "biped/combat/greatsword_auto1", biped);
+		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, biped.toolR, "biped/combat/greatsword_auto2", biped);
+		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", biped, false)
+				//.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER))
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false)
+				.addEvents(AnimationEvent.TimeStampedEvent.create(0.4F, Animations.ReusableSources.FRACTURE_GROUND_SIMPLE, AnimationEvent.Side.CLIENT).params(new Vec3f(0.0F, -0.24F, -2.0F), Armatures.BIPED.toolR, 1.1D, 0.55F));
+		SPEAR_ONEHAND_AUTO = new BasicAttackAnimation(0.16F, 0.1F, 0.2F, 0.45F, null, biped.toolR, "biped/combat/spear_onehand_auto", biped);
+		SPEAR_TWOHAND_AUTO1 = new BasicAttackAnimation(0.25F, 0.05F, 0.15F, 0.45F, null, biped.toolR, "biped/combat/spear_twohand_auto1", biped);
+		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.25F, 0.05F, 0.15F, 0.45F, null, biped.toolR, "biped/combat/spear_twohand_auto2", biped);
+		SPEAR_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.2F, 0.3F, 0.7F, null, biped.toolR, "biped/combat/spear_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, toolR, String.valueOf(SWORD_AUTO1.getId()), bipedModel);
-		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, toolR, "biped/combat/sword_auto4", bipedModel);
-		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, toolR, "biped/combat/tool_dash", bipedModel)
+		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, biped.toolR, String.valueOf(SWORD_AUTO1.getId()), biped);
+		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, biped.toolR, "biped/combat/sword_auto4", biped);
+		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, biped.toolR, "biped/combat/tool_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1));
-		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, toolR, "biped/combat/axe_dash", bipedModel)
+		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, biped.toolR, "biped/combat/axe_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, toolR, "biped/combat/sword_dual_auto1", bipedModel);
-		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.15F, Hand.OFF_HAND, null, toolL, "biped/combat/sword_dual_auto2", bipedModel);
-		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.6F, ColliderPreset.DUAL_SWORD, torso, "biped/combat/sword_dual_auto3", bipedModel);
-		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.05F, 0.3F, 0.75F, ColliderPreset.DUAL_SWORD_DASH, root, "biped/combat/sword_dual_dash", bipedModel)
+		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, biped.toolR, "biped/combat/sword_dual_auto1", biped);
+		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.15F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/sword_dual_auto2", biped);
+		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.6F, ColliderPreset.DUAL_SWORD, biped.torso, "biped/combat/sword_dual_auto3", biped);
+		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", biped,
+				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, toolR, "biped/combat/uchigatana_auto1", bipedModel)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, null);
+		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, toolR, "biped/combat/uchigatana_auto2", bipedModel)
+		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_AUTO3 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, toolR, "biped/combat/uchigatana_auto3", bipedModel)
+		UCHIGATANA_AUTO3 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/uchigatana_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, toolR, "biped/combat/uchigatana_dash", bipedModel)
+		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/uchigatana_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.06F, 0.65F, ColliderPreset.BATTOJUTSU, root, "biped/combat/uchigatana_sheath_auto", bipedModel)
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
+		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/combat/uchigatana_sheath_auto", biped)
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
+				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, root, "biped/combat/uchigatana_sheath_dash", bipedModel)
-				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
-				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
+		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, biped.rootJoint, "biped/combat/uchigatana_sheath_dash", biped)
+				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
+				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		UCHIGATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, toolR, "biped/combat/uchigatana_airslash", bipedModel);
-		UCHIGATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, toolR, "biped/combat/uchigatana_sheath_airslash", bipedModel)
+		UCHIGATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_airslash", biped);
+		UCHIGATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_sheath_airslash", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		KATANA_AUTO1 = new BasicAttackAnimation(0.06F, 0.05F, 0.16F, 0.2F, null, toolR, "biped/combat/katana_auto1", bipedModel);
-		KATANA_AUTO2 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, toolR, "biped/combat/katana_auto2", bipedModel);
-		KATANA_AUTO3 = new BasicAttackAnimation(0.06F, 0.1F, 0.21F, 0.59F, null, toolR, "biped/combat/katana_auto3", bipedModel);
-		KATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.06F, 0.0F, 0.06F, 0.65F, ColliderPreset.FATAL_DRAW, root, "biped/combat/katana_sheath_auto", bipedModel)
+		/*KATANA_AUTO1 = new BasicAttackAnimation(0.06F, 0.05F, 0.16F, 0.2F, null, biped.toolR, "biped/combat/katana_auto1", biped);
+		KATANA_AUTO2 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, biped.toolR, "biped/combat/katana_auto2", biped);
+		KATANA_AUTO3 = new BasicAttackAnimation(0.06F, 0.1F, 0.21F, 0.59F, null, biped.toolR, "biped/combat/katana_auto3", biped);
+		KATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.06F, 0.0F, 0.06F, 0.65F, ColliderPreset.FATAL_DRAW, biped.root, "biped/combat/katana_sheath_auto", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		KATANA_SHEATHING_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.05F, 0.11F, 0.65F, null, toolR, "biped/combat/katana_sheath_dash", bipedModel)
+		KATANA_SHEATHING_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.05F, 0.11F, 0.65F, null, biped.toolR, "biped/combat/katana_sheath_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, toolR, "biped/combat/axe_auto1", bipedModel);
-		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, toolR, "biped/combat/axe_auto2", bipedModel);
-		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, toolR, "biped/combat/longsword_auto1", bipedModel);
-		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.1F, 0.21F, 0.45F, null, toolR, "biped/combat/longsword_auto2", bipedModel);
-		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.15F, 0.05F, 0.16F, 0.8F, null, toolR, "biped/combat/longsword_auto3", bipedModel);
-		LONGSWORD_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.3F, 0.5F, 0.7F, null, toolR, "biped/combat/longsword_dash", bipedModel)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);*/
+		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
+		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
+		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, biped.toolR, "biped/combat/longsword_auto1", biped);
+		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.1F, 0.21F, 0.45F, null, biped.toolR, "biped/combat/longsword_auto2", biped);
+		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.15F, 0.05F, 0.16F, 0.8F, null, biped.toolR, "biped/combat/longsword_auto3", biped);
+		LONGSWORD_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.3F, 0.5F, 0.7F, null, biped.toolR, "biped/combat/longsword_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, toolR, "biped/combat/longsword_liechtenauer_auto1", bipedModel)
+		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, toolR, "biped/combat/longsword_liechtenauer_auto2", bipedModel)
+		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, toolR, "biped/combat/longsword_liechtenauer_auto3", bipedModel)
+		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null, toolR, "biped/combat/tachi_auto1", bipedModel)
+		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null, biped.toolR, "biped/combat/tachi_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 3);
-		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, toolR, "biped/combat/tachi_auto2", bipedModel)
+		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, biped.toolR, "biped/combat/tachi_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, toolR, "biped/combat/tachi_auto3", bipedModel)
+		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, biped.toolR, "biped/combat/tachi_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.2F, 0.45F, 0.7F, null, toolR, "biped/combat/tachi_dash", false, bipedModel)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, toolR, "biped/skill/rushing_tempo1", bipedModel)
+		TACHI_DASH = new DashAttackAnimation(0.1F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, true)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+
+		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
+				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, toolR, "biped/skill/rushing_tempo2", bipedModel)
+		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
-				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
+				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null, toolR, "biped/skill/rushing_tempo3", bipedModel)
+		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
-				//.addProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
+				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		DAGGER_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.2F, null, toolR, "biped/combat/dagger_auto1", bipedModel);
-		DAGGER_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.1F, 0.2F, null, toolR, "biped/combat/dagger_auto2", bipedModel);
-		DAGGER_AUTO3 = new BasicAttackAnimation(0.08F, 0.15F, 0.26F, 0.5F, null, toolR, "biped/combat/dagger_auto3", bipedModel);
-		DAGGER_DUAL_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.16F, 0.25F, null, toolR, "biped/combat/dagger_dual_auto1", bipedModel);
-		DAGGER_DUAL_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, toolL, "biped/combat/dagger_dual_auto2", bipedModel);
-		DAGGER_DUAL_AUTO3 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.2F, null, toolR, "biped/combat/dagger_dual_auto3", bipedModel);
-		DAGGER_DUAL_AUTO4 = new BasicAttackAnimation(0.13F, 0.1F, 0.21F, 0.4F, ColliderPreset.DUAL_DAGGER_DASH, root, "biped/combat/dagger_dual_auto4", bipedModel);
-		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, root, "biped/combat/dagger_dual_dash", bipedModel)
+
+		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.4F, null, biped.toolR, "biped/combat/dagger_auto3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/combat/dagger_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false);
-		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, toolR, "biped/combat/dagger_dash", bipedModel)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
-				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.newTimePair(0.0F, 0.4F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
 				.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
 				.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
-
-		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, toolR, "biped/combat/sword_airslash", bipedModel);
-		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, torso, "biped/combat/sword_dual_airslash", bipedModel);
-		KATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, toolR, "biped/combat/katana_airslash", bipedModel);
-		KATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, toolR, "biped/combat/katana_sheath_airslash", bipedModel)
+		DAGGER_DUAL_AUTO1 = new BasicAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, null, biped.toolR, "biped/combat/dagger_dual_auto1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_DUAL_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/dagger_dual_auto2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_DUAL_AUTO3 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.2F, null, biped.toolR, "biped/combat/dagger_dual_auto3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_DUAL_AUTO4 = new BasicAttackAnimation(0.15F, "biped/combat/dagger_dual_auto4", biped,
+				new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, Hand.OFF_HAND, biped.toolL, null)
+				, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
+		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, "biped/combat/dagger_dual_dash", biped,
+				new Phase(0.0F, 0.1F, 0.2F, 0.3F, 0.65F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true);
+		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, biped.toolR, "biped/combat/sword_airslash", biped);
+		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, biped.torso, "biped/combat/sword_dual_airslash", biped);
+		KATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/katana_airslash", biped);
+		KATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/katana_sheath_airslash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, toolR, "biped/combat/spear_onehand_airslash", bipedModel);
-		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, toolR, "biped/combat/spear_twohand_airslash", bipedModel)
+		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/spear_onehand_airslash", biped);
+		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped)
 				.addProperty(AttackPhaseProperty.FINISHER, true);
-		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, toolR, "biped/combat/longsword_airslash", bipedModel);
-		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, toolR, "biped/combat/greatsword_airslash", bipedModel)
+		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, biped.toolR, "biped/combat/longsword_airslash", biped);
+		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, biped.toolR, "biped/combat/greatsword_airslash", biped)
 				.addProperty(AttackPhaseProperty.FINISHER, true);
-		FIST_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, toolR, "biped/combat/fist_airslash", bipedModel)
+		FIST_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/fist_airslash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
-		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, toolR, "biped/combat/dagger_airslash", bipedModel)
+		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, biped.toolR, "biped/combat/dagger_airslash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, torso, String.valueOf(SWORD_DUAL_AIR_SLASH.getId()), bipedModel)
+		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, biped.torso, String.valueOf(SWORD_DUAL_AIR_SLASH.getId()), biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		AXE_AIRSLASH = new AirSlashAnimation(0.1F, 0.3F, 0.4F, 0.65F, null, toolR, "biped/combat/axe_airslash", bipedModel);
+		AXE_AIRSLASH = new AirSlashAnimation(0.1F, 0.3F, 0.4F, 0.65F, null, biped.toolR, "biped/combat/axe_airslash", biped);
 
-		SWORD_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.1F, 0.2F, 0.25F, 0.7F, null, toolR, "biped/combat/sword_mount_attack", bipedModel);
-		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, toolR, "biped/combat/spear_mount_attack", bipedModel)
-				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-
-
+		SWORD_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.1F, 0.2F, 0.25F, 0.7F, null, biped.toolR, "biped/combat/sword_mount_attack", biped);
+		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, biped.toolR, "biped/combat/spear_mount_attack", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
 		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active1", biped);
 		SWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active2", biped);
@@ -575,96 +597,123 @@ public class Animations {
 		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, "biped/combat/knockdown", biped);
 		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 
-		SWEEPING_EDGE = new SpecialAttackAnimation(0.16F, 0.1F, 0.35F, 0.46F, 0.79F, null, toolR, "biped/skill/sweeping_edge", bipedModel)
+		SWEEPING_EDGE = new SpecialAttackAnimation(0.16F, 0.1F, 0.35F, 0.46F, 0.79F, null, biped.toolR, "biped/skill/sweeping_edge", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 1);
 
-		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", bipedModel,
-				new Phase(0.2F, 0.2F, 0.31F, 0.31F, toolR, null), new Phase(0.5F, 0.5F, 0.61F, 0.61F, Hand.OFF_HAND, toolL, null),
-				new Phase(0.75F, 0.75F, 0.85F, 1.15F, toolR, null))
+		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", biped,
+				new Phase(0.2F, 0.2F, 0.31F, 0.31F, biped.toolR, null), new Phase(0.5F, 0.5F, 0.61F, 0.61F, Hand.OFF_HAND, biped.toolL, null),
+				new Phase(0.75F, 0.75F, 0.85F, 1.15F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true);
 
-		GUILLOTINE_AXE = new SpecialAttackAnimation(0.08F, 0.2F, 0.5F, 0.65F, 1.0F, null, toolR, "biped/skill/guillotine_axe", bipedModel)
+		GUILLOTINE_AXE = new SpecialAttackAnimation(0.08F, 0.2F, 0.5F, 0.65F, 1.0F, null, biped.toolR, "biped/skill/guillotine_axe", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL, true)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 
-		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", bipedModel,
-				new Phase(0.3F, 0.3F, 0.36F, 0.51F, toolR, null), new Phase(0.51F, 0.51F, 0.56F, 0.73F, toolR, null),
-				new Phase(0.73F, 0.73F, 0.78F, 1.05F, toolR, null))
+		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", biped,
+				new Phase(0.3F, 0.3F, 0.36F, 0.51F, biped.toolR, null), new Phase(0.51F, 0.51F, 0.56F, 0.73F, biped.toolR, null),
+				new Phase(0.73F, 0.73F, 0.78F, 1.05F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 
-		SPEAR_SLASH = new SpecialAttackAnimation(0.1F, "biped/skill/spear_slash", bipedModel,
-				new Phase(0.2F, 0.2F, 0.41F, 0.5F, toolR, null), new Phase(0.5F, 0.75F, 0.95F, 1.25F, toolR, null))
+		SPEAR_SLASH = new SpecialAttackAnimation(0.1F, "biped/skill/spear_slash", biped,
+				new Phase(0.2F, 0.2F, 0.41F, 0.5F, biped.toolR, null), new Phase(0.5F, 0.75F, 0.95F, 1.25F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 
-		GIANT_WHIRLWIND = new SpecialAttackAnimation(0.41F, "biped/skill/giant_whirlwind", bipedModel,
-				new Phase(0.3F, 0.35F, 0.55F, 0.85F, toolR, null), new Phase(0.95F, 1.05F, 1.2F, 1.35F, toolR, null),
-				new Phase(1.65F, 1.75F, 1.95F, 2.5F, toolR, null))
+		GIANT_WHIRLWIND = new SpecialAttackAnimation(0.41F, "biped/skill/giant_whirlwind", biped,
+				new Phase(0.3F, 0.35F, 0.55F, 0.85F, biped.toolR, null), new Phase(0.95F, 1.05F, 1.2F, 1.35F, biped.toolR, null),
+				new Phase(1.65F, 1.75F, 1.95F, 2.5F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
 
-		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, biped.root, "biped/combat/uchigatana_sheath_auto", bipedModel)
+		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, biped.biped.root, "biped/combat/uchigatana_sheath_auto", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, biped.root, "biped/combat/uchigatana_sheath_dash", bipedModel)
+		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, biped.biped.root, "biped/combat/uchigatana_sheath_dash", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 
-		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, ColliderPreset.FIST_FIXED, root, "biped/skill/lethal_slicing_start", bipedModel)
+		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, ColliderPreset.FIST_FIXED, biped.root, "biped/skill/lethal_slicing_start", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 
-		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, ColliderPreset.FATAL_DRAW, root, "biped/skill/lethal_slicing_once", bipedModel)
+		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, ColliderPreset.FATAL_DRAW, biped.root, "biped/skill/lethal_slicing_once", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 
-		LETHAL_SLICING_TWICE = new SpecialAttackAnimation(0.016F, "biped/skill/lethal_slicing_twice", bipedModel,
-				new Phase(0.0F, 0.0F, 0.1F, 0.15F, root, ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, root, ColliderPreset.FATAL_DRAW)).addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
+		LETHAL_SLICING_TWICE = new SpecialAttackAnimation(0.016F, "biped/skill/lethal_slicing_twice", biped,
+				new Phase(0.0F, 0.0F, 0.1F, 0.15F, biped.root, ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, biped.root, ColliderPreset.FATAL_DRAW)).addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 
-		RELENTLESS_COMBO = new SpecialAttackAnimation(0.05F, "biped/skill/relentless_combo", bipedModel,
-				new Phase(0.016F, 0.016F, 0.066F, 0.133F, Hand.OFF_HAND, root, ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, root, ColliderPreset.FIST_FIXED),
-				new Phase(0.25F, 0.25F, 0.3F, 0.366F, Hand.OFF_HAND, root, ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, root, ColliderPreset.FIST_FIXED),
-				new Phase(0.483F, 0.483F, 0.533F, 0.6F, Hand.OFF_HAND, root, ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, root, ColliderPreset.FIST_FIXED),
-				new Phase(0.716F, 0.716F, 0.766F, 0.833F, Hand.OFF_HAND, root, ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, root, ColliderPreset.FIST_FIXED))
+		RELENTLESS_COMBO = new SpecialAttackAnimation(0.05F, "biped/skill/relentless_combo", biped,
+				new Phase(0.016F, 0.016F, 0.066F, 0.133F, Hand.OFF_HAND, biped.root, ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, biped.root, ColliderPreset.FIST_FIXED),
+				new Phase(0.25F, 0.25F, 0.3F, 0.366F, Hand.OFF_HAND, biped.root, ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, biped.root, ColliderPreset.FIST_FIXED),
+				new Phase(0.483F, 0.483F, 0.533F, 0.6F, Hand.OFF_HAND, biped.root, ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, biped.root, ColliderPreset.FIST_FIXED),
+				new Phase(0.716F, 0.716F, 0.766F, 0.833F, Hand.OFF_HAND, biped.root, ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, biped.root, ColliderPreset.FIST_FIXED))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
 
-		EVISCERATE_FIRST = new SpecialAttackAnimation(0.08F, 0.05F, 0.05F, 0.15F, 0.45F, null, toolR, "biped/skill/eviscerate_first", bipedModel)
+		EVISCERATE_FIRST = new SpecialAttackAnimation(0.08F, 0.05F, 0.05F, 0.15F, 0.45F, null, biped.toolR, "biped/skill/eviscerate_first", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
-		EVISCERATE_SECOND = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.0F, 0.4F, null, toolR, "biped/skill/eviscerate_second", bipedModel)
+		EVISCERATE_SECOND = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.0F, 0.4F, null, biped.toolR, "biped/skill/eviscerate_second", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, false)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.EVISCERATE)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.EVISCERATE)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
-		BLADE_RUSH_FIRST = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, root, "biped/skill/blade_rush_first", bipedModel)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
+		BLADE_RUSH_COMBO1 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo1", biped)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
-		BLADE_RUSH_SECOND = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, root, "biped/skill/blade_rush_second", bipedModel)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
+				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
+				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.35F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME, TimePairList.create(0.0F, 0.25F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_DEST_LOCATION_BEGIN)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_DEST_LOCATION)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_GET, MoveCoordFunctions.WORLD_COORD)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
+				.newTimePair(0.0F, 0.65F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+
+		BLADE_RUSH_COMBO2 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo2", biped)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
-		BLADE_RUSH_THIRD = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, root, "biped/skill/blade_rush_third", bipedModel)
-				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
+				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
+				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.35F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME, TimePairList.create(0.0F, 0.25F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_DEST_LOCATION_BEGIN)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_DEST_LOCATION)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_GET, MoveCoordFunctions.WORLD_COORD)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
+				.newTimePair(0.0F, 0.65F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+
+		BLADE_RUSH_COMBO3 = new AttackAnimation(0.1F, 0.0F, 0.25F, 0.35F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo3", biped)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
-		BLADE_RUSH_FINISHER = new SpecialAttackAnimation(0.15F, 0.0F, 0.1F, 0.16F, 0.65F, ColliderPreset.BLADE_RUSH, root, "biped/skill/blade_rush_finisher", bipedModel)
+				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
+				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.35F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME, TimePairList.create(0.0F, 0.25F))
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_DEST_LOCATION_BEGIN)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_DEST_LOCATION)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_GET, MoveCoordFunctions.WORLD_COORD)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
+				.newTimePair(0.0F, 0.6F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+
+		BLADE_RUSH_FINISHER = new SpecialAttackAnimation(0.15F, 0.0F, 0.1F, 0.16F, 0.65F, ColliderPreset.BLADE_RUSH, biped.root, "biped/skill/blade_rush_finisher", biped)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
@@ -684,6 +733,96 @@ public class Animations {
 		public static final AnimationEvent.AnimationEventConsumer RESTORE_BOUNDING_BOX = (entitypatch, animation, params) -> {
 			entitypatch.getOriginal().refreshDimensions();
 		};
+
+		public static final AnimationEvent.AnimationEventConsumer FRACTURE_GROUND_SIMPLE = (entitypatch, animation, params) -> {
+			Vector3d position = entitypatch.getOriginal().position();
+			OpenMatrix4f modelTransform = entitypatch.getArmature().getBindedTransformFor(animation.getPoseByTime(entitypatch, (float)params[3], 1.0F), (Joint)params[1])
+					.mulFront(
+							OpenMatrix4f.createTranslation((float)position.x, (float)position.y, (float)position.z)
+									.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+											.mulBack(entitypatch.getModelMatrix(1.0F))));
+
+			World level = entitypatch.getOriginal().level;
+			Vector3d weaponEdge = OpenMatrix4f.transform(modelTransform, ((Vec3f)params[0]).toDoubleVector());
+			Vector3d slamStartPos;
+			RayTraceResult hitResult = level.clip(new RayTraceContext(position.add(0.0D, 0.1D, 0.0D), weaponEdge, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entitypatch.getOriginal()));
+
+			if (hitResult.getType() == RayTraceResult.Type.BLOCK) {
+				Direction direction = hitResult.getDirection();
+				BlockPos collidePos = hitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
+
+				if (!LevelUtil.canTransferShockWave(level, collidePos, level.getBlockState(collidePos))) {
+					collidePos = collidePos.below();
+				}
+
+				slamStartPos = new Vector3d(collidePos.getX(), collidePos.getY(), collidePos.getZ());
+			} else {
+				slamStartPos = weaponEdge.subtract(0.0D, 1.0D, 0.0D);
+			}
+
+			LevelUtil.circleSlamFracture(entitypatch.getOriginal(), level, slamStartPos, (double)params[2], false, false);
+		};
+
+		public static final AnimationEvent.AnimationEventConsumer FRACTURE_METEOR_STRIKE = (entitypatch, animation, params) -> {
+			if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+				SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
+
+				if (skill != null) {
+					double slamPower = (float)(Math.log(MeteorSlamSkill.getFallDistance(skill) * entitypatch.getOriginal().getAttributeValue(EpicFightAttributes.IMPACT.get())));
+					FRACTURE_GROUND_SIMPLE.fire(entitypatch, animation, params[0], params[1], slamPower, params[2]);
+				}
+			}
+		};
+
+		public static final AnimationEvent.AnimationEventConsumer SUMMON_THUNDER = (entitypatch, animation, params) -> {
+			if (entitypatch.isLogicalClient()) {
+				return;
+			}
+
+			if (animation instanceof AttackAnimation attackAnimation) {
+				Phase phase = attackAnimation.phases[1];
+
+				int i = (int)phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).orElse(ValueModifier.setter(3)).getTotalValue(0);
+				float damage = phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).orElse(ValueModifier.setter(8.0F)).getTotalValue(0);
+
+				LivingEntity original = entitypatch.getOriginal();
+				ServerWorld level = (ServerWorld)original.level;
+				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(Hand.MAIN_HAND), null, damage);
+
+				List<Entity> list = level.getEntities(original, original.getBoundingBox().inflate(10.0D, 4.0D, 10.0D), (e) -> {
+					return !(e.distanceToSqr(original) > 100.0D) && !e.isAlliedTo(original) && entitypatch.getOriginal().canSee(e);
+				});
+
+				list = HitEntityList.Priority.HOSTILITY.sort(entitypatch, list);
+				int count = 0;
+
+				while (count < i && count < list.size()) {
+					Entity e = list.get(count++);
+					BlockPos blockpos = e.blockPosition();
+					LightningBoltEntity lightningbolt = EntityType.LIGHTNING_BOLT.create(level);
+					lightningbolt.setVisualOnly(true);
+					lightningbolt.moveTo(Vector3d.atBottomCenterOf(blockpos));
+					lightningbolt.setDamage(0.0F);
+					lightningbolt.setCause(entitypatch instanceof ServerPlayerPatch serverPlayerPatch ? serverPlayerPatch.getOriginal() : null);
+
+					DamageSource dmgSource = new DamageSource(e.level.registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), entitypatch.getOriginal());
+					EpicFightDamageSource damageSource = attackAnimation.getEpicFightDamageSource(dmgSource, entitypatch, e, phase).setHurtItem(entitypatch.getOriginal().getItemInHand(Hand.MAIN_HAND));
+					e.hurt(damageSource, total);
+					e.thunderHit(level, lightningbolt);
+
+					level.addFreshEntity(lightningbolt);
+				}
+
+				if (count > 0) {
+					if (level.getGameRules().getBoolean(GameRules.RULE_WEATHER_CYCLE) && level.random.nextFloat() < 0.08F && level.getThunderLevel(1.0F) < 1.0F) {
+						level.setWeatherParameters(0, MathUtils.randomBetweenInclusive(level.random, 12000, 180000), true, true);
+					}
+
+					original.playSound(SoundEvents.TRIDENT_THUNDER, 5.0F, 1.0F);
+				}
+			}
+		};
+
 		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 
 		public static final AnimationProperty.PoseModifier COMBO_ATTACK_DIRECTION_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
@@ -704,16 +843,73 @@ public class Animations {
 				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		};
-	}
 
-	@OnlyIn(Dist.CLIENT)
-	public static void buildClient() {
+		public static final AnimationProperty.PoseModifier ROOT_X_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
+			float pitch = -entitypatch.getOriginal().xRot;
+			JointTransform chest = pose.getOrDefaultTransform("Root");
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
+		};
 
-		BIPED_RUN_SPEAR.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create()).addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
+		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+			double d0 = vec3d1.horizontalDistanceSqr();
+			double d1 = vec3d.horizontalDistanceSqr();
 
-		OFF_ANIMATION_HIGHEST.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.HIGHEST);
-		OFF_ANIMATION_MIDDLE.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
+			if (d0 > 0.0D && d1 > 0.0D) {
+				JointTransform root = pose.getOrDefaultTransform("Root");
+				JointTransform head = pose.getOrDefaultTransform("Head");
+				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
+				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
+				float zRot = MathHelper.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
 
-		BIPED_LANDING.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.LOWEST);
+				root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
+
+				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
+			}
+		};
+
+		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+			double d0 = vec3d1.horizontalDistanceSqr();
+			double d1 = vec3d.horizontalDistanceSqr();
+
+			if (d0 > 0.0D && d1 > 0.0D) {
+				JointTransform root = pose.getOrDefaultTransform("Root");
+				JointTransform head = pose.getOrDefaultTransform("Head");
+				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
+			}
+		};
+
+		public static final AnimationProperty.PoseModifier MAP_ARMS_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			float xRot = 50.0F - (entitypatch.getOriginal().xRotO + (entitypatch.getOriginal().xRot - entitypatch.getOriginal().xRotO) * partialTicks);
+			xRot = MathHelper.clamp(xRot, 0.0F, 50.0F);
+
+			JointTransform shoulderL = pose.getOrDefaultTransform("Shoulder_L");
+			JointTransform shoulderR = pose.getOrDefaultTransform("Shoulder_R");
+
+			float trans = xRot / 500.0F;
+
+			shoulderL.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
+			shoulderR.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
+			shoulderL.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginInverse);
+			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginInverse);
+		};
+
+		public static final AnimationProperty.PlaybackSpeedModifier CONSTANT_ONE = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> 1.0F;
+
+		public static final AnimationProperty.PlaybackSpeedModifier CHARGING = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+			if (self.isLinkAnimation()) {
+				return 1.0F;
+			} else {
+				return (float)-Math.pow((self.getTotalTime() - elapsedTime) / self.getTotalTime() - 1.0F, 2) + 1.0F;
+			}
+		};
 	}
 }

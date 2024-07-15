@@ -1,11 +1,13 @@
 
 package yesman.epicfight.api.utils.math;
 
+import com.joml.Quaternionf;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import com.joml.Quaternionf;
+
+import java.util.Random;
 
 public class MathUtils {
 	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {
@@ -16,6 +18,14 @@ public class MathUtils {
 		modelMatrix.translate(entityPosition).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 
 		return modelMatrix;
+	}
+
+	// Utility method to generate a random number between min and max, inclusive
+	public static int randomBetweenInclusive(Random random, int min, int max) {
+		if (min > max) {
+			throw new IllegalArgumentException("max must be greater than or equal to min");
+		}
+		return random.nextInt((max - min) + 1) + min;
 	}
 
 	/**

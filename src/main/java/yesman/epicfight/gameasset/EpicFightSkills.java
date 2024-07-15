@@ -1,13 +1,6 @@
 package yesman.epicfight.gameasset;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
@@ -17,31 +10,11 @@ import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.skill.ActiveGuardSkill;
-import yesman.epicfight.skill.AirAttack;
-import yesman.epicfight.skill.BasicAttack;
-import yesman.epicfight.skill.BerserkerSkill;
-import yesman.epicfight.skill.BladeRushSkill;
-import yesman.epicfight.skill.DodgeSkill;
-import yesman.epicfight.skill.EnergizingGuardSkill;
-import yesman.epicfight.skill.EviscerateSkill;
-import yesman.epicfight.skill.FatalDrawSkill;
-import yesman.epicfight.skill.GuardSkill;
-import yesman.epicfight.skill.KatanaPassive;
-import yesman.epicfight.skill.KnockdownWakeupSkill;
-import yesman.epicfight.skill.LethalSlicingSkill;
-import yesman.epicfight.skill.LiechtenauerSkill;
-import yesman.epicfight.skill.PassiveSkill;
-import yesman.epicfight.skill.SimpleSpecialAttackSkill;
-import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.*;
 import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.skill.Skill.Resource;
-import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SpecialAttackSkill;
-import yesman.epicfight.skill.StaminaPillagerSkill;
-import yesman.epicfight.skill.StepSkill;
-import yesman.epicfight.skill.SwordmasterSkill;
-import yesman.epicfight.skill.TechnicianSkill;
+
+import java.util.*;
 
 public class EpicFightSkills {
 	private static final Map<ResourceLocation, Skill> SKILLS = Maps.newHashMap();
@@ -155,14 +128,14 @@ public class EpicFightSkills {
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.6F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.6F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.registerPropertiesToAnimation());
 		
 		DANCING_EDGE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "dancing_edge")).setConsumption(30.0F).setAnimations(Animations.DANCING_EDGE))
 				.newPropertyLine()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.2F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.2F))
 				.registerPropertiesToAnimation());
 		
 		GUILLOTINE_AXE = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "guillotine_axe")).setConsumption(20.0F).setAnimations(Animations.GUILLOTINE_AXE))
@@ -170,7 +143,7 @@ public class EpicFightSkills {
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.5F))
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(2.0F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.registerPropertiesToAnimation());
 		
@@ -178,7 +151,7 @@ public class EpicFightSkills {
 				.newPropertyLine()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(4))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(1.25F))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.2F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.2F))
 				.registerPropertiesToAnimation());
 		
 		HEARTPIERCER = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "heartpiercer")).setConsumption(40.0F).setAnimations(Animations.SPEAR_THRUST))
@@ -189,7 +162,7 @@ public class EpicFightSkills {
 		
 		GIANT_WHIRLWIND = registerSkill(new SimpleSpecialAttackSkill(SimpleSpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "giant_whirlwind")).setConsumption(60.0F).setAnimations(Animations.GIANT_WHIRLWIND))
 				.newPropertyLine()
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.multiplier(1.4F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.4F))
 				.registerPropertiesToAnimation());
 		
 		FATAL_DRAW = registerSkill(new FatalDrawSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "fatal_draw")).setConsumption(30.0F))
@@ -210,7 +183,7 @@ public class EpicFightSkills {
 		LETHAL_SLICING = registerSkill(new LethalSlicingSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "lethal_slicing")).setConsumption(35.0F))
 				.newPropertyLine()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(2))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(0.5F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(0.5F))
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.setter(1.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
@@ -234,7 +207,7 @@ public class EpicFightSkills {
 		EVISCERATE = registerSkill(new EviscerateSkill(SpecialAttackSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "eviscerate")).setConsumption(25.0F))
 				.newPropertyLine()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
-				.addProperty(AttackPhaseProperty.IMPACT, ValueModifier.setter(2.0F))
+				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(2.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.newPropertyLine()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))

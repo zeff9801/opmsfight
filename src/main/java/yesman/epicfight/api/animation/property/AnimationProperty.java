@@ -264,7 +264,7 @@ public abstract class AnimationProperty<T> {
 		public static final AttackPhaseProperty<ValueModifier> DAMAGE = new AttackPhaseProperty<ValueModifier> ();
 		public static final AttackPhaseProperty<ExtraDamageType> EXTRA_DAMAGE = new AttackPhaseProperty<ExtraDamageType> ();
 		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION = new AttackPhaseProperty<ValueModifier> ();
-		public static final AttackPhaseProperty<ValueModifier> IMPACT = new AttackPhaseProperty<ValueModifier> ();
+		public static final AttackPhaseProperty<ValueModifier> IMPACT_MODIFIER = new AttackPhaseProperty<ValueModifier> ("impact", ValueModifier.CODECS);
 		public static final AttackPhaseProperty<StunType> STUN_TYPE = new AttackPhaseProperty<StunType> ();
 		public static final AttackPhaseProperty<SoundEvent> SWING_SOUND = new AttackPhaseProperty<SoundEvent> ();
 		public static final AttackPhaseProperty<SoundEvent> HIT_SOUND = new AttackPhaseProperty<SoundEvent> ();
