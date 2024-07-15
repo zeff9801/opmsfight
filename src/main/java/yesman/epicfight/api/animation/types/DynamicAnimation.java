@@ -49,7 +49,9 @@ public abstract class DynamicAnimation {
 		}
 		return pose;
 	}
-
+	public boolean isClientAnimation() {
+		return false;
+	}
 	public boolean hasTransformFor(String joint) {
 		return this.getTransfroms().containsKey(joint);
 	}

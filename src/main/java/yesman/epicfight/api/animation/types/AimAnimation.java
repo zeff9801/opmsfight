@@ -1,9 +1,15 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.math.MathHelper;
-import yesman.epicfight.api.animation.*;
+import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -12,9 +18,8 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.EpicFightOptions;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-
-import java.util.List;
 
 public class AimAnimation extends StaticAnimation {
 	public StaticAnimation lookUp;
@@ -33,18 +38,14 @@ public class AimAnimation extends StaticAnimation {
 	}
 
 	@Override
-	public List<StaticAnimation> getClipHolders() {
-		return List.of(this, this.lookUp, this.lookDown, this.lying);
-	}
-
-	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);
+
 		ClientAnimator animator = entitypatch.getClientAnimator();
 		Layer layer = animator.getCompositeLayer(this.getPriority());
 		AnimationPlayer player = layer.animationPlayer;
-		
-		if (player.getElapsedTime() >= this.totalTime - 0.06F) {
+
+		if (player.getElapsedTime() >= this.getTotalTime() - 0.06F) {
 			layer.pause();
 		}
 	}
@@ -77,31 +78,50 @@ public class AimAnimation extends StaticAnimation {
 
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		if (!entitypatch.isFirstPerson()) {
+		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
+
+		if (!entitypatch.isFirstPerson() && !animation.isLinkAnimation()) {
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			JointTransform head = pose.getOrDefaultTransform("Head");
 			float f = 90.0F;
 			float ratio = (f - Math.abs(entitypatch.getOriginal().xRot)) / f;
-			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
-			MathUtils.mulQuaternionf(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginInverse);
+			float yRotHead = entitypatch.getOriginal().yHeadRotO;
+			float yRot = entitypatch.getOriginal().getVehicle() != null ? yRotHead : entitypatch.getOriginal().yRot;
+			MathUtils.mulQuaternion(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(yRot - yRotHead) * ratio), head.rotation(), head.rotation());
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(yRotHead - yRot) * ratio)), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}
-	
+
 	@Override
 	public <V> StaticAnimation addProperty(StaticAnimationProperty<V> propertyType, V value) {
 		super.addProperty(propertyType, value);
 		this.lookDown.addProperty(propertyType, value);
 		this.lookUp.addProperty(propertyType, value);
 		this.lying.addProperty(propertyType, value);
+
 		return this;
 	}
-	
+
 	@Override
 	public void loadAnimation(IResourceManager resourceManager) {
-		load(resourceManager, this);
-		load(resourceManager, this.lookUp);
-		load(resourceManager, this.lookDown);
-		load(resourceManager, this.lying);
+		try {
+			loadClip(resourceManager, this);
+			loadClip(resourceManager, this.lookUp);
+			loadClip(resourceManager, this.lookDown);
+			loadClip(resourceManager, this.lying);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this, this.lookUp, this.lookDown, this.lying);
+	}
+
+	@Override
+	public boolean isClientAnimation() {
+		return true;
 	}
 }
