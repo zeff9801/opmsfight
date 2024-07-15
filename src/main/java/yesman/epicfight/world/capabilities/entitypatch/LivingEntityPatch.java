@@ -40,6 +40,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -84,7 +85,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
 
-		//this.armature = Armatures.getArmatureFor(this);
+		this.armature = Armatures.getArmatureFor(this);
 		this.animator = EpicFightMod.getAnimator(this);
 		this.animator.init();
 		this.original.getEntityData().define(STUN_SHIELD, Float.valueOf(0.0F));

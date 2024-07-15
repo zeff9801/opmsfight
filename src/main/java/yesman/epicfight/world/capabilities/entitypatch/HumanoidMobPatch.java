@@ -21,6 +21,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -152,6 +153,11 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 		}
 		
 		this.modifyLivingMotionByCurrentItem();
+	}
+
+	@Override
+	public HumanoidArmature getArmature() {
+		return (HumanoidArmature)this.armature;
 	}
 
 	public void modifyLivingMotionByCurrentItem() {

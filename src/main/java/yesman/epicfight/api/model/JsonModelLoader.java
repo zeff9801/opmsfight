@@ -30,6 +30,7 @@ import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.*;
@@ -626,5 +627,17 @@ public class JsonModelLoader {
 
 		TransformSheet sheet = new TransformSheet(keyframeList);
 		return sheet;
+	}
+
+	public <T extends Armature> T loadArmature(Armatures.ArmatureContructor<T> constructor) {
+		JsonObject obj = this.rootJson.getAsJsonObject("armature");
+		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
+		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
+		Map<String, Joint> jointMap = Maps.newHashMap();
+		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
+		joint.initOriginTransform(new OpenMatrix4f());
+		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
+
+		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
 	}
 }
