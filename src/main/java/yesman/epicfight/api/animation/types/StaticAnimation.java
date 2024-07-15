@@ -281,8 +281,9 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 	@Override
 	public TransformSheet getCoord() {
-		return this.getProperty(AnimationProperty.MoveCoordFunctions.COORD).orElse(super.getCoord());
+		return this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).orElse(super.getCoord());
 	}
+
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {

@@ -1,6 +1,6 @@
 package yesman.epicfight.api.animation.types;
 
-import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.model.Armature;
 
@@ -11,7 +11,7 @@ public class LongHitAnimation extends ActionAnimation {
 
 	public LongHitAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
 		super(convertTime, path, armature, noRegister);
-		this.addProperty(AnimationProperty.MoveCoordFunctions.STOP_MOVEMENT, true);
+		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
 		this.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 
 		this.stateSpectrumBlueprint.clear()
