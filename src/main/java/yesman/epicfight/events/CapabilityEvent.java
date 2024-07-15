@@ -10,8 +10,8 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-import yesman.epicfight.world.capabilities.provider.ProviderEntity;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.capabilities.provider.ProviderSkill;
 
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
@@ -20,7 +20,7 @@ public class CapabilityEvent {
 	@SubscribeEvent
 	public static void attachItemCapability(AttachCapabilitiesEvent<ItemStack> event) {
 		if (event.getObject() != null) {
-			ProviderItem prov = new ProviderItem(event.getObject());
+			ItemCapabilityProvider prov = new ItemCapabilityProvider(event.getObject());
 
 			if (prov.hasCapability()) {
 				event.addCapability(new ResourceLocation(EpicFightMod.MODID, "item_cap"), prov);
@@ -34,7 +34,7 @@ public class CapabilityEvent {
 		EntityPatch oldEntitypatch = EpicFightCapabilities.getEntityPatch(event.getObject(), EntityPatch.class);
 
 		if (oldEntitypatch == null) {
-			ProviderEntity prov = new ProviderEntity(event.getObject());
+			EntityPatchProvider prov = new EntityPatchProvider(event.getObject());
 
 			if (prov.hasCapability()) {
 				EntityPatch entitypatch = prov.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);

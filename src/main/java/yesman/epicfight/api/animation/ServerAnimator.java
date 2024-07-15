@@ -82,6 +82,7 @@ public class ServerAnimator extends Animator {
 		}
 	}
 
+
 	@Override
 	public Pose getPose(float partialTicks) {
 		return this.animationPlayer.getCurrentPose(this.entitypatch, partialTicks);

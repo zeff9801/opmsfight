@@ -14,7 +14,6 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.KeyboardKeyPressedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseClickedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseReleasedEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -25,8 +24,8 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.provider.ProviderEntity;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.RightClickItemEvent;
 
@@ -136,8 +135,8 @@ public class ClientEvents {
 	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
 		if (event.getPlayer() != null) {
 			ItemCapabilityReloadListener.reset();
-			ProviderItem.clear();
-			ProviderEntity.clear();
+			ItemCapabilityProvider.clear();
+			EntityPatchProvider.clear();
 
 			ClientEngine.getInstance().renderEngine.zoomOut(0);
 			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();

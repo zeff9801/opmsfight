@@ -27,6 +27,7 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.types.ActionAnimation;
+import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -104,7 +105,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 
 	public abstract void initAnimator(Animator clientAnimator);
-
 	public abstract void updateMotion(boolean considerInaction);
 
 	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
@@ -160,6 +160,19 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		}
 
 		this.setAirborneState(false);
+	}
+
+	public List<LivingEntity> getCurrenltyAttackedEntities() {
+		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
+	}
+
+	public List<LivingEntity> getCurrenltyHurtEntities() {
+		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
+	}
+
+	public void removeHurtEntities() {
+		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
+		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
 	}
 
 	public void setAirborneState(boolean airborne) {
@@ -459,13 +472,13 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
 		this.animator.playAnimation(animation, convertTimeModifier);
-
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
 
 	public Armature getArmature() {
 		return this.armature;
 	}
+
 	public void setLastAttackEntity(Entity tryHurtEntity) {
 		this.lastTryHurtEntity = tryHurtEntity;
 	}
@@ -479,6 +492,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 		return success;
 	}
+
 	public void setLastAttackSuccess(boolean setter) {
 		this.isLastAttackSuccess = setter;
 	}
@@ -636,6 +650,35 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 		return !thisState.inaction() && !entity.is(this.grapplingTarget);
 	}
+
+	@Override
+	public boolean applyStun(StunType stunType, float stunTime) {
+		this.original.xxa = 0.0F;
+		this.original.yya = 0.0F;
+		this.original.zza = 0.0F;
+		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
+		this.cancelKnockback = true;
+
+		StaticAnimation hitAnimation = this.getHitAnimation(stunType);
+
+		if (hitAnimation != null) {
+			this.playAnimationSynchronized(hitAnimation, stunType.hasFixedStunTime() ? 0.0F : stunTime);
+			return true;
+		}
+
+		return false;
+	}
+
+	public void onAttackBlocked(DamageSource damageSource, LivingEntityPatch<?> opponent) {
+	}
+
+	public void notifyGrapplingWarning() {
+	}
+
+	public void onDodgeSuccess(DamageSource damageSource) {
+	}
+
+
 	public LivingEntity getGrapplingTarget() {
 			return this.grapplingTarget;
 	}
@@ -666,6 +709,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return false;
 	}
 
+	@Override
+	public boolean isStunned() {
+		return this.getEntityState().hurt();
+	}
+
 	public boolean isFirstPerson() {
 		return false;
 	}
@@ -677,6 +725,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public boolean shouldBlockMoving() {
 		return false;
 	}
+
 
 	public float getYRotLimit() {
 		return 20.0F;

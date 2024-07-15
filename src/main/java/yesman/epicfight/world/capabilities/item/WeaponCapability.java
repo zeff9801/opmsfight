@@ -32,6 +32,7 @@ public class WeaponCapability extends CapabilityItem {
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
 	protected final Collider weaponCollider;
+	protected final HitParticleType hitParticle;
 	protected final Map<Style, List<StaticAnimation>> autoAttackMotions;
 	protected final Map<Style, Skill> innateSkill;
 	protected final Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
@@ -43,11 +44,12 @@ public class WeaponCapability extends CapabilityItem {
 		WeaponCapability.Builder weaponBuilder = (WeaponCapability.Builder)builder;
 		
 		this.autoAttackMotions = weaponBuilder.autoAttackMotionMap;
-		this.innateSkill = weaponBuilder.specialAttackMap;
+		this.innateSkill = weaponBuilder.innateSkillByStyle;
 		this.livingMotionModifiers = weaponBuilder.livingMotionModifiers;
 		this.stylegetter = weaponBuilder.styleProvider;
 		this.weaponCombinationPredicator = weaponBuilder.weaponCombinationPredicator;
 		this.passiveSkill = weaponBuilder.passiveSkill;
+		this.hitParticle = weaponBuilder.hitParticle;
 		this.smashingSound = weaponBuilder.swingSound;
 		this.hitSound = weaponBuilder.hitSound;
 		this.weaponCollider = weaponBuilder.collider;
@@ -92,12 +94,12 @@ public class WeaponCapability extends CapabilityItem {
 	public SoundEvent getHitSound() {
 		return this.hitSound;
 	}
-	
+
 	@Override
 	public HitParticleType getHitParticle() {
-		return EpicFightParticles.HIT_BLADE.get();
+		return this.hitParticle;
 	}
-	
+
 	@Override
 	public Collider getWeaponCollider() {
 		return this.weaponCollider != null ? this.weaponCollider : super.getWeaponCollider();
@@ -156,8 +158,9 @@ public class WeaponCapability extends CapabilityItem {
 		SoundEvent swingSound;
 		SoundEvent hitSound;
 		Collider collider;
+		HitParticleType hitParticle;
 		Map<Style, List<StaticAnimation>> autoAttackMotionMap;
-		Map<Style, Skill> specialAttackMap;
+		Map<Style, Skill> innateSkillByStyle;
 		Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
 		boolean canBePlacedOffhand;
 		
@@ -168,9 +171,10 @@ public class WeaponCapability extends CapabilityItem {
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;
 			this.hitSound = EpicFightSounds.BLUNT_HIT;
+			this.hitParticle = EpicFightParticles.HIT_BLADE.get();
 			this.collider = ColliderPreset.FIST;
 			this.autoAttackMotionMap = Maps.newHashMap();
-			this.specialAttackMap = Maps.newHashMap();
+			this.innateSkillByStyle = Maps.newHashMap();
 			this.livingMotionModifiers = null;
 			this.canBePlacedOffhand = true;
 		}
@@ -198,6 +202,10 @@ public class WeaponCapability extends CapabilityItem {
 		
 		public Builder hitSound(SoundEvent hitSound) {
 			this.hitSound = hitSound;
+			return this;
+		}
+		public Builder hitParticle(HitParticleType hitParticle) {
+			this.hitParticle = hitParticle;
 			return this;
 		}
 		
@@ -241,7 +249,7 @@ public class WeaponCapability extends CapabilityItem {
 		}
 
 		public Builder innateSkill(Style style, Skill specialAttack) {
-			this.specialAttackMap.put(style, specialAttack);
+			this.innateSkillByStyle.put(style, specialAttack);
 			return this;
 		}
 	}

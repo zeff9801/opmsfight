@@ -1,5 +1,6 @@
 package yesman.epicfight.api.animation;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
@@ -17,7 +18,6 @@ import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.IOException;
@@ -25,12 +25,17 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
+public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonElement>> {
 
-	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
-	private final Map<ResourceLocation, StaticAnimation> animationByName = Maps.newHashMap();
 
+	private static final AnimationManager INSTANCE = new AnimationManager();
+	private static IResourceManager resourceManager = null;
+
+	public static AnimationManager getInstance() {
+		return INSTANCE;
+	}
 
 	private final Map<ResourceLocation, AnimationClip> animationClips = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
@@ -39,16 +44,9 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	private String currentWorkingModid;
 
 
-
 	private String modid;
 	private int namespaceHash;
 	private int counter = 0;
-	private static final AnimationManager INSTANCE = new AnimationManager();
-	private static IResourceManager resourceManager = null;
-
-	public static AnimationManager getInstance() {
-		return INSTANCE;
-	}
 
 	public StaticAnimation byId(int animationId) {
 		if (!this.animationIdMap.contains(animationId)) {
@@ -63,7 +61,7 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	}
 
 	public StaticAnimation byKeyOrThrow(ResourceLocation rl) {
-		if (!this.animationByName.containsKey(rl)) {
+		if (!this.animationRegistry.containsKey(rl)) {
 			throw new NoSuchElementException("No animation with registry name " + rl);
 		}
 
@@ -71,18 +69,9 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 	}
 
 	public StaticAnimation byKey(ResourceLocation rl) {
-		return this.animationByName.get(rl);
+		return this.animationRegistry.get(rl);
 	}
 
-	public StaticAnimation findAnimationByPath(String resourceLocation) {
-		ResourceLocation rl = new ResourceLocation(resourceLocation);
-
-		if (this.animationByName.containsKey(rl)) {
-			return this.animationByName.get(rl);
-		}
-
-		throw new IllegalArgumentException("Unable to find animation: " + rl);
-	}
 
 	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
 		if (!this.animationClips.containsKey(animation.getLocation())) {
@@ -92,31 +81,19 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		return this.animationClips.get(animation.getLocation());
 	}
 
-	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
-		if (!this.animationClips.containsKey(animation.getLocation())) {
-			AnimationClip animationClip = clipProvider.apply(animation);
-			this.animationClips.put(animation.getLocation(), animationClip);
-		}
+	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
+		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> !this.userAnimations.containsKey(entry.getKey()) && filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
+			map.put(entry.getKey(), entry.getValue());
+			return map;
+		}, (map1, map2) -> {
+			map1.putAll(map2);
+			return map1;
+		});
+
+		return ImmutableMap.copyOf(filteredItems);
 	}
 
-	public void onFailed(StaticAnimation animation) {
-		if (!this.animationClips.containsKey(animation.getLocation())) {
-			this.animationClips.put(animation.getLocation(), AnimationClip.EMPTY_CLIP);
-		}
-	}
 
-	public void registerAnimations() {
-		Map<String, Runnable> registryMap = Maps.newHashMap();
-		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
-
-		registryMap.forEach((key, value) -> {
-            this.modid = key;
-            this.namespaceHash = this.modid.hashCode();
-            this.animationById.put(this.namespaceHash, Maps.newHashMap());
-            this.counter = 0;
-            value.run();
-        });
-	}
 	public int registerAnimation(StaticAnimation staticAnimation) {
 		if (this.currentWorkingModid != null) {
 			if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
@@ -142,10 +119,43 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		return this.animationRegistry.get(staticAnimation.getRegistryName());
 	}
 
-	@Override
-	protected Map<Integer, Map<Integer, StaticAnimation>> prepare(IResourceManager resourceManager, IProfiler profilerIn) {
+	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			AnimationClip animationClip = clipProvider.apply(animation);
+			this.animationClips.put(animation.getLocation(), animationClip);
+		}
+	}
 
+	public void onFailed(StaticAnimation animation) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			this.animationClips.put(animation.getLocation(), AnimationClip.EMPTY_CLIP);
+		}
+	}
+
+	public String workingModId() {
+		return this.currentWorkingModid;
+	}
+
+	public static void readAnimationProperties(StaticAnimation animation) {
+		if (resourceManager == null) return;
+		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
+
+		try {
+			Optional<IResource> resourceOptional = Optional.of(resourceManager.getResource(dataLocation));
+			resourceOptional.ifPresent((rs) -> {
+				ClientAnimationDataReader.readAndApply(animation, rs);
+			});
+		} catch (IOException e) {
+			// Handle the exception (e.g., log it, rethrow it, etc.)
+			System.err.println("Failed to get resource: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected Map<ResourceLocation, JsonElement> prepare(IResourceManager resourceManager, IProfiler profilerIn) {
 		reloadResourceManager(resourceManager);
+		//Armatures.build(resourceManager);
 
 		this.animationClips.clear();
 		this.animationIdMap.clear();
@@ -154,28 +164,49 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 
-		registryMap.entrySet().forEach((entry) -> {
-			EpicFightMod.LOGGER.info("Register animations from " + entry.getKey());
-			this.currentWorkingModid = entry.getKey();
-			entry.getValue().run();
-
+		registryMap.forEach((key, value) -> {
+			EpicFightMod.LOGGER.info("Register animations from " + key);
+			this.currentWorkingModid = key;
+			value.run();
 			this.currentWorkingModid = null;
 		});
 
-		return this.animationById;
+		return prepareAnimationMap(resourceManager);
 	}
 
+	private Map<ResourceLocation, JsonElement> prepareAnimationMap(IResourceManager resourceManager) {
+		Map<ResourceLocation, JsonElement> animationMap = Maps.newHashMap();
+		// Your logic to populate the map goes here
+		// For example, loading animation JSON elements from the resource manager
+		return animationMap;
+	}
+
+
 	@Override
-	protected void apply(Map<Integer, Map<Integer, StaticAnimation>> objectIn, IResourceManager resourceManager, IProfiler profilerIn) {
+	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManager, IProfiler profilerIn) {
 		final Map<ResourceLocation, StaticAnimation> registeredAnimation = Maps.newHashMap();
 		this.animationRegistry.values().forEach(a1 -> a1.getClipHolders().forEach((a2) -> registeredAnimation.put(a2.getRegistryName(), a2)));
 
+		/**
+		 * Load animations that are not registered from {@link AnimationRegistryEvent}
+		 * Reads from Resource Pack in physical client, Datapack in physical server.
+		 */
+		objectIn.entrySet().stream().filter((entry) -> !registeredAnimation.containsKey(entry.getKey()) && !entry.getKey().getPath().contains("/data/"))
+				.sorted((e1, e2) -> e1.getKey().toString().compareTo(e2.getKey().toString()))
+				.forEach((entry) -> {
+					if (!entry.getKey().getNamespace().equals(this.currentWorkingModid)) {
+						this.currentWorkingModid = entry.getKey().getNamespace();
+					}
+
+					try {
+						this.readAnimationFromJson(entry.getKey(), entry.getValue().getAsJsonObject());
+					} catch (Exception e) {
+						EpicFightMod.LOGGER.error("Failed to load User animation " + entry.getKey() + " because of " + e + ". Skipped.");
+						e.printStackTrace();
+					}
+				});
+
 		//SkillManager.reloadAllSkillsAnimations();
-		objectIn.values().forEach((map) -> {
-			map.values().forEach((animation) -> {
-				animation.loadAnimation(resourceManager);
-			});
-		});
 
 		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
 			list.addAll(anim.getClipHolders());
@@ -190,6 +221,26 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 				AnimationManager.readAnimationProperties(animation);
 			}
 		});
+	}
+
+	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
+		int splitIdx = location.getPath().lastIndexOf('/');
+
+		if (splitIdx < 0) {
+			splitIdx = 0;
+		}
+
+		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
+	}
+
+	private static void reloadResourceManager(IResourceManager pResourceManager) {
+		if (resourceManager != pResourceManager) {
+			resourceManager = pResourceManager;
+		}
+	}
+
+	public static IResourceManager getAnimationResourceManager() {
+		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
 	}
 
 	/**************************************************
@@ -220,64 +271,5 @@ public class AnimationManager extends ReloadListener<Map<Integer, Map<Integer, S
 			}
 		}
 	}
-	public static void readAnimationProperties(StaticAnimation animation) {
-		if (resourceManager == null) return;
-		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
 
-		try {
-			Optional<IResource> resourceOptional = Optional.of(resourceManager.getResource(dataLocation));
-			resourceOptional.ifPresent((rs) -> {
-				ClientAnimationDataReader.readAndApply(animation, rs);
-			});
-		} catch (IOException e) {
-			// Handle the exception (e.g., log it, rethrow it, etc.)
-			System.err.println("Failed to get resource: " + e.getMessage());
-			e.printStackTrace();
-		}
-	}
-
-
-	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
-		int splitIdx = location.getPath().lastIndexOf('/');
-
-		if (splitIdx < 0) {
-			splitIdx = 0;
-		}
-
-		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
-	}
-
-	private static void reloadResourceManager(IResourceManager pResourceManager) {
-		if (resourceManager != pResourceManager) {
-			resourceManager = pResourceManager;
-		}
-	}
-
-	public static IResourceManager getAnimationResourceManager() {
-		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
-	}
-
-	public String getModid() {
-		return this.modid;
-	}
-
-	public int getNamespaceHash() {
-		return this.namespaceHash;
-	}
-
-	public int getIdCounter() {
-		return this.counter++;
-	}
-
-	public Map<Integer, StaticAnimation> getIdMap() {
-		return this.animationById.get(this.namespaceHash);
-	}
-
-	public Map<ResourceLocation, StaticAnimation> getNameMap() {
-		return this.animationByName;
-	}
-
-	public String workingModId() {
-		return this.currentWorkingModid;
-	}
 }

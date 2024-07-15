@@ -1,12 +1,12 @@
 package yesman.epicfight.network.server;
 
-import java.util.function.Supplier;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
+
+import java.util.function.Supplier;
 
 public class SPDatapackSync {
 	private int count;
@@ -66,8 +66,8 @@ public class SPDatapackSync {
 		
 		ctx.get().setPacketHandled(true);
 	}
-	
-	public static enum Type {
-		ARMOR, WEAPON, MOB
+
+	public enum Type {
+		ARMOR, WEAPON, MOB, SKILL_PARAMS, WEAPON_TYPE
 	}
 }

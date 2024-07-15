@@ -4,6 +4,9 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.profiler.IProfiler;
+import net.minecraft.resources.IFutureReloadListener;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
@@ -13,8 +16,10 @@ import yesman.epicfight.main.EpicFightMod;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
-public class ColliderPreset {
+public class ColliderPreset implements IFutureReloadListener {
 
 	private static final BiMap<ResourceLocation, Collider> PRESETS = HashBiMap.create();
 
@@ -128,11 +133,10 @@ public class ColliderPreset {
 		}
 	}
 
-	/**
-	public static void update() {
-		Collider newCOllider = new OBBCollider(0.7D, 0.7D, 3.5D, 0D, 1.0D, -3.5D);
-		((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
-	}**/
-	
-
+	public CompletableFuture<Void> reload(IStage stage, IResourceManager resourceManager, IProfiler preparationsProfiler, IProfiler reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+		return CompletableFuture.runAsync(() -> {
+			//Collider newCOllider = new OBBCollider(0.4D, 0.4D, 0.5D, 0D, 1.25D, -0.85D)
+			//((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
+		}, gameExecutor).thenCompose(stage::wait);
+	}
 }

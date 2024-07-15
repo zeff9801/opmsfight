@@ -1,21 +1,7 @@
 package yesman.epicfight.world.capabilities.provider;
 
-import java.util.Map;
-import java.util.function.Function;
-
 import com.google.common.collect.Maps;
-
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.AxeItem;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.HoeItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PickaxeItem;
-import net.minecraft.item.ShieldItem;
-import net.minecraft.item.ShovelItem;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -26,22 +12,25 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
-import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 
-public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
+import java.util.Map;
+import java.util.function.Function;
+
+public class ItemCapabilityProvider implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
 	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem.Builder>> CAPABILITY_BY_CLASS = Maps.newHashMap();
 	private static final Map<Item, CapabilityItem> CAPABILITIES = Maps.newHashMap();
 	
 	public static void registerWeaponTypesByClass() {
 		CAPABILITY_BY_CLASS.put(ArmorItem.class, (item) -> ArmorCapability.builder().item(item));
-		CAPABILITY_BY_CLASS.put(ShieldItem.class, WeaponCapabilityPresets.SHIELD);
-		CAPABILITY_BY_CLASS.put(SwordItem.class, WeaponCapabilityPresets.SWORD);
-		CAPABILITY_BY_CLASS.put(PickaxeItem.class, WeaponCapabilityPresets.PICKAXE);
-		CAPABILITY_BY_CLASS.put(AxeItem.class, WeaponCapabilityPresets.AXE);
-		CAPABILITY_BY_CLASS.put(ShovelItem.class, WeaponCapabilityPresets.SHOVEL);
-		CAPABILITY_BY_CLASS.put(HoeItem.class, WeaponCapabilityPresets.HOE);
-		CAPABILITY_BY_CLASS.put(BowItem.class, WeaponCapabilityPresets.BOW);
-		CAPABILITY_BY_CLASS.put(CrossbowItem.class, WeaponCapabilityPresets.CROSSBOW);
+		CAPABILITY_BY_CLASS.put(ShieldItem.class, WeaponTypeReloadListener.SHIELD);
+		CAPABILITY_BY_CLASS.put(SwordItem.class, WeaponTypeReloadListener.SWORD);
+		CAPABILITY_BY_CLASS.put(PickaxeItem.class, WeaponTypeReloadListener.PICKAXE);
+		CAPABILITY_BY_CLASS.put(AxeItem.class, WeaponTypeReloadListener.AXE);
+		CAPABILITY_BY_CLASS.put(ShovelItem.class, WeaponTypeReloadListener.SHOVEL);
+		CAPABILITY_BY_CLASS.put(HoeItem.class, WeaponTypeReloadListener.HOE);
+		CAPABILITY_BY_CLASS.put(BowItem.class, WeaponTypeReloadListener.BOW);
+		CAPABILITY_BY_CLASS.put(CrossbowItem.class, WeaponTypeReloadListener.CROSSBOW);
 	}
 	
 	public static void put(Item item, CapabilityItem cap) {
@@ -78,7 +67,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	private CapabilityItem capability;
 	private LazyOptional<CapabilityItem> optional = LazyOptional.of(this);
 	
-	public ProviderItem(ItemStack itemstack) {
+	public ItemCapabilityProvider(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
 		
 		if (this.capability instanceof TagBasedSeparativeCapability) {

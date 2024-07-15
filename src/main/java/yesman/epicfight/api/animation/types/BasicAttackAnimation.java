@@ -1,7 +1,9 @@
 package yesman.epicfight.api.animation.types;
 
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
 import yesman.epicfight.api.client.animation.JointMaskEntry;
@@ -9,7 +11,6 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -73,11 +74,11 @@ public class BasicAttackAnimation extends AttackAnimation {
 		return stateMap;
 	}
 	@Override
-	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
-		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
-		
-		if (entitypatch.shouldBlockMoving() && this.getProperty(MoveCoordFunctions.CANCELABLE_MOVE).orElse(false)) {
-			vec3.scale(0.0F);
+	protected Vector3d getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
+		Vector3d vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
+
+		if (entitypatch.shouldBlockMoving() && this.getProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
+			vec3 = vec3.scale(0.0F);
 		}
 		
 		return vec3;

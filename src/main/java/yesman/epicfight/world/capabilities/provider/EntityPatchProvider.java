@@ -1,11 +1,6 @@
 package yesman.epicfight.world.capabilities.provider;
 
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.entity.player.RemoteClientPlayerEntity;
 import net.minecraft.entity.Entity;
@@ -26,7 +21,11 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
-public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<EntityPatch<?>> {
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier<EntityPatch<?>> {
 	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CAPABILITIES = Maps.newHashMap();
 	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CUSTOM_CAPABILITIES = Maps.newHashMap();
 	
@@ -71,7 +70,7 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Enti
 	private EntityPatch<?> capability;
 	private LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
 	
-	public ProviderEntity(Entity entity) {
+	public EntityPatchProvider(Entity entity) {
 		Function<Entity, Supplier<EntityPatch<?>>> provider = CUSTOM_CAPABILITIES.getOrDefault(entity.getType(), CAPABILITIES.get(entity.getType()));
 		
 		if (provider != null) {

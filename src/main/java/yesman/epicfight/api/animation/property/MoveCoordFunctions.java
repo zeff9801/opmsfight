@@ -47,7 +47,7 @@ public class MoveCoordFunctions {
         prevpos.transform(rotationTransform);
 
         boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
-        boolean moveVertical = animation.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false) || animation.getProperty(AnimationProperty.MoveCoordFunctions.COORD).isPresent();
+        boolean moveVertical = animation.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL).orElse(false) || animation.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isPresent();
         float dx = prevpos.x - currentpos.x;
         float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
         float dz = prevpos.z - currentpos.z;

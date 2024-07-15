@@ -1,9 +1,6 @@
 package yesman.epicfight.main;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.IResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.AddReloadListenerEvent;
@@ -24,7 +21,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.client.ClientEngine;
@@ -34,11 +33,12 @@ import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
 import yesman.epicfight.events.*;
+import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.server.commands.arguments.SkillArgument;
+import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillSlot;
@@ -48,10 +48,10 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
-import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
-import yesman.epicfight.world.capabilities.provider.ProviderEntity;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.capabilities.provider.ProviderProjectile;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
@@ -75,8 +75,7 @@ public class EpicFightMod {
 	}
 
 	private Function<LivingEntityPatch<?>, Animator> animatorProvider;
-	//private Models<?> model;
-	
+
     public EpicFightMod() {
     	instance = this;
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
@@ -86,6 +85,7 @@ public class EpicFightMod {
 		bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
+		bus.addListener(this::registerResourcepackReloadListnerEvent);
 
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
@@ -105,7 +105,7 @@ public class EpicFightMod {
         EpicFightParticles.PARTICLES.register(bus);
         EpicFightEntities.ENTITIES.register(bus);
         
-        MinecraftForge.EVENT_BUS.addListener(this::reloadDataListenerEvent); //Forge side event
+        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent); //Forge side event
 		bus.addListener(this::reloadAssetsListenerEvent); //Minecraft side event
 
         MinecraftForge.EVENT_BUS.register(EntityEvents.class);
@@ -132,7 +132,7 @@ public class EpicFightMod {
         this.animatorProvider = ClientAnimator::getAnimator;
         //this.model = ClientModels.LOGICAL_CLIENT;
     	
-		ProviderEntity.registerEntityPatchesClient();
+		EntityPatchProvider.registerEntityPatchesClient();
 		//Models.LOGICAL_SERVER.loadArmatures(resourceManager);
 		EpicFightKeyMappings.registerKeys();
 
@@ -147,36 +147,50 @@ public class EpicFightMod {
 	}
 
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
-		event.enqueueWork(EpicFightCapabilities::registerCapabilities);
-		event.enqueueWork(EpicFightSkills::registerSkills);
-		event.enqueueWork(SkillArgument::registerArgumentTypes);
+		event.enqueueWork(EpicFightCapabilities::registerCapabilities);//old
+		event.enqueueWork(EpicFightSkills::registerSkills);//old
+		event.enqueueWork(ProviderProjectile::registerPatches);//old
+		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);//old
+
+
+		event.enqueueWork(EpicFightCommandArgumentTypes::registerArgumentTypes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
-		event.enqueueWork(ProviderItem::registerWeaponTypesByClass);
-		event.enqueueWork(ProviderEntity::registerEntityPatches);
-		event.enqueueWork(ProviderProjectile::registerPatches);
+		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);
+		event.enqueueWork(EntityPatchProvider::registerEntityPatches);
 		event.enqueueWork(EpicFightGamerules::registerRules);
-		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);
-		event.enqueueWork(WeaponCapabilityPresets::register);
+		event.enqueueWork(WeaponTypeReloadListener::registerDefaultWeaponTypes);
+		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
-	private void reloadDataListenerEvent(final AddReloadListenerEvent event) {
+	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
+		if (!isPhysicalClient()) {
+			event.addListener(AnimationManager.getInstance());
+		}
+
+		event.addListener(new ColliderPreset());
+		//event.addListener(new SkillManager());
+		//event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
 	}
 
+	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(new JointMaskReloadListener());
+		//event.registerReloadListener(Meshes.INSTANCE);
+		event.registerReloadListener(AnimationManager.getInstance());
+		event.registerReloadListener(ItemSkins.INSTANCE);
+	}
 
 	private void reloadAssetsListenerEvent(final RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(ClientModels.LOGICAL_CLIENT); //Order matters. Model stuff like armature has to be populated first. Animations uses them
-		event.registerReloadListener(AnimationManager.getInstance());
 	}
 
+	/**
+	 * Epic Fight utils
+	 */
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {
 		return EpicFightMod.getInstance().animatorProvider.apply(entitypatch);
 	}
-	
-	//public static Models<?> getModelContainer(boolean isLogicalClient) {
-	//	return EpicFightMod.getInstance().model.getModels(isLogicalClient);
-	//}
 	
 	public static boolean isPhysicalClient() {
     	return FMLEnvironment.dist == Dist.CLIENT;

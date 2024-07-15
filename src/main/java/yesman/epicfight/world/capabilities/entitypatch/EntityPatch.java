@@ -9,12 +9,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 
 public abstract class EntityPatch<T extends Entity> {
 	protected T original;
 	protected boolean initialized = false;
+	protected boolean cancelKnockback;
 
 	public void tick(LivingUpdateEvent event) {
 		if (this.isLogicalClient()) {
@@ -23,6 +25,12 @@ public abstract class EntityPatch<T extends Entity> {
 			this.serverTick(event);
 		}
 	}
+	public float getStunShield() {
+		return 0.0F;
+	}
+	public void setStunShield(float value) {
+	}
+	public abstract boolean applyStun(ExtendedDamageSource.StunType stunType, float stunTime);
 
 	protected void clientTick(LivingUpdateEvent event) {}
 	protected void serverTick(LivingUpdateEvent event) {}
@@ -45,6 +53,7 @@ public abstract class EntityPatch<T extends Entity> {
 
 	public void onDeath(LivingDeathEvent event) {
 	}
+	public abstract boolean isStunned();
 
 	public final T getOriginal() {
 		return this.original;

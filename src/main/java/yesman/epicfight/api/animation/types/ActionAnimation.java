@@ -1,29 +1,23 @@
 package yesman.epicfight.api.animation.types;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.TimePairList;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.EpicFightOptions;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.HashSet;
@@ -72,27 +66,19 @@ public class ActionAnimation extends MainFrameAnimation {
 
 		entitypatch.cancelAnyAction();
 
-	//	if (entitypatch.shouldMoveOnCurrentSide(this)) {
+		if (entitypatch.shouldMoveOnCurrentSide(this)) {
 			entitypatch.correctRotation();
 
-			if (this.getProperty(AnimationProperty.MoveCoordFunctions.STOP_MOVEMENT).orElse(false)) {
+			if (this.getProperty(AnimationProperty.ActionAnimationProperty.STOP_MOVEMENT).orElse(false)) {
 				entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
 				entitypatch.getOriginal().xxa = 0.0F;
 				entitypatch.getOriginal().yya = 0.0F;
 				entitypatch.getOriginal().zza = 0.0F;
 			}
 
-			//AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse(AnimationProperty.AttackAnimationProperty.RAW_COORD);
-			//moveCoordSetter.set(this, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
-
-
-			AnimationProperty.MoveCoordSetter actionCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
-				transformSheet.readFrom(self.jointTransforms.get("Root"));
-			});
-
-			entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionCoordSetter);
-		//}
-
+			AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN).orElse((AnimationProperty.MoveCoordSetter) MoveCoordFunctions.RAW_COORD);
+			moveCoordSetter.set(this, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
+		}
 	}
 	
 	@Override
@@ -105,24 +91,16 @@ public class ActionAnimation extends MainFrameAnimation {
 	public void linkTick(LivingEntityPatch<?> entitypatch, LinkAnimation linkAnimation) {
 		this.move(entitypatch, linkAnimation);
 	};
-	
-	private void move(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+
+	protected void move(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		if (!this.validateMovement(entitypatch, animation)) {
 			return;
 		}
 
-		EntityState state = this.getState(entitypatch, entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
-
-		if (state.inaction()) {
+		if (this.getState(EntityState.INACTION, entitypatch, animation, entitypatch.getAnimator().getPlayerFor(this).getElapsedTime())) {
 			LivingEntity livingentity = entitypatch.getOriginal();
-			Vec3f vec3 = this.getCoordVector(entitypatch, animation);
-			BlockPos blockpos = new BlockPos(livingentity.getX(), livingentity.getBoundingBox().minY - 1.0D, livingentity.getZ());
-			BlockState blockState = livingentity.level.getBlockState(blockpos);
-			ModifiableAttributeInstance movementSpeed = livingentity.getAttribute(Attributes.MOVEMENT_SPEED);
-			boolean soulboost = blockState.is(BlockTags.SOUL_SPEED_BLOCKS) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, livingentity) > 0;
-			double speedFactor = soulboost ? 1.0D : livingentity.level.getBlockState(blockpos).getBlock().getSpeedFactor();
-			double moveMultiplier = this.getProperty(AnimationProperty.MoveCoordFunctions.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F;
-			livingentity.move(MoverType.SELF, new Vector3d(vec3.x * moveMultiplier, vec3.y, vec3.z * moveMultiplier * speedFactor));
+			Vector3d vec3 = this.getCoordVector(entitypatch, animation);
+			livingentity.move(MoverType.SELF, vec3);
 		}
 	}
 
@@ -132,7 +110,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		}
 
 		if (animation.isLinkAnimation()) {
-			if (!this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_ON_LINK).orElse(true)) {
+			if (!this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
 				return false;
 			} else {
 				return this.shouldMove(0.0F);
@@ -141,16 +119,11 @@ public class ActionAnimation extends MainFrameAnimation {
 			return this.shouldMove(entitypatch.getAnimator().getPlayerFor(animation).getElapsedTime());
 		}
 	}
-	private boolean shouldMove(float currentTime) {
-		if (this.properties.containsKey(AnimationProperty.MoveCoordFunctions.MOVE_TIME)) {
-			ActionTime[] actionTimes = this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_TIME).get();
-			for (ActionTime actionTime : actionTimes) {
-				if (actionTime.begin <= currentTime && currentTime <= actionTime.end) {
-					return true;
-				}
-			}
-			
-			return false;
+
+	protected boolean shouldMove(float currentTime) {
+		if (this.properties.containsKey(AnimationProperty.ActionAnimationProperty.MOVE_TIME)) {
+			TimePairList moveTimes = this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_TIME).get();
+			return moveTimes.isTimeInPairs(currentTime);
 		} else {
 			return true;
 		}
@@ -158,20 +131,18 @@ public class ActionAnimation extends MainFrameAnimation {
 
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		if (this.getProperty(AnimationProperty.MoveCoordFunctions.COORD).isEmpty()) {
-			JointTransform jt = pose.getOrDefaultTransform("Root");
-			Vec3f jointPosition = jt.translation();
-			OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
-			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
-			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
-			worldPosition.x = 0.0F;
-			worldPosition.y = (this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
-			worldPosition.z = 0.0F;
-			OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
-			jointPosition.x = worldPosition.x;
-			jointPosition.y = worldPosition.y;
-			jointPosition.z = worldPosition.z;
-		}
+		JointTransform jt = pose.getOrDefaultTransform("Root");
+		Vec3f jointPosition = jt.translation();
+		OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+		OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
+		Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
+		worldPosition.x = 0.0F;
+		worldPosition.y = (this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
+		worldPosition.z = 0.0F;
+		OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
+		jointPosition.x = worldPosition.x;
+		jointPosition.y = worldPosition.y;
+		jointPosition.z = worldPosition.z;
 
 		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
 	}
@@ -260,8 +231,8 @@ public class ActionAnimation extends MainFrameAnimation {
 		JointTransform jt = pose.getOrDefaultTransform("Root");
 
 		if (this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isEmpty()) {
-			//Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
-			Vec3f withPosition = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
+			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
+			//Vec3f withPosition = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
 			jt.translation().set(withPosition);
 		} else {
 			TransformSheet coordTransform = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).get();
@@ -269,72 +240,55 @@ public class ActionAnimation extends MainFrameAnimation {
 			jt.translation().add(0.0F, 0.0F, nextCoord.z);
 		}
 	}
-	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
-		if (this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).isPresent()) {
-			AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.MoveCoordFunctions.COORD_SET_TICK).orElse(null);
+	protected Vector3d getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
+		TimePairList coordUpdateTime = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME).orElse(null);
+		boolean isCoordUpdateTime = coordUpdateTime == null || coordUpdateTime.isTimeInPairs(player.getElapsedTime());
 
-			if (animation instanceof LinkAnimation) {
-				moveCoordSetter.set(animation, entitypatch, animation.jointTransforms.get("Root"));
-			} else {
-				entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, moveCoordSetter);
-			}
+		AnimationProperty.MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK).orElse(null) : (AnimationProperty.MoveCoordSetter) MoveCoordFunctions.RAW_COORD;
+
+		if (moveCoordsetter != null) {
+			TransformSheet transformSheet = animation.isLinkAnimation() ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
+			moveCoordsetter.set(animation, entitypatch, transformSheet);
 		}
 
 		TransformSheet rootCoord;
 
-		if (animation instanceof LinkAnimation) {
-			rootCoord = animation.jointTransforms.get("Root");
+		if (animation.isLinkAnimation()) {
+			rootCoord = animation.getCoord();
 		} else {
-			rootCoord = entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
+			rootCoord = entitypatch.getArmature().getActionAnimationCoord();
 
 			if (rootCoord == null) {
-				rootCoord = animation.jointTransforms.get("Root");
+				rootCoord = animation.getCoord();
 			}
 		}
 
-		LivingEntity livingentity = entitypatch.getOriginal();
-		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
-		JointTransform jt = rootCoord.getInterpolatedTransform(player.getElapsedTime());
-		JointTransform prevJt = rootCoord.getInterpolatedTransform(player.getPrevElapsedTime());
-		Vec4f currentpos = new Vec4f(jt.translation().x, jt.translation().y, jt.translation().z, 1.0F);
-		Vec4f prevpos = new Vec4f(prevJt.translation().x, prevJt.translation().y, prevJt.translation().z, 1.0F);
-		OpenMatrix4f rotationTransform = entitypatch.getModelMatrix(1.0F).removeTranslation();
-		OpenMatrix4f localTransform = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
-		rotationTransform.mulBack(localTransform);
-		currentpos.transform(rotationTransform);
-		prevpos.transform(rotationTransform);
 		boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
-		boolean moveVertical = this.getProperty(AnimationProperty.MoveCoordFunctions.MOVE_VERTICAL).orElse(false);
-		float dx = prevpos.x - currentpos.x;
-		float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
-		float dz = prevpos.z - currentpos.z;
-		dx = Math.abs(dx) > 0.0000001F ? dx : 0.0F;
-		dz = Math.abs(dz) > 0.0000001F ? dz : 0.0F;
+		boolean moveVertical = this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL).orElse(this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isPresent());
+		MoveCoordFunctions.MoveCoordGetter moveGetter = isCoordUpdateTime ? this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_GET).orElse(MoveCoordFunctions.DIFF_FROM_PREV_COORD) : MoveCoordFunctions.DIFF_FROM_PREV_COORD;
+		Vec3f move = moveGetter.get(animation, entitypatch, rootCoord);
+		LivingEntity livingentity = entitypatch.getOriginal();
+		Vector3d motion = livingentity.getDeltaMovement();
 
-		if (moveVertical && currentpos.y > 0.0F && !hasNoGravity) {
-			Vector3d motion = livingentity.getDeltaMovement();
-			livingentity.setDeltaMovement(motion.x, motion.y <= 0 ? (motion.y + 0.08D) : motion.y, motion.z);
-		}
+		this.getProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME).ifPresentOrElse((noGravityTime) -> {
+			if (noGravityTime.isTimeInPairs(animation.isLinkAnimation() ? 0.0F : player.getElapsedTime())) {
+				livingentity.setDeltaMovement(motion.x, 0.0D, motion.z);
+			} else {
+				move.y = 0.0F;
+			}
+		}, () -> {
+			if (moveVertical && move.y > 0.0F && !hasNoGravity) {
+				double gravity = livingentity.getAttribute(ForgeMod.ENTITY_GRAVITY.get()).getValue();
+				livingentity.setDeltaMovement(motion.x, motion.y <= 0.0F ? (motion.y + gravity) : motion.y, motion.z);
+			}
+		});
 
-		return new Vec3f(dx, dy, dz);
+		return move.toDoubleVector();
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
 		return playerpatch.isLogicalClient();
-	}
-
-	public static class ActionTime {
-		private float begin;
-		private float end;
-		
-		private ActionTime(float begin, float end) {
-			this.begin = begin;
-			this.end = end;
-		}
-		
-		public static ActionTime crate(float begin, float end) {
-			return new ActionTime(begin, end);
-		}
 	}
 }

@@ -16,7 +16,7 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.network.server.SPClearSkills;
 import yesman.epicfight.network.server.SPRemoveSkill;
-import yesman.epicfight.server.commands.arguments.SkillArgument;
+import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -31,10 +31,10 @@ public class PlayerSkillCommand {
 		LiteralArgumentBuilder<CommandSource> builder = Commands.literal("skill").requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
 			.then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players()).executes((commandContext) -> {
 				return clearSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"));
-			}))).then(Commands.literal("add").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", SkillArgument.skill()).executes((commandContext) -> {
-				return addSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), SkillArgument.getSkill(commandContext, "skill"));
-			})))).then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", SkillArgument.skill()).executes((commandContext) -> {
-				return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), SkillArgument.getSkill(commandContext, "skill"));
+			}))).then(Commands.literal("add").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", EpicFightCommandArgumentTypes.skill()).executes((commandContext) -> {
+				return addSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), EpicFightCommandArgumentTypes.getSkill(commandContext, "skill"));
+			})))).then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", EpicFightCommandArgumentTypes.skill()).executes((commandContext) -> {
+				return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), EpicFightCommandArgumentTypes.getSkill(commandContext, "skill"));
 			}))));
 		
 		dispatcher.register(Commands.literal("epicfight").then(builder));

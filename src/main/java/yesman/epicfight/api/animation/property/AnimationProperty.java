@@ -10,7 +10,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
-import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
@@ -28,6 +27,7 @@ import java.util.function.Function;
 
 
 public abstract class AnimationProperty<T> {
+
 	private static final Map<String, AnimationProperty<?>> SERIALIZABLE_ANIMATION_PROPERTY_KEYS = Maps.newHashMap();
 
 	@SuppressWarnings("unchecked")
@@ -157,11 +157,6 @@ public abstract class AnimationProperty<T> {
 		public static final MoveCoordFunctions<Boolean> MOVE_ON_LINK = new MoveCoordFunctions<Boolean>();
 		
 		/**
-		 * You can specify the coord movement time in action animation. Must be registered in order of time.
-		 */
-		public static final MoveCoordFunctions<ActionAnimation.ActionTime[]> MOVE_TIME = new MoveCoordFunctions<ActionAnimation.ActionTime[]>();
-		
-		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
 		public static final MoveCoordFunctions<MoveCoordSetter> COORD_SET_BEGIN = new MoveCoordFunctions<MoveCoordSetter>();
@@ -181,6 +176,7 @@ public abstract class AnimationProperty<T> {
 		 */
 		public static final MoveCoordFunctions<Boolean> CANCELABLE_MOVE = new MoveCoordFunctions<Boolean>();
 	}
+
 	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
 		public ActionAnimationProperty(String rl, @Nullable Codec<T> codecs) {
 			super(rl, codecs);
@@ -188,16 +184,18 @@ public abstract class AnimationProperty<T> {
 
 		public ActionAnimationProperty() {
 			this(null, null);
-		}		/**
-		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
-		 */
-		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ();
+		}
 
 		/**
-		 * This property will move entity's coord also as y-axis if true.
+		 * This property will set the entity's delta movement to (0, 0, 0) at the beginning of an animation if true.
+		 */
+		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ("stop_movements", Codec.BOOL);
+
+		/**
+		 * This property will move entity's coord also as y axis if true.
 		 * Don't recommend using this property because it's old system. Use the coord joint instead.
 		 */
-		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ("move_vertically", Codec.BOOL);
 
 		/**
 		 * This property determines the time of entity not affected by gravity.
@@ -212,7 +210,7 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * This property determines whether to move the entity in link animation or not.
 		 */
-		public static final ActionAnimationProperty<Boolean> MOVE_ON_LINK = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> MOVE_ON_LINK = new ActionAnimationProperty<Boolean> ("move_during_link", Codec.BOOL);
 
 		/**
 		 * You can specify the coord movement time in action animation. Must be registered in order of time.
@@ -237,17 +235,17 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * This property determines if the speed effect will increase the move distance.
 		 */
-		public static final ActionAnimationProperty<Boolean> AFFECT_SPEED = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> AFFECT_SPEED = new ActionAnimationProperty<Boolean> ("move_speed_based_distance", Codec.BOOL);
 
 		/**
 		 * This property determines if the movement can be canceled by {@link LivingEntityPatch#shouldBlockMoving()}.
 		 */
-		public static final ActionAnimationProperty<Boolean> CANCELABLE_MOVE = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> CANCELABLE_MOVE = new ActionAnimationProperty<Boolean> ("cancellable_movement", Codec.BOOL);
 
 		/**
 		 * Death animations won't be played if this value is true
 		 */
-		public static final ActionAnimationProperty<Boolean> IS_DEATH_ANIMATION = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> IS_DEATH_ANIMATION = new ActionAnimationProperty<Boolean> ("is_death", Codec.BOOL);
 
 		/**
 		 * This property determines the update time of {@link ActionAnimationProperty#COORD_SET_TICK}
@@ -255,9 +253,9 @@ public abstract class AnimationProperty<T> {
 		public static final ActionAnimationProperty<TimePairList> COORD_UPDATE_TIME = new ActionAnimationProperty<TimePairList> ();
 
 		/**
-		 * This property determines if it reset the player baic attack combo counter or not {@link BasicAttack}
+		 * This property determines if it reset the player basic attack combo counter or not {@link BasicAttack}
 		 */
-		public static final ActionAnimationProperty<Boolean> RESET_PLAYER_COMBO_COUNTER = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> RESET_PLAYER_COMBO_COUNTER = new ActionAnimationProperty<Boolean> ("reset_combo_attack_counter", Codec.BOOL);
 	}
 
 	@FunctionalInterface
