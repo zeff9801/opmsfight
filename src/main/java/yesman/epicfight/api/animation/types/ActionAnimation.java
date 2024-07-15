@@ -53,8 +53,8 @@ public class ActionAnimation extends MainFrameAnimation {
 
 		this.addProperty(AnimationProperty.StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 	}
-	
-	public <V> ActionAnimation addProperty(AnimationProperty.MoveCoordFunctions<V> propertyType, V value) {
+
+	public <V> ActionAnimation addProperty(AnimationProperty.ActionAnimationProperty<V> propertyType, V value) {
 		this.properties.put(propertyType, value);
 		return this;
 	}
@@ -76,7 +76,7 @@ public class ActionAnimation extends MainFrameAnimation {
 				entitypatch.getOriginal().zza = 0.0F;
 			}
 
-			AnimationProperty.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN).orElse((AnimationProperty.MoveCoordSetter) MoveCoordFunctions.RAW_COORD);
+			MoveCoordFunctions.MoveCoordSetter moveCoordSetter = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN).orElse(MoveCoordFunctions.RAW_COORD);
 			moveCoordSetter.set(this, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
 		}
 	}
@@ -245,7 +245,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		TimePairList coordUpdateTime = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME).orElse(null);
 		boolean isCoordUpdateTime = coordUpdateTime == null || coordUpdateTime.isTimeInPairs(player.getElapsedTime());
 
-		AnimationProperty.MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK).orElse(null) : (AnimationProperty.MoveCoordSetter) MoveCoordFunctions.RAW_COORD;
+		MoveCoordFunctions.MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK).orElse(null) : MoveCoordFunctions.RAW_COORD;
 
 		if (moveCoordsetter != null) {
 			TransformSheet transformSheet = animation.isLinkAnimation() ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();

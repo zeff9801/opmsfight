@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -84,97 +85,43 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * Events that are fired in specific time.
 		 */
-		public static final StaticAnimationProperty<AnimationEvent.TimeStampedEvent[]> TIME_STAMPED_EVENTS = new StaticAnimationProperty<AnimationEvent.TimeStampedEvent[]> ();
+		public static final StaticAnimationProperty<AnimationEvent.TimeStampedEvent[]> TIME_STAMPED_EVENTS = new StaticAnimationProperty<>();
 
 		/**
 		 * Events that are fired in specific time.
 		 */
-		public static final StaticAnimationProperty<AnimationEvent.TimePeriodEvent[]> TIME_PERIOD_EVENTS = new StaticAnimationProperty<AnimationEvent.TimePeriodEvent[]> ();
+		public static final StaticAnimationProperty<AnimationEvent.TimePeriodEvent[]> TIME_PERIOD_EVENTS = new StaticAnimationProperty<>();
 
 		/**
 		 * Events that are fired when the animation starts.
 		 */
-		public static final StaticAnimationProperty<AnimationEvent[]> ON_BEGIN_EVENTS = new StaticAnimationProperty<AnimationEvent[]> ();
+		public static final StaticAnimationProperty<AnimationEvent[]> ON_BEGIN_EVENTS = new StaticAnimationProperty<>();
 
 		/**
 		 * Events that are fired when the animation ends.
 		 */
-		public static final StaticAnimationProperty<AnimationEvent[]> ON_END_EVENTS = new StaticAnimationProperty<AnimationEvent[]> ();
+		public static final StaticAnimationProperty<AnimationEvent[]> ON_END_EVENTS = new StaticAnimationProperty<>();
 
 		/**
 		 * You can modify the playback speed of the animation.
 		 */
-		public static final StaticAnimationProperty<PlaybackSpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackSpeedModifier> ();
+		public static final StaticAnimationProperty<PlaybackSpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<>();
 
 		/**
 		 * You can modify the playback speed of the animation.
 		 */
-		public static final StaticAnimationProperty<PlaybackTimeModifier> ELAPSED_TIME_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
+		public static final StaticAnimationProperty<PlaybackTimeModifier> ELAPSED_TIME_MODIFIER = new StaticAnimationProperty<>();
 
 		/**
 		 * This property will be called both in client and server when modifying the pose
 		 */
-	//	public static final StaticAnimationProperty<PoseModifier> POSE_MODIFIER = new StaticAnimationProperty<PoseModifier> ();
+		public static final StaticAnimationProperty<PoseModifier> POSE_MODIFIER = new StaticAnimationProperty<PoseModifier> ();
 
 		/**
 		 * Fix the head rotation to the player's body rotation
 		 */
 		public static final StaticAnimationProperty<Boolean> FIXED_HEAD_ROTATION = new StaticAnimationProperty<Boolean> ();
-		//TODO OLD
-		/**
-		 * You can set the fixed play speed of the animation.
-		 */
-		public static final StaticAnimationProperty<Float> PLAY_SPEED = new StaticAnimationProperty<Float> ();
 
-	}
-
-	public static class MoveCoordFunctions<T> extends AnimationProperty<T> {
-		public MoveCoordFunctions(String rl, @Nullable Codec<T> codecs) {
-			super(rl, codecs);
-		}
-
-		public MoveCoordFunctions() {
-			this(null, null);
-		}
-		/**
-		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
-		 */
-		public static final MoveCoordFunctions<Boolean> STOP_MOVEMENT = new MoveCoordFunctions<Boolean>();
-		
-		/**
-		 * This property will move entity's coord of y-axis according to animation's coord if true.
-		 */
-		public static final MoveCoordFunctions<Boolean> MOVE_VERTICAL = new MoveCoordFunctions<Boolean>();
-
-		/**
-		 * Coord of action animation
-		 */
-		public static final MoveCoordFunctions<TransformSheet> COORD = new MoveCoordFunctions<TransformSheet>();
-		
-		/**
-		 * This property determines whether to move the entity in link animation or not.
-		 */
-		public static final MoveCoordFunctions<Boolean> MOVE_ON_LINK = new MoveCoordFunctions<Boolean>();
-		
-		/**
-		 * Set the dynamic coordinates of action animation.
-		 */
-		public static final MoveCoordFunctions<MoveCoordSetter> COORD_SET_BEGIN = new MoveCoordFunctions<MoveCoordSetter>();
-		
-		/**
-		 * Set the dynamic coordinates of action animation.
-		 */
-		public static final MoveCoordFunctions<MoveCoordSetter> COORD_SET_TICK = new MoveCoordFunctions<MoveCoordSetter>();
-		
-		/**
-		 * This property determines if the speed effect will increase the move distance.
-		 */
-		public static final MoveCoordFunctions<Boolean> AFFECT_SPEED = new MoveCoordFunctions<Boolean>();
-		
-		/**
-		 * This property determines if the movement can be canceled by {@link LivingEntityPatch#shouldBlockMoving()}.
-		 */
-		public static final MoveCoordFunctions<Boolean> CANCELABLE_MOVE = new MoveCoordFunctions<Boolean>();
 	}
 
 	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
@@ -220,12 +167,12 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<MoveCoordSetter> ();
+		public static final ActionAnimationProperty<MoveCoordFunctions.MoveCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<>();
 
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
-		public static final ActionAnimationProperty<MoveCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<MoveCoordSetter> ();
+		public static final ActionAnimationProperty<MoveCoordFunctions.MoveCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<>();
 
 		/**
 		 * Set the coordinates of action animation.
@@ -256,11 +203,6 @@ public abstract class AnimationProperty<T> {
 		 * This property determines if it reset the player basic attack combo counter or not {@link BasicAttack}
 		 */
 		public static final ActionAnimationProperty<Boolean> RESET_PLAYER_COMBO_COUNTER = new ActionAnimationProperty<Boolean> ("reset_combo_attack_counter", Codec.BOOL);
-	}
-
-	@FunctionalInterface
-	public interface MoveCoordSetter {
-		public void set(DynamicAnimation self, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 
 	public static class AttackAnimationProperty<T> extends AnimationProperty<T> {
@@ -300,7 +242,7 @@ public abstract class AnimationProperty<T> {
 		 */
 		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ();
 
-		public static final MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
+		public static final MoveCoordFunctions.MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
 			transformSheet.readFrom(self.getCoord().copyAll());
 		};
 	}
@@ -338,5 +280,15 @@ public abstract class AnimationProperty<T> {
 	@FunctionalInterface
 	public interface PlaybackTimeModifier {
 		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
+	}
+
+	@FunctionalInterface
+	public interface PoseModifier {
+		void modify(DynamicAnimation self, Pose pose, LivingEntityPatch<?> entitypatch, float elapsedTime, float partialTicks);
+	}
+
+	@FunctionalInterface
+	public interface Registerer<T> {
+		void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
 	}
 }

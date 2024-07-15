@@ -2,16 +2,18 @@ package yesman.epicfight.api.animation.types;
 
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.MoveCoordFunctions;
+
 import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
@@ -20,23 +22,33 @@ import java.util.Locale;
 import java.util.Optional;
 
 public class BasicAttackAnimation extends AttackAnimation {
-	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, antic, antic, contact, recovery, collider, index, path, model);
+	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		this(convertTime, antic, antic, contact, recovery, collider, colliderJoint, path, armature);
 	}
 
-	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
-
-		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
+	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 
-	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, Hand hand, @Nullable Collider collider, String index, String path, Model model) {
-		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
-
-		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		this.addProperty(MoveCoordFunctions.CANCELABLE_MOVE, true);
+	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		super(convertTime, antic, antic, contact, recovery, hand, collider, colliderJoint, path, armature);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
+
+	public BasicAttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
+		super(convertTime, path, armature, phases);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+	}
+
+
+
 	
 	@Override
 	public void setLinkAnimation(Pose pose1, float timeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {

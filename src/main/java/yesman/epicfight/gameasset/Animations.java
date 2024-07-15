@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
@@ -26,10 +27,12 @@ import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
-import yesman.epicfight.api.utils.math.ValueModifier;
+import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 import java.util.function.Consumer;
 
@@ -287,19 +290,7 @@ public class Animations {
 
 
 	private static void build() {
-		Models<?> models = FMLEnvironment.dist == Dist.CLIENT ? ClientModels.LOGICAL_CLIENT : Models.LOGICAL_SERVER;
-		Armature biped = models.biped.getArmature();
-		Model bipedModel = models.biped;
-		final Joint rootJoint = models.biped.getArmature().getRootJoint();
-		final Joint toolRJoint = models.biped.getArmature().searchJointByName("Tool_R");
-		final Joint toolLJoint = models.biped.getArmature().searchJointByName("Tool_L");
-		final Joint shoulderRJoint = models.biped.getArmature().searchJointByName("Shoulder_R");
-		final Joint torsoJoint = models.biped.getArmature().searchJointByName("Torso");
-		final String root = ("Root");
-		final String toolR = ("Tool_R");
-		final String toolL = ("Tool_L");
-		final String shoulderR = ("Shoulder_R");
-		final String torso = ("Torso");
+		HumanoidArmature biped = Armatures.BIPED;
 
 
 		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
@@ -396,7 +387,7 @@ public class Animations {
 		BIPED_KNOCKDOWN_WAKEUP_LEFT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_left", 0.8F, 0.6F, biped);
 		BIPED_KNOCKDOWN_WAKEUP_RIGHT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_right", 0.8F, 0.6F, biped);
 
-		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, toolL, "biped/combat/fist_auto1", bipedModel)
+		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
 		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, toolR, "biped/combat/fist_auto2", bipedModel)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
@@ -694,6 +685,25 @@ public class Animations {
 			entitypatch.getOriginal().refreshDimensions();
 		};
 		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
+
+		public static final AnimationProperty.PoseModifier COMBO_ATTACK_DIRECTION_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
+			if (!self.isStaticAnimation() || entitypatch instanceof PlayerPatch<?> playerpatch && playerpatch.isFirstPerson()) {
+				return;
+			}
+
+			float pitch = entitypatch.getAttackDirectionPitch();
+			JointTransform chest = pose.getOrDefaultTransform("Chest");
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
+
+			if (entitypatch instanceof PlayerPatch) {
+				float xRot = MathUtils.lerpBetween(entitypatch.getOriginal().xRotO, entitypatch.getOriginal().xRot, partialTicks);
+				OpenMatrix4f toOriginalRotation = entitypatch.getArmature().getBindedTransformFor(pose, entitypatch.getArmature().searchJointByName("Head")).removeScale().removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-(pitch + xRot), xAxis);
+
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+			}
+		};
 	}
 
 	@OnlyIn(Dist.CLIENT)
