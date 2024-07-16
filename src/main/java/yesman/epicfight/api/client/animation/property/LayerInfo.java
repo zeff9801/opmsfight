@@ -1,6 +1,5 @@
 package yesman.epicfight.api.client.animation.property;
 
-import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 
 public class LayerInfo {

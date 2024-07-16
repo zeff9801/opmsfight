@@ -4,9 +4,8 @@ import net.minecraft.client.Minecraft;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.client.animation.JointMaskEntry;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer.Priority;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 

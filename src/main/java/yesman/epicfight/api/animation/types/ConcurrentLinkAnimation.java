@@ -5,8 +5,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.JointMaskEntry;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 

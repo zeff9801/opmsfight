@@ -1,10 +1,10 @@
-package yesman.epicfight.api.client.animation;
+package yesman.epicfight.api.client.animation.property;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.api.client.animation.Layer;
 
 import java.util.List;
 

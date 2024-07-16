@@ -10,10 +10,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.property.GsonHelper;
-import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
-import yesman.epicfight.api.client.animation.property.LayerInfo;
-import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.api.client.animation.property.*;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.InputStream;
