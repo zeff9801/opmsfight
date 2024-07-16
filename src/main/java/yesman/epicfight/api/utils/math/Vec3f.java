@@ -1,8 +1,8 @@
 package yesman.epicfight.api.utils.math;
 
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
 import com.joml.Quaternionf;
+import net.minecraft.util.math.vector.Vector3f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class Vec3f extends Vec2f {

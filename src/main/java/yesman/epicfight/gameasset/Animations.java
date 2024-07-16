@@ -42,6 +42,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 import java.util.List;
+import java.util.Vector;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -875,42 +876,42 @@ public class Animations {
 			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 		};
 
-//		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
-//			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
-//			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-//			double d0 = vec3d1.horizontalDistanceSqr();
-//			double d1 = vec3d.horizontalDistanceSqr();
-//
-//			if (d0 > 0.0D && d1 > 0.0D) {
-//				JointTransform root = pose.getOrDefaultTransform("Root");
-//				JointTransform head = pose.getOrDefaultTransform("Head");
-//				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
-//				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
-//				float zRot = MathHelper.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
-//
-//				root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
-//
-//				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-//
-//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
-//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
-//			}
-//		};
+		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+			double d0 = vec3d1.horizontalDistanceSqr();
+			double d1 = vec3d.horizontalDistanceSqr();
 
-//		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
-//			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
-//			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-//			double d0 = vec3d1.horizontalDistanceSqr();
-//			double d1 = vec3d.horizontalDistanceSqr();
-//
-//			if (d0 > 0.0D && d1 > 0.0D) {
-//				JointTransform root = pose.getOrDefaultTransform("Root");
-//				JointTransform head = pose.getOrDefaultTransform("Head");
-//				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
-//				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
-//			}
-//		};
+			if (d0 > 0.0D && d1 > 0.0D) {
+				JointTransform root = pose.getOrDefaultTransform("Root");
+				JointTransform head = pose.getOrDefaultTransform("Head");
+				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
+				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
+				float zRot = MathHelper.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
+
+				root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
+
+				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
+			}
+		};
+
+		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
+			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
+			double d0 = vec3d1.horizontalDistanceSqr();
+			double d1 = vec3d.horizontalDistanceSqr();
+
+			if (d0 > 0.0D && d1 > 0.0D) {
+				JointTransform root = pose.getOrDefaultTransform("Root");
+				JointTransform head = pose.getOrDefaultTransform("Head");
+				float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
+			}
+		};
 
 		public static final AnimationProperty.PoseModifier MAP_ARMS_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
 			float xRot = 50.0F - (entitypatch.getOriginal().xRotO + (entitypatch.getOriginal().xRot - entitypatch.getOriginal().xRotO) * partialTicks);

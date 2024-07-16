@@ -240,12 +240,6 @@ public class MathUtils {
 		return quat;
 	}
 
-	public static double horizontalDistance(Vector3d vec) { //TODO to remove
-		return Math.sqrt(horizontalDistanceSqr(vec));
-	}
-	public static double horizontalDistanceSqr(Vector3d vec) {
-		return vec.x * vec.x + vec.z * vec.z;
-	}
 
 	public static Vec3f lerpVector(Vec3f start, Vec3f end, float weight) {
 		float x = start.x + (end.x - start.x) * weight;

@@ -118,8 +118,7 @@ public class TransformSheet {
 
 	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
-		//loat horizontalDistance = (float) dest.subtract(start).horizontalDistance();
-		float horizontalDistance = (float) dest.distanceTo(start);
+		float horizontalDistance = (float) dest.subtract(start).horizontalDistance();
 		float verticalDistance = (float) Math.abs(dest.y - start.y);
 		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
 		JointTransform endJt = transform.getKeyframes()[endFrame].transform();

@@ -258,112 +258,215 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
         
 		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, prvePitch, pitch, yaw, yaw, partialTick, 1, 1, 1);
 	}
-	
+
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTick) {
 		Direction direction;
-		
+
 		if (this.original.isAutoSpinAttack()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
-			float yawDegree = MathUtils.lerpBetween(this.original.yRotO, this.original.yRot, partialTick);
-			float pitchDegree = MathUtils.lerpBetween(this.original.xRotO, this.original.xRot, partialTick);
-			mat.rotateDeg(-yawDegree, Vec3f.Y_AXIS).rotateDeg(-pitchDegree, Vec3f.X_AXIS).rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS).translate(0F, -0.39F, 0F);
-			
-            return mat;
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			float yRot = MathUtils.lerpBetween(this.original.yRotO, this.original.yRot, partialTick);
+			float xRot = MathUtils.lerpBetween(this.original.xRotO, this.original.xRot, partialTick);
+
+			mat.rotateDeg(-yRot, Vec3f.Y_AXIS)
+					.rotateDeg(-xRot, Vec3f.X_AXIS)
+					.rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS)
+					.translate(0F, -0.39F, 0F);
+
+			return mat;
 		} else if (this.original.isFallFlying()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
-			
-            float f1 = (float)this.getOriginal().getFallFlyingTicks() + partialTick;
-            float f2 = MathHelper.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
-            
-            mat.rotateDeg(-MathHelper.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS);
-            
-            if (!this.getOriginal().isAutoSpinAttack()) {
-            	mat.rotateDeg((float)(f2 * (-this.original.xRot)), Vec3f.X_AXIS);
-            }
-            
-            Vector3d vector3d = this.original.getViewVector(partialTick);
-            Vector3d vector3d1 = this.original.getDeltaMovement();
-            double d0 = Entity.getHorizontalDistanceSqr(vector3d1);
-            double d1 = Entity.getHorizontalDistanceSqr(vector3d);
-            
-            if (d0 > 0.0D && d1 > 0.0D) {
-               double d2 = (vector3d1.x * vector3d.x + vector3d1.z * vector3d.z) / Math.sqrt(d0 * d1);
-               double d3 = vector3d1.x * vector3d.z - vector3d1.z * vector3d.x;
-               mat.rotate((float)-(Math.signum(d3) * Math.acos(d2)), Vec3f.Z_AXIS);
-            }
-            
-            return mat;
-            
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			float f1 = (float)this.original.getFallFlyingTicks() + partialTick;
+			float f2 = MathHelper.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+
+			mat.rotateDeg(-MathHelper.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.xRot), Vec3f.X_AXIS);
+
+			Vector3d vec3d = this.original.getViewVector(partialTick);
+			Vector3d vec3d1 = this.original.getDeltaMovement();
+			double d0 = vec3d1.horizontalDistanceSqr();
+			double d1 = vec3d.horizontalDistanceSqr();
+
+			if (d0 > 0.0D && d1 > 0.0D) {
+				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
+				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
+				mat.rotate((float)-((Math.signum(d3) * Math.acos(d2))), Vec3f.Z_AXIS);
+			}
+
+			return mat;
 		} else if (this.original.isSleeping()) {
 			BlockState blockstate = this.original.getFeetBlockState();
-			float yaw = 0.0F;
-			
+			float yRot = 0.0F;
+
 			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
 				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-            		switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
-            		case EAST:
-        				yaw = 90.0F;
-        				break;
-        			case WEST:
-        				yaw = -90.0F;
-        				break;
-        			case SOUTH:
-        				yaw = 180.0F;
-        				break;
-        			default:
-        				break;
-            		}
-            	}
+					switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
+						case EAST:
+							yRot = 90.0F;
+							break;
+						case WEST:
+							yRot = -90.0F;
+							break;
+						case SOUTH:
+							yRot = 180.0F;
+							break;
+						default:
+							break;
+					}
+				}
 			}
-			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 1.0F, 1.0F, 1.0F);
+
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0, 0.9375F, 0.9375F, 0.9375F);
 		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
-			float yaw = 0.0F;
-			
+			float yRot = 0.0F;
+
 			switch(direction) {
-			case EAST:
-				yaw = 90.0F;
-				break;
-			case WEST:
-				yaw = -90.0F;
-				break;
-			case SOUTH:
-				yaw = 180.0F;
-				break;
-			default:
-				break;
+				case EAST:
+					yRot = 90.0F;
+					break;
+				case WEST:
+					yRot = -90.0F;
+					break;
+				case SOUTH:
+					yRot = 180.0F;
+					break;
+				default:
+					break;
 			}
-			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0.0F, 1.0F, 1.0F, 1.0F);
+
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, 0.9375F, 0.9375F, 0.9375F);
 		} else {
-			float yaw;
-			float prevRotYaw;
-			float rotyaw;
-			float prevPitch = 0;
-			float pitch = 0;
-			
-			if (this.original.getVehicle() instanceof LivingEntity) {
-				LivingEntity ridingEntity = (LivingEntity)this.original.getVehicle();
-				prevRotYaw = ridingEntity.yBodyRotO;
-				rotyaw = ridingEntity.yBodyRot;
+			float yRotO;
+			float yRot;
+			float xRotO = 0;
+			float xRot = 0;
+
+			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
+				yRotO = ridingEntity.yBodyRotO;
+				yRot = ridingEntity.yBodyRot;
 			} else {
-				yaw = MathUtils.lerpBetween(this.prevYaw, this.yaw, partialTick);
-				prevRotYaw = this.prevBodyYaw + yaw;
-				rotyaw = this.bodyYaw + yaw;
+				yRotO = this.modelYRotO;
+				yRot = this.modelYRot;
 			}
-			
-			if (!this.getEntityState().inaction() && this.original.getPose() == Pose.SWIMMING) {
+
+			if (!this.getEntityState().inaction() && this.original.getPose() == net.minecraft.world.entity.Pose.SWIMMING) {
 				float f = this.original.getSwimAmount(partialTick);
-				float f3 = this.original.isInWater() ? this.original.xRot : 0;
-		        float f4 = MathHelper.lerp(f, 0.0F, f3);
-		        prevPitch = f4;
-		        pitch = f4;
+				float f3 = this.original.isInWater() ? this.original.getXRot() : 0;
+				float f4 = Mth.lerp(f, 0.0F, f3);
+				xRotO = f4;
+				xRot = f4;
 			}
-			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevPitch, pitch, prevRotYaw, rotyaw, partialTick, 1.0F, 1.0F, 1.0F);
+
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
 		}
 	}
+	
+//	@Override
+//	public OpenMatrix4f getModelMatrix(float partialTick) {
+//		Direction direction;
+//
+//		if (this.original.isAutoSpinAttack()) {
+//			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+//			float yRot  = MathUtils.lerpBetween(this.original.yRotO, this.original.yRot, partialTick);
+//			float xRot  = MathUtils.lerpBetween(this.original.xRotO, this.original.xRot, partialTick);
+//
+//
+//			mat.rotateDeg(-yRot, Vec3f.Y_AXIS).rotateDeg(-xRot, Vec3f.X_AXIS).rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS).translate(0F, -0.39F, 0F);
+//
+//            return mat;
+//		} else if (this.original.isFallFlying()) {
+//			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+//
+//            float f1 = (float)this.getOriginal().getFallFlyingTicks() + partialTick;
+//            float f2 = MathHelper.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+//
+//			mat.rotateDeg(-MathHelper.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.xRot), Vec3f.X_AXIS);
+//
+//            if (!this.getOriginal().isAutoSpinAttack()) {
+//            	mat.rotateDeg((float)(f2 * (-this.original.xRot)), Vec3f.X_AXIS);
+//            }
+//
+//            Vector3d vector3d = this.original.getViewVector(partialTick);
+//            Vector3d vector3d1 = this.original.getDeltaMovement();
+//            double d0 = Entity.getHorizontalDistanceSqr(vector3d1);
+//            double d1 = Entity.getHorizontalDistanceSqr(vector3d);
+//
+//            if (d0 > 0.0D && d1 > 0.0D) {
+//               double d2 = (vector3d1.x * vector3d.x + vector3d1.z * vector3d.z) / Math.sqrt(d0 * d1);
+//               double d3 = vector3d1.x * vector3d.z - vector3d1.z * vector3d.x;
+//               mat.rotate((float)-(Math.signum(d3) * Math.acos(d2)), Vec3f.Z_AXIS);
+//            }
+//
+//            return mat;
+//
+//		} else if (this.original.isSleeping()) {
+//			BlockState blockstate = this.original.getFeetBlockState();
+//			float yaw = 0.0F;
+//
+//			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
+//				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+//            		switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
+//            		case EAST:
+//        				yaw = 90.0F;
+//        				break;
+//        			case WEST:
+//        				yaw = -90.0F;
+//        				break;
+//        			case SOUTH:
+//        				yaw = 180.0F;
+//        				break;
+//        			default:
+//        				break;
+//            		}
+//            	}
+//			}
+//
+//			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 1.0F, 1.0F, 1.0F);
+//		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
+//			float yaw = 0.0F;
+//
+//			switch(direction) {
+//			case EAST:
+//				yaw = 90.0F;
+//				break;
+//			case WEST:
+//				yaw = -90.0F;
+//				break;
+//			case SOUTH:
+//				yaw = 180.0F;
+//				break;
+//			default:
+//				break;
+//			}
+//
+//			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0.0F, 1.0F, 1.0F, 1.0F);
+//		} else {
+//			float yaw;
+//			float prevRotYaw;
+//			float rotyaw;
+//			float prevPitch = 0;
+//			float pitch = 0;
+//
+//			if (this.original.getVehicle() instanceof LivingEntity) {
+//				LivingEntity ridingEntity = (LivingEntity)this.original.getVehicle();
+//				prevRotYaw = ridingEntity.yBodyRotO;
+//				rotyaw = ridingEntity.yBodyRot;
+//			} else {
+//				yaw = MathUtils.lerpBetween(this.prevYaw, this.yaw, partialTick);
+//				prevRotYaw = this.prevBodyYaw + yaw;
+//				rotyaw = this.bodyYaw + yaw;
+//			}
+//
+//			if (!this.getEntityState().inaction() && this.original.getPose() == Pose.SWIMMING) {
+//				float f = this.original.getSwimAmount(partialTick);
+//				float f3 = this.original.isInWater() ? this.original.xRot : 0;
+//		        float f4 = MathHelper.lerp(f, 0.0F, f3);
+//		        prevPitch = f4;
+//		        pitch = f4;
+//			}
+//
+//			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevPitch, pitch, prevRotYaw, rotyaw, partialTick, 1.0F, 1.0F, 1.0F);
+//		}
+//	}
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
 		boolean isSpectator = (entity instanceof PlayerEntity && ((PlayerEntity)entity).isSpectator());

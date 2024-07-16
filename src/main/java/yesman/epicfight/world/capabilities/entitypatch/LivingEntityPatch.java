@@ -1,9 +1,11 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -38,6 +40,7 @@ import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
@@ -50,6 +53,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.List;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
@@ -59,15 +63,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public static final DataParameter<Boolean> AIRBORNE = new DataParameter<Boolean> (250, DataSerializers.BOOLEAN);
 	protected static final double WEIGHT_CORRECTION = 37.037D;
 
-	private float stunTimeReduction;
-	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private AttackResult.ResultType lastResultType;
 	private float lastDealDamage;
 	protected Entity lastTryHurtEntity;
 	protected LivingEntity grapplingTarget;
-
 	protected Armature armature;
-
 	protected EntityState state = EntityState.DEFAULT_STATE;
 	protected Animator animator;
 	protected Vector3d lastAttackPosition;
@@ -76,7 +76,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
-	public List<LivingEntity> currentlyAttackedEntity;
 
 
 	@Override
@@ -98,15 +97,12 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.initAttributes();
 	}
 
-	@Override
-	public boolean overrideRender() {
-		return true;
-	}
-
 	public abstract void initAnimator(Animator clientAnimator);
 	public abstract void updateMotion(boolean considerInaction);
 
-	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
+	public Armature getArmature() {
+		return this.armature;
+	}
 
 	protected void initAttributes() {
 		EntitySize dimension = this.original.getDimensions(net.minecraft.entity.Pose.STANDING);
@@ -114,73 +110,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
-	}
-	public void setLastAttackResult(AttackResult attackResult) {
-		this.lastResultType = attackResult.resultType;
-		this.lastDealDamage = attackResult.damage;
-	}
-	public boolean isAirborneState() {
-		return this.original.getEntityData().get(AIRBORNE);
-	}
-
-	public float getCameraXRot() {
-		return MathHelper.wrapDegrees(this.original.xRot);
-	}
-
-	public float getCameraYRot() {
-		return MathHelper.wrapDegrees(this.original.yRot);
-	}
-	@Override
-	protected void clientTick(LivingUpdateEvent event) {
-	}
-	public void correctRotation() {
-	}
-	public void cancelAnyAction() {
-		this.original.stopUsingItem();
-		ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
-	}
-
-	@Override
-	protected void serverTick(LivingUpdateEvent event) {
-		if (this.stunTimeReduction > 0.0F) {
-			float stunArmor = this.getStunArmor();
-			this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
-			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
-		}
-	}
-
-	public void onFall(LivingFallEvent event) {
-		if (!this.getOriginal().level.isClientSide() && this.isAirborneState()) {
-			StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
-
-			if (fallAnimation != null) {
-				this.playAnimationSynchronized(fallAnimation, 0);
-			}
-		}
-
-		this.setAirborneState(false);
-	}
-
-	public List<LivingEntity> getCurrenltyAttackedEntities() {
-		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
-	}
-
-	public List<LivingEntity> getCurrenltyHurtEntities() {
-		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
-	}
-
-	public void removeHurtEntities() {
-		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
-		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
-	}
-
-	public void setAirborneState(boolean airborne) {
-		this.original.getEntityData().set(AIRBORNE, airborne);
-	}
-	@Override
-	public void onDeath(LivingDeathEvent event) {
-		this.getAnimator().playDeathAnimation();
-		this.currentLivingMotion = LivingMotions.DEATH;
 	}
 
 	@Override
@@ -222,25 +151,34 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		}
 	}
 
-	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
-		return !this.isLogicalClient();
+	public void onFall(LivingFallEvent event) {
+		if (!this.getOriginal().level.isClientSide() && this.isAirborneState()) {
+			StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
+
+			if (fallAnimation != null) {
+				this.playAnimationSynchronized(fallAnimation, 0);
+			}
+		}
+
+		this.setAirborneState(false);
+	}
+
+	@Override
+	public void onDeath(LivingDeathEvent event) {
+		this.getAnimator().playDeathAnimation();
+		this.currentLivingMotion = LivingMotions.DEATH;
 	}
 
 	public void updateEntityState() {
 		this.state = this.animator.getEntityState();
 	}
 
-	public void cancelUsingItem() {
+	public void cancelAnyAction() {
 		this.original.stopUsingItem();
 		ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
 	}
 
 	public CapabilityItem getHoldingItemCapability(Hand hand) {
-
-		if ( hand == null ) {
-			return CapabilityItem.EMPTY;
-		}
-
 		return EpicFightCapabilities.getItemStackCapability(this.original.getItemInHand(hand));
 	}
 
@@ -259,99 +197,97 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return ExtendedDamageSource.causeMobDamage(this.original, stunType, animation);
 	}
 
-	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, Hand hand) {
-		float damage = 0;
-
-		if (hand == Hand.MAIN_HAND) {
-			damage = (float) this.original.getAttributeValue(Attributes.ATTACK_DAMAGE);
-		} else {
-			damage = this.isOffhandItemValid() ? (float) this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get()) : (float) this.original.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
-		}
-
-		damage += EnchantmentHelper.getDamageBonus(this.getValidItemInHand(hand), (targetEntity instanceof LivingEntity) ? ((LivingEntity)targetEntity).getMobType() : CreatureAttribute.UNDEFINED);
-
-		return damage;
-	}
-
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		return AttackResult.of(this.getEntityState().attackResult(damageSource), amount);
 	}
 
 	public AttackResult tryHarm(Entity target, EpicFightDamageSource damagesource, float amount) {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(target, LivingEntityPatch.class);
-		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
+		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource, amount) : AttackResult.success(amount);
 
 		return result;
 	}
 
-	public void onHurtSomeone(Entity target, Hand handIn, ExtendedDamageSource damagesource, float amount, boolean succeed) {
-		int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, this.getValidItemInHand(handIn));
+	@Nullable
+	public EpicFightDamageSource getEpicFightDamageSource() {
+		return this.epicFightDamageSource;
+	}
 
-		if (target instanceof LivingEntity) {
-			this.getOriginal().doEnchantDamageEffects(this.getOriginal(), target);
-
-			if (j > 0 && !target.isOnFire()) {
-				target.setSecondsOnFire(j * 4);
-			}
+	/**
+	 * Swap item and attributes of mainhand for offhand item and attributes
+	 * You must call {@link LivingEntityPatch#recoverMainhandDamage} method again after finishing the damaging process.
+	 */
+	protected void setOffhandDamage(Hand hand, Collection<AttributeModifier> mainhandAttributes, Collection<AttributeModifier> offhandAttributes) {
+		if (hand == Hand.MAIN_HAND) {
+			return;
 		}
+
+		/**
+		 * Swap hand items
+		 */
+		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		this.getOriginal().setItemInHand(Hand.MAIN_HAND, offHandItem);
+		this.getOriginal().setItemInHand(Hand.OFF_HAND, mainHandItem);
+
+		/**
+		 * Swap item's attributes before {@link LivingEntity#setItemInHand} called
+		 */
+		ModifiableAttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		mainhandAttributes.forEach(damageAttributeInstance::removeModifier);
+		offhandAttributes.forEach(damageAttributeInstance::addTransientModifier);
+	}
+
+	/**
+	 * Set mainhand item's attribute modifiers
+	 */
+	protected void recoverMainhandDamage(Hand hand, Collection<AttributeModifier> mainhandAttributes, Collection<AttributeModifier> offhandAttributes) {
+		if (hand == Hand.MAIN_HAND) {
+			return;
+		}
+
+		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		this.getOriginal().setItemInHand(Hand.MAIN_HAND, offHandItem);
+		this.getOriginal().setItemInHand(Hand.OFF_HAND, mainHandItem);
+
+		ModifiableAttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		offhandAttributes.forEach(damageAttributeInstance::removeModifier);
+		mainhandAttributes.forEach(damageAttributeInstance::addTransientModifier);
+	}
+
+	public void setLastAttackResult(AttackResult attackResult) {
+		this.lastResultType = attackResult.resultType;
+		this.lastDealDamage = attackResult.damage;
+	}
+
+	public void setLastAttackEntity(Entity tryHurtEntity) {
+		this.lastTryHurtEntity = tryHurtEntity;
+	}
+
+	protected boolean checkLastAttackSuccess(Entity target) {
+		boolean success = target.is(this.lastTryHurtEntity);
+		this.lastTryHurtEntity = null;
+
+		if (success && !this.isLastAttackSuccess) {
+			this.setLastAttackSuccess(true);
+		}
+
+		return success;
+	}
+
+	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
+		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
+	}
+
+	public float getModifiedBaseDamage(float baseDamage) {
+		return baseDamage;
 	}
 
 	public boolean onDrop(LivingDropsEvent event) {
 		return false;
 	}
 
-	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {}
-
-	public void setStunReductionOnHit() {
-		this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
-		this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
-	}
-
-	public float getStunTimeTimeReduction() {
-		return this.stunTimeReduction;
-	}
-
-	public void knockBackEntity(Vector3d sourceLocation, float power) {
-		double d1 = sourceLocation.x() - this.original.getX();
-        double d0;
-
-		for (d0 = sourceLocation.z() - this.original.getZ(); d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
-            d1 = (Math.random() - Math.random()) * 0.01D;
-        }
-
-		if (this.original.getRandom().nextDouble() >= this.original.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) {
-        	Vector3d vec = this.original.getDeltaMovement();
-
-        	this.original.hasImpulse = true;
-            float f = (float) Math.sqrt(d1 * d1 + d0 * d0);
-
-            double x = vec.x;
-            double y = vec.y;
-            double z = vec.z;
-
-            x /= 2.0D;
-            z /= 2.0D;
-            x -= d1 / (double)f * (double)power;
-            z -= d0 / (double)f * (double)power;
-
-			if (!this.original.isOnGround()) {
-				y /= 2.0D;
-				y += (double) power;
-
-				if (y > 0.4000000059604645D) {
-					y = 0.4000000059604645D;
-				}
-			}
-
-            this.original.setDeltaMovement(x, y, z);
-            this.original.hurtMarked = true;
-        }
-	}
-
-	public float getStunArmor() {
-		ModifiableAttributeInstance stunArmor = this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get());
-		return (float) (stunArmor == null ? 0 : stunArmor.getValue());
-	}
 
 	public float getStunShield() {
 		return this.original.getEntityData().get(STUN_SHIELD).floatValue();
@@ -359,6 +295,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 	public void setStunShield(float value) {
 		value = Math.max(value, 0);
+		value = Math.min(value, this.getMaxStunShield());
 		this.original.getEntityData().set(STUN_SHIELD, value);
 	}
 
@@ -371,26 +308,29 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.original.getEntityData().set(MAX_STUN_SHIELD, value);
 	}
 
+	public int getExecutionResistance() {
+		return this.original.getEntityData().get(EXECUTION_RESISTANCE).intValue();
+	}
+
+
+	//TODO Implement once we port ExecutionSkills
+//	public void setExecutionResistance(int value) {
+//		int maxExecutionResistance = (int)this.original.getAttributeValue(EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
+//		value = Math.min(maxExecutionResistance, value);
+//		this.original.getEntityData().set(EXECUTION_RESISTANCE, value);
+//	}
+
 	public float getWeight() {
 		return (float)this.original.getAttributeValue(EpicFightAttributes.WEIGHT.get());
 	}
 
-	public void rotateTo(float degree, float limit, boolean synchronizeOld) {
+	public void rotateTo(float degree, float limit, boolean syncPrevRot) {
 		LivingEntity entity = this.getOriginal();
-		float amount = degree - entity.yRot;
+		float yRot = MathHelper.wrapDegrees(entity.yRot);
+		float amount = MathHelper.clamp(MathHelper.wrapDegrees(degree - yRot), -limit, limit);
+		float f1 = yRot + amount;
 
-        while (amount < -180.0F) {
-        	amount += 360.0F;
-        }
-
-        while (amount > 180.0F) {
-        	amount -= 360.0F;
-        }
-
-        amount = MathHelper.clamp(amount, -limit, limit);
-        float f1 = entity.yRot + amount;
-
-		if (synchronizeOld) {
+		if (syncPrevRot) {
 			entity.yRotO = f1;
 			entity.yHeadRotO = f1;
 			entity.yBodyRotO = f1;
@@ -401,25 +341,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		entity.yBodyRot = f1;
 	}
 
-	public void rotateTo(Entity target, float limit, boolean partialSync) {
-		double d0 = target.getX() - this.original.getX();
-        double d1 = target.getZ() - this.original.getZ();
-        float degree = -(float)Math.toDegrees(MathHelper.atan2(d0, d1));
-    	this.rotateTo(degree, limit, partialSync);
-	}
-
-	public void playSound(SoundEvent sound, float pitchModifierMin, float pitchModifierMax) {
-		this.playSound(sound, 1.0F, pitchModifierMin, pitchModifierMax);
-	}
-
-	public void playSound(SoundEvent sound, float volume, float pitchModifierMin, float pitchModifierMax) {
-		float pitch = (this.original.getRandom().nextFloat() * 2.0F - 1.0F) * (pitchModifierMax - pitchModifierMin);
-
-		if (!this.isLogicalClient()) {
-			this.original.level.playSound(null, this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch);
-		} else {
-			this.original.level.playLocalSound(this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch, false);
-		}
+	public void rotateTo(Entity target, float limit, boolean syncPrevRot) {
+		Vector3d playerPosition = this.original.position();
+		Vector3d targetPosition = target.position();
+		float yaw = (float)MathUtils.getYRotOfVector(targetPosition.subtract(playerPosition));
+		this.rotateTo(yaw, limit, syncPrevRot);
 	}
 
 	public LivingEntity getTarget() {
@@ -430,31 +356,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		float partialTicks = EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getFrameTime() : 1.0F;
 		float pitch = -this.getOriginal().getViewXRot(partialTicks);
 		float correct = (pitch > 0) ? 0.03333F * (float)Math.pow(pitch, 2) : -0.03333F * (float)Math.pow(pitch, 2);
+
 		return MathHelper.clamp(correct, -30.0F, 30.0F);
 	}
 
-	@OnlyIn(Dist.CLIENT)
-	public OpenMatrix4f getHeadMatrix(float partialTicks) {
-        float f2;
+	public float getCameraXRot() {
+		return MathHelper.wrapDegrees(this.original.xRot);
+	}
 
-		if (this.state.inaction()) {
-			f2 = 0;
-		} else {
-			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks);
-			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTicks);
-			f2 = f1 - f;
-
-			if (this.original.getVehicle() != null) {
-				if (f2 > 45.0F) {
-					f2 = 45.0F;
-				} else if (f2 < -45.0F) {
-					f2 = -45.0F;
-				}
-			}
-		}
-
-
-		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, this.original.xRotO, this.original.xRot, f2, f2, partialTicks, 1, 1, 1);
+	public float getCameraYRot() {
+		return MathHelper.wrapDegrees(this.original.yRot);
 	}
 
 	@Override
@@ -489,41 +400,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
 
-	public Armature getArmature() {
-		return this.armature;
-	}
-
-	public void setLastAttackEntity(Entity tryHurtEntity) {
-		this.lastTryHurtEntity = tryHurtEntity;
-	}
-	protected boolean checkLastAttackSuccess(Entity target) {
-		boolean success = target.is(this.lastTryHurtEntity);
-		this.lastTryHurtEntity = null;
-
-		if (success && !this.isLastAttackSuccess) {
-			this.setLastAttackSuccess(true);
-		}
-
-		return success;
-	}
-
-	public void setLastAttackSuccess(boolean setter) {
-		this.isLastAttackSuccess = setter;
-	}
-	@Nullable
-	public EpicFightDamageSource getEpicFightDamageSource() {
-		return this.epicFightDamageSource;
-	}
-	public boolean isLastAttackSuccess() {
-		return this.isLastAttackSuccess;
-	}
-	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
-		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
-	}
-	public AttackResult attack(ExtendedDamageSource damageSource, Entity target, Hand hand) {
-		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
-	}
-
 	@FunctionalInterface
 	public static interface AnimationPacketProvider {
 		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
@@ -537,21 +413,43 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		EntitySize entitysize = this.original.dimensions;
 		EntitySize entitysize1 = size;
 		this.original.dimensions = entitysize1;
-	    if (entitysize1.width < entitysize.width) {
-	    	double d0 = (double)entitysize1.width / 2.0D;
-	    	this.original.setBoundingBox(new AxisAlignedBB(original.getX() - d0, original.getY(), original.getZ() - d0, original.getX() + d0,
-	    			original.getY() + (double)entitysize1.height, original.getZ() + d0));
-	    } else {
-	    	AxisAlignedBB axisalignedbb = this.original.getBoundingBox();
-	    	this.original.setBoundingBox(new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double)entitysize1.width,
-	    			axisalignedbb.minY + (double)entitysize1.height, axisalignedbb.minZ + (double)entitysize1.width));
 
-	    	if (entitysize1.width > entitysize.width && !original.level.isClientSide()) {
-	    		float f = entitysize.width - entitysize1.width;
-	        	this.original.move(MoverType.SELF, new Vector3d((double)f, 0.0D, (double)f));
-	    	}
-	    }
-    }
+		if (entitysize1.width < entitysize.width) {
+			double d0 = (double)entitysize1.width / 2.0D;
+			this.original.setBoundingBox(new AxisAlignedBB(original.getX() - d0, original.getY(), original.getZ() - d0, original.getX() + d0,
+					original.getY() + (double)entitysize1.height, original.getZ() + d0));
+		} else {
+			AxisAlignedBB axisalignedbb = this.original.getBoundingBox();
+			this.original.setBoundingBox(new AxisAlignedBB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double)entitysize1.width,
+					axisalignedbb.minY + (double)entitysize1.height, axisalignedbb.minZ + (double)entitysize1.width));
+
+			if (entitysize1.width > entitysize.width && !original.level.isClientSide()) {
+				float f = entitysize.width - entitysize1.width;
+				this.original.move(MoverType.SELF, new Vector3d((double)f, 0.0D, (double)f));
+			}
+		}
+	}
+
+	@Override
+	public boolean applyStun(StunType stunType, float stunTime) {
+		this.original.xxa = 0.0F;
+		this.original.yya = 0.0F;
+		this.original.zza = 0.0F;
+		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
+		this.cancelKnockback = true;
+
+		StaticAnimation hitAnimation = this.getHitAnimation(stunType);
+
+		if (hitAnimation != null) {
+			this.playAnimationSynchronized(hitAnimation, stunType.hasFixedStunTime() ? 0.0F : stunTime);
+			return true;
+		}
+
+		return false;
+	}
+
+	public void correctRotation() {
+	}
 
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
 	}
@@ -562,7 +460,21 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public void onAttackBlocked(HurtEvent.Pre hurtEvent, LivingEntityPatch<?> opponent) {
 	}
 
+	public void onAttackBlocked(DamageSource damageSource, LivingEntityPatch<?> opponent) {
+	}
+
 	public void onMount(boolean isMountOrDismount, Entity ridingEntity) {
+	}
+
+	public void notifyGrapplingWarning() {
+	}
+
+	public void onDodgeSuccess(DamageSource damageSource) {
+	}
+
+	@Override
+	public boolean isStunned() {
+		return this.getEntityState().hurt();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -577,7 +489,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 
 	public ServerAnimator getServerAnimator() {
-		return this.<ServerAnimator>getAnimator();
+		return this.getAnimator();
 	}
 
 	public abstract StaticAnimation getHitAnimation(StunType stunType);
@@ -601,12 +513,12 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 
 	public int getMaxStrikes(Hand hand) {
 		return (int) (hand == Hand.MAIN_HAND ? this.original.getAttributeValue(EpicFightAttributes.MAX_STRIKES.get()) :
-			this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_MAX_STRIKES.get()) : this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue());
+				this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_MAX_STRIKES.get()) : this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue());
 	}
 
 	public float getArmorNegation(Hand hand) {
 		return (float) (hand == Hand.MAIN_HAND ? this.original.getAttributeValue(EpicFightAttributes.ARMOR_NEGATION.get()) :
-			this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get()) : this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue());
+				this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get()) : this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue());
 	}
 
 	public float getImpact(Hand hand) {
@@ -665,41 +577,14 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return !thisState.inaction() && !entity.is(this.grapplingTarget);
 	}
 
-	@Override
-	public boolean applyStun(StunType stunType, float stunTime) {
-		this.original.xxa = 0.0F;
-		this.original.yya = 0.0F;
-		this.original.zza = 0.0F;
-		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
-		this.cancelKnockback = true;
-
-		StaticAnimation hitAnimation = this.getHitAnimation(stunType);
-
-		if (hitAnimation != null) {
-			this.playAnimationSynchronized(hitAnimation, stunType.hasFixedStunTime() ? 0.0F : stunTime);
-			return true;
-		}
-
-		return false;
-	}
-
-	public void onAttackBlocked(DamageSource damageSource, LivingEntityPatch<?> opponent) {
-	}
-
-	public void notifyGrapplingWarning() {
-	}
-
-	public void onDodgeSuccess(DamageSource damageSource) {
-	}
-
-
 	public LivingEntity getGrapplingTarget() {
-			return this.grapplingTarget;
+		return this.grapplingTarget;
 	}
 
 	public void setGrapplingTarget(LivingEntity grapplingTarget) {
 		this.grapplingTarget = grapplingTarget;
 	}
+
 	public Vector3d getLastAttackPosition() {
 		return this.lastAttackPosition;
 	}
@@ -723,27 +608,44 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return false;
 	}
 
-	@Override
-	public boolean isStunned() {
-		return this.getEntityState().hurt();
+	public void setAirborneState(boolean airborne) {
+		this.original.getEntityData().set(AIRBORNE, airborne);
+	}
+
+	public boolean isAirborneState() {
+		return this.original.getEntityData().get(AIRBORNE);
+	}
+
+	public void setLastAttackSuccess(boolean setter) {
+		this.isLastAttackSuccess = setter;
+	}
+
+	public boolean isLastAttackSuccess() {
+		return this.isLastAttackSuccess;
+	}
+
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return !this.isLogicalClient();
 	}
 
 	public boolean isFirstPerson() {
 		return false;
 	}
 
-	public boolean shouldSkipRender() {
-		return false;
+	@Override
+	public boolean overrideRender() {
+		return true;
 	}
 
 	public boolean shouldBlockMoving() {
 		return false;
 	}
 
-
 	public float getYRotLimit() {
 		return 20.0F;
 	}
+
+
 	public double getXOld() {
 		return this.original.xOld;
 	}
@@ -756,13 +658,231 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return this.original.zOld;
 	}
 
+	public float getYRot() {
+		return this.original.yRot;
+	}
+
+	public void setYRot(float yRot) {
+		this.original.yRot = yRot;
+	}
+
+	@Override
+	public EntityState getEntityState() {
+		return this.state;
+	}
+
+	public Hand getAttackingHand() {
+		Pair<AnimationPlayer, AttackAnimation> layerInfo = this.getAnimator().findFor(AttackAnimation.class);
+
+		if (layerInfo != null) {
+			return layerInfo.getSecond().getPhaseByTime(layerInfo.getFirst().getElapsedTime()).hand;
+		}
+		return null;
+	}
 
 	public LivingMotion getCurrentLivingMotion() {
 		return this.currentLivingMotion;
 	}
 
+	public List<LivingEntity> getCurrenltyAttackedEntities() {
+		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
+	}
 
-	public EntityState getEntityState() {
-		return this.state;
+	public List<LivingEntity> getCurrenltyHurtEntities() {
+		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
+	}
+
+	public void removeHurtEntities() {
+		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
+		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
+	}
+
+	//TODO Implement
+//	@OnlyIn(Dist.CLIENT)
+//	public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
+//		TargetIndicatorCheckEvent event = new TargetIndicatorCheckEvent(playerpatch, this);
+//		playerpatch.getEventListener().triggerEvents(EventType.TARGET_INDICATOR_ALERT_CHECK_EVENT, event);
+//
+//		return event.isCanceled();
+//	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
+
+
+
+
+
+
+	@Override
+	protected void clientTick(LivingUpdateEvent event) {
+	}
+
+
+
+	@Override
+	protected void serverTick(LivingUpdateEvent event) {
+		if (this.stunTimeReduction > 0.0F) {
+			float stunArmor = this.getStunArmor();
+			this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
+			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
+		}
+	}
+
+
+
+
+	public void cancelUsingItem() {
+		this.original.stopUsingItem();
+		ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
+	}
+
+
+
+
+
+
+
+	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, Hand hand) {
+		float damage = 0;
+
+		if (hand == Hand.MAIN_HAND) {
+			damage = (float) this.original.getAttributeValue(Attributes.ATTACK_DAMAGE);
+		} else {
+			damage = this.isOffhandItemValid() ? (float) this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get()) : (float) this.original.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
+		}
+
+		damage += EnchantmentHelper.getDamageBonus(this.getValidItemInHand(hand), (targetEntity instanceof LivingEntity) ? ((LivingEntity)targetEntity).getMobType() : CreatureAttribute.UNDEFINED);
+
+		return damage;
+	}
+
+
+
+	public void onHurtSomeone(Entity target, Hand handIn, ExtendedDamageSource damagesource, float amount, boolean succeed) {
+		int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, this.getValidItemInHand(handIn));
+
+		if (target instanceof LivingEntity) {
+			this.getOriginal().doEnchantDamageEffects(this.getOriginal(), target);
+
+			if (j > 0 && !target.isOnFire()) {
+				target.setSecondsOnFire(j * 4);
+			}
+		}
+	}
+
+
+
+	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {}
+
+	public void setStunReductionOnHit() {
+		this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
+		this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
+	}
+
+	public float getStunTimeTimeReduction() {
+		return this.stunTimeReduction;
+	}
+
+	public void knockBackEntity(Vector3d sourceLocation, float power) {
+		double d1 = sourceLocation.x() - this.original.getX();
+        double d0;
+
+		for (d0 = sourceLocation.z() - this.original.getZ(); d1 * d1 + d0 * d0 < 1.0E-4D; d0 = (Math.random() - Math.random()) * 0.01D) {
+            d1 = (Math.random() - Math.random()) * 0.01D;
+        }
+
+		if (this.original.getRandom().nextDouble() >= this.original.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)) {
+        	Vector3d vec = this.original.getDeltaMovement();
+
+        	this.original.hasImpulse = true;
+            float f = (float) Math.sqrt(d1 * d1 + d0 * d0);
+
+            double x = vec.x;
+            double y = vec.y;
+            double z = vec.z;
+
+            x /= 2.0D;
+            z /= 2.0D;
+            x -= d1 / (double)f * (double)power;
+            z -= d0 / (double)f * (double)power;
+
+			if (!this.original.isOnGround()) {
+				y /= 2.0D;
+				y += (double) power;
+
+				if (y > 0.4000000059604645D) {
+					y = 0.4000000059604645D;
+				}
+			}
+
+            this.original.setDeltaMovement(x, y, z);
+            this.original.hurtMarked = true;
+        }
+	}
+
+	public float getStunArmor() {
+		ModifiableAttributeInstance stunArmor = this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get());
+		return (float) (stunArmor == null ? 0 : stunArmor.getValue());
+	}
+
+
+
+
+
+
+
+
+
+
+	public void playSound(SoundEvent sound, float pitchModifierMin, float pitchModifierMax) {
+		this.playSound(sound, 1.0F, pitchModifierMin, pitchModifierMax);
+	}
+
+	public void playSound(SoundEvent sound, float volume, float pitchModifierMin, float pitchModifierMax) {
+		float pitch = (this.original.getRandom().nextFloat() * 2.0F - 1.0F) * (pitchModifierMax - pitchModifierMin);
+
+		if (!this.isLogicalClient()) {
+			this.original.level.playSound(null, this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch);
+		} else {
+			this.original.level.playLocalSound(this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch, false);
+		}
+	}
+
+
+
+	@OnlyIn(Dist.CLIENT)
+	public OpenMatrix4f getHeadMatrix(float partialTicks) {
+        float f2;
+
+		if (this.state.inaction()) {
+			f2 = 0;
+		} else {
+			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks);
+			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTicks);
+			f2 = f1 - f;
+
+			if (this.original.getVehicle() != null) {
+				if (f2 > 45.0F) {
+					f2 = 45.0F;
+				} else if (f2 < -45.0F) {
+					f2 = -45.0F;
+				}
+			}
+		}
+
+
+		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, this.original.xRotO, this.original.xRot, f2, f2, partialTicks, 1, 1, 1);
 	}
 }

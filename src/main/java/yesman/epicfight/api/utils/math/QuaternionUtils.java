@@ -1,8 +1,8 @@
 package yesman.epicfight.api.utils.math;
 
 import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3f;
 import com.joml.Quaternionf;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class QuaternionUtils {
 

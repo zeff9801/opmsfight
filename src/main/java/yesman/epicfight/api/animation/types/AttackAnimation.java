@@ -212,27 +212,24 @@ public class AttackAnimation extends ActionAnimation {
 
 		if (!list.isEmpty()) {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
-			boolean flag1 = true;
 			int maxStrikes = this.getMaxStrikes(entitypatch, phase);
 
-			while (entitypatch.currentlyAttackedEntity.size() < maxStrikes && hitEntities.next()) {
-				Entity e = hitEntities.getEntity();
-				LivingEntity trueEntity = this.getTrueEntity(e);
+			while (entitypatch.getCurrenltyHurtEntities().size() < maxStrikes && hitEntities.next()) {
+				Entity hitten = hitEntities.getEntity();
+				LivingEntity trueEntity = this.getTrueEntity(hitten);
 
-				if (!entitypatch.currentlyAttackedEntity.contains(trueEntity) && !entitypatch.isTeammate(e)) {
-					if (e instanceof LivingEntity || e instanceof PartEntity) {
-						if (entity.canSee(e)) {
-							ExtendedDamageSource source = this.getExtendedDamageSource(entitypatch, e, phase);
-							AttackResult attackResult = entitypatch.tryHarm(e, (EpicFightDamageSource) source, this.getDamageTo(entitypatch, trueEntity, phase, source));
-							boolean count = attackResult.resultType.shouldCount();
+				if (trueEntity != null & trueEntity.isAlive() && !entitypatch.getCurrenltyAttackedEntities().contains(trueEntity) && !entitypatch.isTeammate(hitten)) {
+					if (hitten instanceof LivingEntity || hitten instanceof PartEntity) {
+						if (entity.canSee(hitten)) {
+							ExtendedDamageSource source = this.getExtendedDamageSource(entitypatch, hitten, phase);
+							AttackResult attackResult = entitypatch.attack(hitten, (EpicFightDamageSource) source, this.getDamageTo(entitypatch, trueEntity, phase, source));
 
 							if (attackResult.resultType.dealtDamage()) {
-								int temp = e.invulnerableTime;
+								int temp = hitten.invulnerableTime;
 								trueEntity.invulnerableTime = 0;
-								boolean attackSuccess = e.hurt((DamageSource) source, attackResult.damage);
+								boolean attackSuccess = hitten.hurt((DamageSource) source, attackResult.damage);
 								trueEntity.invulnerableTime = temp;
-								count = attackSuccess || trueEntity.isDamageSourceBlocked((DamageSource)source);
-								entitypatch.onHurtSomeone(e, phase.hand, source, attackResult.damage, attackSuccess);
+								entitypatch.onHurtSomeone(hitten, phase.hand, source, attackResult.damage, attackSuccess);
 
 								if (attackSuccess) {
 									if (entitypatch instanceof ServerPlayerPatch) {
@@ -245,13 +242,13 @@ public class AttackAnimation extends ActionAnimation {
 										flag1 = false;
 									}
 
-									e.level.playSound(null, e.getX(), e.getY(), e.getZ(), this.getHitSound(entitypatch, phase), e.getSoundSource(), 1.0F, 1.0F);
-									this.spawnHitParticle(((ServerWorld)e.level), entitypatch, e, phase);
+									hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
+									this.spawnHitParticle(((ServerWorld)hitten.level), entitypatch, hitten, phase);
 								}
 							}
 
-							if (count) {
-								entitypatch.currentlyAttackedEntity.add(trueEntity);
+							if (attackResult.resultType.shouldCount()) {
+								entitypatch.getCurrenltyAttackedEntities().add(trueEntity);
 							}
 						}
 					}
@@ -330,7 +327,15 @@ public class AttackAnimation extends ActionAnimation {
 		return phase.getProperty(AttackPhaseProperty.HIT_SOUND).orElse(entitypatch.getWeaponHitSound(phase.hand));
 	}
 
-	protected ExtendedDamageSource getExtendedDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
+	protected EpicFightDamageSource  getEpicFightDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
+		if (phase == null) {
+			phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
+		}
+
+		EpicFightDamageSource extendedSource;
+
+
+
 		StunType stunType = phase.getProperty(AttackPhaseProperty.STUN_TYPE).orElse(StunType.SHORT);
 		ExtendedDamageSource extendedSource = entitypatch.getDamageSource(stunType, this, phase.hand);
 
