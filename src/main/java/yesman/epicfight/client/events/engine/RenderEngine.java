@@ -63,6 +63,7 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PHumanoidRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.client.renderer.patched.item.RenderBow;
@@ -84,15 +85,20 @@ import yesman.epicfight.world.item.EpicFightItems;
 @OnlyIn(Dist.CLIENT)
 public class RenderEngine {
 	private static final Vec3f AIMING_CORRECTION = new Vec3f(-1.5F, 0.0F, 1.25F);
+
 	public AimHelperRenderer aimHelper;
 	private final BattleModeGui battleModeUI = new BattleModeGui(Minecraft.getInstance());
-
 	public final Minecraft minecraft;
 	private final Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
 	private final Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private final Map<Class<? extends Item>, RenderItemBase> itemRendererMapByClass;
 	private FirstPersonRenderer firstPersonRenderer;
+
+	private PHumanoidRenderer<?, ?, ?, ?, ?> basicHumanoidRenderer;
+
+
+
 	private final OverlayManager overlayManager;
 	private boolean aiming;
 	private int zoomOutTimer = 0;

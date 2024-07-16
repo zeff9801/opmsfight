@@ -20,9 +20,11 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimator extends Animator {
@@ -38,13 +40,17 @@ public class ClientAnimator extends Animator {
 	private LivingMotion currentCompositeMotion;
 
 	public ClientAnimator(LivingEntityPatch<?> entitypatch) {
+		this(entitypatch, Layer.BaseLayer::new);
+	}
+
+	public ClientAnimator(LivingEntityPatch<?> entitypatch, Supplier<Layer.BaseLayer> layerSupplier) {
 		this.entitypatch = entitypatch;
 		this.currentMotion = LivingMotions.IDLE;
 		this.currentCompositeMotion = LivingMotions.IDLE;
 		this.compositeLivingAnimations = Maps.newHashMap();
 		this.defaultLivingAnimations = Maps.newHashMap();
 		this.defaultCompositeLivingAnimations = Maps.newHashMap();
-		this.baseLayer = new Layer.BaseLayer(null);
+		this.baseLayer = layerSupplier.get();
 	}
 
 	/** Play an animation by animation instance **/
@@ -100,11 +106,6 @@ public class ClientAnimator extends Animator {
 		}
 	}
 
-
-	public LivingMotion currentMotion() {
-		return this.currentMotion;
-	}
-
 	public void setCurrentMotionsAsDefault() {
 		this.defaultLivingAnimations.putAll(this.livingAnimations);
 		this.defaultCompositeLivingAnimations.putAll(this.compositeLivingAnimations);
@@ -123,21 +124,7 @@ public class ClientAnimator extends Animator {
 	}
 
 	public StaticAnimation getCompositeLivingMotion(LivingMotion motion) {
-		return this.compositeLivingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION);
-	}
-
-	public void setPoseToModel(float partialTicks) {
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint();
-		this.applyPoseToJoint(rootJoint, new OpenMatrix4f(), this.getPose(partialTicks), partialTicks);
-	}
-
-	public void applyPoseToJoint(Joint joint, OpenMatrix4f parentTransform, Pose pose, float partialTicks) {
-		OpenMatrix4f result = pose.getOrDefaultTransform(joint.getName()).getAnimationBindedMatrix(joint, parentTransform);
-		joint.setPoseTransform(result);
-
-		for (Joint joints : joint.getSubJoints()) {
-			this.applyPoseToJoint(joints, result, pose, partialTicks);
-		}
+		return this.compositeLivingAnimations.get(motion);
 	}
 
 	@Override
@@ -209,12 +196,21 @@ public class ClientAnimator extends Animator {
 			this.currentMotion = LivingMotions.DEATH;
 		}
 	}
+
 	public StaticAnimation getJumpAnimation() {
 		return this.livingAnimations.get(LivingMotions.JUMP);
 	}
 
 	public Layer getCompositeLayer(Layer.Priority priority) {
 		return this.baseLayer.compositeLayers.get(priority);
+	}
+
+	public Collection<Layer> getAllLayers() {
+		List<Layer> layerList = Lists.newArrayList();
+		layerList.add(this.baseLayer);
+		layerList.addAll(this.baseLayer.compositeLayers.values());
+
+		return layerList;
 	}
 
 	@Override
@@ -243,8 +239,7 @@ public class ClientAnimator extends Animator {
 			}
 		}
 
-		//Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint(); //TODO change
+		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
 		this.applyBindModifier(baseLayerPose, composedPose, rootJoint, layerPoses, useCurrentMotion);
 
 		return composedPose;
@@ -269,8 +264,7 @@ public class ClientAnimator extends Animator {
 			}
 		}
 
-		//Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
-		Joint rootJoint = this.entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().getRootJoint(); //TODO change
+		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
 
 		if (!layerPoses.isEmpty()) {
 			this.applyBindModifier(baseLayerPose, composedPose, rootJoint, layerPoses, true);
@@ -308,11 +302,6 @@ public class ClientAnimator extends Animator {
 		}
 	}
 
-	public LivingMotion currentCompositeMotion() {
-		return this.currentCompositeMotion;
-	}
-
-
 	public boolean compareMotion(LivingMotion motion) {
 		return this.currentMotion.isSame(motion);
 	}
@@ -330,11 +319,13 @@ public class ClientAnimator extends Animator {
 		this.currentCompositeMotion = LivingMotions.NONE;
 		this.entitypatch.currentCompositeMotion = LivingMotions.NONE;
 	}
+
 	public void offAllLayers() {
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
 			layer.off(this.entitypatch);
 		}
 	}
+
 	public boolean isAiming() {
 		return this.currentCompositeMotion == LivingMotions.AIM;
 	}
@@ -357,6 +348,7 @@ public class ClientAnimator extends Animator {
 
 		return this.baseLayer.animationPlayer;
 	}
+
 	public Layer.Priority getPriorityFor(DynamicAnimation playingAnimation) {
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
 			if (layer.animationPlayer.getAnimation().getRealAnimation().equals(playingAnimation)) {
@@ -366,6 +358,7 @@ public class ClientAnimator extends Animator {
 
 		return this.baseLayer.priority;
 	}
+
 	public LivingMotion getLivingMotionFor(DynamicAnimation animation) {
 		Layer.LayerType layerType = animation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER);
 
@@ -376,6 +369,15 @@ public class ClientAnimator extends Animator {
 			return animation == this.baseLayer.compositeLayers.get(priority).animationPlayer.getAnimation() ? this.currentCompositeMotion : this.entitypatch.currentCompositeMotion;
 		}
 	}
+
+	public LivingMotion currentMotion() {
+		return this.currentMotion;
+	}
+
+	public LivingMotion currentCompositeMotion() {
+		return this.currentCompositeMotion;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {

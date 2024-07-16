@@ -22,10 +22,7 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.model.ClientModel;
-import yesman.epicfight.api.client.model.Mesh;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator;
+import yesman.epicfight.api.client.model.*;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -49,18 +46,19 @@ public class JsonModelLoader {
 	private ResourceLocation resourceLocation;
 
 	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
+		JsonReader jsonReader = null;
 		this.resourceManager = resourceManager;
 		this.resourceLocation = resourceLocation;
-
-		JsonReader jsonReader = null;
 
 		try {
 			if (resourceManager != null) {
 				// Load resource using Minecraft's resource manager
 				IResource resource = resourceManager.getResource(resourceLocation);
 				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			} else {
-				// Load resource from mod's JAR file
+				// In this case, reads the animation data from mod.jar (Especially in a server)
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
 
@@ -71,6 +69,8 @@ public class JsonModelLoader {
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
 				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
 				jsonReader = new JsonReader(reader);
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
 
 			jsonReader.setLenient(true);
@@ -87,7 +87,6 @@ public class JsonModelLoader {
 			}
 		}
 	}
-
 
 	@OnlyIn(Dist.CLIENT)
 	public JsonModelLoader(InputStream inputstream, ResourceLocation resourceLocation) throws IOException {
@@ -108,8 +107,213 @@ public class JsonModelLoader {
 		this.resourceLocation = rl;
 	}
 
-	public boolean isValidSource() {
-		return this.rootJson != null;
+	@OnlyIn(Dist.CLIENT)
+	public AnimatedMesh.RenderProperties getRenderProperties() {
+		if (!this.rootJson.has("render_properties")) {
+			return null;
+		}
+
+		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
+		AnimatedMesh.RenderProperties renderProperties = AnimatedMesh.RenderProperties.create();
+
+		if (properties != null) {
+			if (properties.has("transparent")) {
+				renderProperties.transparency(properties.get("transparent").getAsBoolean());
+			}
+
+			if (properties.has("texture_path")) {
+				renderProperties.customTexturePath(properties.get("texture_path").getAsString());
+			}
+
+			if (properties.has("parent_part_visualizer")) {
+				JsonObject partVisualizer = properties.get("parent_part_visualizer").getAsJsonObject();
+
+				partVisualizer.entrySet().forEach((entry) -> renderProperties.newPartVisualizer(entry.getKey(), entry.getValue().getAsBoolean()));
+			}
+
+			return renderProperties;
+		}
+
+		return renderProperties;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public ResourceLocation getParent() {
+		return this.rootJson.has("parent") ? new ResourceLocation(this.rootJson.get("parent").getAsString()) : null;
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public <T extends Mesh.RawMesh> T loadMesh(Meshes.MeshContructor<VertexIndicator, T> constructor) {
+		ResourceLocation parent = this.getParent();
+
+		if (parent != null) {
+			T mesh = Meshes.getOrCreateRawMesh(this.resourceManager, parent, constructor);
+			return constructor.invoke(null, mesh, this.getRenderProperties(), null);
+		} else {
+			JsonObject obj = this.rootJson.getAsJsonObject("vertices");
+			JsonObject positions = obj.getAsJsonObject("positions");
+			JsonObject normals = obj.getAsJsonObject("normals");
+			JsonObject uvs = obj.getAsJsonObject("uvs");
+			JsonObject parts = obj.getAsJsonObject("parts");
+			JsonObject indices = obj.getAsJsonObject("indices");
+
+			float[] positionArray = ParseUtil.toFloatArray(positions.get("array").getAsJsonArray());
+
+			for (int i = 0; i < positionArray.length / 3; i++) {
+				int k = i * 3;
+				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, posVector, posVector);
+				positionArray[k] = posVector.x;
+				positionArray[k+1] = posVector.y;
+				positionArray[k+2] = posVector.z;
+			}
+
+			float[] normalArray = ParseUtil.toFloatArray(normals.get("array").getAsJsonArray());
+
+			for (int i = 0; i < normalArray.length / 3; i++) {
+				int k = i * 3;
+				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, normVector, normVector);
+				normalArray[k] = normVector.x;
+				normalArray[k+1] = normVector.y;
+				normalArray[k+2] = normVector.z;
+			}
+
+			float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
+
+			Map<String, float[]> arrayMap = Maps.newHashMap();
+			Map<String, ModelPart<VertexIndicator>> meshMap = Maps.newHashMap();
+
+			arrayMap.put("positions", positionArray);
+			arrayMap.put("normals", normalArray);
+			arrayMap.put("uvs", uvArray);
+
+			if (parts != null) {
+				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
+					meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.create(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()))));
+				}
+			}
+
+			if (indices != null) {
+				meshMap.put("noGroups", new ModelPart<>(VertexIndicator.create(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()))));
+			}
+
+			return constructor.invoke(arrayMap, null, this.getRenderProperties(), meshMap);
+		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public <T extends AnimatedMesh> T loadAnimatedMesh(Meshes.MeshContructor<VertexIndicator.AnimatedVertexIndicator, T> constructor) {
+		ResourceLocation parent = this.getParent();
+
+		if (parent != null) {
+			T mesh = Meshes.getOrCreateAnimatedMesh(this.resourceManager, parent, constructor);
+			return constructor.invoke(null, mesh, this.getRenderProperties(), null);
+		} else {
+			JsonObject obj = this.rootJson.getAsJsonObject("vertices");
+			JsonObject positions = obj.getAsJsonObject("positions");
+			JsonObject normals = obj.getAsJsonObject("normals");
+			JsonObject uvs = obj.getAsJsonObject("uvs");
+			JsonObject vdincies = obj.getAsJsonObject("vindices");
+			JsonObject weights = obj.getAsJsonObject("weights");
+			JsonObject vcounts = obj.getAsJsonObject("vcounts");
+			JsonObject parts = obj.getAsJsonObject("parts");
+			JsonObject indices = obj.getAsJsonObject("indices");
+
+			float[] positionArray = ParseUtil.toFloatArray(positions.get("array").getAsJsonArray());
+
+			for (int i = 0; i < positionArray.length / 3; i++) {
+				int k = i * 3;
+				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, posVector, posVector);
+				positionArray[k] = posVector.x;
+				positionArray[k+1] = posVector.y;
+				positionArray[k+2] = posVector.z;
+			}
+
+			float[] normalArray = ParseUtil.toFloatArray(normals.get("array").getAsJsonArray());
+
+			for (int i = 0; i < normalArray.length / 3; i++) {
+				int k = i * 3;
+				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, normVector, normVector);
+				normalArray[k] = normVector.x;
+				normalArray[k+1] = normVector.y;
+				normalArray[k+2] = normVector.z;
+			}
+
+			float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
+			int[] animationIndexArray = ParseUtil.toIntArray(vdincies.get("array").getAsJsonArray());
+			float[] weightArray = ParseUtil.toFloatArray(weights.get("array").getAsJsonArray());
+			int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
+
+			Map<String, float[]> arrayMap = Maps.newHashMap();
+			Map<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
+
+			arrayMap.put("positions", positionArray);
+			arrayMap.put("normals", normalArray);
+			arrayMap.put("uvs", uvArray);
+			arrayMap.put("weights", weightArray);
+
+			if (parts != null) {
+				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
+					meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+				}
+			}
+
+			if (indices != null) {
+				meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+			}
+
+			return constructor.invoke(arrayMap, null, this.getRenderProperties(), meshMap);
+		}
+	}
+
+	public <T extends Armature> T loadArmature(Armatures.ArmatureContructor<T> constructor) {
+		JsonObject obj = this.rootJson.getAsJsonObject("armature");
+		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
+		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
+		Map<String, Joint> jointMap = Maps.newHashMap();
+		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
+		joint.initOriginTransform(new OpenMatrix4f());
+		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
+
+		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
+	}
+
+	public static Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
+		float[] floatArray = ParseUtil.toFloatArray(object.get("transform").getAsJsonArray());
+		OpenMatrix4f localMatrix = OpenMatrix4f.load(null, floatArray);
+		localMatrix.transpose();
+
+		if (start) {
+			localMatrix.mulFront(BLENDER_TO_MINECRAFT_COORD);
+		}
+
+		String name = object.get("name").getAsString();
+		int index = -1;
+
+		for (int i = 0; i < nameAsVertexGroups.size(); i++) {
+			if (name.equals(nameAsVertexGroups.get(i).getAsString())) {
+				index = i;
+				break;
+			}
+		}
+
+		if (index == -1) {
+			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " doesn't exist!");
+		}
+
+		Joint joint = new Joint(name, index, localMatrix);
+		jointMap.put(name, joint);
+
+		if (object.has("children")) {
+			for (JsonElement children : object.get("children").getAsJsonArray()) {
+				joint.addSubJoint(getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
+			}
+		}
+
+		return joint;
 	}
 
 	public AnimationClip loadClipForAnimation(StaticAnimation animation) {
@@ -232,7 +436,6 @@ public class JsonModelLoader {
 		return clip;
 	}
 
-
 	public AnimationClip loadAllJointsClipForAnimation(StaticAnimation animation) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean root = true;
@@ -280,131 +483,9 @@ public class JsonModelLoader {
 
 		return clip;
 	}
-	@OnlyIn(Dist.CLIENT)
-	public ClientModel.RenderProperties getRenderProperties() {
-		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
 
-		if (properties != null) {
-			return ClientModel.RenderProperties.builder()
-					.transparency(properties.has("transparent") && properties.get("transparent").getAsBoolean())
-				.build();
-		} else {
-			return ClientModel.RenderProperties.builder().build();
-		}
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public ResourceLocation getParent() {
-		return this.rootJson.has("parent") ? new ResourceLocation(this.rootJson.get("parent").getAsString()) : null;
-	}
-
-	@OnlyIn(Dist.CLIENT)
-	public Mesh getMesh() {
-		JsonObject obj = this.rootJson.getAsJsonObject("vertices");
-		JsonObject positions = obj.getAsJsonObject("positions");
-		JsonObject normals = obj.getAsJsonObject("normals");
-		JsonObject uvs = obj.getAsJsonObject("uvs");
-		JsonObject vdincies = obj.getAsJsonObject("vindices");
-		JsonObject weights = obj.getAsJsonObject("weights");
-		JsonObject vcounts = obj.getAsJsonObject("vcounts");
-		JsonObject parts = obj.getAsJsonObject("parts");
-		JsonObject indices = obj.getAsJsonObject("indices");
-
-		float[] positionArray = ParseUtil.toFloatArray(positions.get("array").getAsJsonArray());
-
-		for (int i = 0; i < positionArray.length / 3; i++) {
-			int k = i * 3;
-			Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
-			OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, posVector, posVector);
-			positionArray[k] = posVector.x;
-			positionArray[k+1] = posVector.y;
-			positionArray[k+2] = posVector.z;
-		}
-
-		float[] normalArray = ParseUtil.toFloatArray(normals.get("array").getAsJsonArray());
-
-		for (int i = 0; i < normalArray.length / 3; i++) {
-			int k = i * 3;
-			Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
-			OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, normVector, normVector);
-			normalArray[k] = normVector.x;
-			normalArray[k+1] = normVector.y;
-			normalArray[k+2] = normVector.z;
-		}
-
-		float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
-		int[] animationIndexArray = ParseUtil.toIntArray(vdincies.get("array").getAsJsonArray());
-		float[] weightArray = ParseUtil.toFloatArray(weights.get("array").getAsJsonArray());
-		int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
-
-		Map<String, float[]> arrayMap = Maps.newHashMap();
-		Map<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
-
-		arrayMap.put("positions", positionArray);
-		arrayMap.put("normals", normalArray);
-		arrayMap.put("uvs", uvArray);
-		arrayMap.put("weights", weightArray);
-
-		if (parts != null) {
-			for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
-				meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
-			}
-		}
-
-		int[] indicesArray = new int[]{};
-		
-		if (indices != null) {
-			indicesArray = ParseUtil.toIntArray(indices.get("array").getAsJsonArray());
-			meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(indicesArray, vcountArray, animationIndexArray)));
-		}
-		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, indicesArray, vcountArray);
-	}
-
-	public Armature getArmature() {
-		JsonObject obj = this.rootJson.getAsJsonObject("armature");
-		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
-		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
-		Map<String, Joint> jointMap = Maps.newHashMap();
-		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
-		joint.initOriginTransform(new OpenMatrix4f());
-		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
-
-		return new Armature(armatureName, jointMap.size(), joint, jointMap);
-	}
-
-	public static Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
-		float[] floatArray = ParseUtil.toFloatArray(object.get("transform").getAsJsonArray());
-		OpenMatrix4f localMatrix = OpenMatrix4f.load(null, floatArray);
-		localMatrix.transpose();
-
-		if (start) {
-			localMatrix.mulFront(BLENDER_TO_MINECRAFT_COORD);
-		}
-
-		String name = object.get("name").getAsString();
-		int index = -1;
-
-		for (int i = 0; i < nameAsVertexGroups.size(); i++) {
-			if (name.equals(nameAsVertexGroups.get(i).getAsString())) {
-				index = i;
-				break;
-			}
-		}
-
-		if (index == -1) {
-			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " doesn't exist!");
-		}
-
-		Joint joint = new Joint(name, index, localMatrix);
-		jointMap.put(name, joint);
-
-		if (object.has("children")) {
-			for (JsonElement children : object.get("children").getAsJsonArray()) {
-				joint.addSubJoint(getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
-			}
-		}
-
-		return joint;
+	public JsonObject getRootJson() {
+		return this.rootJson;
 	}
 
 	public AnimationClip loadAnimationClip(Armature armature) {
@@ -484,17 +565,5 @@ public class JsonModelLoader {
 
 		TransformSheet sheet = new TransformSheet(keyframeList);
 		return sheet;
-	}
-
-	public <T extends Armature> T loadArmature(Armatures.ArmatureContructor<T> constructor) {
-		JsonObject obj = this.rootJson.getAsJsonObject("armature");
-		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
-		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
-		Map<String, Joint> jointMap = Maps.newHashMap();
-		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
-		joint.initOriginTransform(new OpenMatrix4f());
-		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
-
-		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
 	}
 }

@@ -126,14 +126,6 @@ public class IngameConfigurationScreen extends Screen {
 		}));
 		
 		this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 64, 160, 20, new TranslationTextComponent("gui."+EpicFightMod.MODID+".export_custom_armor"),  (button) -> {
-			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory();
-			try {
-				CustomModelBakery.exportModels(resourcePackDirectory);
-				Util.getPlatform().openFile(resourcePackDirectory);
-			} catch (IOException e) {
-				EpicFightMod.LOGGER.info("Failed to export custom armor models");
-				e.printStackTrace();
-			}
 		}, (button, matrixStack, mouseX, mouseY) -> {
 	        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslationTextComponent("gui.epicfight.export_custom_armor.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 		}));

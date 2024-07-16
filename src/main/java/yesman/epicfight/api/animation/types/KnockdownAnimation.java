@@ -2,7 +2,7 @@ package yesman.epicfight.api.animation.types;
 
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
 public class KnockdownAnimation extends LongHitAnimation {
 	public KnockdownAnimation(float convertTime, String path, Armature armature) {

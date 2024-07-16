@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
 public interface ExtendedDamageSource {
 	public static EpicFightDamageSource causePlayerDamage(PlayerEntity player, StunType stunType, StaticAnimation animation, Hand hand) {

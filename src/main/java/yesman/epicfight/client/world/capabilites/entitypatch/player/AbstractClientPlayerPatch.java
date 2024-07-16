@@ -48,9 +48,6 @@ import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> extends PlayerPatch<T> {
-	protected float prevYaw;
-	protected float bodyYaw;
-	protected float prevBodyYaw;
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
 	
@@ -164,42 +161,57 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.CompositeLayer(this, this.currentCompositeMotion));
 	}
-	@Override
-	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
-		return false;
-	}
+
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
-		this.prevYaw = this.yaw;
-		this.prevBodyYaw = this.bodyYaw;
-		
-		if (this.getEntityState().inaction()) {
+		super.clientTick(event);
+
+		if (!this.getEntityState().updateLivingMotion()) {
 			this.original.yBodyRot = this.original.yRot;
 		}
-		
-		this.bodyYaw = this.original.yBodyRot;
+
 		boolean isMainHandChanged = this.prevHeldItem != this.original.inventory.getSelected().getItem();
 		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.inventory.offhand.get(0).getItem();
 
+
 		if (isMainHandChanged || isOffHandChanged) {
 			this.updateHeldItem(this.getHoldingItemCapability(Hand.MAIN_HAND), this.getHoldingItemCapability(Hand.OFF_HAND));
-			
+
 			if (isMainHandChanged) {
 				this.prevHeldItem = this.original.inventory.getSelected().getItem();
 			}
-			
+
 			if (isOffHandChanged) {
 				this.prevHeldItemOffHand = this.original.inventory.offhand.get(0).getItem();
 			}
 		}
-		
-		super.clientTick(event);
-		
+
 		/** {@link LivingDeathEvent} never fired for client players **/
 		if (this.original.deathTime == 1) {
 			this.getClientAnimator().playDeathAnimation();
 		}
 	}
+
+	protected boolean isMoving() {
+		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
+	}
+
+	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
+		this.cancelAnyAction();
+	}
+
+	@Override
+	public void reserveAnimation(StaticAnimation animation) {
+		this.animator.reserveAnimation(animation);
+	}
+
+	
+
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return false;
+	}
+
 	@Override
 	public boolean overrideRender() {
 		boolean originalShouldRender = this.isBattleMode() || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
@@ -209,17 +221,10 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 
 		return renderepicfightplayerevent.getShouldRender();
 	}
-	protected boolean isMoving() {
-		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
-	}
-	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
-		this.cancelAnyAction();
-	}
+
+
 	
-	@Override
-	public void reserveAnimation(StaticAnimation animation) {
-		this.animator.reserveAnimation(animation);
-	}
+
 	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {

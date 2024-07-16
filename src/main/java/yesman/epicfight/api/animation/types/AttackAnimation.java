@@ -9,11 +9,9 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -26,22 +24,20 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProp
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.*;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.api.utils.math.*;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.EpicFightOptions;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.eventlistener.AttackEndEvent;
-import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 import javax.annotation.Nullable;
@@ -221,7 +217,7 @@ public class AttackAnimation extends ActionAnimation {
 				if (trueEntity != null && trueEntity.isAlive() && !entitypatch.getCurrenltyAttackedEntities().contains(trueEntity) && !entitypatch.isTeammate(hitten)) {
 					if (hitten instanceof LivingEntity || hitten instanceof PartEntity) {
 						if (entity.canSee(hitten)) {
-							ExtendedDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
+							EpicFightDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
 							int prevInvulTime = hitten.invulnerableTime;
 							hitten.invulnerableTime = 0;
 
@@ -318,6 +314,10 @@ public class AttackAnimation extends ActionAnimation {
 		return phase.getProperty(AttackPhaseProperty.HIT_SOUND).orElse(entitypatch.getWeaponHitSound(phase.hand));
 	}
 
+	public EpicFightDamageSource getEpicFightDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
+		return this.getEpicFightDamageSource(entitypatch.getDamageSource(this, phase.hand), entitypatch, target, phase);
+	}
+
 	public EpicFightDamageSource getEpicFightDamageSource(DamageSource originalSource, LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
 		if (phase == null) {
 			phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
@@ -331,22 +331,34 @@ public class AttackAnimation extends ActionAnimation {
 			extendedSource = EpicFightDamageSources.copy(originalSource).setAnimation(this);
 		}
 
+		phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).ifPresent((opt) -> {
+			extendedSource.setDamageModifier(opt);
+		});
 
-
-		StunType stunType = phase.getProperty(AttackPhaseProperty.STUN_TYPE).orElse(StunType.SHORT);
-		ExtendedDamageSource extendedSource = entitypatch.getDamageSource(stunType, this, phase.hand);
-
-		phase.getProperty(AttackPhaseProperty.ARMOR_NEGATION).ifPresent((opt) -> {
+		phase.getProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER).ifPresent((opt) -> {
 			extendedSource.setArmorNegation(opt.getTotalValue(extendedSource.getArmorNegation()));
 		});
+
 		phase.getProperty(AttackPhaseProperty.IMPACT_MODIFIER).ifPresent((opt) -> {
 			extendedSource.setImpact(opt.getTotalValue(extendedSource.getImpact()));
 		});
 
-		phase.getProperty(AttackPhaseProperty.FINISHER).ifPresent(extendedSource::setFinisher);
+		phase.getProperty(AttackPhaseProperty.STUN_TYPE).ifPresent((opt) -> {
+			extendedSource.setStunType(opt);
+		});
+
+//		phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).ifPresent((opt) -> {
+//			opt.forEach(extendedSource::addExtraDamage);
+//		});
 
 		phase.getProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER).ifPresent((opt) -> {
 			extendedSource.setInitialPosition(opt.apply(entitypatch));
+		});
+
+		phase.getProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER).ifPresentOrElse((opt) -> {
+			extendedSource.setInitialPosition(opt.apply(entitypatch));
+		}, () -> {
+			extendedSource.setInitialPosition(entitypatch.getOriginal().position());
 		});
 
 		return extendedSource;
@@ -428,18 +440,6 @@ public class AttackAnimation extends ActionAnimation {
 		public static JointColliderPair of(Joint joint, Collider collider) {
 			return new JointColliderPair(joint, collider);
 		}
-	}
-
-
-	protected float getDamageTo(LivingEntityPatch<?> entitypatch, LivingEntity target, Phase phase, ExtendedDamageSource source) {
-		float totalDamage = phase.getProperty(AttackPhaseProperty.DAMAGE).map((valueCorrector) -> valueCorrector.getTotalValue(entitypatch.getDamageTo(target, source, phase.hand))).orElse(entitypatch.getDamageTo(target, source, phase.hand));
-		ExtraDamageType extraCalculator = phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).orElse(null);
-
-		if (extraCalculator != null) {
-			totalDamage += extraCalculator.get(entitypatch.getOriginal(), target);
-		}
-
-		return totalDamage;
 	}
 
 

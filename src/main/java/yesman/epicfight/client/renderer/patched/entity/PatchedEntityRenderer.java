@@ -17,13 +17,17 @@ import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.EntityUtils;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>> {
+public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>, AM extends AnimatedMesh> {
 	protected static Method shouldShowName;
 	protected static Method renderNameTag;
 	private ResourceLocation overridingTexture;
@@ -32,12 +36,8 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		shouldShowName = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "func_177070_b", Entity.class);
 		renderNameTag = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "func_225629_a_", Entity.class, ITextComponent.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
 	}
-	
-	public PatchedEntityRenderer<E, T, R> setOverridingTexture(String texture) {
-		this.overridingTexture = new ResourceLocation(texture);
-		return this;
-	}
-	
+
+
 	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
 		try {
 			RenderNameplateEvent renderNameplateEvent = new RenderNameplateEvent(entityIn, entityIn.getDisplayName(), renderer, poseStack, buffer, packedLight, partialTicks);
@@ -50,36 +50,38 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 			e.printStackTrace();
 		}
 	}
-	
-	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
-		armature.initializeTransform();
-        this.setJointTransforms(entitypatch, armature, partialTicks);
-		entitypatch.getClientAnimator().setPoseToModel(partialTicks);
-		OpenMatrix4f[] poseMatrices = armature.getJointTransforms();
-		
-		return poseMatrices;
-	}
-	
-	protected void setJointTransform(int jointId, Armature modelArmature, OpenMatrix4f mat) {
-		modelArmature.searchJointById(jointId).getPoseTransform().mulFront(mat);
-	}
-	
+
 	public void mulPoseStack(MatrixStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
-        OpenMatrix4f transpose = modelMatrix.transpose(null);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-        MathUtils.translateStack(poseStack, modelMatrix);
-        MathUtils.rotateStack(poseStack, transpose);
-        MathUtils.scaleStack(poseStack, transpose);
+		OpenMatrix4f transpose = modelMatrix.transpose(null);
+		poseStack.mulPose(QuaternionUtils.toVanillaQuaternion(QuaternionUtils.YP.rotationDegrees(180.0F)));
+		MathUtils.translateStack(poseStack, modelMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+		MathUtils.scaleStack(poseStack, transpose);
+
+		if (EntityUtils.isEntityUpsideDown(entityIn)) {
+			poseStack.translate(0.0D, entityIn.getBbHeight() + 0.1F, 0.0D);
+			poseStack.mulPose(QuaternionUtils.toVanillaQuaternion(QuaternionUtils.ZP.rotationDegrees(180.0F)));
+		}
 	}
-	
-	protected void setJointTransforms(T entitypatch, Armature armature, float partialTicks) {}
-	
+
+	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
+		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
+		this.setJointTransforms(entitypatch, armature, pose, partialTicks);
+		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose);
+
+		return poseMatrices;
+	}
+
+	public abstract AM getMesh(T entitypatch);
+
+	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {}
+
 	protected ResourceLocation getEntityTexture(T entitypatch, R renderer) {
 		if (this.overridingTexture != null) {
 			return this.overridingTexture;
 		}
-		
+
 		return renderer.getTextureLocation(entitypatch.getOriginal());
 	}
 }

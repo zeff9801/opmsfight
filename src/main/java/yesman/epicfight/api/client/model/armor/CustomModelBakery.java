@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.commons.lang3.ArrayUtils;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.util.math.vector.Vector3f;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -29,9 +31,7 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModel;
-import yesman.epicfight.api.client.model.ClientModels;
-import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.client.model.*;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
@@ -54,32 +54,10 @@ public class CustomModelBakery {
 	static final ModelBaker RIGHT_LEG_CHILD = new SimpleSeparateBaker(1, 2, 6.0F);
 	static final ModelBaker CHEST = new Chest();
 	static final ModelBaker CHEST_CHILD = new SimpleSeparateBaker(8, 7, 18.0F);
-	
-	public static void exportModels(File resourcePackDirectory) throws IOException {
-		File zipFile = new File(resourcePackDirectory, "epicfight_custom_armors.zip");
-		
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
-		for (Map.Entry<ResourceLocation, ClientModel> entry : BAKED_MODELS.entrySet()) {
-			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/%s", entry.getValue().getLocation().getNamespace(), entry.getValue().getLocation().getPath()));
-			Gson gson = new GsonBuilder().create();
-			out.putNextEntry(zipEntry);
-			out.write(gson.toJson(entry.getValue().getMesh().toJsonObject()).getBytes());
-			out.closeEntry();
-            EpicFightMod.LOGGER.info("Exported custom armor model : {}", entry.getKey());
-		}
-		
-		ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		JsonObject root = new JsonObject();
-		JsonObject pack = new JsonObject();
-		pack.addProperty("description", "epicfight_custom_armor_models");
-		pack.addProperty("pack_format", Minecraft.getInstance().getGame().getVersion().getPackVersion());
-		root.add("pack", pack);
-		out.putNextEntry(zipEntry);
-		out.write(gson.toJson(root).getBytes());
-		out.closeEntry();
-		out.close();
-	}
+
+	//Placebo identifier given to each part of the model so that data can be mapped to it.
+	//Separate constructor can be made, like a list of list, but kind of gay.
+	static private Integer partIdentifier = 0;
 	
 	static void resetRotation(ModelRenderer modelRenderer) {
 		modelRenderer.xRot = 0.0F;
@@ -87,7 +65,7 @@ public class CustomModelBakery {
 		modelRenderer.zRot = 0.0F;
 	}
 	
-	public static ClientModel bakeBipedCustomArmorModel(BipedModel<?> model, ArmorItem armorItem, EquipmentSlotType slot, boolean debuggingMode) {
+	public static AnimatedMesh bakeBipedCustomArmorModel(BipedModel<?> model, ArmorItem armorItem, EquipmentSlotType slot, boolean debuggingMode) {
 		List<ModelPartition> boxes = Lists.<ModelPartition>newArrayList();
 		
 		resetRotation(model.head);
@@ -120,19 +98,20 @@ public class CustomModelBakery {
 		default:
 			return null;
 		}
-		
+
 		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
-		ClientModel customModel = new ClientModel(rl, bakeMeshFromCubes(boxes, debuggingMode));
-		ClientModels.LOGICAL_CLIENT.register(rl, customModel);
-		BAKED_MODELS.put(armorItem.getRegistryName(), customModel);
-		return customModel;
+		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
+		Meshes.addMesh(rl, armorModelMesh);
+
+		return armorModelMesh;
 	}
 	
-	private static Mesh bakeMeshFromCubes(List<ModelPartition> partitions, boolean debuggingMode) {
-		List<CustomArmorVertex> vertices = Lists.newArrayList();
-		List<Integer> indices = Lists.newArrayList();
+	private static AnimatedMesh bakeMeshFromCubes(List<ModelPartition> partitions, boolean debuggingMode) {
+		List<SingleVertex> vertices = Lists.newArrayList();
+		Map<String, IntList> indices = Maps.newHashMap();
 		MatrixStack poseStack = new MatrixStack();
 		indexCount = 0;
+		//TODO IF model has some weird rotation bug, use QuaternionUtils
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
 		poseStack.translate(0, -24, 0);
@@ -141,10 +120,10 @@ public class CustomModelBakery {
 			bake(poseStack, modelpartition, modelpartition.part, modelpartition.partBaker, vertices, indices, debuggingMode);
 		}
 		
-		return CustomArmorVertex.loadVertexInformation(vertices, ArrayUtils.toPrimitive(indices.toArray(new Integer[0])));
+		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(MatrixStack poseStack, ModelPartition modelpartition, ModelRenderer part, ModelBaker partBaker, List<CustomArmorVertex> vertices, List<Integer> indices, boolean debuggingMode) {
+	private static void bake(MatrixStack poseStack, ModelPartition modelpartition, ModelRenderer part, ModelBaker partBaker, List<SingleVertex> vertices, Map<String, IntList> indices, boolean debuggingMode) {
 		poseStack.pushPose();
 		poseStack.translate(part.x, part.y, part.z);
 		
@@ -159,10 +138,12 @@ public class CustomModelBakery {
 		if (part.xRot != 0.0F) {
 			poseStack.mulPose(Vector3f.XP.rotation(part.xRot));
 		}
-		
+
 		for (ModelRenderer.ModelBox cube : part.cubes) {
-			partBaker.bakeCube(poseStack, cube, vertices, indices);
+			partBaker.bakeCube(partIdentifier, poseStack, cube, vertices, indices);
 		}
+		//TODO Debug and see if identifiers are set right for each part
+		partIdentifier += 1;
 		
 		for (ModelRenderer childParts : part.children) {
 			bake(poseStack, modelpartition, childParts, modelpartition.childBaker, vertices, indices, debuggingMode);
@@ -186,12 +167,14 @@ public class CustomModelBakery {
 	
 	@OnlyIn(Dist.CLIENT)
 	abstract static class ModelBaker {
-		public abstract void bakeCube(MatrixStack poseStack, ModelRenderer.ModelBox cube, List<CustomArmorVertex> vertices, List<Integer> indices);
+		public abstract void bakeCube(Integer partIdentifier, MatrixStack poseStack, ModelRenderer.ModelBox cube, List<SingleVertex> vertices, Map<String, IntList> indices);
 	}
-	
-	static void putIndexCount(List<Integer> indices, int value) {
+
+	static void putIndexCount(Integer partIdentifier, Map<String, IntList> indices, int value) {
+		IntList list = indices.computeIfAbsent(String.valueOf(partIdentifier), (key) -> new IntArrayList());
+
 		for (int i = 0; i < 3; i++) {
-			indices.add(value);
+			list.add(value);
 		}
 	}
 	
@@ -203,7 +186,7 @@ public class CustomModelBakery {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(MatrixStack poseStack, ModelRenderer.ModelBox cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+		public void bakeCube(Integer partIdentifier, MatrixStack poseStack, ModelRenderer.ModelBox cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			for (ModelRenderer.TexturedQuad quad : cube.polygons) {
 				Vector3f norm = quad.normal.copy();
 				norm.transform(poseStack.last().normal());
@@ -211,7 +194,7 @@ public class CustomModelBakery {
 				for (ModelRenderer.PositionTextureVertex vertex : quad.vertices) {
 					Vector4f pos = new Vector4f(vertex.pos);
 					pos.transform(poseStack.last().pose());
-					vertices.add(new CustomArmorVertex()
+					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -221,12 +204,12 @@ public class CustomModelBakery {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(partIdentifier, indices, indexCount);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -245,14 +228,14 @@ public class CustomModelBakery {
 		}
 		
 		@Override
-		public void bakeCube(MatrixStack poseStack, ModelRenderer.ModelBox cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+		public void bakeCube(Integer partIdentifier, MatrixStack poseStack, ModelRenderer.ModelBox cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
 			cubeCenter.transform(poseStack.last().pose());
 			
 			if (cubeCenter.y() > this.yClipCoord) {
-				this.upperBaker.bakeCube(poseStack, cube, vertices, indices);
+				this.upperBaker.bakeCube(partIdentifier, poseStack, cube, vertices, indices);
 			} else {
-				this.lowerBaker.bakeCube(poseStack, cube, vertices, indices);
+				this.lowerBaker.bakeCube(partIdentifier, poseStack, cube, vertices, indices);
 			}
 		}
 	}
@@ -263,7 +246,7 @@ public class CustomModelBakery {
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
 		
 		@Override
-		public void bakeCube(MatrixStack poseStack, ModelRenderer.ModelBox cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+		public void bakeCube(Integer partIdentifier, MatrixStack poseStack, ModelRenderer.ModelBox cube, List<SingleVertex	> vertices, Map<String, IntList> indices) {
 			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			
@@ -325,6 +308,7 @@ public class CustomModelBakery {
 					for (VertexWeight vertexWeight : vertexWeights) {
 						float distance = pos2.pos.y() - pos1.pos.y();
 						float textureV = pos1.v + (pos2.v - pos1.v) * ((vertexWeight.yClipCoord - pos1.pos.y()) / distance);
+						//TODO Might need to port VanillaArmor additional code if armor are not rendered properly, not sure though.
 						ModelRenderer.PositionTextureVertex pos4 = new ModelRenderer.PositionTextureVertex(pos0.pos.x(), vertexWeight.yClipCoord, pos0.pos.z(), pos0.u, textureV);
 						ModelRenderer.PositionTextureVertex pos5 = new ModelRenderer.PositionTextureVertex(pos1.pos.x(), vertexWeight.yClipCoord, pos1.pos.z(), pos1.u, textureV);
 						animatedVertices.add(new AnimatedVertex(pos4, 8, 7, 0, vertexWeight.chestWeight, vertexWeight.torsoWeight, 0));
@@ -367,7 +351,7 @@ public class CustomModelBakery {
 						weight1 = weight2;
 					}
 					
-					vertices.add(new CustomArmorVertex()
+					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -377,12 +361,12 @@ public class CustomModelBakery {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(partIdentifier, indices, indexCount);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -445,7 +429,7 @@ public class CustomModelBakery {
 		}
 		
 		@Override
-		public void bakeCube(MatrixStack poseStack, ModelRenderer.ModelBox cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+		public void bakeCube(Integer partIdentifier, MatrixStack poseStack, ModelRenderer.ModelBox cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelRenderer.TexturedQuad quad : cube.polygons) {
@@ -525,7 +509,7 @@ public class CustomModelBakery {
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos);
-					vertices.add(new CustomArmorVertex()
+					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -535,12 +519,12 @@ public class CustomModelBakery {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(partIdentifier, indices, indexCount);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 3);
+				putIndexCount(partIdentifier, indices, indexCount + 1);
+				putIndexCount(partIdentifier, indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}

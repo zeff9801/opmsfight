@@ -322,7 +322,7 @@ public class Animations {
 		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
 		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
 		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
-		BIPED_SIT = new StaticAnima ion(true, "biped/living/sit", biped);
+		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
 		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig_mainhand", biped);
 		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
 		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == Hand.OFF_HAND ? 1 : 0, "biped/living/dig", BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);

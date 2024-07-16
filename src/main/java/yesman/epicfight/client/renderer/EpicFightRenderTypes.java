@@ -1,8 +1,10 @@
 package yesman.epicfight.client.renderer;
 
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 
+import com.google.common.collect.Maps;
 import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -21,10 +23,13 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
+
+	private static final Map<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Maps.newHashMap();
+
 	private EpicFightRenderTypes(String p_173178_, VertexFormat p_173179_, int drawingMode, int p_173181_, boolean p_173182_, boolean p_173183_, Runnable p_173184_, Runnable p_173185_) {
 		super(p_173178_, p_173179_, drawingMode, p_173181_, p_173182_, p_173183_, p_173184_, p_173185_);
 	}
-	
+
 	private static final Function<ResourceLocation, RenderType> ANIMATED_MODEL = (textureLocation) -> {
 		RenderType.State state = RenderType.State.builder()
 			.setTextureState(new RenderState.TextureState(textureLocation, false, false))

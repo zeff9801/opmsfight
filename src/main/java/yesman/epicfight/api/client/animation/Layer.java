@@ -203,14 +203,17 @@ public class Layer {
 		protected Map<Layer.Priority, Layer> compositeLayers = Maps.newLinkedHashMap();
 		protected Layer.Priority baseLayerPriority;
 
-		public BaseLayer(Layer.Priority priority) {
-			super(priority);
+		public BaseLayer() {
+			this(AnimationPlayer::new);
+		}
+
+		public BaseLayer(Supplier<AnimationPlayer> animationPlayerProvider) {
+			super(null, animationPlayerProvider);
 
 			this.compositeLayers.computeIfAbsent(Priority.LOWEST, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.MIDDLE, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.HIGHEST, Layer::new);
 			this.baseLayerPriority = Priority.LOWEST;
-
 		}
 
 		@Override
