@@ -15,14 +15,12 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.Collections;
 import java.util.List;
 
 public abstract class MultiCollider<T extends Collider> extends Collider {
-	protected T bigCollider;
 	protected final List<T> colliders = Lists.newArrayList();
 	protected final int numberOfColliders;
 
@@ -62,8 +60,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 
 		for (Collider collider : colliders) {
 			OpenMatrix4f transformMatrix;
-			//Armature armature = entitypatch.getArmature();
-			Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
+			Armature armature = entitypatch.getArmature();
 			int pathIndex = armature.searchPathIndex(joint.getName());
 
 			if (pathIndex == -1) {
@@ -128,17 +125,23 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	}
 
 	@Override
-	protected AxisAlignedBB getHitboxAABB() {
-		return null;
+	public List<Entity> getCollideEntities(Entity entity) {
+		List<Entity> list = Lists.newArrayList();
+
+		for (T collider : this.colliders) {
+			list.addAll(collider.getCollideEntities(entity));
+		}
+
+		return list;
 	}
 
 	@Override
-	protected boolean isCollide(Entity opponent) {
+	public boolean isCollide(Entity opponent) {
 		return false;
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + " collider count: " + this.numberOfColliders + " real collider" + this.bigCollider.toString();
+		return super.toString() + " collider count: " + this.numberOfColliders + " " + this.colliders.get(0);
 	}
 }

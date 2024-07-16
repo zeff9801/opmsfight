@@ -4,7 +4,11 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
@@ -16,7 +20,6 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
@@ -43,8 +46,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		int colliderCount = Math.max(Math.round((this.numberOfColliders + animation.getProperty(AttackAnimationProperty.EXTRA_COLLIDERS).orElse(0)) * attackSpeed), this.numberOfColliders);
 		float partialScale = 1.0F / (colliderCount - 1);
 		float interpolation = 0.0F;
-		//Armature armature = entitypatch.getArmature();
-		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
+		Armature armature = entitypatch.getArmature();
 		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
@@ -85,6 +87,34 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 			interpolation += partialScale;
 		}
 	}
+
+	@Override
+	public CompoundNBT serialize(CompoundNBT resultTag) {
+		if (resultTag == null) {
+			resultTag = new CompoundNBT();
+		}
+
+		resultTag.putInt("number", this.numberOfColliders);
+
+		ListNBT center = new ListNBT();
+
+		center.add(DoubleNBT.valueOf(this.modelCenter.x));
+		center.add(DoubleNBT.valueOf(this.modelCenter.y));
+		center.add(DoubleNBT.valueOf(this.modelCenter.z));
+
+		resultTag.put("center", center);
+
+		ListNBT size = new ListNBT();
+
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].x));
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].y));
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].z));
+
+		resultTag.put("size", size);
+
+		return resultTag;
+	}
+
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public RenderType getRenderType() {

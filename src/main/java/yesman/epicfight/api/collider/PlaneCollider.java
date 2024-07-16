@@ -2,6 +2,7 @@ package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
@@ -16,12 +17,21 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+@Deprecated
 public class PlaneCollider extends Collider {
-	private Vector3d[] modelPos;
-	private Vector3d[] worldPos;
+	static AxisAlignedBB getInitialAABB(double center_x, double center_y, double center_z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
+		double xLength = Math.max(Math.abs(aX), Math.abs(bX)) + Math.abs(center_x);
+		double yLength = Math.max(Math.abs(aY), Math.abs(bY)) + Math.abs(center_y);
+		double zLength = Math.max(Math.abs(aZ), Math.abs(bZ)) + Math.abs(center_z);
+		double maxLength = Math.max(xLength, Math.max(yLength, zLength));
+		return new AxisAlignedBB(maxLength, maxLength, maxLength, -maxLength, -maxLength, -maxLength);
+	}
 
-	public PlaneCollider(Vector3d center, AxisAlignedBB entityCallAABB) {
-		super(center, entityCallAABB);
+	private final Vector3d[] modelPos;
+	private final Vector3d[] worldPos;
+
+	public PlaneCollider(double x, double y, double z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
+		this(getInitialAABB(x, y, z, aX, aY, aZ, bX, bY, bZ), x, y, z, aX, aY, aZ, bX, bY, bZ);
 	}
 
 	public PlaneCollider(AxisAlignedBB entityCallAABB, double centerX, double centerY, double centerZ, double pos1X, double pos1Y, double pos1Z, double pos2X, double pos2Y, double pos2Z) {
@@ -35,15 +45,6 @@ public class PlaneCollider extends Collider {
 		this.worldPos[1] = new Vector3d(0.0D, 0.0D, 0.0D);
 	}
 
-
-
-	@Override
-	public PlaneCollider deepCopy() {
-		Vector3d aVec = this.modelPos[0];
-		Vector3d bVec = this.modelPos[1];
-
-		return new PlaneCollider(this.outerAABB, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
-	}
 	@Override
 	public boolean isCollide(Entity entity) {
 		AxisAlignedBB opponent = entity.getBoundingBox();
@@ -59,11 +60,7 @@ public class PlaneCollider extends Collider {
 
 		double dot2 = planeNorm.dot(neg) - planeD;
 
-		if (dot2 > 0.0D) {
-			return false;
-		}
-
-		return true;
+		return !(dot2 > 0.0D);
 	}
 
 	@Override
@@ -76,12 +73,21 @@ public class PlaneCollider extends Collider {
 	}
 
 	@Override
+	public PlaneCollider deepCopy() {
+		Vector3d aVec = this.modelPos[0];
+		Vector3d bVec = this.modelPos[1];
+
+		return new PlaneCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
+	}
+
+	@Override
 	public void drawInternal(MatrixStack poseStack, IVertexBuilder vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
 	}
 
 	@Override
 	public void draw(MatrixStack matrixStackIn, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 	}
+
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public RenderType getRenderType() {

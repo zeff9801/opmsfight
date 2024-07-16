@@ -5,10 +5,12 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.entity.PartEntity;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -16,7 +18,6 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import javax.annotation.Nullable;
@@ -30,7 +31,7 @@ public abstract class Collider {
 	public Collider(Vector3d center, @Nullable AxisAlignedBB outerAABB) {
 		this.modelCenter = center;
 		this.outerAABB = outerAABB;
-		this.worldCenter = new Vector3d(0, 0, 0);
+		this.worldCenter = new Vector3d(0.0D, 0.0D, 0.0D);
 	}
 
 	protected void transform(OpenMatrix4f mat) {
@@ -39,8 +40,7 @@ public abstract class Collider {
 
 	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, Joint joint, float attackSpeed) {
 		OpenMatrix4f transformMatrix;
-		//Armature armature = entitypatch.getArmature();
-		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
+		Armature armature = entitypatch.getArmature();
 		int pathIndex = armature.searchPathIndex(joint.getName());
 
 		if (pathIndex == -1) {
@@ -58,14 +58,23 @@ public abstract class Collider {
 
 		return this.getCollideEntities(entitypatch.getOriginal());
 	}
+
 	public List<Entity> getCollideEntities(Entity entity) {
-		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB());
-		list.removeIf((e) -> !this.isCollide(e));
 
-		return list;
+        return entity.level.getEntities(entity, this.getHitboxAABB(), (e) -> {
+			if (e instanceof PartEntity<?> partEntity) {
+				if (partEntity.getParent().is(entity)) {
+					return false;
+				}
+			}
+
+			if (e.isSpectator()) {
+				return false;
+			}
+
+			return this.isCollide(e);
+		});
 	}
-
-	public abstract Collider deepCopy();
 
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
@@ -74,8 +83,7 @@ public abstract class Collider {
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
 	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
-		//Armature armature = entitypatch.getArmature();
-		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
+		Armature armature = entitypatch.getArmature();
 		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
@@ -98,13 +106,19 @@ public abstract class Collider {
 		this.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, prevPose, currentPose, partialTicks, attacking ? 0xFFFF0000 : -1);
 	}
 
+	public abstract Collider deepCopy();
+
+	public abstract boolean isCollide(Entity opponent);
+
 	@OnlyIn(Dist.CLIENT)
 	public abstract RenderType getRenderType();
 
-	protected abstract boolean isCollide(Entity opponent);
-
 	protected AxisAlignedBB getHitboxAABB() {
 		return this.outerAABB.move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
+	}
+
+	public CompoundNBT serialize(CompoundNBT resultTag) {
+		return resultTag;
 	}
 
 	@Override

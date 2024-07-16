@@ -4,6 +4,9 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.DoubleNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
@@ -36,16 +39,16 @@ public class OBBCollider extends Collider {
 		this(getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ), vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
 	}
 
-	public OBBCollider(AxisAlignedBB outerAABB, double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
-		super(new Vector3d(center_x, center_y, center_z), outerAABB);
+	protected OBBCollider(AxisAlignedBB outerAABB, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+		super(new Vector3d(centerX, centerY, centerZ), outerAABB);
 		this.modelVertex = new Vector3d[4];
 		this.modelNormal = new Vector3d[3];
 		this.rotatedVertex = new Vector3d[4];
 		this.rotatedNormal = new Vector3d[3];
-		this.modelVertex[0] = new Vector3d(posX, posY, -posZ);
-		this.modelVertex[1] = new Vector3d(posX, posY, posZ);
-		this.modelVertex[2] = new Vector3d(-posX, posY, posZ);
-		this.modelVertex[3] = new Vector3d(-posX, posY, -posZ);
+		this.modelVertex[0] = new Vector3d(vertexX, vertexY, -vertexZ);
+		this.modelVertex[1] = new Vector3d(vertexX, vertexY, vertexZ);
+		this.modelVertex[2] = new Vector3d(-vertexX, vertexY, vertexZ);
+		this.modelVertex[3] = new Vector3d(-vertexX, vertexY, -vertexZ);
 		this.modelNormal[0] = new Vector3d(1, 0, 0);
 		this.modelNormal[1] = new Vector3d(0, 1, 0);
 		this.modelNormal[2] = new Vector3d(0, 0, -1);
@@ -113,7 +116,7 @@ public class OBBCollider extends Collider {
 	}
 
 	/**
-	 * Transform every element of this Bounding Box
+	 * Transform every elements of this Bounding Box
 	 **/
 	@Override
 	public void transform(OpenMatrix4f modelMatrix) {
@@ -130,12 +133,6 @@ public class OBBCollider extends Collider {
 		this.scale = noTranslation.toScaleVector();
 
 		super.transform(modelMatrix);
-	}
-
-	@Override
-	public OBBCollider deepCopy() {
-		Vector3d xyzVec = this.modelVertex[1];
-		return new OBBCollider(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
 	}
 
 	@Override
@@ -160,7 +157,7 @@ public class OBBCollider extends Collider {
 			}
 		}
 
-		/** Below code detects whether the each line of obb is collide but it is disabled for better performance
+		/** Below codes detect if the line of each obb collides but it has disabled for better performance
 		 for(Vector3f norm1 : this.rotatedNormal)
 		 {
 		 for(Vector3f norm2 : opponent.rotatedNormal)
@@ -188,6 +185,12 @@ public class OBBCollider extends Collider {
 		return isCollide(obb);
 	}
 
+	@Override
+	public OBBCollider deepCopy() {
+		Vector3d xyzVec = this.modelVertex[1];
+		return new OBBCollider(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
+	}
+
 	private static boolean collisionDetection(Vector3d seperateAxis, Vector3d toOpponent, OBBCollider box1, OBBCollider box2) {
 		Vector3d maxProj1 = null, maxProj2 = null, distance;
 		double maxDot1 = -1, maxDot2 = -1;
@@ -213,16 +216,12 @@ public class OBBCollider extends Collider {
 			}
 		}
 
-		if (MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length()) {
-			return false;
-		}
-
-		return true;
+		return !(MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length());
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + " direction : " + this.worldCenter;
+		return super.toString() + " worldCenter : " + this.modelCenter + " direction : " + this.modelVertex[0];
 	}
 
 	@Override
@@ -290,5 +289,29 @@ public class OBBCollider extends Collider {
 		vertexConsumer.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(-1.0F, 0.0F, 0.0F).endVertex();
 
 		poseStack.popPose();
+	}
+
+	public CompoundNBT serialize(CompoundNBT resultTag) {
+		if (resultTag == null) {
+			resultTag = new CompoundNBT();
+		}
+
+		resultTag.putInt("number", 1);
+
+		ListNBT center = new ListNBT();
+		center.add(DoubleNBT.valueOf(this.modelCenter.x));
+		center.add(DoubleNBT.valueOf(this.modelCenter.y));
+		center.add(DoubleNBT.valueOf(this.modelCenter.z));
+
+		resultTag.put("center", center);
+
+		ListNBT size = new ListNBT();
+		size.add(DoubleNBT.valueOf(this.modelVertex[1].x));
+		size.add(DoubleNBT.valueOf(this.modelVertex[1].y));
+		size.add(DoubleNBT.valueOf(this.modelVertex[1].z));
+
+		resultTag.put("size", size);
+
+		return resultTag;
 	}
 }

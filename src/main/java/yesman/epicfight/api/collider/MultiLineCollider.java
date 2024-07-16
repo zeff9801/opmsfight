@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
@@ -14,15 +15,13 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
 
 public class MultiLineCollider extends MultiCollider<LineCollider> {
-	public  MultiLineCollider(int arrayLength, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
+	public MultiLineCollider(int arrayLength, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
 		super(arrayLength, posX, posY, posZ, LineCollider.getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ));
-		this.bigCollider = new LineCollider(this.outerAABB, posX, posY, posZ, vecX, vecY, vecZ);
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -31,8 +30,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		int numberOf = Math.max(Math.round(this.numberOfColliders * attackSpeed), 1);
 		float partialScale = 1.0F / numberOf;
 		float interpolation = partialScale;
-		//Armature armature = entitypatch.getArmature();
-		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
+		Armature armature = entitypatch.getArmature();
 		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
@@ -70,6 +68,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 			interpolation += partialScale;
 		}
 	}
+
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public RenderType getRenderType() {
