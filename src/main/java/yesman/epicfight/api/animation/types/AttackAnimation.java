@@ -218,38 +218,29 @@ public class AttackAnimation extends ActionAnimation {
 				Entity hitten = hitEntities.getEntity();
 				LivingEntity trueEntity = this.getTrueEntity(hitten);
 
-				if (trueEntity != null & trueEntity.isAlive() && !entitypatch.getCurrenltyAttackedEntities().contains(trueEntity) && !entitypatch.isTeammate(hitten)) {
+				if (trueEntity != null && trueEntity.isAlive() && !entitypatch.getCurrenltyAttackedEntities().contains(trueEntity) && !entitypatch.isTeammate(hitten)) {
 					if (hitten instanceof LivingEntity || hitten instanceof PartEntity) {
 						if (entity.canSee(hitten)) {
-							ExtendedDamageSource source = this.getExtendedDamageSource(entitypatch, hitten, phase);
-							AttackResult attackResult = entitypatch.attack(hitten, (EpicFightDamageSource) source, this.getDamageTo(entitypatch, trueEntity, phase, source));
+							ExtendedDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
+							int prevInvulTime = hitten.invulnerableTime;
+							hitten.invulnerableTime = 0;
+
+							AttackResult attackResult = entitypatch.attack(source, hitten, phase.hand);
+							hitten.invulnerableTime = prevInvulTime;
+
 
 							if (attackResult.resultType.dealtDamage()) {
-								int temp = hitten.invulnerableTime;
-								trueEntity.invulnerableTime = 0;
-								boolean attackSuccess = hitten.hurt((DamageSource) source, attackResult.damage);
-								trueEntity.invulnerableTime = temp;
-								entitypatch.onHurtSomeone(hitten, phase.hand, source, attackResult.damage, attackSuccess);
-
-								if (attackSuccess) {
-									if (entitypatch instanceof ServerPlayerPatch) {
-										ServerPlayerPatch playerpatch = ((ServerPlayerPatch)entitypatch);
-										playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent<>(playerpatch, trueEntity, source, attackResult.damage));
-									}
-
-									if (flag1 && entitypatch instanceof PlayerPatch) {
-										entity.getItemInHand(phase.hand).hurtEnemy(trueEntity, (PlayerEntity) entity);
-										flag1 = false;
-									}
-
-									hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
-									this.spawnHitParticle(((ServerWorld)hitten.level), entitypatch, hitten, phase);
-								}
+								hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
+								this.spawnHitParticle(((ServerWorld)hitten.level), entitypatch, hitten, phase);
 							}
+
+							entitypatch.getCurrenltyAttackedEntities().add(trueEntity);
+
 
 							if (attackResult.resultType.shouldCount()) {
-								entitypatch.getCurrenltyAttackedEntities().add(trueEntity);
+								entitypatch.getCurrenltyHurtEntities().add(trueEntity);
 							}
+
 						}
 					}
 				}
@@ -327,12 +318,18 @@ public class AttackAnimation extends ActionAnimation {
 		return phase.getProperty(AttackPhaseProperty.HIT_SOUND).orElse(entitypatch.getWeaponHitSound(phase.hand));
 	}
 
-	protected EpicFightDamageSource  getEpicFightDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
+	public EpicFightDamageSource getEpicFightDamageSource(DamageSource originalSource, LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
 		if (phase == null) {
 			phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
 		}
 
 		EpicFightDamageSource extendedSource;
+
+		if (originalSource instanceof EpicFightDamageSource epicfightDamageSource) {
+			extendedSource = epicfightDamageSource;
+		} else {
+			extendedSource = EpicFightDamageSources.copy(originalSource).setAnimation(this);
+		}
 
 
 
