@@ -1,7 +1,5 @@
 package yesman.epicfight.world.entity.ai.attribute;
 
-import java.util.UUID;
-
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -18,6 +16,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherGhostClone;
+
+import java.util.UUID;
 
 public class EpicFightAttributes {
 	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, EpicFightMod.MODID);
@@ -38,8 +38,9 @@ public class EpicFightAttributes {
 	public static final UUID IMPACT_MODIFIER = UUID.fromString("b0a746ac-5734-11eb-ae93-0242ac130002");
 	public static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("1c224694-19f3-11ec-9621-0242ac130002");
 	public static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("1c2249f0-19f3-11ec-9621-0242ac130002");
-    
-	public static void registerNewMobs(EntityAttributeCreationEvent event) {
+	public static final RegistryObject<Attribute> MAX_EXECUTION_RESISTANCE = ATTRIBUTES.register("execution_resistance", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".execution_resistance", 0.0D, 0.0D, 10.0D).setSyncable(true));
+
+    public static void registerNewMobs(EntityAttributeCreationEvent event) {
 		event.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), AbstractSkeletonEntity.createAttributes().build());
 		event.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostClone.createAttributes().build());
 	}
@@ -54,6 +55,7 @@ public class EpicFightAttributes {
 		event.add(entityType, EpicFightAttributes.IMPACT.get());
 		event.add(entityType, EpicFightAttributes.MAX_STRIKES.get());
 		event.add(entityType, EpicFightAttributes.STUN_ARMOR.get());
+		event.add(entityType, EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
 	}
     
     private static void humanoid(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {

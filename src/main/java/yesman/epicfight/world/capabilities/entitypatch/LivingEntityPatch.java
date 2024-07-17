@@ -4,7 +4,10 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.*;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -27,17 +30,15 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.*;
-import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -45,9 +46,13 @@ import yesman.epicfight.network.server.SPPlayAnimation;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
+import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
+import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -60,8 +65,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final DataParameter<Boolean> AIRBORNE = new DataParameter<Boolean>(250, DataSerializers.BOOLEAN);
 	protected static final double WEIGHT_CORRECTION = 37.037D;
 
-	private AttackResult.ResultType lastResultType;
-	private float lastDealDamage;
+	protected AttackResult.ResultType lastResultType;
+	protected float lastDealDamage;
 	protected Entity lastTryHurtEntity;
 	protected LivingEntity grapplingTarget;
 	protected Armature armature;
@@ -192,7 +197,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, Hand hand) {
-		EpicFightDamageSource damagesource = EpicFightDamageSources.mobAttack(this.original).setAnimation(animation);
+		EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level);
+		EpicFightDamageSource damagesource = damageSources.mobAttack(this.original).setAnimation(animation);
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.original.getItemInHand(hand));
@@ -316,12 +322,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 
 
-	//TODO Implement once we port ExecutionSkills
-//	public void setExecutionResistance(int value) {
-//		int maxExecutionResistance = (int)this.original.getAttributeValue(EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
-//		value = Math.min(maxExecutionResistance, value);
-//		this.original.getEntityData().set(EXECUTION_RESISTANCE, value);
-//	}
+	public void setExecutionResistance(int value) {
+		int maxExecutionResistance = (int)this.original.getAttributeValue(EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
+		value = Math.min(maxExecutionResistance, value);
+		this.original.getEntityData().set(EXECUTION_RESISTANCE, value);
+	}
 
 	public float getWeight() {
 		return (float) this.original.getAttributeValue(EpicFightAttributes.WEIGHT.get());
@@ -404,8 +409,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 
 	@FunctionalInterface
-	public static interface AnimationPacketProvider {
-		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
+	public interface AnimationPacketProvider {
+		SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
 	}
 
 	protected void playReboundAnimation() {
@@ -703,12 +708,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
 	}
 
-	//TODO Implement
-//	@OnlyIn(Dist.CLIENT)
-//	public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
-//		TargetIndicatorCheckEvent event = new TargetIndicatorCheckEvent(playerpatch, this);
-//		playerpatch.getEventListener().triggerEvents(EventType.TARGET_INDICATOR_ALERT_CHECK_EVENT, event);
-//
-//		return event.isCanceled();
-//	}
+	@OnlyIn(Dist.CLIENT)
+	public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
+		TargetIndicatorCheckEvent event = new TargetIndicatorCheckEvent(playerpatch, this);
+		playerpatch.getEventListener().triggerEvents(PlayerEventListener.EventType.TARGET_INDICATOR_ALERT_CHECK_EVENT, event);
+
+		return event.isCanceled();
+	}
 }

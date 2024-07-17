@@ -202,22 +202,4 @@ public class Armature {
 			joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
 		}
 	}
-
-	//TODO to remove
-	public OpenMatrix4f[] getJointTransforms() {
-		OpenMatrix4f[] jointMatrices = new OpenMatrix4f[this.jointNumber];
-		this.jointToTransformMatrixArray(this.rootJoint, jointMatrices);
-		return jointMatrices;
-	}
-	private void jointToTransformMatrixArray(Joint joint, OpenMatrix4f[] jointMatrices) {
-		OpenMatrix4f result = OpenMatrix4f.mul(joint.getPoseTransform(), joint.getToOrigin(), null);
-		jointMatrices[joint.getId()] = result;
-
-		for (Joint childJoint : joint.getSubJoints()) {
-			this.jointToTransformMatrixArray(childJoint, jointMatrices);
-		}
-	}
-	public void initializeTransform() {
-		this.rootJoint.resetPoseTransforms();
-	}
 }
