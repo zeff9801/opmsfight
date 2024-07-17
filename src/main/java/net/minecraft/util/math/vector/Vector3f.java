@@ -83,6 +83,18 @@ public final class Vector3f {
         this.z *= p_229192_3_;
     }
 
+    public Vector3f mul(Matrix3f mat) {
+        return mul(mat, this);
+    }
+
+    public Vector3f mul(Matrix3f mat, Vector3f dest) {
+        float lx = x, ly = y, lz = z;
+        dest.x = (float) Math.fma(mat.m00, lx, Math.fma(mat.m10, ly, mat.m20 * lz));
+        dest.y = (float) Math.fma(mat.m01, lx, Math.fma(mat.m11, ly, mat.m21 * lz));
+        dest.z = (float) Math.fma(mat.m02, lx, Math.fma(mat.m12, ly, mat.m22 * lz));
+        return dest;
+    }
+
     @OnlyIn(Dist.CLIENT)
     public void clamp(float p_195901_1_, float p_195901_2_) {
         this.x = MathHelper.clamp(this.x, p_195901_1_, p_195901_2_);

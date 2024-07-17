@@ -7,6 +7,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -54,14 +55,14 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	public void mulPoseStack(MatrixStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
 		OpenMatrix4f transpose = modelMatrix.transpose(null);
-		poseStack.mulPose(QuaternionUtils.toVanillaQuaternion(QuaternionUtils.YP.rotationDegrees(180.0F)));
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F).toVanillaQuaternion());
 		MathUtils.translateStack(poseStack, modelMatrix);
 		MathUtils.rotateStack(poseStack, transpose);
 		MathUtils.scaleStack(poseStack, transpose);
 
 		if (EntityUtils.isEntityUpsideDown(entityIn)) {
 			poseStack.translate(0.0D, entityIn.getBbHeight() + 0.1F, 0.0D);
-			poseStack.mulPose(QuaternionUtils.toVanillaQuaternion(QuaternionUtils.ZP.rotationDegrees(180.0F)));
+			poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(180.0F).toVanillaQuaternion());
 		}
 	}
 

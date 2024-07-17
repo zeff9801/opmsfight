@@ -26,7 +26,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
@@ -210,22 +209,5 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 		
 		return resourcelocation;
-	}
-	
-	public static ClientModel getDefaultArmorModel(EquipmentSlotType slot) {
-		ClientModels modelDB = ClientModels.LOGICAL_CLIENT;
-		
-		switch (slot) {
-		case HEAD:
-			return modelDB.helmet;
-		case CHEST:
-			return modelDB.chestplate;
-		case LEGS:
-			return modelDB.leggins;
-		case FEET:
-			return modelDB.boots;
-		default:
-			return null;
-		}
 	}
 }

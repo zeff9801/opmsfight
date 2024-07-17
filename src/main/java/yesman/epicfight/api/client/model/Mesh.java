@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
@@ -113,6 +115,9 @@ public abstract class Mesh<T extends VertexIndicator> {
 	public void draw(MatrixStack poseStack, IVertexBuilder builder, DrawingFunction drawingFunction, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
+
+		//TODO This code used Vector4f and Vector3f comign from Joml.
+		//Ported the methods directly in the classes. If stuff doesn't work fine, could also be a cause
 
 		for (ModelPart<T> part : this.parts.values()) {
 			if (!part.hidden) {

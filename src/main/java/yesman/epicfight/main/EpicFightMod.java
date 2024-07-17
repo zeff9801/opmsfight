@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -130,20 +129,16 @@ public class EpicFightMod {
     	CLIENT_CONFIGS = new EpicFightOptions();
 
         this.animatorProvider = ClientAnimator::getAnimator;
-        //this.model = ClientModels.LOGICAL_CLIENT;
     	
 		EntityPatchProvider.registerEntityPatchesClient();
-		//Models.LOGICAL_SERVER.loadArmatures(resourceManager);
 		EpicFightKeyMappings.registerKeys();
 
 
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		//Models.LOGICAL_SERVER.loadArmatures(null);
 		//this.animationManager.loadAnimationsInit(null);
 		this.animatorProvider = ServerAnimator::getAnimator;
-		//this.model = Models.LOGICAL_SERVER;
 	}
 
 	private void doCommonStuff(final FMLCommonSetupEvent event) {

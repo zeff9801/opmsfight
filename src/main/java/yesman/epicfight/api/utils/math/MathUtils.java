@@ -177,7 +177,7 @@ public class MathUtils {
 	}
 
 	public static void rotateStack(MatrixStack mStack, OpenMatrix4f mat) {
-		mStack.mulPose(QuaternionUtils.toVanillaQuaternion(getQuaternionfFromMatrix(mat)));
+		mStack.mulPose(getQuaternionfFromMatrix(mat).toVanillaQuaternion());
 	}
 
 	public static void scaleStack(MatrixStack mStack, OpenMatrix4f mat) {

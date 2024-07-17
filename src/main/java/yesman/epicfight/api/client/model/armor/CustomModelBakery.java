@@ -40,7 +40,7 @@ import yesman.epicfight.main.EpicFightMod;
 public class CustomModelBakery {
 	static int indexCount = 0;
 	
-	static final Map<ResourceLocation, ClientModel> BAKED_MODELS = Maps.newHashMap();
+	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
 	static final ModelBaker HEAD = new SimpleBaker(9);
 	static final ModelBaker LEFT_FEET = new SimpleBaker(5);
 	static final ModelBaker RIGHT_FEET = new SimpleBaker(2);

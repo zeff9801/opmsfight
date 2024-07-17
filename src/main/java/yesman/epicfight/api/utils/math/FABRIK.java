@@ -55,7 +55,7 @@ public class FABRIK {
 
 		for (Chain chain : this.chains) {
 			Vector3f tailToHeadM = chain.tailToHead.toMojangVector();
-			tailToHeadM.transform(QuaternionUtils.toVanillaQuaternion(parentQuaternion));
+			tailToHeadM.transform(parentQuaternion.toVanillaQuaternion());
 			Vec3f tailToHead = Vec3f.fromMojangVector(tailToHeadM);
 			Vec3f tailToNewHead = chain.head.copy().sub(chain.tail);
 			Vec3f axis = Vec3f.cross(tailToNewHead, tailToHead, null).normalise();

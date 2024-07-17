@@ -12,22 +12,24 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>> extends PatchedLayer<E, T, M, AbstractEyesLayer<E, M>> {
+public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends PatchedLayer<E, T, M, AbstractEyesLayer<E, M>, AM>{
+
+
 	private final RenderType renderType;
-	private final ClientModel eyeModel;
-	
-	public PatchedEyeLayer(ResourceLocation eyeTexture, ClientModel eyeModel) {
+
+	public PatchedEyeLayer(ResourceLocation eyeTexture, AM mesh) {
+		super(mesh);
 		this.renderType = RenderType.eyes(eyeTexture);
-		this.eyeModel = eyeModel;
 	}
 	
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, AbstractEyesLayer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, AbstractEyesLayer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		IVertexBuilder ivertexbuilder = buffer.getBuffer(this.renderType);
-		this.eyeModel.drawAnimatedModel(matrixStackIn, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, poses);
+		this.mesh.drawModelWithPose(matrixStackIn, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 	}
 }

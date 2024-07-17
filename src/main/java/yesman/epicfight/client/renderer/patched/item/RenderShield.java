@@ -1,40 +1,39 @@
 package yesman.epicfight.client.renderer.patched.item;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderShield extends RenderItemBase {
-	public RenderShield() {
-		super(new OpenMatrix4f().rotateDeg(-80.0F, Vec3f.X_AXIS).translate(0F, 0.2F, 0F), new OpenMatrix4f().translate(0.0F, 1.5F, -0.15F).rotateDeg(180F, Vec3f.Y_AXIS).rotateDeg(90F, Vec3f.X_AXIS));
-	}
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, Hand hand, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, Hand hand, HumanoidArmature armature, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
-		String holdingHand = (hand == Hand.MAIN_HAND) ? "Tool_R" : "Tool_L";
-		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName(holdingHand).getPoseTransform();
+		boolean isInMainhand = (hand == Hand.MAIN_HAND);
+		Joint holdingHand = isInMainhand ? armature.toolR : armature.toolL;
+		OpenMatrix4f jointTransform = poses[holdingHand.getId()];
 		modelMatrix.mulFront(jointTransform);
-		
+
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
-		TransformType transformType = (hand == Hand.MAIN_HAND) ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
-		Minecraft.getInstance().getItemRenderer().renderStatic(stack, transformType, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer);
+		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
+		Minecraft mc = Minecraft.getInstance();
+		IBakedModel model = mc.getItemRenderer().getItemModelShaper().getItemModel(stack);
+		mc.getItemRenderer().render(stack, transformType, !isInMainhand, poseStack, buffer, packedLight, OverlayTexture.NO_OVERLAY, model);
+
 		poseStack.popPose();
-		
-		GlStateManager._enableDepthTest();
 	}
 }

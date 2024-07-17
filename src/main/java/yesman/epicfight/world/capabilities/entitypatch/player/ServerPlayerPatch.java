@@ -2,8 +2,11 @@ package yesman.epicfight.world.capabilities.entitypatch.player;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -28,6 +31,7 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +44,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void onJoinWorld(ServerPlayerEntity entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
+
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		
 		for (SkillContainer skill : skillCapability.skillContainers) {
@@ -55,6 +60,24 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
 		}
+
+		//TODO Implement this
+//		this.eventListeners.addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, PLAYER_EVENT_UUID, (playerevent) -> {
+//			if (playerevent.getDamageSource().isBasicAttack()) {
+//				SkillContainer container = this.getSkill(SkillSlots.WEAPON_INNATE);
+//				ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+//
+//				if (!container.isFull() && !container.isActivated() && container.hasSkill(EpicFightCapabilities.getItemStackCapability(mainHandItem).getInnateSkill(this, mainHandItem))) {
+//					float value = container.getResource() + playerevent.getAttackDamage();
+//
+//					if (value > 0.0F) {
+//						this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
+//					}
+//				}
+//			}
+//		}, 10);
+
+
 		
 		EpicFightNetworkManager.sendToPlayer(new SPAddSkill(learnedSkill.toArray(new String[0])), this.original);
 		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
@@ -64,67 +87,78 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	public void onStartTracking(ServerPlayerEntity trackingPlayer) {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
 		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
+
+		//TODO Implement once skills
+//		for (SkillContainer container : this.getSkillCapability().skillContainers) {
+//			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
+//				if (key.syncronizeTrackingPlayers()) {
+//					EpicFightNetworkManager.sendToPlayer(
+//							new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()),
+//							trackingPlayer);
+//				}
+//			}
+//		}
+
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
+//		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer); //TODO This is the right packet
 		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
 	}
-	
-	@Override
-	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {
-		if (source.isBasicAttack()) {
-			SkillContainer container = this.getSkill(SkillCategories.WEAPON_INNATE);
-			
-			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(this))) {
-				float value = container.getResource() + amount;
-				
-				if (value > 0.0F) {
-					this.getSkill(SkillCategories.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
-				}
-			}
-		}
-	}
-	
+
 	@Override
 	public void tick(LivingUpdateEvent event) {
 		super.tick(event);
 		this.updatedMotionCurrentTick = false;
 	}
-	
+
 	@Override
 	public void updateMotion(boolean considerInaction) {
 	}
-	
+
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
+		//TODO Implement once skills
+//		if (this.isChargingSkill()) {
+//			Skill skill = this.chargingSkill.asSkill();
+//			skill.cancelOnServer(this, null);
+//			this.resetSkillCharging();
+//
+//			EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(this.getSkill(skill).getSlotId()), this.original);
+//		}
+
+
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
+//		mainHandCap.changeWeaponInnateSkill(this, (hand == InteractionHand.MAIN_HAND) ? to : this.original.getMainHandItem()); Right one, to port
 		mainHandCap.changeWeaponInnateSkill(this);
-		
+
 		if (hand == Hand.OFF_HAND) {
 			if (!from.isEmpty()) {
-				from.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::removeModifier);
-				from.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
+				Multimap<Attribute, AttributeModifier> modifiers = from.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
 			if (!fromCap.isEmpty()) {
-				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::removeModifier);
-				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::removeModifier);
-				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::removeModifier);
-				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::removeModifier);
-				fromCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
+				Multimap<Attribute, AttributeModifier> modifiers = fromCap.getAllAttributeModifiers(EquipmentSlotType.MAINHAND);
+				modifiers.get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::removeModifier);
+				modifiers.get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::removeModifier);
+				modifiers.get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::removeModifier);
+				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
-			
+
 			if (!to.isEmpty()) {
-				to.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::addTransientModifier);
-				to.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
+				Multimap<Attribute, AttributeModifier> modifiers = to.getAttributeModifiers(EquipmentSlotType.MAINHAND);
+				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
 			if (!toCap.isEmpty()) {
-				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::addTransientModifier);
-				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::addTransientModifier);
-				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::addTransientModifier);
-				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::addTransientModifier);
-				toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
+				Multimap<Attribute, AttributeModifier> modifiers = toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this);
+				modifiers.get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::addTransientModifier);
+				modifiers.get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::addTransientModifier);
+				modifiers.get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::addTransientModifier);
+				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
 		}
-		
+
 		this.modifyLivingMotionByCurrentItem();
+
+		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 
 	public void modifyLivingMotionByCurrentItem() {
@@ -177,63 +211,111 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		super.playAnimationSynchronized(animation, convertTimeModifier, packetProvider);
 		EpicFightNetworkManager.sendToPlayer(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
-	
+
 	@Override
 	public void reserveAnimation(StaticAnimation animation) {
 		super.reserveAnimation(animation);
 		EpicFightNetworkManager.sendToPlayer(new SPPlayAnimation(animation, this.original.getId(), 0.0F), this.original);
 	}
-	
+
 	@Override
-	public void changeYaw(float amount) {
-		super.changeYaw(amount);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerYaw(this.original.getId(), this.yaw), this.original);
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
+
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+		}
 	}
-	
+
+	@Override
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+		}
+	}
+
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		HurtEvent.Pre hurtEvent = new HurtEvent.Pre(this, damageSource, amount);
-		
+
 		if (this.getEventListener().triggerEvents(EventType.HURT_EVENT_PRE, hurtEvent)) {
 			return new AttackResult(hurtEvent.getResult(), hurtEvent.getAmount());
 		} else {
 			return super.tryHurt(damageSource, amount);
 		}
 	}
-	
+
+	//Implement
+//	@Override
+//	public void onDodgeSuccess(DamageSource damageSource) {
+//		super.onDodgeSuccess(damageSource);
+//
+//		DodgeSuccessEvent dodgeSuccessEvent = new DodgeSuccessEvent(this, damageSource);
+//		this.getEventListener().triggerEvents(EventType.DODGE_SUCCESS_EVENT, dodgeSuccessEvent);
+//	}
+
 	@Override
 	public void toMiningMode(boolean synchronize) {
 		super.toMiningMode(synchronize);
-		
+
 		if (synchronize) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), PlayerMode.MINING), this.original);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerMode(this.original.getId(), PlayerMode.MINING), this.original);
 		}
 	}
-	
+
 	@Override
 	public void toBattleMode(boolean synchronize) {
 		super.toBattleMode(synchronize);
-		
+
 		if (synchronize) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), PlayerMode.BATTLE), this.original);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerMode(this.original.getId(), PlayerMode.BATTLE), this.original);
 		}
 	}
-	
+
 	@Override
 	public boolean isTeammate(Entity entityIn) {
 		if (entityIn instanceof PlayerEntity && !this.getOriginal().server.isPvpAllowed()) {
 			return true;
 		}
-		
+
 		return super.isTeammate(entityIn);
 	}
-	
-	public void setAttackTarget(LivingEntity entity) {
-		this.attackTarget = entity;
+
+	@Override
+	public void setLastAttackSuccess(boolean setter) {
+		if (setter) {
+			EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setLastAttackResult(this.original.getId(), true), this.original);
+		}
+
+		this.isLastAttackSuccess = setter;
 	}
-	
+
+	public void setAttackTarget(LivingEntity entity) {
+		SetTargetEvent setTargetEvent = new SetTargetEvent(this, entity);
+		this.getEventListener().triggerEvents(EventType.SET_TARGET_EVENT, setTargetEvent);
+
+		this.attackTarget = setTargetEvent.getTarget();
+	}
+
+	//Implement when skills
+//	@Override
+//	public void startSkillCharging(ChargeableSkill chargingSkill) {
+//		super.startSkillCharging(chargingSkill);
+//		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.chargingBegin(this.getSkill((Skill)chargingSkill).getSlotId()), this.getOriginal());
+//	}
+
 	@Override
 	public LivingEntity getTarget() {
 		return this.attackTarget;
 	}
+
+	@Override
+	public void setGrapplingTarget(LivingEntity grapplingTarget) {
+		super.setGrapplingTarget(grapplingTarget);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setGrapplingTarget(this.original.getId(), grapplingTarget), this.original);
+	}
+	
+
 }

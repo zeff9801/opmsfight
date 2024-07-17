@@ -14,7 +14,7 @@ import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
@@ -29,7 +29,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 	private final Matrix4f modelMatrix;
 	private float alphaO;
 
-	public EntityAfterImageParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, ClientModel particleMesh, OpenMatrix4f[] matrices, Matrix4f modelMatrix) {
+	public EntityAfterImageParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, AnimatedMesh particleMesh, OpenMatrix4f[] matrices, Matrix4f modelMatrix) {
 		super(level, x, y, z, xd, yd, zd, particleMesh);
 		this.poseMatrices = matrices;
 		this.modelMatrix = modelMatrix;
@@ -51,10 +51,10 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 	@Override
 	public void render(IVertexBuilder vertexConsumer, ActiveRenderInfo camera, float partialTicks) {
 		MatrixStack poseStack = new MatrixStack();
-		this.setupMatrixStack(poseStack, camera, partialTicks);
-		poseStack.last().pose().multiply(this.modelMatrix);
+		this.setupPoseStack(poseStack, camera, partialTicks);
+//		poseStack.mulPoseMatrix(this.modelMatrix); //TODO MatrixStack has to be extended and #mulPoseMatrix ported into it
 		float alpha = this.alphaO + (this.alpha - this.alphaO) * partialTicks;
-		this.particleMesh.drawWithPoseNoTexture(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, this.poseMatrices);
+		((AnimatedMesh)this.particleMesh).drawWithPoseNoTexture(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, this.poseMatrices);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 
 			if (entitypatch != null && ClientEngine.getInstance().renderEngine.hasRendererFor(entitypatch.getOriginal())) {
 				PatchedEntityRenderer renderer = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal());
-				Armature armature = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature();
+				Armature armature = entitypatch.getArmature();
 				MatrixStack poseStack = new MatrixStack();
 				OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);
 				renderer.mulPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);
@@ -81,8 +81,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 					matrices[i] = OpenMatrix4f.mul(matrices[i], armature.searchJointById(i).getToOrigin(), null);
 				}
 
-				//ClientModel mesh = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal()).getMesh(entitypatch);
-				ClientModel mesh = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
+				AnimatedMesh mesh = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal()).getMesh(entitypatch);
 				EntityAfterImageParticle particle = new EntityAfterImageParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, mesh, matrices, poseStack.last().pose());
 
 				return particle;

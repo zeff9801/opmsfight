@@ -34,14 +34,14 @@ import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, LivingRenderer<E, M>, AM> {
+public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, R, AM> {
 
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>, AM>> patchedLayers = Maps.newHashMap();
 
 
 
 	@Override
-	public void render(E entityIn, T entitypatch, LivingRenderer<E, M> renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
+	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
@@ -58,7 +58,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
 
 			AM mesh = this.getMesh(entitypatch);
-			mesh.initialize(); //Normally was in a different method
+			this.prepareModel(mesh, entityIn, entitypatch, renderer);
 
 			IVertexBuilder builder = buffer.getBuffer(renderType);
 			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
@@ -142,7 +142,9 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		model.setupAnim(entityIn, f5, f8, f7, f2, f6);
 	}
 
-
+	protected void prepareModel(AM mesh, E entity, T entitypatch, R renderer) {
+		mesh.initialize();
+	}
 	
 	protected void renderLayer(LivingRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLightIn, float partialTicks) {
 		List<LayerRenderer<E, M>> layers = new ArrayList<>(renderer.layers);
@@ -193,7 +195,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 
 
 	//TODO Should Port to newer version, but requires porting RenderTypes
-	public RenderType getRenderType(E entityIn, T entitypatch, LivingRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
+	public RenderType getRenderType(E entityIn, T entitypatch, R renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
 		ResourceLocation resourcelocation = this.getEntityTexture(entitypatch, renderer);
 
 		if (isVisibleToPlayer) {
@@ -229,5 +231,4 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	protected double getLayerCorrection() {
 		return 1.15D;
 	}
-
 }

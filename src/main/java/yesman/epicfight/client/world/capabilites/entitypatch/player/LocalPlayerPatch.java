@@ -48,6 +48,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	private boolean targetLockedOn;
 	private float prevStamina;
 	private int prevChargingAmount;
+
 	private float lockOnXRot;
 	private float lockOnXRotO;
 	private float lockOnYRot;
@@ -62,6 +63,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	@Override
 	public void onJoinWorld(ClientPlayerEntity entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
+
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
 			ClientEngine.getInstance().controllEngine.unlockHotkeys();
 		});
@@ -84,32 +86,33 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	@Override
+	public void tick(LivingEvent.LivingUpdateEvent event) {
+		this.prevStamina = this.getStamina();
+
+//		if (this.isChargingSkill()) {
+//			this.prevChargingAmount = this.getChargingSkill().getChargingAmount(this);
+//		} else {
+//			this.prevChargingAmount = 0;
+//		}
+
+		super.tick(event);
+	}
+
+	@Override
 	public void clientTick(LivingEvent.LivingUpdateEvent event) {
 		this.prevStamina = this.getStamina();
 		super.clientTick(event);
 
 		RayTraceResult cameraHitResult = this.minecraft.hitResult;
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-
-		if (renderEngine.isPlayerRotationLocked()) {
-			double pickRange = this.minecraft.gameMode.getPickRange();
-			Vector3d vec3 = this.original.getEyePosition(1.0F);
-			Vector3d vec31 = MathUtils.getVectorForRotation(renderEngine.getCorrectedXRot(), renderEngine.getCorrectedYRot());
-			Vector3d vec32 = vec3.add(vec31.x * pickRange, vec31.y * pickRange, vec31.z * pickRange);
-			AxisAlignedBB aabb = this.original.getBoundingBox().expandTowards(vec31.scale(pickRange)).inflate(1.0D, 1.0D, 1.0D);
-
-			cameraHitResult = ProjectileHelper.getEntityHitResult(this.original, vec3, vec32, aabb, (hit) ->
-					!hit.isSpectator() && hit.isPickable() && !hit.is(this.grapplingTarget), pickRange);
-		}
 
 		if (cameraHitResult != null && cameraHitResult.getType() == RayTraceResult.Type.ENTITY) {
-			Entity hit = ((EntityRayTraceResult)cameraHitResult).getEntity();
+			Entity hit = ((EntityRayTraceResult) cameraHitResult).getEntity();
 
-			if (hit != this.rayTarget) {
+			if (hit != this.rayTarget && hit != this.original) {
 				if (hit instanceof LivingEntity livingentity) {
 					if (!(hit instanceof ArmorStandEntity) && !this.targetLockedOn) {
 						this.rayTarget = livingentity;
-                    }
+					}
 				} else if (hit instanceof PartEntity<?> partEntity) {
 					Entity parent = partEntity.getParent();
 
@@ -126,72 +129,86 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			}
 		}
 
-		if (this.rayTarget != null) {
-			if (this.targetLockedOn) {
-				Vector3d playerPosition = this.original.getEyePosition(1.0F);
-				Vector3d targetPosition = this.rayTarget.getEyePosition(1.0F);
-				Vector3d toTarget = targetPosition.subtract(playerPosition);
-				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
-				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
-				PointOfView cameraType = this.minecraft.options.getCameraType();
-				this.lockOnXRotO = this.lockOnXRot;
-				this.lockOnYRotO = this.lockOnYRot;
-				float lockOnXRotDst = pitch + (cameraType.isFirstPerson() ? 0.0F : 30.0F);
-				lockOnXRotDst = MathHelper.clamp(lockOnXRotDst, 0.0F, 60.0F);
+			if (this.rayTarget != null) {
+				if (this.targetLockedOn) {
+					Vector3d playerPosition = this.original.getEyePosition(1.0F);
+					Vector3d targetPosition = this.rayTarget.getEyePosition(1.0F);
+					Vector3d toTarget = targetPosition.subtract(playerPosition);
+					float yaw = (float)MathUtils.getYRotOfVector(toTarget);
+					float pitch = (float)MathUtils.getXRotOfVector(toTarget);
+					PointOfView cameraType = this.minecraft.options.getCameraType();
+					this.lockOnXRotO = this.lockOnXRot;
+					this.lockOnYRotO = this.lockOnYRot;
+					float lockOnXRotDst = pitch + (cameraType.isFirstPerson() ? 0.0F : 30.0F);
+					lockOnXRotDst = MathHelper.clamp(lockOnXRotDst, 0.0F, 60.0F);
 
-				if (cameraType.isMirrored()) {
-					lockOnXRotDst = -lockOnXRotDst;
+					if (cameraType.isMirrored()) {
+						lockOnXRotDst = -lockOnXRotDst;
+					}
+
+					float lockOnYRotDst = yaw + (cameraType.isMirrored() ? 180.0F : 0.0F);
+					float xDiff = MathHelper.wrapDegrees(lockOnXRotDst - this.lockOnXRotO);
+					float yDiff = MathHelper.wrapDegrees(lockOnYRotDst - this.lockOnYRotO);
+					float xLerp = MathHelper.clamp(xDiff * 0.4F, -30.0F, 30.0F);
+					float yLerp = MathHelper.clamp(yDiff * 0.4F, -30.0F, 30.0F);
+
+					this.lockOnXRot = this.lockOnXRotO + xLerp;
+					this.lockOnYRot = this.lockOnYRotO + yLerp;
+
+					if (!this.getEntityState().turningLocked() || this.getEntityState().lockonRotate()) {
+						this.original.xRot = (lockOnXRotDst);
+						this.original.yRot = (lockOnYRotDst);
+					}
+				} else {
+					this.lockOnXRot = this.original.xRot;
+					this.lockOnYRot = this.original.yRot;
+					this.lockOnXRotO = this.lockOnXRot;
+					this.lockOnYRotO = this.lockOnYRot;
 				}
 
-				float lockOnYRotDst = yaw + (cameraType.isMirrored() ? 180.0F : 0.0F);
-				float xDiff = MathHelper.wrapDegrees(lockOnXRotDst - this.lockOnXRotO);
-				float yDiff = MathHelper.wrapDegrees(lockOnYRotDst - this.lockOnYRotO);
-				float xLerp = MathHelper.clamp(xDiff * 0.4F, -30.0F, 30.0F);
-				float yLerp = MathHelper.clamp(yDiff * 0.4F, -30.0F, 30.0F);
-
-				this.lockOnXRot = this.lockOnXRotO + xLerp;
-				this.lockOnYRot = this.lockOnYRotO + yLerp;
-
-				if (!this.getEntityState().turningLocked() || this.getEntityState().lockonRotate()) {
-					this.original.xRot = lockOnXRotDst;
-					this.original.yRot = lockOnYRotDst;
+				if (!this.rayTarget.isAlive() || this.getOriginal().distanceToSqr(this.rayTarget) > 400.0D || (this.getAngleTo(this.rayTarget) > 100.0D && !this.targetLockedOn)) {
+					this.rayTarget = null;
+					EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(-1));
 				}
 			} else {
 				this.lockOnXRot = this.original.xRot;
 				this.lockOnYRot = this.original.yRot;
-				this.lockOnXRotO = this.lockOnXRot;
-				this.lockOnYRotO = this.lockOnYRot;
+				this.targetLockedOn = false;
 			}
 
-			if (!this.rayTarget.isAlive() || this.getOriginal().distanceToSqr(this.rayTarget) > 400.0D || (this.getAngleTo(this.rayTarget) > 100.0D && !this.targetLockedOn)) {
-				this.rayTarget = null;
-				EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(-1));
-			}
-		} else {
-			this.lockOnXRot = this.original.xRot;
-			this.lockOnYRot = this.original.yRot;
-			this.targetLockedOn = false;
-		}
+			CapabilityItem itemCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
+
+//			switch (itemCap.getZoomInType()) {
+//				case ALWAYS:
+//					ClientEngine.getInstance().renderEngine.zoomIn();
+//					break;
+//				case USE_TICK:
+//					if (this.original.getUseItemRemainingTicks() > 0) {
+//						ClientEngine.getInstance().renderEngine.zoomIn();
+//					} else {
+//						ClientEngine.getInstance().renderEngine.zoomOut(40);
+//					}
+//
+//					break;
+//				case AIMING:
+//					if (this.getClientAnimator().isAiming()) {
+//						ClientEngine.getInstance().renderEngine.zoomIn();
+//					} else {
+//						ClientEngine.getInstance().renderEngine.zoomOut(40);
+//					}
+//
+//					break;
+//				case CUSTOM:
+//					//Zoom manually handled
+//					break;
+//				default:
+//					ClientEngine.getInstance().renderEngine.zoomOut(0);
+//			}
 	}
 
 	@Override
 	protected boolean isMoving() {
 		return Math.abs(this.original.xxa) > 0.0004F || Math.abs(this.original.zza) > 0.0004F;
-	}
-
-	@Override
-	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
-		if (!this.isLogicalClient()) {
-			return false;
-		}
-
-		return actionAnimation.shouldPlayerMove(this);
-	}
-
-	@Override
-	protected void playReboundAnimation() {
-		super.playReboundAnimation();
-		ClientEngine.getInstance().renderEngine.zoomOut(40);
 	}
 
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
@@ -274,11 +291,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		return ClientEngine.getInstance().controllEngine.isKeyDown(this.minecraft.options.keyDown);
 	}
 
-	//@Override
-	//public boolean consumeStamina(float amount) {
-	//	float currentStamina = this.getStamina();
-	//	return currentStamina >= amount;
-	//}
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		if (!this.isLogicalClient()) {
+			return false;
+		}
+
+		return actionAnimation.shouldPlayerMove(this);
+	}
 
 	public float getPrevStamina() {
 		return this.prevStamina;
@@ -294,38 +314,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	public float getLerpedLockOnY(double partial) {
 		return MathHelper.rotLerp((float)partial, this.lockOnYRotO, this.lockOnYRot);
-	}
-
-	@Override
-	public void correctRotation() {
-		if (this.targetLockedOn) {
-			if (this.rayTarget != null && !this.rayTarget.isDeadOrDying()) {
-				Vector3d playerPosition = this.original.position();
-				Vector3d targetPosition = this.rayTarget.position();
-				Vector3d toTarget = targetPosition.subtract(playerPosition);
-				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
-				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
-				this.original.yRot =(yaw);
-				this.original.xRot = (pitch);
-			} else {
-				this.original.yRot =(this.lockOnYRot);
-				this.original.xRot =(this.lockOnXRot);
-			}
-		}
-	}
-
-	@Override
-	public float getCameraXRot() {
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-
-		return MathHelper.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedXRot() : super.getCameraXRot());
-	}
-
-	@Override
-	public float getCameraYRot() {
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-
-		return MathHelper.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedYRot() : super.getCameraYRot());
 	}
 
 	public boolean isTargetLockedOn() {
@@ -348,11 +336,36 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		this.original.yRot = (this.lockOnYRot);
 	}
 
+	@Override
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
 
-	/*@Override
-	public void changeModelYRot(float amount) {
-		super.changeModelYRot(amount);
-		EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(amount));
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot(amount)); //Implement this packet
+		}
+	}
+
+	public float getModelYRot() {
+		return this.modelYRot;
+	}
+
+	public void setModelYRotInGui(float rotDeg) {
+		this.useModelYRot = true;
+		this.modelYRot = rotDeg;
+	}
+
+	public void disableModelYRotInGui(float originalDeg) {
+		this.useModelYRot = false;
+		this.modelYRot = originalDeg;
+	}
+
+	@Override
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot());
+		}
 	}
 
 	@Override
@@ -364,14 +377,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 				Vector3d toTarget = targetPosition.subtract(playerPosition);
 				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
 				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
-				this.original.yRot = yaw;
-				this.original.xRot = pitch;
+				this.original.yRot = (yaw);
+				this.original.xRot = (pitch);
 			} else {
-				this.original.yRot = this.lockOnYRot;
-				this.original.xRot = this.lockOnXRot;
+				this.original.yRot = (this.lockOnYRot);
+				this.original.xRot = (this.lockOnXRot);
 			}
 		}
-	}*/
+	}
 
 	@Override
 	public void openSkillBook(ItemStack itemstack, Hand hand) {
@@ -379,4 +392,5 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			Minecraft.getInstance().setScreen(new SkillBookScreen(this.original, itemstack, hand));
 		}
 	}
+
 }

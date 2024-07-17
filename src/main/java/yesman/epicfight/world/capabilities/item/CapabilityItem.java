@@ -194,6 +194,18 @@ public class CapabilityItem {
 	public final Map<Attribute, AttributeModifier> getDamageAttributesInCondition(Style style) {
 		return this.attributeMap.getOrDefault(style, this.attributeMap.get(Styles.COMMON));
 	}
+
+	public Multimap<Attribute, AttributeModifier> getAllAttributeModifiers(EquipmentSlotType equipmentSlot) {
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
+
+		for (Map<Attribute, AttributeModifier> attrMap : this.attributeMap.values()) {
+			for (Entry<Attribute, AttributeModifier> entry : attrMap.entrySet()) {
+				map.put(entry.getKey(), entry.getValue());
+			}
+		}
+
+		return map;
+	}
 	
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, LivingEntityPatch<?> entitypatch) {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();

@@ -27,6 +27,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.AttackSpeedModifyEvent;
 import yesman.epicfight.world.entity.eventlistener.FallEvent;
@@ -318,15 +320,20 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 //	}
 
 	@Override
-	public ExtendedDamageSource getDamageSource(StunType stunType, StaticAnimation animation, Hand hand) {
-		return ExtendedDamageSource.causePlayerDamage(this.original, stunType, animation, hand);
+	public EpicFightDamageSource getDamageSource(StaticAnimation animation, Hand hand) {
+		EpicFightDamageSource damagesource = EpicFightDamageSources.playerAttack(this.original).setAnimation(animation);
+		damagesource.setImpact(this.getImpact(hand));
+		damagesource.setArmorNegation(this.getArmorNegation(hand));
+		damagesource.setHurtItem(this.getOriginal().getItemInHand(hand));
+
+		return damagesource;
 	}
 
-	@Override
-	public void cancelAnyAction() {
-		super.cancelAnyAction();
-		this.resetSkillCharging();
-	}
+//	@Override
+//	public void cancelAnyAction() {
+//		super.cancelAnyAction();
+//		this.resetSkillCharging();
+//	}
 
 	public float getMaxStamina() {
 		ModifiableAttributeInstance maxStamina  = this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get());

@@ -23,6 +23,8 @@
  */
 package com.joml;
 
+import net.minecraft.util.math.vector.Quaternion;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -1896,6 +1898,10 @@ public class Quaternionf implements Quaternionfc {
 
     public Object clone() throws CloneNotSupportedException {
         return super.clone();
+    }
+
+    public Quaternion toVanillaQuaternion() {
+        return new Quaternion(this.x, this.y, this.z, this.w);
     }
 
 }

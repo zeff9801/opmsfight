@@ -14,9 +14,7 @@ import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 

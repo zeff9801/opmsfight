@@ -15,10 +15,10 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
 public class LaserParticle extends CustomModelParticle {
@@ -27,9 +27,9 @@ public class LaserParticle extends CustomModelParticle {
 	private float yRot;
 	
 	public LaserParticle(ClientWorld level, double x, double y, double z, double toX, double toY, double toZ) {
-		super(level, x, y, z, 0, 0, 0, ClientModels.LOGICAL_CLIENT.laser);
+		super(level, x, y, z, 0, 0, 0, Meshes.LASER);
 		this.lifetime = 5;
-		
+
 		Vector3d direction = new Vector3d(toX - x, toY - y, toZ - z);
 		Vector3d start = new Vector3d(x, y, z);
 		Vector3d destination = start.add(direction.normalize().scale(200.0D));
@@ -42,18 +42,18 @@ public class LaserParticle extends CustomModelParticle {
 		this.yRot = (float)(-Math.atan2(zLength, xLength) * (180D / Math.PI)) - 90.0F;
 		this.xRot = (float)(Math.atan2(yLength, horizontalDistance) * (180D / Math.PI));
 		int smokeCount = (int)this.length * 4;
-		
+
 		for (int i = 0; i < smokeCount; i++) {
 			level.addParticle(ParticleTypes.SMOKE, x + xLength / smokeCount * i, y + yLength / smokeCount * i, z + zLength / smokeCount * i, 0, 0, 0);
 		}
-		
+
 		this.setBoundingBox(new AxisAlignedBB(x, y, z, toX, toY, toZ));
 	}
 	
 	@Override
 	public void prepareDraw(MatrixStack poseStack, float partialTicks) {
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(this.yRot));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(this.xRot));
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(this.yRot).toVanillaQuaternion());
+		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(this.xRot).toVanillaQuaternion());
 		float progression = (this.age + partialTicks) / (this.lifetime + 1);
 		float scale = MathHelper.sin(progression * (float)Math.PI);
 		float zScale = progression > 0.5F ? 1.0F : MathHelper.sin(progression * (float)Math.PI);
@@ -63,8 +63,9 @@ public class LaserParticle extends CustomModelParticle {
 	@Override
 	public void render(IVertexBuilder vertexConsumer, ActiveRenderInfo camera, float partialTicks) {
 		super.render(vertexConsumer, camera, partialTicks);
+
 		MatrixStack poseStack = new MatrixStack();
-		this.setupMatrixStack(poseStack, camera, partialTicks);
+		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
 		poseStack.scale(1.1F, 1.1F, 1.1F);
 	}
