@@ -176,10 +176,9 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	}
 
 	private Map<ResourceLocation, JsonElement> prepareAnimationMap(IResourceManager resourceManager) {
-		Map<ResourceLocation, JsonElement> animationMap = Maps.newHashMap();
-		// Your logic to populate the map goes here
+        // Your logic to populate the map goes here
 		// For example, loading animation JSON elements from the resource manager
-		return animationMap;
+		return Maps.newHashMap();
 	}
 
 

@@ -1,16 +1,16 @@
 
 package yesman.epicfight.network.server;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
+
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class SPChangeGamerule {
 	private final SynchronizedGameRules gamerule;
@@ -50,8 +50,8 @@ public class SPChangeGamerule {
 	public enum SynchronizedGameRules {
 		HAS_FALL_ANIMATION((level) -> level.getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.HAS_FALL_ANIMATION).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
 		WEIGHT_PENALTY((level) -> level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.WEIGHT_PENALTY).tryDeserialize(value.toString()), (buf, val) -> buf.writeInt((int)val), ByteBuf::readInt),
-		DIABLE_ENTITY_UI((level) -> level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.DISABLE_ENTITY_UI).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean);
-//		CAN_SWITCH_COMBAT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.CAN_SWITCH_COMBAT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
+		DIABLE_ENTITY_UI((level) -> level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.DISABLE_ENTITY_UI).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
+		CAN_SWITCH_COMBAT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.CAN_SWITCH_COMBAT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean);
 //		STIFF_COMBO_ATTACKS((level) -> level.getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
 //		NO_MOBS_IN_BOSSFIGHT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean);
 

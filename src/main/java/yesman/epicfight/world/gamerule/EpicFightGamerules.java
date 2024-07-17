@@ -7,6 +7,7 @@ import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPChangeGamerule.SynchronizedGameRules;
 
 public class EpicFightGamerules {
+	public static GameRules.RuleKey<GameRules.BooleanValue> CAN_SWITCH_COMBAT;
 	public static GameRules.RuleKey<GameRules.BooleanValue> DO_VANILLA_ATTACK;
 	public static GameRules.RuleKey<GameRules.BooleanValue> HAS_FALL_ANIMATION;
 	public static GameRules.RuleKey<GameRules.IntegerValue> WEIGHT_PENALTY;
@@ -24,6 +25,9 @@ public class EpicFightGamerules {
 		KEEP_SKILLS = GameRules.register("keepSkills", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.KEEP_SKILLS.get()));
 		DISABLE_ENTITY_UI = GameRules.register("disableEntityUI", GameRules.Category.MISC, GameRules.BooleanValue.create(ConfigManager.DISABLE_ENTITY_UI.get(), (server, value) -> {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.DIABLE_ENTITY_UI, value.get()));
+		}));
+		CAN_SWITCH_COMBAT = GameRules.register("canSwitchCombat", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.CAN_SWITCH_COMBAT.get(), (server, value) -> {
+			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.CAN_SWITCH_COMBAT, value.get()));
 		}));
 	}
 }

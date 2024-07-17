@@ -7,12 +7,12 @@
     "MixinBufferBuilder",
     "MixinKeyboardHandler",
     "MixinLightTexture",
-    "MixinMouseHelper",
-    "MixinResourceLoadProgressGui"
+    "MixinMinecraft"
   ],
   "mixins": [
     "MixinCapabilityProviderInvoker",
     "MixinLivingEntity",
+    "MixinPlayer",
     "MixinServerPlayer"
   ],
   "injectors": {

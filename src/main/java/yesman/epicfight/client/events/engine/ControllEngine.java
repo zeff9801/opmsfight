@@ -33,6 +33,7 @@ import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.entity.eventlistener.MovementInputEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 import java.util.Map;
 import java.util.Set;
@@ -92,7 +93,124 @@ public class ControllEngine {
 	public boolean canPlayerRotate(EntityState playerState) {
 		return !playerState.turningLocked() || this.player.isRidingJumpable();
 	}
-	
+	public void handleEpicFightKeyMappings() {
+		/*if (EpicFightKeyMappings.SKILL_EDIT.consumeClick()) {
+			if (this.playerpatch.getSkillCapability() != null) {
+				Minecraft.getInstance().setScreen(new SkillEditScreen(this.player, this.playerpatch.getSkillCapability()));
+			}
+		}
+
+		if (EpicFightKeyMappings.CONFIG.consumeClick()) {
+			Minecraft.getInstance().setScreen(new IngameConfigurationScreen(this.minecraft, null));
+		}
+
+		while (EpicFightKeyMappings.ATTACK.consumeClick()) {
+			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.ATTACK) {
+				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
+					SkillSlot slot = (!this.player.onGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
+
+					if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
+						this.player.resetAttackStrengthTicker();
+						this.attackLightPressToggle = false;
+						this.releaseAllServedKeys();
+					} else {
+						if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
+							this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
+						}
+					}
+
+					this.lockHotkeys();
+					this.attackLightPressToggle = false;
+					this.weaponInnatePressToggle = false;
+					this.weaponInnatePressCounter = 0;
+				} else {
+					if (!this.weaponInnatePressToggle) {
+						this.weaponInnatePressToggle = true;
+					}
+				}
+
+				//Disable vanilla attack
+				if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
+					this.disableKey(this.options.keyAttack);
+				}
+			}
+		}
+
+		while (EpicFightKeyMappings.DODGE.consumeClick()) {
+			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.DODGE) {
+				if (EpicFightKeyMappings.DODGE.getKey().getValue() == this.options.keyShift.getKey().getValue()) {
+					if (this.player.getVehicle() == null) {
+						if (!this.sneakPressToggle) {
+							this.sneakPressToggle = true;
+						}
+					}
+				} else {
+					SkillSlot skillCategory = (this.playerpatch.getEntityState().knockDown()) ? SkillSlots.KNOCKDOWN_WAKEUP : SkillSlots.DODGE;
+					SkillContainer skill = this.playerpatch.getSkill(skillCategory);
+
+					if (skill.sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
+						this.reserveKey(SkillSlots.DODGE, EpicFightKeyMappings.DODGE);
+					}
+				}
+			}
+		}
+
+		while (EpicFightKeyMappings.GUARD.consumeClick()) {
+		}
+
+		while (EpicFightKeyMappings.WEAPON_INNATE_SKILL.consumeClick()) {
+			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.WEAPON_INNATE_SKILL) {
+				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
+					if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
+						if (!this.player.isSpectator()) {
+							this.reserveKey(SkillSlots.WEAPON_INNATE, EpicFightKeyMappings.WEAPON_INNATE_SKILL);
+						}
+					} else {
+						this.lockHotkeys();
+					}
+				}
+			}
+		}
+
+		while (EpicFightKeyMappings.MOVER_SKILL.consumeClick()) {
+			if (this.playerpatch.isBattleMode() && !this.playerpatch.isChargingSkill()) {
+				if (EpicFightKeyMappings.MOVER_SKILL.getKey().getValue() == this.options.keyJump.getKey().getValue()) {
+					SkillContainer skillContainer = this.playerpatch.getSkill(SkillSlots.MOVER);
+					SkillExecuteEvent event = new SkillExecuteEvent(this.playerpatch, skillContainer);
+
+					if (skillContainer.canExecute(playerpatch, event) && this.player.getVehicle() == null) {
+						if (!this.moverPressToggle) {
+							this.moverPressToggle = true;
+						}
+					}
+				} else {
+					SkillContainer skill = this.playerpatch.getSkill(SkillSlots.MOVER);
+					skill.sendExecuteRequest(this.playerpatch, this);
+				}
+			}
+		}*/
+
+		while (EpicFightKeyMappings.SWITCH_MODE.consumeClick()) {
+			if (this.playerpatch.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)) {
+				this.playerpatch.toggleMode();
+			}
+		}
+
+		while (EpicFightKeyMappings.LOCK_ON.consumeClick()) {
+			this.playerpatch.toggleLockOn();
+		}
+
+		//Disable swap hand items
+		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(Hand.MAIN_HAND).canBePlacedOffhand())) {
+			this.disableKey(this.minecraft.options.keySwapOffhand);
+		}
+
+		this.tick();
+	}
+
+	private void disableKey(KeyBinding keySwapOffhand) {
+	}
+
 	private void attackKeyPressed(KeyBinding key, int action) {
 		if (player.getPose() == Pose.SWIMMING) return;
 		if (action == 1 && this.playerpatch.isBattleMode()) {

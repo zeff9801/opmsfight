@@ -1,24 +1,17 @@
 package yesman.epicfight.data.conditions;
 
-import java.util.function.Supplier;
-
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
-import yesman.epicfight.data.conditions.entity.HealthPoint;
-import yesman.epicfight.data.conditions.entity.OffhandItemCategory;
-import yesman.epicfight.data.conditions.entity.RandomChance;
-import yesman.epicfight.data.conditions.entity.SkillActivated;
-import yesman.epicfight.data.conditions.entity.TargetInDistance;
-import yesman.epicfight.data.conditions.entity.TargetInEyeHeight;
-import yesman.epicfight.data.conditions.entity.TargetInPov;
+import yesman.epicfight.data.conditions.entity.*;
 import yesman.epicfight.data.conditions.itemstack.TagValueCondition;
 import yesman.epicfight.main.EpicFightMod;
 
-public class EpicFightConditions {
+import java.util.function.Supplier;
+
+public class EpicFightConditions  {
 	public static final IForgeRegistry<Condition<?>> REGISTRY = RegistryManager.ACTIVE.getRegistry(Condition.class);;
 	public static final DeferredRegister<Condition<?>> CONDITIONS = DeferredRegister.create(REGISTRY, EpicFightMod.MODID);
 
