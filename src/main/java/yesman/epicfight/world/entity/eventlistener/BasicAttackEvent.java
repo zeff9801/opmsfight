@@ -1,3 +1,4 @@
+
 package yesman.epicfight.world.entity.eventlistener;
 
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;

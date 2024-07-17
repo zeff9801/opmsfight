@@ -16,8 +16,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
@@ -32,6 +31,7 @@ import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.AttackSpeedModifyEvent;
 import yesman.epicfight.world.entity.eventlistener.FallEvent;
+import yesman.epicfight.world.entity.eventlistener.ModifyBaseDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
@@ -260,14 +260,13 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return this.eventListeners;
 	}
 
-	//TODO This function triggers MODIFY_DAMAGE events during an animation. Probably not useful
-//	@Override
-//	public float getModifiedBaseDamage(float baseDamage) {
-//		ModifyBaseDamageEvent<PlayerPatch<?>> event = new ModifyBaseDamageEvent<>(this, baseDamage);
-//		this.getEventListener().triggerEvents(EventType.MODIFY_DAMAGE_EVENT, event);
-//
-//		return event.getDamage();
-//	}
+	@Override
+	public float getModifiedBaseDamage(float baseDamage) {
+		ModifyBaseDamageEvent<PlayerPatch<?>> event = new ModifyBaseDamageEvent<>(this, baseDamage);
+		this.getEventListener().triggerEvents(EventType.MODIFY_DAMAGE_EVENT, event);
+
+		return event.getDamage();
+	}
 
 	public float getAttackSpeed(Hand hand) {
 		float baseSpeed;

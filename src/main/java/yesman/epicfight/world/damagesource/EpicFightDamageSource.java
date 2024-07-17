@@ -2,14 +2,12 @@ package yesman.epicfight.world.damagesource;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 
@@ -23,19 +21,34 @@ public class EpicFightDamageSource extends EntityDamageSource {
 
 	private Entity directEntity; //If projectile, this is the entity that cast it
 
-	public EpicFightDamageSource(DamageSource from) {
-		this(from.msgId, from.getEntity());
+	private final EpicFightDamageSources.TYPE sourceType;
+
+	public EpicFightDamageSource(DamageSource damageSource) {
+		this(damageSource.msgId, damageSource.getEntity(), damageSource.getDirectEntity());
 	}
 
-	public EpicFightDamageSource(String sourceName, Entity sourceOwner) {
-        super(sourceName, sourceOwner);
-        this.initialPosition = sourceOwner.position();
+	public EpicFightDamageSource(String sourceIdentifier, Entity sourceOwner, Entity directSourceOwner) {
+		super(sourceIdentifier, sourceOwner);
+		this.directEntity = directSourceOwner;
+		this.sourceType = EpicFightDamageSources.TYPE.VANILLA_GENERIC;
+		this.initialPosition = sourceOwner.position();
 	}
 
-	public EpicFightDamageSource(String sourceName, Entity sourceOwner, Entity directSourceOwner) {
-		super(sourceName, sourceOwner);
+	public EpicFightDamageSource(EpicFightDamageSources.TYPE sourceType, Entity sourceOwner) {
+		super(sourceType.identifierName, sourceOwner);
+		this.sourceType = sourceType;
+		this.initialPosition = sourceOwner.position();
+	}
+
+	public EpicFightDamageSource(EpicFightDamageSources.TYPE sourceType, Entity sourceOwner, Entity directSourceOwner) {
+		super(sourceType.identifierName, sourceOwner);
+		this.sourceType = sourceType;
 		this.initialPosition = sourceOwner.position();
 		this.directEntity = directSourceOwner;
+	}
+
+	public boolean isIndirect() {
+		return this.directEntity != null && this.directEntity != this.entity; //Damagesource has a direct entity that's not the same as the entity that caused the damage
 	}
 
 
@@ -79,12 +92,12 @@ public class EpicFightDamageSource extends EntityDamageSource {
 		return this.getDamageSourceElements().armorNegation;
 	}
 
-	public EpicFightDamageSource setStunType(ExtendedDamageSource.StunType stunType) {
+	public EpicFightDamageSource setStunType(StunType stunType) {
 		this.getDamageSourceElements().stunType = stunType;
 		return this;
 	}
 
-	public ExtendedDamageSource.StunType getStunType() {
+	public StunType getStunType() {
 		return this.getDamageSourceElements().stunType;
 	}
 
@@ -126,5 +139,9 @@ public class EpicFightDamageSource extends EntityDamageSource {
 
 	public StaticAnimation getAnimation() {
 		return this.animation == null ? Animations.DUMMY_ANIMATION : this.animation;
+	}
+
+	public boolean is(EpicFightDamageSources.TYPE type) {
+		return this.sourceType.equals(type);
 	}
 }

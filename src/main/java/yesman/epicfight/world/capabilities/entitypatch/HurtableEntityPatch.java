@@ -14,12 +14,10 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-
-import java.util.Collection;
 
 public abstract class HurtableEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
     private boolean stunReductionDecreases;
@@ -62,7 +60,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
         return null;
     }
 
-    public abstract boolean applyStun(ExtendedDamageSource.StunType stunType, float stunTime);
+    public abstract boolean applyStun(StunType stunType, float stunTime);
 
     public float getWeight() {
         return (float)this.original.getAttributeValue(Attributes.MAX_HEALTH) * 2.0F;
@@ -75,10 +73,10 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
     public void setStunShield(float value) {
     }
 
-    public void setStunReductionOnHit(ExtendedDamageSource.StunType stunType) {
+    public void setStunReductionOnHit(StunType stunType) {
         this.stunReductionDecreases = true;
 
-        if (stunType != ExtendedDamageSource.StunType.NONE) {
+        if (stunType != StunType.NONE) {
             this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
             this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
             this.stunReductionDecreases = true;

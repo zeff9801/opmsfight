@@ -1,3 +1,4 @@
+
 package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.entity.LivingEntity;

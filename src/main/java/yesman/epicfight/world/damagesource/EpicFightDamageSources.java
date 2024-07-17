@@ -3,37 +3,56 @@ package yesman.epicfight.world.damagesource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resources.DataPackRegistries;
 import net.minecraft.util.DamageSource;
-import net.minecraft.world.World;
 
 public class EpicFightDamageSources {
 
-    public static EpicFightDamageSource copy(DamageSource damageSource) {
-        return new EpicFightDamageSource(damageSource);
+    public enum TYPE {
+        EXECUTION("execution"),
+        SHOCK_WAVE("shock_wave"),
+        WITHER_BEAM("wither_beam"),
+        TRIDENT("mob"),
+        MOB_ATTACK("mob"),
+        PLAYER_ATTACK("player"),
+        ENDER_DRAGON_BREATH("enderdragon_breath"),
+        VANILLA_GENERIC("");
+
+        public String identifierName;
+
+        TYPE(String identifierName) {
+            this.identifierName = identifierName;
+        }
+    }
+
+    public static EpicFightDamageSource copy(DamageSource source) {
+        return new EpicFightDamageSource(TYPE.EXECUTION, owner, owner);
+    }
+
+    public static EpicFightDamageSource execution(LivingEntity owner) {
+        return new EpicFightDamageSource(TYPE.EXECUTION, owner, owner);
     }
 
     public static EpicFightDamageSource shockwave(LivingEntity owner) {
-        return new EpicFightDamageSource("shock_wave", owner, owner);
+        return new EpicFightDamageSource(TYPE.SHOCK_WAVE, owner, owner);
     }
 
     public static EpicFightDamageSource witherBeam(LivingEntity owner) {
-        return new EpicFightDamageSource("wither_beam", owner, owner);
+        return new EpicFightDamageSource(TYPE.WITHER_BEAM, owner, owner);
     }
 
     public static EpicFightDamageSource trident(Entity owner, Entity causingEntity) {
-        return new EpicFightDamageSource("mob", owner, causingEntity);
+        return new EpicFightDamageSource(TYPE.TRIDENT, owner, causingEntity);
     }
 
     public static EpicFightDamageSource mobAttack(LivingEntity owner) {
-        return new EpicFightDamageSource("mob", owner);
+        return new EpicFightDamageSource(TYPE.MOB_ATTACK, owner);
     }
 
     public static EpicFightDamageSource playerAttack(PlayerEntity owner) {
-        return new EpicFightDamageSource("player", owner);
+        return new EpicFightDamageSource(TYPE.PLAYER_ATTACK, owner);
     }
 
     public static EpicFightDamageSource enderDragonBreath(LivingEntity owner, Entity causingEntity) {
-        return new EpicFightDamageSource("enderdragon_breath", owner, owner);
+        return new EpicFightDamageSource(TYPE.ENDER_DRAGON_BREATH, owner, owner);
     }
 }
