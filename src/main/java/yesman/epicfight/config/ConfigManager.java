@@ -1,13 +1,12 @@
 package yesman.epicfight.config;
 
-import java.io.File;
-
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
-
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.loading.FMLPaths;
 import yesman.epicfight.main.EpicFightMod;
+
+import java.io.File;
 
 public class ConfigManager {
 	public static final ForgeConfigSpec COMMON_CONFIG;
@@ -23,9 +22,10 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue SKILLBOOK_CHEST_LOOT;
 	
 	static {
-		CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve(EpicFightMod.CONFIG_FILE_PATH).toString())).sync().autosave().writingMode(WritingMode.REPLACE).build();
-		file.load();
-		ForgeConfigSpec.Builder client = new ForgeConfigSpec.Builder();
+        try (CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve(EpicFightMod.CONFIG_FILE_PATH).toString())).sync().autosave().writingMode(WritingMode.REPLACE).build()) {
+            file.load();
+        }
+        ForgeConfigSpec.Builder client = new ForgeConfigSpec.Builder();
 		ForgeConfigSpec.Builder server = new ForgeConfigSpec.Builder();
 		
 		DO_VANILLA_ATTACK = server.define("default_gamerule.doVanillaAttack", true);

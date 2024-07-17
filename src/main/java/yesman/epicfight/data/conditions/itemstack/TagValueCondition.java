@@ -90,14 +90,12 @@ public class TagValueCondition extends ItemStackCondition {
 				for (INBT tag : CompoundNBT) {
 					if (tag instanceof CompoundNBT compTag && compTag.contains(arrayKey)) {
 						ListNBT listTag = (ListNBT)compTag.get(arrayKey);
-						
-						for (INBT listTagElement : listTag) {
-							childs.add(listTagElement);
-						}
+
+                        childs.addAll(listTag);
 					}
 				}
 			} else {
-				int index = Integer.valueOf(sIndex);
+				int index = Integer.parseInt(sIndex);
 				
 				for (INBT tag : CompoundNBT) {
 					if (tag instanceof CompoundNBT compTag && compTag.contains(arrayKey)) {

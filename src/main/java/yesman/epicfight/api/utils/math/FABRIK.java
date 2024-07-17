@@ -1,15 +1,14 @@
 package yesman.epicfight.api.utils.math;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import com.joml.Quaternionf;
 import net.minecraft.util.math.vector.Vector3f;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
+
+import java.util.List;
 
 public class FABRIK {
 	private final Armature armature;
@@ -102,7 +101,7 @@ public class FABRIK {
 		return list;
 	}
 
-	class Chain {
+	static class Chain {
 		final String jointName;
 		float length;
 		Vec3f tail;

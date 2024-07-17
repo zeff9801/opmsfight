@@ -108,21 +108,12 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 
 	public void loadAnimation(IResourceManager resourceManager) {
 		try {
-			loadClip(resourceManager, this); //TODO HERE BREKS!!!!
+			loadClip(resourceManager, this);
 		} catch (Exception e) {
 			AnimationManager.getInstance().onFailed(this);
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		/*try {
-			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.byId(id);
-			this.jointTransforms = animation.jointTransforms;
-			this.setTotalTime(animation.totalTime);
-		} catch (NumberFormatException e) {
-			load(resourceManager, this);
-		}
-		this.onLoaded();*/
 	}
 
 	public void postInit() {

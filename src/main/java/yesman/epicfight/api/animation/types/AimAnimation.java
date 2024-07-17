@@ -1,15 +1,9 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.List;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.math.MathHelper;
-import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -20,6 +14,8 @@ import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.util.List;
 
 public class AimAnimation extends StaticAnimation {
 	public StaticAnimation lookUp;
@@ -110,7 +106,7 @@ public class AimAnimation extends StaticAnimation {
 			loadClip(resourceManager, this.lookDown);
 			loadClip(resourceManager, this.lying);
 		} catch (Exception e) {
-			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+            EpicFightMod.LOGGER.warn("Failed to load animation: {}", this.resourceLocation);
 			e.printStackTrace();
 		}
 	}

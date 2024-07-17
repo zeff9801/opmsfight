@@ -190,10 +190,10 @@ public class Layer {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append(this.isBaseLayer() ? "Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer(" + this.priority + ") : ");
-		sb.append(this.animationPlayer.getAnimation() + " ");
-		sb.append(", prev elapsed time: " + this.animationPlayer.getPrevElapsedTime() + " ");
-		sb.append(", elapsed time: " + this.animationPlayer.getElapsedTime() + " ");
-		sb.append(", total time: " + this.animationPlayer.getAnimation().getTotalTime() + " ");
+		sb.append(this.animationPlayer.getAnimation()).append(" ");
+		sb.append(", prev elapsed time: ").append(this.animationPlayer.getPrevElapsedTime()).append(" ");
+		sb.append(", elapsed time: ").append(this.animationPlayer.getElapsedTime()).append(" ");
+		sb.append(", total time: ").append(this.animationPlayer.getAnimation().getTotalTime()).append(" ");
 
 		return sb.toString();
 	}

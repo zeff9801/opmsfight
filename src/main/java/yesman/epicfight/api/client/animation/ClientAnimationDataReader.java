@@ -30,12 +30,11 @@ public class ClientAnimationDataReader {
 	private final List<TrailInfo> trailInfo;
 
 	public static void readAndApply(StaticAnimation animation, IResource iresource) {
-		InputStream inputstream = null;
+		InputStream inputstream;
 
         inputstream = iresource.getInputStream();
 
-        assert inputstream != null;
-		readAndApply(animation, inputstream);
+        readAndApply(animation, inputstream);
 	}
 
 	public static void readAndApply(StaticAnimation animation, InputStream resourceReader) {

@@ -496,7 +496,7 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		} else {
 			extract.put("model", original.get("model"));
 			extract.put("armature", original.get("armature"));
-			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
+			extract.putBoolean("isHumanoid", original.contains("isHumanoid") && original.getBoolean("isHumanoid"));
 			extract.put("renderer", original.get("renderer"));
 			extract.put("faction", original.get("faction"));
 			extract.put("default_livingmotions", original.get("default_livingmotions"));

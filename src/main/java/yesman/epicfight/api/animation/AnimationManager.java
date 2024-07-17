@@ -18,6 +18,7 @@ import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.IOException;
@@ -155,7 +156,7 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(IResourceManager resourceManager, IProfiler profilerIn) {
 		reloadResourceManager(resourceManager);
-		//Armatures.build(resourceManager);
+		Armatures.build(resourceManager);
 
 		this.animationClips.clear();
 		this.animationIdMap.clear();
@@ -165,7 +166,7 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 
 		registryMap.forEach((key, value) -> {
-			EpicFightMod.LOGGER.info("Register animations from " + key);
+            EpicFightMod.LOGGER.info("Register animations from {}", key);
 			this.currentWorkingModid = key;
 			value.run();
 			this.currentWorkingModid = null;

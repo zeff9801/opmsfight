@@ -1,11 +1,7 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
@@ -23,6 +19,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class EditSwitchingItemScreen extends Screen {
@@ -162,7 +161,8 @@ public class EditSwitchingItemScreen extends Screen {
 				try {
 					EditSwitchingItemScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), left + 4, top + 1);
 				} catch (Exception e) {
-				}
+                    throw new RuntimeException(e);
+                }
 				
 				ITextComponent Component = this.item.getName(ItemStack.EMPTY);
 				RegisteredItemList.this.minecraft.font.draw(matrixStack, Component, (float) (left + 30), (float) top + 5, 16777215);

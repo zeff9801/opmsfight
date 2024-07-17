@@ -124,7 +124,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
             d1 = (Math.random() - Math.random()) * 0.01D;
         }
 
-        power *= 1.0D - this.original.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+        power *= (float) (1.0D - this.original.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
 
         if (power > 0.0D) {
             this.original.hasImpulse = true;

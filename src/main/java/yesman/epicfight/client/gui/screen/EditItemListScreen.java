@@ -1,14 +1,9 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.List;
-
-import org.lwjgl.opengl.GL11;
-
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.DialogTexts;
@@ -28,6 +23,9 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.lwjgl.opengl.GL11;
+
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class EditItemListScreen extends Screen {
@@ -362,7 +360,8 @@ public class EditItemListScreen extends Screen {
 			try {
 				EditItemListScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), this.x, this.y);
 			} catch (Exception e) {
-			}
+                throw new RuntimeException(e);
+            }
 		}
 	}
 	

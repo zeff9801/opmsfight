@@ -30,6 +30,6 @@ public class OffAnimation extends StaticAnimation {
 	
 	@Override
 	public void loadAnimation(IResourceManager resourceManager) {
-		;
+
 	}
 }

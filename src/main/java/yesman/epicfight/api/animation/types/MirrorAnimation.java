@@ -39,7 +39,7 @@ public class MirrorAnimation extends StaticAnimation {
 			loadClip(resourceManager, this.original);
 			loadClip(resourceManager, this.mirror);
 		} catch (Exception e) {
-			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+            EpicFightMod.LOGGER.warn("Failed to load animation: {}", this.resourceLocation);
 			e.printStackTrace();
 		}
 

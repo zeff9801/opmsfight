@@ -546,9 +546,7 @@ public class JsonModelLoader {
 
 			float[] matrixElements = new float[16];
 
-			for (int j = 0; j < 16; j++) {
-				matrixElements[j] = trasnformMatrix[i*16 + j];
-			}
+            System.arraycopy(trasnformMatrix, i * 16 + 0, matrixElements, 0, 16);
 
 			OpenMatrix4f matrix = OpenMatrix4f.load(null, matrixElements);
 			matrix.transpose();
