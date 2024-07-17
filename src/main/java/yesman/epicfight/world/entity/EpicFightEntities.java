@@ -33,8 +33,11 @@ public class EpicFightEntities {
 		EntityType.Builder.<WitherGhostClone>of(WitherGhostClone::new, EntityClassification.MONSTER)
 			.fireImmune().sized(0.9F, 3.5F).clientTrackingRange(10).build("wither_ghost")
 		);
-	
-	public static void registerSpawnPlacements() {
+	public static final RegistryObject<EntityType<DodgeLeft>> DODGE_LEFT = ENTITIES.register("dodge_left", () ->
+			EntityType.Builder.<DodgeLeft>of(DodgeLeft::new, EntityClassification.MISC)
+					.sized(0.0F, 0.0F).clientTrackingRange(6).updateInterval(1).noSummon().noSave().build("dodge_left")
+	);
+    public static void registerSpawnPlacements() {
 		EntitySpawnPlacementRegistry.register(WITHER_SKELETON_MINION.get(), EntitySpawnPlacementRegistry.PlacementType.ON_GROUND,
 				Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MonsterEntity::checkAnyLightMonsterSpawnRules);
 	}

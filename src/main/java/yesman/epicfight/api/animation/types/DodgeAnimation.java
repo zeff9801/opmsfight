@@ -9,6 +9,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.entity.DodgeLeft;
 
 import java.util.function.Function;
 
@@ -49,7 +50,7 @@ public class DodgeAnimation extends ActionAnimation {
 		super.begin(entitypatch);
 
 		if (!entitypatch.isLogicalClient() && entitypatch != null) {
-//			entitypatch.getOriginal().level.addFreshEntity(new DodgeLeft(entitypatch)); //TODO Implement DodgeLeft
+			entitypatch.getOriginal().level.addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}
 }
