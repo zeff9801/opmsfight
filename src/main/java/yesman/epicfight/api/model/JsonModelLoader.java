@@ -51,13 +51,12 @@ public class JsonModelLoader {
 		this.resourceLocation = resourceLocation;
 
 		try {
-			if (resourceManager != null) {
-				// Load resource using Minecraft's resource manager
+			try {
 				IResource resource = resourceManager.getResource(resourceLocation);
 				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
-			} else {
+			} catch (NoSuchElementException e) {
 				// In this case, reads the animation data from mod.jar (Especially in a server)
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
@@ -72,9 +71,6 @@ public class JsonModelLoader {
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
-
-			jsonReader.setLenient(true);
-			this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 		} catch (IOException e) {
 			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
 		} finally {

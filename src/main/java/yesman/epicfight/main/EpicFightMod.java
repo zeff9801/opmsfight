@@ -26,6 +26,7 @@ import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -156,24 +157,24 @@ public class EpicFightMod {
 		event.enqueueWork(WeaponTypeReloadListener::registerDefaultWeaponTypes);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
-	
-	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
-		if (!isPhysicalClient()) {
-			event.addListener(AnimationManager.getInstance());
-		}
-
-		event.addListener(new ColliderPreset());
-		//event.addListener(new SkillManager());
-		//event.addListener(new WeaponTypeReloadListener());
-		event.addListener(new ItemCapabilityReloadListener());
-		event.addListener(new MobPatchReloadListener());
-	}
 
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(new JointMaskReloadListener());
 		event.registerReloadListener(Meshes.INSTANCE);
 		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
+	}
+
+	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
+		if (!isPhysicalClient()) {
+			event.addListener(AnimationManager.getInstance());
+		}
+
+		event.addListener(new ColliderPreset());
+//		event.addListener(new SkillManager());
+		event.addListener(new WeaponTypeReloadListener());
+		event.addListener(new ItemCapabilityReloadListener());
+		event.addListener(new MobPatchReloadListener());
 	}
 
 	/**
