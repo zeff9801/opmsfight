@@ -223,7 +223,7 @@ public class EpicFightSkills {
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueModifier.multiplier(2.5F))
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION, ValueModifier.adder(20.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
-				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.StunType.HOLD)
+				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.BLADE_RUSH_SKILL)
 				.registerPropertiesToAnimation());

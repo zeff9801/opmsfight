@@ -15,6 +15,9 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 
 public class AreaEffectBreath extends AreaEffectCloudEntity {
@@ -55,6 +58,8 @@ public class AreaEffectBreath extends AreaEffectCloudEntity {
 				
 				this.setRadius(f);
 			}
+
+			EpicFightDamageSource damageSource = EpicFightDamageSources.enderDragonBreath(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION).setStunType(StunType.SHORT);
 			
 			this.victims.entrySet().removeIf((p_146784_) -> {
 				return this.tickCount >= p_146784_.getValue();
@@ -70,13 +75,13 @@ public class AreaEffectBreath extends AreaEffectCloudEntity {
 						double d3 = d8 * d8 + d1 * d1;
 						
 						if (d3 <= (double) (f * f)) {
+
 							this.victims.put(livingentity, this.tickCount + 3);
 							livingentity.invulnerableTime = 0;
-							IndirectEpicFightDamageSource damagesource = new IndirectEpicFightDamageSource("indirectMagic", this.getOwner(), this, StunType.StunType.SHORT);
-							damagesource.setInitialPosition(this.initialFirePosition);
-							damagesource.bypassArmor().setMagic();
-							damagesource.setImpact(2.0F);
-							livingentity.hurt(damagesource, 3.0F);
+
+							damageSource.setInitialPosition(this.initialFirePosition);
+							damageSource.setImpact(2.0F);
+							livingentity.hurt(damageSource, 3.0F);
 						}
 					}
 				}

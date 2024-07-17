@@ -49,7 +49,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		if (executer.isLogicalClient()) {
 			return executer.getSkill(this.getCategory()).isReady() || executer.getOriginal().isCreative();
 		} else {
-			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer) == this && executer.getOriginal().getVehicle() == null && (!executer.getSkill(this.category).isActivated() || this.activateType == ActivateType.TOGGLE);
+			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer, executer.getValidItemInHand(Hand.MAIN_HAND)) == this && executer.getOriginal().getVehicle() == null && (!executer.getSkill(this.category).isActivated() || this.activateType == ActivateType.TOGGLE);
 		}
 	}
 	
@@ -96,7 +96,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		
 		impactCorrector.merge(ValueModifier.multiplier(1.0F + EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemStack) * 0.12F));
 		
-		damage = damageCorrector.getTotalValue(playerpatch.getDamageToEntity(null, null, (float)damage));
+		damage = damageCorrector.getTotalValue(playerpatch.getModifiedBaseDamage((float)damage)); //TODO Most likely wrong, but this class is not used in new skills system
 		armorNegation = armorNegationCorrector.getTotalValue((float)armorNegation);
 		impact = impactCorrector.getTotalValue((float)impact);
 		maxStrikes = maxStrikesCorrector.getTotalValue((float)maxStrikes);

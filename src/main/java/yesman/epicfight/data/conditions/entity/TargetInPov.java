@@ -1,20 +1,9 @@
 package yesman.epicfight.data.conditions.entity;
 
 import java.util.List;
-import java.util.function.Function;
 
-import io.netty.util.internal.StringUtil;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
@@ -65,7 +54,7 @@ public class TargetInPov extends MobPatchCondition {
 	public List<ParameterEditor> getAcceptingParameters(Screen screen) {
 		return List.of();
 	}
-\
+
 	public static class TargetInPovHorizontal extends TargetInPov {
 		public TargetInPovHorizontal() {
 		}

@@ -32,21 +32,21 @@ public class BerserkerSkill extends PassiveSkill {
 			event.setAttackSpeed(Math.min(5.0F, attackSpeed * (1.0F + lostHealthPercentage)));
 		});
 		
-		listener.addEventListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID, (event) -> {
+		listener.addEventListener(EventType.MODIFY_DAMAGE_EVENT, EVENT_UUID, (event) -> {
 			PlayerEntity player = event.getPlayerPatch().getOriginal();
 			float health = player.getHealth();
 			float maxHealth = player.getMaxHealth();
 			float lostHealthPercentage = (maxHealth - health) / maxHealth;
 			lostHealthPercentage = (float)Math.floor(lostHealthPercentage * 100.0F) * 0.003F;
-			float attackDamage = event.getAttackDamage();
-			event.setAttackDamage(attackDamage * (1.0F + lostHealthPercentage));
+			float attackDamage = event.getDamage();
+			event.setDamage(attackDamage * (1.0F + lostHealthPercentage));
 		});
 	}
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
 		container.getExecuter().getEventListener().removeListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.MODIFY_DAMAGE_EVENT, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.UseAction;
@@ -24,6 +25,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -103,7 +105,7 @@ public class ClientEvents {
 	@SubscribeEvent
 	public static void rightClickItemClient(RightClickItem event) {
 		if (event.getSide() == LogicalSide.CLIENT) {
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
 			
 			if (playerpatch != null && playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAction.NONE) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.CLIENT_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
@@ -116,32 +118,6 @@ public class ClientEvents {
 			}
 		}
 	}
-	
-	@SubscribeEvent
-	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
-		LocalPlayerPatch oldCap = (LocalPlayerPatch)event.getOldPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-		
-		if (oldCap != null) {
-			LocalPlayerPatch newCap = (LocalPlayerPatch)event.getNewPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-
-//			newCap.copySkillsFrom(oldCap); //TODO Uncomment this if skills do not get copied over after player respawned
-			newCap.onRespawnLocalPlayer(event);
-			newCap.copySkillsFrom(oldCap);
-			newCap.toMode(oldCap.getPlayerMode(), false);
-		}
-	}
-	
-	@SubscribeEvent
-	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
-		if (event.getPlayer() != null) {
-			ItemCapabilityReloadListener.reset();
-			ItemCapabilityProvider.clear();
-			EntityPatchProvider.clear();
-
-			ClientEngine.getInstance().renderEngine.zoomOut(0);
-			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
-		}
-	}
 
 	@SubscribeEvent
 	public static void clientLoggingInEvent(ClientPlayerNetworkEvent.LoggedInEvent event) {
@@ -151,4 +127,35 @@ public class ClientEvents {
 			ClientEngine.getInstance().controllEngine.setPlayerPatch(playerpatch);
 		}
 	}
+	
+	@SubscribeEvent
+	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
+		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
+		
+		if (oldCap != null) {
+			LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
+
+			if (newCap != null) {
+				//			newCap.copySkillsFrom(oldCap); //TODO Uncomment this if skills do not get copied over after player respawned
+				newCap.onRespawnLocalPlayer(event);
+				newCap.toMode(oldCap.getPlayerMode(), false);
+				ClientEngine.getInstance().controllEngine.setPlayerPatch(newCap);
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+		if (event.getPlayer() != null) {
+			ItemCapabilityReloadListener.reset();
+			ItemCapabilityProvider.clear();
+			EntityPatchProvider.clear();
+			WeaponTypeReloadListener.clear();
+
+			ClientEngine.getInstance().renderEngine.zoomOut(0);
+			ClientEngine.getInstance().renderEngine.registerRenderer();
+		}
+	}
+
+
 }

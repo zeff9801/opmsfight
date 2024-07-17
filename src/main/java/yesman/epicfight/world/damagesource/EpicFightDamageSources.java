@@ -15,7 +15,13 @@ public class EpicFightDamageSources {
         MOB_ATTACK("mob"),
         PLAYER_ATTACK("player"),
         ENDER_DRAGON_BREATH("enderdragon_breath"),
-        VANILLA_GENERIC("");
+        VANILLA_GENERIC(""),
+        FINISHER("finisher"),
+        COUNTER("counter"),
+        WEAPON_INNATE("weapon_innate"),
+        GUARD_PUNCTURE("guard_puncture"),
+        PARTIAL_DAMAGE("partial_damage");
+
 
         public String identifierName;
 
@@ -25,7 +31,7 @@ public class EpicFightDamageSources {
     }
 
     public static EpicFightDamageSource copy(DamageSource source) {
-        return new EpicFightDamageSource(TYPE.EXECUTION, owner, owner);
+        return new EpicFightDamageSource(source);
     }
 
     public static EpicFightDamageSource execution(LivingEntity owner) {

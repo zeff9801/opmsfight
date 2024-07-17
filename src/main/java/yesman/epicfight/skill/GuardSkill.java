@@ -40,6 +40,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
@@ -167,7 +168,7 @@ public class GuardSkill extends Skill {
 			container.getDataManager().setDataSync(LAST_HIT_TICK, serverplayer.tickCount, serverplayer);
 		});
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			container.getDataManager().setDataSync(PENALTY, 0.0F, event.getPlayerPatch().getOriginal());
 		});
 		
@@ -192,8 +193,8 @@ public class GuardSkill extends Skill {
 					float impact = 0.5F;
 					float knockback = 0.25F;
 					
-					if (event.getDamageSource() instanceof ExtendedDamageSource) {
-						impact = ((ExtendedDamageSource)event.getDamageSource()).getImpact();
+					if (event.getDamageSource() instanceof EpicFightDamageSource) {
+						impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}
 					
@@ -315,13 +316,13 @@ public class GuardSkill extends Skill {
 		container.getExecuter().getEventListener().removeListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 	}
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.isUnstable() || playerState.hurt()) && executer.isBattleMode();
+		return !(executer.footsOnGround() || playerState.hurt()) && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
@@ -361,7 +362,7 @@ public class GuardSkill extends Skill {
 		return false;
 	}
 	
-	protected static enum BlockType {
+	public static enum BlockType {
 		GUARD_BREAK, GUARD, ADVANCED_GUARD
 	}
 }

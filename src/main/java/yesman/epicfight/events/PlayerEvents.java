@@ -6,8 +6,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BowItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -18,9 +20,11 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.mixin.MixinCapabilityProviderInvoker;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -40,7 +44,7 @@ public class PlayerEvents {
 	@SubscribeEvent
 	public static void startTrackingEvent(StartTracking event) {
 		Entity trackingTarget = event.getTarget();
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)trackingTarget.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		EntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(trackingTarget, EntityPatch.class);
 		
 		if (entitypatch != null) {
 			entitypatch.onStartTracking((ServerPlayerEntity)event.getPlayer());
@@ -50,15 +54,16 @@ public class PlayerEvents {
 	@SubscribeEvent
 	public static void rightClickItemServerEvent(RightClickItem event) {
 		if (event.getSide() == LogicalSide.SERVER) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			
-			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAction.NONE || !playerpatch.getHoldingItemCapability(Hand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), ServerPlayerPatch.class);
+			ItemStack itemstack = playerpatch.getOriginal().getOffhandItem();
+
+			if (playerpatch != null && (itemstack.getUseAnimation() == UseAction.NONE || !playerpatch.getHoldingItemCapability(Hand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
-				
+
 				if (playerpatch.getEntityState().movementLocked()) {
 					canceled = true;
 				}
-				
+
 				event.setCanceled(canceled);
 			}
 		}
@@ -66,18 +71,22 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void itemUseStartEvent(LivingEntityUseItemEvent.Start event) {
-		if (event.getEntity() instanceof PlayerEntity) {
-			PlayerEntity player = (PlayerEntity) event.getEntity();
-			PlayerPatch<?> playerpatch = (PlayerPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		if (event.getEntity() instanceof PlayerEntity player) {
+			PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
+
+			if (playerpatch == null) {
+				return;
+			}
+
 			Hand hand = player.getItemInHand(Hand.MAIN_HAND).equals(event.getItem()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
 			CapabilityItem itemCap = playerpatch.getHoldingItemCapability(hand);
-			
+
 			if (!playerpatch.getEntityState().canUseSkill()) {
 				event.setCanceled(true);
 			} else if (event.getItem() == player.getOffhandItem() && !playerpatch.getHoldingItemCapability(Hand.MAIN_HAND).getStyle(playerpatch).canUseOffhand()) {
 				event.setCanceled(true);
 			}
-			
+
 			if (itemCap.getUseAnimation(playerpatch) == UseAction.BLOCK) {
 				event.setDuration(Integer.MAX_VALUE);
 			}
@@ -86,67 +95,65 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void cloneEvent(PlayerEvent.Clone event) {
-		//event.getOriginal().reviveCaps();
-		ServerPlayerPatch oldCap = (ServerPlayerPatch)event.getOriginal().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-		
+		PlayerEntity originalEntity = event.getOriginal();
+		((MixinCapabilityProviderInvoker) originalEntity).invokeReviveCaps();
+		ServerPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(originalEntity, ServerPlayerPatch.class);
+
 		if (oldCap != null) {
-			ServerPlayerPatch newCap = (ServerPlayerPatch)event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			
-			if ((!event.isWasDeath() || event.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
+			ServerPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getEntity(), ServerPlayerPatch.class);
+
+			if ((!event.isWasDeath() || originalEntity.level.getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
 				newCap.copySkillsFrom(oldCap);
 			}
-			
+
 			newCap.toMode(oldCap.getPlayerMode(), false);
 		}
-		
-		//event.getOriginal().invalidateCaps();
+
+		((MixinCapabilityProviderInvoker) originalEntity).invokeInvalidateCaps();
 	}
 	
 	@SubscribeEvent
 	public static void changeDimensionEvent(PlayerEvent.PlayerChangedDimensionEvent event) {
 		PlayerEntity player = event.getPlayer();
-		ServerPlayerPatch playerpatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+		playerpatch.getAnimator().resetLivingAnimations();
 		playerpatch.modifyLivingMotionByCurrentItem();
-		
-		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayerEntity)player);
+
+		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayerEntity) player);
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), (ServerPlayerEntity)player);
 	}
 	
 	@SubscribeEvent
 	public static void itemUseStopEvent(LivingEntityUseItemEvent.Stop event) {
-		if (event.getEntity().level.isClientSide()) {
-			if (event.getEntity() instanceof ClientPlayerEntity) {
-				ClientEngine.getInstance().renderEngine.zoomOut(0);
-			}
-		} else {
-			if (event.getEntity() instanceof ServerPlayerEntity) {
-				ServerPlayerEntity player = (ServerPlayerEntity) event.getEntity();
-				ServerPlayerPatch playerpatch = (ServerPlayerPatch) player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		if (!event.getEntity().level.isClientSide()) {
+			if (event.getEntity() instanceof ServerPlayerEntity player) {
+				ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+
 				if (playerpatch != null) {
-					boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_STOP_EVENT, new ItemUseEndEvent(playerpatch));
+					boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_STOP_EVENT, new ItemUseEndEvent(playerpatch, event));
 					event.setCanceled(canceled);
 				}
 			}
 		}
 	}
-	
+
+
 	@SubscribeEvent
-	public static void itemUseTickEvent(LivingEntityUseItemEvent.Tick event) {
-		if (event.getEntity() instanceof PlayerEntity) {
-			if (event.getItem().getItem() instanceof BowItem) {
-				PlayerPatch<?> playerpatch = (PlayerPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-				if (playerpatch.getEntityState().inaction()) {
-					event.setCanceled(true);
-				}
+	public static void attackEntityEvent(AttackEntityEvent event) {
+		boolean isLivingTarget = event.getTarget() instanceof LivingEntity livingEntity && livingEntity.attackable();
+		PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
+
+		if (playerpatch != null) {
+			if (!event.getEntity().level.getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget && playerpatch.getEpicFightDamageSource() == null && !fakePlayerCheck(event.getPlayer())) {
+				event.setCanceled(true);
 			}
 		}
 	}
-	
-	@SubscribeEvent
-	public static void attackEntityEvent(AttackEntityEvent event) {
-		boolean isLivingTarget = event.getTarget() instanceof LivingEntity && ((LivingEntity) event.getTarget()).attackable();
-		if (!event.getEntity().level.getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget) {
-			event.setCanceled(true);
-		}
+
+	// Fixed by Saithe6(github)
+	public static boolean fakePlayerCheck(PlayerEntity source) {
+		return source instanceof FakePlayer;
 	}
+	
+
 }

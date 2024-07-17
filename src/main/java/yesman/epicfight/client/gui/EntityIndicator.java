@@ -16,6 +16,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
@@ -53,7 +54,7 @@ public abstract class EntityIndicator extends ModIngameGui {
 		float posZ = (float)MathHelper.lerp(partialTicks, entity.zOld, entity.getZ());
 		poseStack.pushPose();
 		poseStack.translate(-posX, -posY, -posZ);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F).toVanillaQuaternion());
 
 		float screenX = posX + x;
 		float screenY = posY + y;

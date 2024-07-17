@@ -34,6 +34,6 @@ public class KnockdownWakeupSkill extends DodgeSkill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		
-		return !(executer.isUnstable() || (playerState.hurt() && !playerState.knockDown())) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
+		return !(executer.footsOnGround() || (playerState.hurt() && !playerState.knockDown())) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
 	}
 }

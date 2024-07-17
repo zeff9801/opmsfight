@@ -1,23 +1,25 @@
-package yesman.epicfight.world.capabilities.item;
 
-import com.google.common.collect.Maps;
-import net.minecraft.util.Hand;
-import yesman.epicfight.api.animation.AnimationProvider;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+package yesman.epicfight.world.capabilities.item;
 
 import java.util.Map;
 
-public class RangedWeaponCapability extends CapabilityItem {
+import com.google.common.collect.Maps;
 
+import net.minecraft.util.Hand;
+import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+public class RangedWeaponCapability extends CapabilityItem {
 	protected Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+	protected ZoomInType zoomInType;
 
 	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
 
 		RangedWeaponCapability.Builder rangedBuilder = (RangedWeaponCapability.Builder)builder;
 		this.rangeAnimationModifiers = rangedBuilder.rangeAnimationModifiers;
+		this.zoomInType = rangedBuilder.zoomInType;
 	}
 
 	@Override
@@ -38,18 +40,24 @@ public class RangedWeaponCapability extends CapabilityItem {
 	public boolean availableOnHorse() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean canBePlacedOffhand() {
 		return false;
 	}
-	
+
 	public static RangedWeaponCapability.Builder builder() {
 		return new RangedWeaponCapability.Builder();
 	}
 
+	@Override
+	public ZoomInType getZoomInType() {
+		return this.zoomInType;
+	}
+
 	public static class Builder extends CapabilityItem.Builder {
 		private Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+		private ZoomInType zoomInType = ZoomInType.USE_TICK;
 
 		protected Builder() {
 			this.category = WeaponCategories.RANGED;
@@ -57,8 +65,13 @@ public class RangedWeaponCapability extends CapabilityItem {
 			this.rangeAnimationModifiers = Maps.newHashMap();
 		}
 
-		public Builder addAnimationsModifier(LivingMotion livingMotion, StaticAnimation animations) {
-			this.rangeAnimationModifiers.put(livingMotion, animations); //TODO dunno if correct
+		public Builder addAnimationsModifier(LivingMotion livingMotion, AnimationProvider<?> animations) {
+			this.rangeAnimationModifiers.put(livingMotion, animations);
+			return this;
+		}
+
+		public Builder zoomInType(ZoomInType zoomInType) {
+			this.zoomInType = zoomInType;
 			return this;
 		}
 	}

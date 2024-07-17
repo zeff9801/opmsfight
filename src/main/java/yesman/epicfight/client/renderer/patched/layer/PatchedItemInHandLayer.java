@@ -37,19 +37,19 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 		if (mainHandStack.getItem() != Items.AIR) {
 			if (entitypatch.getOriginal().getVehicle() != null) {
 				if (!entitypatch.getHoldingItemCapability(Hand.MAIN_HAND).availableOnHorse()) {
-					renderEngine.getItemRenderer(mainHandStack.getItem()).renderUnusableItemMount(mainHandStack, entitypatch, buffer, matrixStackIn, packedLightIn);
+					renderEngine.getItemRenderer(mainHandStack).renderUnusableItemMount(mainHandStack, entitypatch, poses, buffer, matrixStackIn, packedLightIn);
 					return;
 				}
 			}
 			
-			renderEngine.getItemRenderer(mainHandStack.getItem()).renderItemInHand(mainHandStack, entitypatch, Hand.MAIN_HAND, buffer, matrixStackIn, packedLightIn);
+			renderEngine.getItemRenderer(mainHandStack).renderItemInHand(mainHandStack, entitypatch, Hand.MAIN_HAND, humanoidArmature, poses, buffer, matrixStackIn, packedLightIn);
 		}
 		
 		
 		ItemStack offHandStack = entitypatch.getOriginal().getOffhandItem();
 		
 		if (entitypatch.isOffhandItemValid()) {
-			renderEngine.getItemRenderer(offHandStack.getItem()).renderItemInHand(offHandStack, entitypatch, Hand.OFF_HAND, buffer, matrixStackIn, packedLightIn);
+			renderEngine.getItemRenderer(offHandStack).renderItemInHand(offHandStack, entitypatch, Hand.OFF_HAND, humanoidArmature, poses, buffer, matrixStackIn, packedLightIn);
 		}
 	}
 }

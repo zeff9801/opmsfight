@@ -110,10 +110,9 @@ public abstract class Skill {
 	public PacketBuffer gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
 		return null;
 	}
-	
-	public boolean isExecutableState(PlayerPatch<?> executer) {
-		EntityState playerState = executer.getEntityState();
-		return !(executer.isUnstable() || !playerState.canUseSkill());
+
+	public boolean isExecutableState(PlayerPatch<?> executor) {
+		return !executor.getOriginal().isSpectator() && !executor.footsOnGround() && executor.getEntityState().canUseSkill();
 	}
 	
 	public boolean canExecute(PlayerPatch<?> executer) {

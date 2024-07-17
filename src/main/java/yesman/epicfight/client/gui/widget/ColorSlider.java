@@ -10,6 +10,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.Option.DoubleOption;
 
 @OnlyIn(Dist.CLIENT)
@@ -94,7 +95,7 @@ public class ColorSlider extends AbstractSlider {
 		int newX = x1 + width / 2;
 		int newY = y1 + height / 2;
 		poseStack.translate(newX, newY, 0.0F);
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
+		poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(-90.0F).toVanillaQuaternion());
 		super.fillGradient(poseStack, -height/2, -width/2, height/2, width/2, colorA, colorB);
 		poseStack.popPose();
 	}

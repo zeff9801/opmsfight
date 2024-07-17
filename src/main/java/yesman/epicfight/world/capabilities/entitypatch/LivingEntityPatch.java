@@ -197,8 +197,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, Hand hand) {
-		EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level);
-		EpicFightDamageSource damagesource = damageSources.mobAttack(this.original).setAnimation(animation);
+		EpicFightDamageSource damagesource = EpicFightDamageSources.mobAttack(this.original).setAnimation(animation);
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.original.getItemInHand(hand));

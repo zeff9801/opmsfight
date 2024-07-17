@@ -3,6 +3,7 @@ package yesman.epicfight.api.animation.types;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 
 public class KnockdownAnimation extends LongHitAnimation {
 	public KnockdownAnimation(float convertTime, String path, Armature armature) {
@@ -15,7 +16,7 @@ public class KnockdownAnimation extends LongHitAnimation {
 				.addState(EntityState.ATTACK_RESULT, (damagesource) -> {
 					if (damagesource.getEntity() != null && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 						if (damagesource instanceof EpicFightDamageSource) {
-							return ((EpicFightDamageSource)damagesource).isFinisher() ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED;
+							return ((EpicFightDamageSource)damagesource).is(EpicFightDamageSources.TYPE.FINISHER) ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED;
 						} else {
 							return AttackResult.ResultType.BLOCKED;
 						}

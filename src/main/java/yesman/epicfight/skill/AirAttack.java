@@ -6,6 +6,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.main.EpicFightMod;
@@ -25,13 +26,13 @@ public class AirAttack extends Skill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		PlayerEntity player = executer.getOriginal();
-		return !(player.isPassenger() || player.isSpectator() || executer.isUnstable() || !playerState.canBasicAttack());
+		return !(player.isPassenger() || player.isSpectator() || executer.footsOnGround() || !playerState.canBasicAttack());
 	}
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, PacketBuffer args) {
-		List<StaticAnimation> motions = executer.getHoldingItemCapability(Hand.MAIN_HAND).getAutoAttckMotion(executer);
-		StaticAnimation attackMotion = motions.get(motions.size() - 1);
+		List<AnimationProvider<?>> motions = executer.getHoldingItemCapability(Hand.MAIN_HAND).getAutoAttckMotion(executer);
+		StaticAnimation attackMotion = motions.get(motions.size() - 1).get();
 		
 		if (attackMotion != null) {
 			super.executeOnServer(executer, args);

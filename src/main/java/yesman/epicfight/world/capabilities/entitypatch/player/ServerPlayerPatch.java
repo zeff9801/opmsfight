@@ -125,8 +125,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 
 
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
-//		mainHandCap.changeWeaponInnateSkill(this, (hand == InteractionHand.MAIN_HAND) ? to : this.original.getMainHandItem()); Right one, to port
-		mainHandCap.changeWeaponInnateSkill(this);
+		mainHandCap.changeWeaponInnateSkill(this, (hand == Hand.MAIN_HAND) ? to : this.original.getMainHandItem());
 
 		if (hand == Hand.OFF_HAND) {
 			if (!from.isEmpty()) {

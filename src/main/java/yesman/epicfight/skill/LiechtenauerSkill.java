@@ -23,6 +23,7 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class LiechtenauerSkill extends SpecialAttackSkill {
@@ -41,7 +42,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 			this.setMaxDurationSynchronize((ServerPlayerPatch)container.getExecuter(), this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, container.getExecuter().getOriginal()));
 		}
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			if (container.isActivated()) {
 				if (!event.getTarget().isAlive()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), container.duration + 1);
@@ -85,8 +86,8 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 					
 					float knockback = 0.25F;
 					
-					if (damageSource instanceof ExtendedDamageSource) {
-						knockback += Math.min(((ExtendedDamageSource)damageSource).getImpact() * 0.1F, 1.0F);
+					if (damageSource instanceof EpicFightDamageSource) {
+						knockback += Math.min(((EpicFightDamageSource)damageSource).getImpact() * 0.1F, 1.0F);
 					}
 					
 					if (damageSource.getDirectEntity() instanceof LivingEntity) {
@@ -114,7 +115,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	@Override
 	public void onRemoved(SkillContainer container) {
 		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 0);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 	}
 	
@@ -146,7 +147,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 		if (executer.isLogicalClient()) {
 			return super.canExecute(executer);
 		} else {
-			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer) == this && executer.getOriginal().getVehicle() == null;
+			return executer.getHoldingItemCapability(Hand.MAIN_HAND).getInnateSkill(executer, executer.getValidItemInHand(Hand.MAIN_HAND)) == this && executer.getOriginal().getVehicle() == null;
 		}
 	}
 	

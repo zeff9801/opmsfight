@@ -13,7 +13,6 @@ import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPPlayAnimation;
-import yesman.epicfight.network.client.CPRotatePlayerYaw;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.network.server.*;
 
@@ -55,7 +54,6 @@ public class EpicFightNetworkManager {
 		int id = 0;
 		INSTANCE.registerMessage(id++, CPExecuteSkill.class, CPExecuteSkill::toBytes, CPExecuteSkill::fromBytes, CPExecuteSkill::handle);
 		INSTANCE.registerMessage(id++, CPPlayAnimation.class, CPPlayAnimation::toBytes, CPPlayAnimation::fromBytes, CPPlayAnimation::handle);
-		INSTANCE.registerMessage(id++, CPRotatePlayerYaw.class, CPRotatePlayerYaw::toBytes, CPRotatePlayerYaw::fromBytes, CPRotatePlayerYaw::handle);
 		INSTANCE.registerMessage(id++, CPChangePlayerMode.class, CPChangePlayerMode::toBytes, CPChangePlayerMode::fromBytes, CPChangePlayerMode::handle);
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);
@@ -65,7 +63,6 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPSpawnData.class, SPSpawnData::toBytes, SPSpawnData::fromBytes, SPSpawnData::handle);
 		INSTANCE.registerMessage(id++, SPChangeLivingMotion.class, SPChangeLivingMotion::toBytes, SPChangeLivingMotion::fromBytes, SPChangeLivingMotion::handle);
 		INSTANCE.registerMessage(id++, SPSetSkillValue.class, SPSetSkillValue::toBytes, SPSetSkillValue::fromBytes, SPSetSkillValue::handle);
-		INSTANCE.registerMessage(id++, SPChangePlayerYaw.class, SPChangePlayerYaw::toBytes, SPChangePlayerYaw::fromBytes, SPChangePlayerYaw::handle);
 		INSTANCE.registerMessage(id++, SPPlayAnimation.class, SPPlayAnimation::toBytes, SPPlayAnimation::fromBytes, SPPlayAnimation::handle);
 		INSTANCE.registerMessage(id++, SPPlayAnimationInstant.class, SPPlayAnimation::toBytes, SPPlayAnimationInstant::fromBytes, SPPlayAnimation::handle);
 		INSTANCE.registerMessage(id++, SPPlayAnimationAndSetTarget.class, SPPlayAnimationAndSetTarget::toBytes, SPPlayAnimationAndSetTarget::fromBytes, SPPlayAnimationAndSetTarget::handle);

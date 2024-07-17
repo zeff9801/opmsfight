@@ -1,6 +1,7 @@
 package yesman.epicfight.world.capabilities.item;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
@@ -24,6 +25,7 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.skill.GuardSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
@@ -41,19 +43,19 @@ import java.util.function.Function;
 
 public class CapabilityItem {
 	public static CapabilityItem EMPTY = CapabilityItem.builder().build();
-	protected static List<StaticAnimation> commonAutoAttackMotion;
+	protected static List<AnimationProvider<?>> commonAutoAttackMotion;
 	protected final WeaponCategory weaponCategory;
 	
 	static {
-		commonAutoAttackMotion = new ArrayList<StaticAnimation> ();
-		commonAutoAttackMotion.add(Animations.FIST_AUTO1);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO2);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO3);
-		commonAutoAttackMotion.add(Animations.FIST_DASH);
-		commonAutoAttackMotion.add(Animations.FIST_AIR_SLASH);
+		commonAutoAttackMotion = Lists.newArrayList();
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO1);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO2);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO3);
+		commonAutoAttackMotion.add(() -> Animations.FIST_DASH);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AIR_SLASH);
 	}
-	
-	public static List<StaticAnimation> getBasicAutoAttackMotion() {
+
+	public static List<AnimationProvider<?>> getBasicAutoAttackMotion() {
 		return commonAutoAttackMotion;
 	}
 	
@@ -102,19 +104,21 @@ public class CapabilityItem {
 //			}
 //		}
 	}
-	
-	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
+
+	public List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return getBasicAutoAttackMotion();
 	}
 
-	public List<StaticAnimation> getMountAttackMotion() {
+	public List<AnimationProvider<?>> getMountAttackMotion() {
 		return null;
 	}
-	
+
+
 	@Nullable
-	public Skill getInnateSkill(PlayerPatch<?> playerpatch) {
+	public Skill getInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
 		return null;
 	}
+
 	
 	@Nullable
 	public Skill getPassiveSkill() {
@@ -124,24 +128,26 @@ public class CapabilityItem {
 	public WeaponCategory getWeaponCategory() {
 		return this.weaponCategory;
 	}
-	
-	public void changeWeaponInnateSkill(PlayerPatch<?> playerpatch) {
-		Skill specialSkill = this.getInnateSkill(playerpatch);
+
+	public void changeWeaponInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
+
+		Skill weaponInnateSkill  = this.getInnateSkill(playerpatch, itemstack);
 		String skillName = "";
 		SPChangeSkill.State state = SPChangeSkill.State.ENABLE;
-		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_INNATE);
+		SkillContainer weaponInnateSkillContainer  = playerpatch.getSkill(SkillCategories.WEAPON_INNATE);
 		
-		if (specialSkill != null) {
-			if (specialSkillContainer.getSkill() != specialSkill) {
-				specialSkillContainer.setSkill(specialSkill);
+		if (weaponInnateSkill  != null) {
+			if (weaponInnateSkillContainer .getSkill() != weaponInnateSkill ) {
+				weaponInnateSkillContainer .setSkill(weaponInnateSkill );
 			}
 			
-			skillName = specialSkill.toString();
+			skillName = weaponInnateSkill .toString();
 		} else {
 			state = SPChangeSkill.State.DISABLE;
 		}
 		
-		specialSkillContainer.setDisabled(specialSkill == null);
+		weaponInnateSkillContainer.setDisabled(weaponInnateSkill == null);
+
 		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_INNATE.universalOrdinal(), skillName, state), (ServerPlayerEntity)playerpatch.getOriginal());
 		
 		Skill skill = this.getPassiveSkill();
@@ -190,9 +196,28 @@ public class CapabilityItem {
 			this.addStyleAttibutes(style, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(maxStrikes)));
 		}
 	}
-	
+
 	public final Map<Attribute, AttributeModifier> getDamageAttributesInCondition(Style style) {
-		return this.attributeMap.getOrDefault(style, this.attributeMap.get(Styles.COMMON));
+		Map<Attribute, AttributeModifier> attributes = this.attributeMap.getOrDefault(style, Maps.newHashMap());
+		this.attributeMap.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(attributes::putIfAbsent);
+
+		return attributes;
+	}
+
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, LivingEntityPatch<?> entitypatch) {
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+
+		if (entitypatch != null) {
+			Map<Attribute, AttributeModifier> modifierMap = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
+
+			if (modifierMap != null) {
+				for (Entry<Attribute, AttributeModifier> entry : modifierMap.entrySet()) {
+					map.put(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+
+		return map;
 	}
 
 	public Multimap<Attribute, AttributeModifier> getAllAttributeModifiers(EquipmentSlotType equipmentSlot) {
@@ -206,22 +231,6 @@ public class CapabilityItem {
 
 		return map;
 	}
-	
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, LivingEntityPatch<?> entitypatch) {
-		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
-		
-		if (entitypatch != null) {
-			Map<Attribute, AttributeModifier> modifierMap = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
-			
-			if (modifierMap != null) {
-				for (Entry<Attribute, AttributeModifier> entry : modifierMap.entrySet()) {
-					map.put(entry.getKey(), entry.getValue());
-				}
-			}
-		}
-		
-		return map;
-    }
 
 	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, Hand hand) {
 		return Maps.newHashMap();
@@ -231,7 +240,15 @@ public class CapabilityItem {
 		return this.canBePlacedOffhand() ? Styles.ONE_HAND : Styles.TWO_HAND;
 	}
 
+	public StaticAnimation getGuardMotion(GuardSkill skill, GuardSkill.BlockType blockType, PlayerPatch<?> playerpatch) {
+		return null;
+	}
+
 	public boolean canBePlacedOffhand() {
+		return true;
+	}
+
+	public boolean shouldCancelCombo(LivingEntityPatch<?> entitypatch) {
 		return true;
 	}
 	
@@ -242,11 +259,11 @@ public class CapabilityItem {
 	public CapabilityItem getResult(ItemStack item) {
 		return this;
 	}
-	
+
 	public boolean availableOnHorse() {
-		return this.getMountAttackMotion() != null;
+		return true;
 	}
-	
+
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
 		this.addStyleAttributes(Styles.ONE_HAND, armorNegation1, impact1, maxStrikes1);
 		this.addStyleAttributes(Styles.TWO_HAND, armorNegation2, impact2, maxStrikes2);
@@ -263,79 +280,83 @@ public class CapabilityItem {
 	public UseAction getUseAnimation(LivingEntityPatch<?> entitypatch) {
 		return UseAction.NONE;
 	}
-	
+
+	public ZoomInType getZoomInType() {
+		return ZoomInType.NONE;
+	}
+
 	public enum WeaponCategories implements WeaponCategory {
 		NOT_WEAPON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, UCHIGATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
-		
+
 		final int id;
-		
+
 		WeaponCategories() {
 			this.id = WeaponCategory.ENUM_MANAGER.assign(this);
 		}
-		
+
 		@Override
 		public int universalOrdinal() {
 			return this.id;
 		}
 	}
-	
-	public enum HoldingOption {
-		TWO_HANDED, MAINHAND_ONLY, ONE_HANDED
-	}
-	
+
 	public enum Styles implements Style {
-		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false), OCHS(false);
-		
+		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), OCHS(false);
+
 		final boolean canUseOffhand;
 		final int id;
-		
+
 		Styles(boolean canUseOffhand) {
 			this.id = Style.ENUM_MANAGER.assign(this);
 			this.canUseOffhand = canUseOffhand;
 		}
-		
+
 		@Override
 		public int universalOrdinal() {
 			return this.id;
 		}
-		
+
 		public boolean canUseOffhand() {
 			return this.canUseOffhand;
 		}
 	}
-	
+
+	public enum ZoomInType {
+		NONE, ALWAYS, USE_TICK, AIMING, CUSTOM
+	}
+
 	public static CapabilityItem.Builder builder() {
 		return new CapabilityItem.Builder();
 	}
-	
+
 	public static class Builder {
 		Function<Builder, CapabilityItem> constructor;
 		WeaponCategory category;
 		Map<Style, Map<Attribute, AttributeModifier>> attributeMap;
-		
+
 		protected Builder() {
 			this.constructor = CapabilityItem::new;
 			this.category = WeaponCategories.FIST;
 			this.attributeMap = Maps.newHashMap();
 		}
-		
+
 		public Builder constructor(Function<Builder, CapabilityItem> constructor) {
 			this.constructor = constructor;
 			return this;
 		}
-		
+
 		public Builder category(WeaponCategory category) {
 			this.category = category;
 			return this;
 		}
-		
+
 		public Builder addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
-			Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.<Attribute, AttributeModifier>newHashMap());
+			Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.newHashMap());
 			map.put(attributePair.getFirst(), attributePair.getSecond());
-			
+
 			return this;
 		}
-		
+
 		public final CapabilityItem build() {
 			return this.constructor.apply(this);
 		}

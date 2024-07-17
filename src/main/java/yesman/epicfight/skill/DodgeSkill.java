@@ -115,14 +115,14 @@ public class DodgeSkill extends Skill {
 	public void executeOnServer(ServerPlayerPatch executer, PacketBuffer args) {
 		super.executeOnServer(executer, args);
 		int i = args.readInt();
-		float yaw = args.readFloat();
-		executer.playAnimationSynchronized(this.animations[i], 0);
-		executer.changeYaw(yaw);
+		float yRot = args.readFloat();
+		executer.playAnimationSynchronized(this.animations[i].get(), 0);
+		executer.setModelYRot(yRot, true);
 	}
-	
+
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.isUnstable() || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
+		return !(executer.footsOnGround() || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable() && executer.getOriginal().getVehicle() == null;
 	}
 }
