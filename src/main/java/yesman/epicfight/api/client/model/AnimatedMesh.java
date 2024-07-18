@@ -100,8 +100,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 
                     Vector4f posVec = new Vector4f(totalPos.x, totalPos.y, totalPos.z, 1.0F);
                     Vector3f normVec = new Vector3f(totalNorm.x, totalNorm.y, totalNorm.z);
-                    posVec.mul(matrix4f);
-                    normVec.mul(matrix3f);
+                    posVec.transform(matrix4f);
+                    normVec.transform(matrix3f);
 
                     drawingFunction.draw(builder, posVec, normVec, packedLight, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
                 }

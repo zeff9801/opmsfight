@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.IVertexConsumer;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraft.util.math.vector.Matrix3f;
@@ -116,9 +117,6 @@ public abstract class Mesh<T extends VertexIndicator> {
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
 
-		//TODO This code used Vector4f and Vector3f comign from Joml.
-		//Ported the methods directly in the classes. If stuff doesn't work fine, could also be a cause
-
 		for (ModelPart<T> part : this.parts.values()) {
 			if (!part.hidden) {
 				for (VertexIndicator vi : part.getVertices()) {
@@ -127,8 +125,8 @@ public abstract class Mesh<T extends VertexIndicator> {
 					int uv = vi.uv * 2;
 					Vector4f posVec = new Vector4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
 					Vector3f normVec = new Vector3f(this.normals[norm], this.normals[norm + 1], this.normals[norm + 2]);
-					posVec.mul(matrix4f);
-					normVec.mul(matrix3f);
+					posVec.transform(matrix4f);
+					normVec.transform(matrix3f);
 					drawingFunction.draw(builder, posVec, normVec, packedLightIn, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlayCoord);
 				}
 			}

@@ -44,7 +44,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 	}
 	
 	@Override
-	public void render(ClientPlayerEntity entityIn, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack matStackIn, int packedLightIn, float partialTicks) {
+	public void 	render(ClientPlayerEntity entityIn, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack matStackIn, int packedLightIn, float partialTicks) {
 		Armature armature = entitypatch.getArmature();
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
 		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
@@ -75,12 +75,6 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTicks);
 		}
 
-		matStackIn.popPose();
-		
-		if(!entityIn.isSpectator()) {
-			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTicks);
-		}
-		
 		matStackIn.popPose();
 	}
 

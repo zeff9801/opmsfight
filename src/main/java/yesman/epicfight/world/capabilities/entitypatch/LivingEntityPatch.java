@@ -182,6 +182,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 
 	public CapabilityItem getHoldingItemCapability(Hand hand) {
+		if (hand == null) return CapabilityItem.EMPTY; //If player has no item in their inventory, this will crash. On 1.20, even if you pass a null hand, you would get an empty stack which you can check for
 		return EpicFightCapabilities.getItemStackCapability(this.original.getItemInHand(hand));
 	}
 

@@ -36,6 +36,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.forgeevent.RenderEpicFightPlayerEvent;
 import yesman.epicfight.api.client.forgeevent.UpdatePlayerMotionEvent;
+import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -263,8 +264,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 
 			Vector3d vec3d = this.original.getViewVector(partialTick);
 			Vector3d vec3d1 = this.original.getDeltaMovement();
-			double d0 = vec3d1.horizontalDistanceSqr();
-			double d1 = vec3d.horizontalDistanceSqr();
+			double d0 = VectorUtils.horizontalDistanceSqr(vec3d1);
+			double d1 = VectorUtils.horizontalDistanceSqr(vec3d);
 
 			if (d0 > 0.0D && d1 > 0.0D) {
 				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));

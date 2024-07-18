@@ -17,13 +17,12 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
+import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-
-import java.util.Vector;
 
 public class MoveCoordFunctions {
     @FunctionalInterface
@@ -168,7 +167,7 @@ public class MoveCoordFunctions {
             Vector3d targetpos = attackTarget.position();
             Vector3d toTarget = targetpos.subtract(pos);
             Vector3d viewVec = entitypatch.getOriginal().getViewVector(1.0F);
-            float horizontalDistance = Math.max((float)toTarget.horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+            float horizontalDistance = Math.max((float) VectorUtils.horizontalDistance(toTarget) - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
             Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
             float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 
@@ -238,7 +237,7 @@ public class MoveCoordFunctions {
             Vector3d pos = entitypatch.getOriginal().position();
             Vector3d targetpos = attackTarget.position();
             Vector3d toTarget = targetpos.subtract(pos);
-            float horizontalDistance = Math.max((float)toTarget.horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+            float horizontalDistance = Math.max((float)VectorUtils.horizontalDistance(toTarget) - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
             Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
             float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
             float yRot = (float)MathUtils.getYRotOfVector(toTarget);
@@ -282,7 +281,7 @@ public class MoveCoordFunctions {
         Vector3d pos = entitypatch.getOriginal().position();
         Vector3d targetpos = entitypatch.getTarget().position();
         float verticalDistance = (float) (targetpos.y - pos.y);
-        Quaternionf rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, 1.0F));
+        Quaternionf rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)VectorUtils.horizontalDistance(targetpos.subtract(pos))), new Vec3f(0.0F, 0.0F, 1.0F));
 
         for (int i = startFrame; i <= endFrame; i++) {
             Vec3f translation = keyframes[i].transform().translation();

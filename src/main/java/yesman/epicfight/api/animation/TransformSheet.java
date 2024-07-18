@@ -1,8 +1,9 @@
 package yesman.epicfight.api.animation;
 
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import com.joml.Quaternionf;
+import net.minecraft.util.math.vector.Vector3d;
+import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -118,7 +119,7 @@ public class TransformSheet {
 
 	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
-		float horizontalDistance = (float) dest.subtract(start).horizontalDistance();
+		float horizontalDistance = (float) VectorUtils.horizontalDistance(dest.subtract(start));
 		float verticalDistance = (float) Math.abs(dest.y - start.y);
 		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
 		JointTransform endJt = transform.getKeyframes()[endFrame].transform();

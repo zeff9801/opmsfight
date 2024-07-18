@@ -1,19 +1,22 @@
 package yesman.epicfight.api.utils.math;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.mojang.datafixers.util.Pair;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import com.joml.Quaternionf;
-import yesman.epicfight.api.animation.JointTransform;
-
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.joml.Quaternionf;
+import com.mojang.datafixers.util.Pair;
+
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import org.lwjgl.BufferUtils;
+import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
@@ -609,12 +612,12 @@ public class OpenMatrix4f {
 		return new Quaternionf(x, y, z, w);
 	}
 
-	public static OpenMatrix4f fromQuaternionf(Quaternionf Quaternionf) {
+	public static OpenMatrix4f fromQuaternionf(Quaternionf quaternion) {
 		OpenMatrix4f matrix = new OpenMatrix4f();
-		float x = Quaternionf.x(); //x
-		float y = Quaternionf.y(); //y
-		float z = Quaternionf.z(); //z
-		float w = Quaternionf.w(); //w
+		float x = quaternion.x();
+		float y = quaternion.y();
+		float z = quaternion.z();
+		float w = quaternion.w();
 		float xy = x * y;
 		float xz = x * z;
 		float xw = x * w;
@@ -699,19 +702,14 @@ public class OpenMatrix4f {
 
 	@Override
 	public String toString() {
-        return "\n" +
-                m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
-                m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
-                m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
-                m03 + " " + m13 + " " + m23 + " " + m33 + "\n";
+		String buf = String.valueOf("\n" +
+				m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
+				m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
+				m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
+				m03 + " " + m13 + " " + m23 + " " + m33) + "\n";
+		return buf;
 	}
 
-	/*public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
-		MATRIX_TRANSFORMER.position(0);
-		visibleMat.store(MATRIX_TRANSFORMER);
-		MATRIX_TRANSFORMER.position(0);
-		return new Matrix4f(MATRIX_TRANSFORMER.array());
-	}*/
 	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
 		float[] arr = new float[16];
 		arr[0] = visibleMat.m00;
@@ -733,9 +731,11 @@ public class OpenMatrix4f {
 
 		return new Matrix4f(arr);
 	}
+
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
-		MATRIX_TRANSFORMER.position(0);
-		mat4f.store(MATRIX_TRANSFORMER);
-		return OpenMatrix4f.load(null, MATRIX_TRANSFORMER);
+		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
+		buf.position(0);
+		mat4f.store(buf);
+		return OpenMatrix4f.load(null, buf);
 	}
 }

@@ -2,10 +2,10 @@ package yesman.epicfight.api.animation;
 
 import java.util.Map;
 
-import net.minecraft.util.math.MathHelper;
 import com.google.common.collect.Maps;
 
 import com.joml.Quaternionf;
+import net.minecraft.util.math.MathHelper;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.MatrixOperation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -60,7 +60,7 @@ public class JointTransform {
 		Quaternionf newQ = jt.rotation();
 		Vec3f newS = jt.scale;
 		this.translation.set(newV);
-		this.rotation.set(newQ.x(), newQ.y(), newQ.z(), newQ.w());
+		this.rotation.set(newQ);
 		this.scale.set(newS);
 
 		this.entries.putAll(jt.entries);
@@ -123,7 +123,7 @@ public class JointTransform {
 
 	private static JointTransform interpolateSimple(JointTransform prev, JointTransform next, float progression) {
 		return new JointTransform(MathUtils.lerpVector(prev.translation, next.translation, progression),
-				MathUtils.lerpQuaternionf(prev.rotation, next.rotation, progression),
+				MathUtils.lerpQuaternion(prev.rotation, next.rotation, progression),
 				MathUtils.lerpVector(prev.scale, next.scale, progression));
 	}
 

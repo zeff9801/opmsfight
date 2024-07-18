@@ -26,6 +26,7 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.HitEntityList.Priority;
 import yesman.epicfight.api.utils.TimePairList;
+import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
@@ -885,8 +886,8 @@ public class Animations {
 		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
 			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
 			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-			double d0 = vec3d1.horizontalDistanceSqr();
-			double d1 = vec3d.horizontalDistanceSqr();
+			double d0 = VectorUtils.horizontalDistanceSqr(vec3d1);
+			double d1 = VectorUtils.horizontalDistanceSqr(vec3d);
 
 			if (d0 > 0.0D && d1 > 0.0D) {
 				JointTransform root = pose.getOrDefaultTransform("Root");
@@ -907,8 +908,8 @@ public class Animations {
 		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
 			Vector3d vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
 			Vector3d vec3d1 = entitypatch.getOriginal().getDeltaMovement();
-			double d0 = vec3d1.horizontalDistanceSqr();
-			double d1 = vec3d.horizontalDistanceSqr();
+			double d0 = VectorUtils.horizontalDistanceSqr(vec3d1);
+			double d1 = VectorUtils.horizontalDistanceSqr(vec3d);
 
 			if (d0 > 0.0D && d1 > 0.0D) {
 				JointTransform root = pose.getOrDefaultTransform("Root");

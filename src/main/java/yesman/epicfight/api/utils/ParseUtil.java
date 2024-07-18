@@ -1,10 +1,24 @@
 package yesman.epicfight.api.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -12,17 +26,13 @@ import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.ByteNBT;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import yesman.epicfight.api.utils.math.Vec3f;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ParseUtil {
     public static int[] toIntArray(JsonArray array) {
@@ -238,20 +248,17 @@ public class ParseUtil {
         }
     }
 
-    public static JsonObject convertToJsonObject(CompoundNBT compoundTag) {
-        JsonObject root = (JsonObject) CompoundNBT.CODEC.encodeStart(JsonOps.INSTANCE, compoundTag).getOrThrow(false, e -> {});
+    public static JsonObject convertToJsonObject(CompoundNBT compoundtag) {
+        JsonObject root = CompoundNBT.CODEC.encodeStart(JsonOps.INSTANCE, compoundtag).get().left().get().getAsJsonObject();
 
-        for (String key : compoundTag.getAllKeys()) {
-            INBT tag = compoundTag.get(key);
-            if (tag instanceof ByteNBT) {
-                ByteNBT byteTag = (ByteNBT) tag;
-                byte byteValue = byteTag.getAsByte();
-                if (byteValue == 0 || byteValue == 1) {
-                    root.remove(key);
-                    root.addProperty(key, byteValue == 1);
-                }
+        for (String entry : compoundtag.getAllKeys()) {
+            INBT tag = compoundtag.get(entry);
+            if (tag instanceof ByteNBT byteTag && (byteTag.getAsByte() == 0 || byteTag.getAsByte() == 1)) {
+                root.remove(entry);
+                root.addProperty(entry, byteTag.getAsByte() == 1);
             }
         }
+
         return root;
     }
 

@@ -1,4 +1,3 @@
-
 package yesman.epicfight.api.utils.math;
 
 import com.joml.Quaternionf;
@@ -6,8 +5,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-
-import java.util.Random;
 
 public class MathUtils {
 	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {
@@ -18,14 +15,6 @@ public class MathUtils {
 		modelMatrix.translate(entityPosition).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 
 		return modelMatrix;
-	}
-
-	// Utility method to generate a random number between min and max, inclusive
-	public static int randomBetweenInclusive(Random random, int min, int max) {
-		if (min > max) {
-			throw new IllegalArgumentException("max must be greater than or equal to min");
-		}
-		return random.nextInt((max - min) + 1) + min;
 	}
 
 	/**
@@ -95,72 +84,7 @@ public class MathUtils {
 
 		return f1;
 	}
-	public static Quaternionf lerpQuaternion(Quaternionf from, Quaternionf to, float lerpAmount) {
-		float fromX = from.x();
-		float fromY = from.y();
-		float fromZ = from.z();
-		float fromW = from.w();
-		float toX = to.x();
-		float toY = to.y();
-		float toZ = to.z();
-		float toW = to.w();
-		float resultX;
-		float resultY;
-		float resultZ;
-		float resultW;
-		float dot = fromW * toW + fromX * toX + fromY * toY + fromZ * toZ;
-		float blendI = 1.0F - lerpAmount;
 
-		if (dot < 0.0F) {
-			resultW = blendI * fromW + lerpAmount * -toW;
-			resultX = blendI * fromX + lerpAmount * -toX;
-			resultY = blendI * fromY + lerpAmount * -toY;
-			resultZ = blendI * fromZ + lerpAmount * -toZ;
-		} else {
-			resultW = blendI * fromW + lerpAmount * toW;
-			resultX = blendI * fromX + lerpAmount * toX;
-			resultY = blendI * fromY + lerpAmount * toY;
-			resultZ = blendI * fromZ + lerpAmount * toZ;
-		}
-
-		Quaternionf result = new Quaternionf(resultX, resultY, resultZ, resultW);
-		normalizeQuaternion(result);
-		return result;
-	}
-	private static void normalizeQuaternion(Quaternionf quaternion) {
-		float f = quaternion.x() * quaternion.x() + quaternion.y() * quaternion.y() + quaternion.z() * quaternion.z() + quaternion.w() * quaternion.w();
-		if (f > 1.0E-6F) {
-			float f1 = fastInvSqrt(f);
-			setQuaternion(quaternion, quaternion.x() * f1, quaternion.y() * f1, quaternion.z() * f1, quaternion.w() * f1);
-		} else {
-			setQuaternion(quaternion, 0.0F, 0.0F, 0.0F, 0.0F);
-		}
-	}	public static void setQuaternion(Quaternionf quat, float x, float y, float z, float w) {
-		quat.set(x, y, z, w);
-	}
-
-	public static Quaternionf mulQuaternion(Quaternionf left, Quaternionf right, Quaternionf dest) {
-		if (dest == null) {
-			dest = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
-		}
-
-		float f = left.x();
-		float f1 = left.y();
-		float f2 = left.z();
-		float f3 = left.w();
-		float f4 = right.x();
-		float f5 = right.y();
-		float f6 = right.z();
-		float f7 = right.w();
-		float i = f3 * f4 + f * f7 + f1 * f6 - f2 * f5;
-		float j = f3 * f5 - f * f6 + f1 * f7 + f2 * f4;
-		float k = f3 * f6 + f * f5 - f1 * f4 + f2 * f7;
-		float r = f3 * f7 - f * f4 - f1 * f5 - f2 * f6;
-
-		dest.set(i, j, k, r);
-
-		return dest;
-	}
 	public static float rotWrap(double d) {
 		while (d >= 180.0) {
 			d -= 360.0;
@@ -177,7 +101,7 @@ public class MathUtils {
 	}
 
 	public static void rotateStack(MatrixStack mStack, OpenMatrix4f mat) {
-		mStack.mulPose(getQuaternionfFromMatrix(mat).toVanillaQuaternion());
+		mStack.mulPose(getQuaternionFromMatrix(mat).toVanillaQuaternion());
 	}
 
 	public static void scaleStack(MatrixStack mStack, OpenMatrix4f mat) {
@@ -205,7 +129,7 @@ public class MathUtils {
 		return Math.atan2(normalized.z, normalized.x) * (180D / Math.PI) - 90.0F;
 	}
 
-	private static Quaternionf getQuaternionfFromMatrix(OpenMatrix4f mat) {
+	private static Quaternionf getQuaternionFromMatrix(OpenMatrix4f mat) {
 		float w, x, y, z;
 		float diagonal = mat.m00 + mat.m11 + mat.m22;
 
@@ -240,7 +164,6 @@ public class MathUtils {
 		return quat;
 	}
 
-
 	public static Vec3f lerpVector(Vec3f start, Vec3f end, float weight) {
 		float x = start.x + (end.x - start.x) * weight;
 		float y = start.y + (end.y - start.y) * weight;
@@ -261,23 +184,23 @@ public class MathUtils {
 		return new Vector3d(dot * to.x * normalScale, dot * to.y * normalScale, dot * to.z * normalScale);
 	}
 
-	public static void setQuaternionf(Quaternionf quat, float x, float y, float z, float w) {
+	public static void setQuaternion(Quaternionf quat, float x, float y, float z, float w) {
 		quat.set(x, y, z, w);
 	}
 
-	public static Quaternionf mulQuaternionf(Quaternionf left, Quaternionf right, Quaternionf dest) {
+	public static Quaternionf mulQuaternion(Quaternionf left, Quaternionf right, Quaternionf dest) {
 		if (dest == null) {
 			dest = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 		}
 
-		float f = left.x(); //x
-		float f1 = left.y(); //y
-		float f2 = left.z(); //z
-		float f3 = left.w(); //w
-		float f4 = right.x(); //x
-		float f5 = right.y(); //y
-		float f6 = right.z(); //z
-		float f7 = right.w(); //w
+		float f = left.x();
+		float f1 = left.y();
+		float f2 = left.z();
+		float f3 = left.w();
+		float f4 = right.x();
+		float f5 = right.y();
+		float f6 = right.z();
+		float f7 = right.w();
 		float i = f3 * f4 + f * f7 + f1 * f6 - f2 * f5;
 		float j = f3 * f5 - f * f6 + f1 * f7 + f2 * f4;
 		float k = f3 * f6 + f * f5 - f1 * f4 + f2 * f7;
@@ -288,7 +211,7 @@ public class MathUtils {
 		return dest;
 	}
 
-	public static Quaternionf lerpQuaternionf(Quaternionf from, Quaternionf to, float lerpAmount) {
+	public static Quaternionf lerpQuaternion(Quaternionf from, Quaternionf to, float lerpAmount) {
 		float fromX = from.x();
 		float fromY = from.y();
 		float fromZ = from.z();
@@ -317,17 +240,17 @@ public class MathUtils {
 		}
 
 		Quaternionf result = new Quaternionf(resultX, resultY, resultZ, resultW);
-		normalizeQuaternionf(result);
+		normalizeQuaternion(result);
 		return result;
 	}
 
-	private static void normalizeQuaternionf(Quaternionf Quaternionf) {
-		float f = Quaternionf.x() * Quaternionf.x() + Quaternionf.y() * Quaternionf.y() + Quaternionf.z() * Quaternionf.z() + Quaternionf.w() * Quaternionf.w();
+	private static void normalizeQuaternion(Quaternionf quaternion) {
+		float f = quaternion.x() * quaternion.x() + quaternion.y() * quaternion.y() + quaternion.z() * quaternion.z() + quaternion.w() * quaternion.w();
 		if (f > 1.0E-6F) {
 			float f1 = fastInvSqrt(f);
-			setQuaternionf(Quaternionf, Quaternionf.x() * f1, Quaternionf.y() * f1, Quaternionf.z() * f1, Quaternionf.w() * f1);
+			setQuaternion(quaternion, quaternion.x() * f1, quaternion.y() * f1, quaternion.z() * f1, quaternion.w() * f1);
 		} else {
-			setQuaternionf(Quaternionf, 0.0F, 0.0F, 0.0F, 0.0F);
+			setQuaternion(quaternion, 0.0F, 0.0F, 0.0F, 0.0F);
 		}
 	}
 

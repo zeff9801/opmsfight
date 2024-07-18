@@ -27,12 +27,9 @@ public class Armature {
 	private final int jointNumber;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
-	public final String root = ("Root");
-	public final String toolR = ("Tool_R");
-	public final String toolL = ("Tool_L");
-	public final String shoulderR = ("Shoulder_R");
-	public final String torso = ("Torso");
-    public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+
+
+	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
 		this.name = name;
 		this.jointNumber = jointNumber;
 		this.rootJoint = rootJoint;
@@ -46,7 +43,7 @@ public class Armature {
 
 	protected Joint getOrLogException(Map<String, Joint> jointMap, String name) {
 		if (!jointMap.containsKey(name)) {
-            EpicFightMod.LOGGER.debug("Cannot find the joint named {} in {}", name, this.getClass().getCanonicalName());
+			EpicFightMod.LOGGER.debug("Cannot find the joint named " + name + " in " + this.getClass().getCanonicalName());
 
 			return Joint.EMPTY;
 		}
@@ -103,7 +100,7 @@ public class Armature {
 			if (pathIndex == null) {
 				throw new IllegalArgumentException("failed to get joint path index for " + joint);
 			} else {
-				pathIndex2Int = (pathIndex.isEmpty()) ? -1 : Integer.parseInt(pathIndex);
+				pathIndex2Int = (pathIndex.length() == 0) ? -1 : Integer.parseInt(pathIndex);
 				this.pathIndexMap.put(joint, pathIndex2Int);
 			}
 

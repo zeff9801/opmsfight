@@ -1,6 +1,5 @@
 package yesman.epicfight.api.utils.math;
 
-import net.minecraft.util.math.vector.Quaternion;
 import com.joml.Quaternionf;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -13,12 +12,9 @@ public class QuaternionUtils {
 	public static Axis ZN = new Axis(0.0F, 0.0F, -1.0F);
 	public static Axis ZP = new Axis(0.0F, 0.0F, 1.0F);
 
-	public static Quaternion toVanillaQuaternion(Quaternionf quaternion) {
-		return new Quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
-	}
 
-	public static Quaternionf rotationDegrees(Vector3f axis, float degrees) {
-		float angle = degrees * (float) Math.PI / 180;
+	public static Quaternionf rotationDegrees(Vector3f axis, float degress) {
+		float angle = degress * (float) Math.PI / 180;
 		return rotation(axis, angle);
 	}
 
@@ -27,6 +23,7 @@ public class QuaternionUtils {
 		quat.setAngleAxis(angle, axis.x(), axis.y(), axis.z());
 		return quat;
 	}
+
 
 	public static class Axis {
 
