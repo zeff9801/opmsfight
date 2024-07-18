@@ -12,9 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
 @Mixin(value = LivingEntity.class)
 public abstract class MixinLivingEntity {
@@ -57,24 +58,24 @@ public abstract class MixinLivingEntity {
 			info.cancel();
 		}
 	}
-	
+
 	@Inject(at = @At(value = "HEAD"), method = "getDamageAfterArmorAbsorb(Lnet/minecraft/util/DamageSource;F)F", cancellable = true)
 	private void epicfight_getDamageAfterArmorAbsorb(DamageSource source, float amount, CallbackInfoReturnable<Float> info) {
 		EpicFightDamageSource epicFightDamageSource = null;
 		LivingEntityPatch<?> attackerEntityPatch = EpicFightCapabilities.getEntityPatch(source.getEntity(), LivingEntityPatch.class);
-		
+
 		if (source instanceof EpicFightDamageSource instance) {
             epicFightDamageSource = instance;
 		} else if (source.msgId.equals("indirectMagic") && source.getDirectEntity() != null) {
-		//	ProjectilePatch<?> projectileCap = EpicFightCapabilities.getEntityPatch(source.getDirectEntity(), ProjectilePatch.class);TODO
-			
-		//	if (projectileCap != null) {
-			//	epicFightDamageSource = projectileCap.getEpicFightDamageSource(source);
-		//	}
+			ProjectilePatch<?> projectileCap = EpicFightCapabilities.getEntityPatch(source.getDirectEntity(), ProjectilePatch.class);
+
+			if (projectileCap != null) {
+				epicFightDamageSource = projectileCap.getEpicFightDamageSource(source);
+			}
 		} else if (attackerEntityPatch != null) {
 			epicFightDamageSource = attackerEntityPatch.getEpicFightDamageSource();
 		}
-		
+
 		if (epicFightDamageSource != null && !source.isBypassArmor()) {
 			this.hurtArmor(source, amount);
 			float armorNegationAmount = amount * epicFightDamageSource.getArmorNegation() * 0.01F;
