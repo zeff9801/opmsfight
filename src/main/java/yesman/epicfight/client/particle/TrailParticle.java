@@ -270,7 +270,7 @@ public class TrailParticle extends SpriteTexturedParticle {
 		TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
 		Texture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
 
-        RenderSystem.bindTexture(abstracttexture.getId());
+        RenderSystem.bindTexture(abstracttexture != null ? abstracttexture.getId() : 0);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 	    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 		// RenderSystem.setShaderTexture(0, abstracttexture.getId());
