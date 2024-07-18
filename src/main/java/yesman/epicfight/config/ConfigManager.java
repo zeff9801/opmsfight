@@ -21,8 +21,14 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue SKILLBOOK_MOB_LOOT;
 	public static final ForgeConfigSpec.BooleanValue SKILLBOOK_CHEST_LOOT;
 	public static final ForgeConfigSpec.BooleanValue CAN_SWITCH_COMBAT;
+	public static final ForgeConfigSpec.BooleanValue STIFF_COMBO_ATTACKS;
+	public static final ForgeConfigSpec.BooleanValue NO_MOBS_IN_BOSSFIGHT;
+	public static final ForgeConfigSpec.BooleanValue GLOBAL_STUN;
+	public static final ForgeConfigSpec.IntValue SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER;
+	public static final ForgeConfigSpec.IntValue SKILL_BOOK_CHEST_LOOT_MODIFYER;
 
-	static {
+
+    static {
         try (CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve(EpicFightMod.CONFIG_FILE_PATH).toString())).sync().autosave().writingMode(WritingMode.REPLACE).build()) {
             file.load();
         }
@@ -37,6 +43,12 @@ public class ConfigManager {
 		SKILLBOOK_MOB_LOOT = server.define("loot.skill_book_mob_loot", true);
 		SKILLBOOK_CHEST_LOOT = server.define("loot.skill_book_chest_loot", true);
 		CAN_SWITCH_COMBAT = server.define("default_gamerule.canSwitchCombat", true);
+		STIFF_COMBO_ATTACKS = server.define("default_gamerule.stiffComboAttacks", true);
+		GLOBAL_STUN = server.define("default_gamerule.globalStun", true);
+		NO_MOBS_IN_BOSSFIGHT = server.define("default_gamerule.noMobsInBossfight", true);
+
+		SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER = server.defineInRange("loot.skill_book_mob_drop_chance_modifier", 0, -100, 100);
+		SKILL_BOOK_CHEST_LOOT_MODIFYER = server.defineInRange("loot.skill_book_chest_drop_chance_modifier", 0, -100, 100);
 
 		INGAME_CONFIG = new ClientConfig(client);
 		CLIENT_CONFIG = client.build();
