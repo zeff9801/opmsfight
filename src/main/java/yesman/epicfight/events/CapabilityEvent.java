@@ -12,11 +12,10 @@ import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
-import yesman.epicfight.world.capabilities.provider.ProviderSkill;
+import yesman.epicfight.world.capabilities.provider.SkillCapabilityProvider;
 
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
 public class CapabilityEvent {
-
 	@SubscribeEvent
 	public static void attachItemCapability(AttachCapabilitiesEvent<ItemStack> event) {
 		if (event.getObject() != null) {
@@ -46,7 +45,7 @@ public class CapabilityEvent {
 					if (event.getObject().getCapability(EpicFightCapabilities.CAPABILITY_SKILL).orElse(null) == null) {
 
 						if (playerpatch != null) {
-							ProviderSkill skillProvider = new ProviderSkill(playerpatch);
+							SkillCapabilityProvider skillProvider = new SkillCapabilityProvider(playerpatch);
 							event.addCapability(new ResourceLocation(EpicFightMod.MODID, "skill_cap"), skillProvider);
 						}
 					}

@@ -11,11 +11,11 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
-public class ProviderSkill implements ICapabilityProvider, NonNullSupplier<CapabilitySkill>, ICapabilitySerializable<CompoundNBT> {
+public class SkillCapabilityProvider implements ICapabilityProvider, NonNullSupplier<CapabilitySkill>, ICapabilitySerializable<CompoundNBT> {
 	private CapabilitySkill capability;
 	private LazyOptional<CapabilitySkill> optional = LazyOptional.of(this);
 	
-	public ProviderSkill(PlayerPatch<?> player) {
+	public SkillCapabilityProvider(PlayerPatch<?> player) {
 		this.capability = new CapabilitySkill(player);
 	}
 	
