@@ -199,6 +199,12 @@ public class EpicFightMod {
 		PlayerSkillCommand.register(event.getDispatcher());
 	}
 
+	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent  event) {
+		event.registerReloadListener(new JointMaskReloadListener());
+		event.registerReloadListener(Meshes.INSTANCE);
+		event.registerReloadListener(AnimationManager.getInstance());
+		event.registerReloadListener(ItemSkins.INSTANCE);
+	}
 
 	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
 		if (!isPhysicalClient()) {
@@ -211,14 +217,6 @@ public class EpicFightMod {
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
 	}
-
-	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener(new JointMaskReloadListener());
-		event.registerReloadListener(Meshes.INSTANCE);
-		event.registerReloadListener(AnimationManager.getInstance());
-		event.registerReloadListener(ItemSkins.INSTANCE);
-	}
-
 
 	/**
 	 * Epic Fight utils
