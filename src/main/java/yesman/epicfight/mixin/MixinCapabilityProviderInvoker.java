@@ -8,13 +8,9 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface MixinCapabilityProviderInvoker {
 
     @Invoker(value = "reviveCaps", remap = false)
-    default void invokeReviveCaps() {
-
-    }
+    void invokeReviveCaps();
 
     @Invoker(value = "invalidateCaps", remap = false)
-    default void invokeInvalidateCaps() {
-
-    }
+    void invokeInvalidateCaps();
 
 }
