@@ -40,47 +40,89 @@
         "subtitle":"entity.hit.blade_rush_last",
         "sounds":[{"name":"epicfight:entity/hit/blade_rush", "stream":true}]
     },
-
+    
     "entity.weapon.whoosh":
     {
         "category":"master",
         "subtitle":"entity.weapon.whoosh",
         "sounds":[{"name":"epicfight:entity/weapon/whoosh", "stream":true}]
     },
-
+    
     "entity.weapon.whoosh_hard":
     {
         "category":"master",
         "subtitle":"entity.weapon.whoosh_hard",
         "sounds":[{"name":"epicfight:entity/weapon/whoosh_hard", "stream":true}]
     },
-
+    
     "entity.weapon.whoosh_small":
     {
         "category":"master",
         "subtitle":"entity.weapon.whoosh_small",
         "sounds":[{"name":"epicfight:entity/weapon/whoosh_small", "stream":true}]
     },
-
+    
     "entity.weapon.whoosh_sharp":
     {
         "category":"master",
         "subtitle":"entity.weapon.whoosh_sharp",
         "sounds":[{"name":"epicfight:entity/weapon/whoosh_sharp", "stream":true}]
     },
-
+    
     "entity.weapon.whoosh_rod":
     {
         "category":"master",
         "subtitle":"entity.weapon.whoosh_rod",
         "sounds":[{"name":"epicfight:entity/weapon/whoosh_rod", "stream":true}]
     },
-
+    
     "entity.weapon.sword_in":
     {
         "category":"master",
         "subtitle":"entity.weapon.sword_in",
         "sounds":[{"name":"epicfight:entity/weapon/sword_in", "stream":true}]
+    },
+    
+    "entity.enderdragon.dragon_breath":
+    {
+        "category":"master",
+        "subtitle":"entity.enderdragon.dragon_breath",
+        "sounds":[{"name":"epicfight:entity/enderdragon/dragon_breath", "stream":true, "attenuation_distance":200}]
+    },
+    
+    "entity.enderdragon.dragon_breath_finale":
+    {
+        "category":"master",
+        "subtitle":"entity.enderdragon.dragon_breath_finale",
+        "sounds":[{"name":"epicfight:entity/enderdragon/dragon_breath_finale", "stream":true, "attenuation_distance":200}]
+    },
+    
+    "entity.enderdragon.dragon_crystal_link":
+    {
+        "category":"master",
+        "subtitle":"entity.enderdragon.dragon_crystal_link",
+        "sounds":[{"name":"epicfight:entity/enderdragon/dragon_crystal_link", "stream":true, "attenuation_distance":200}]
+    },
+    
+    "entity.wither.wither_spell_armor":
+    {
+        "category":"master",
+        "subtitle":"entity.wither.wither_spell_armor",
+        "sounds":[{"name":"epicfight:entity/wither/wither_spell_armor", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "sfx.ground_slam_small":
+    {
+        "category":"master",
+        "subtitle":"sfx.ground_slam_small",
+        "sounds":[{"name":"epicfight:sfx/ground_slam_small", "stream":true, "attenuation_distance":25}]
+    },
+    
+    "sfx.ground_slam":
+    {
+        "category":"master",
+        "subtitle":"sfx.ground_slam",
+        "sounds":[{"name":"epicfight:sfx/ground_slam", "stream":true, "attenuation_distance":100}]
     },
     
     "sfx.buzz":
@@ -118,57 +160,41 @@
         "sounds":[{"name":"epicfight:sfx/nether_star_glitter", "stream":true, "attenuation_distance":12}]
     },
     
-    "sfx.fast_move":
-    {
-        "category":"master",
-        "subtitle":"sfx.fast_move",
-        "sounds":[{"name":"epicfight:sfx/fast_move", "stream":true, "attenuation_distance":50}]
-    },
-    "sfx.no_sound":
-    {
-        "category":"master",
-        "subtitle":"sfx.no_sound",
-        "sounds":[{"name":"epicfight:sfx/no_sound", "stream":true, "attenuation_distance":50}]
-    },
-    "sfx.ground_slam_small":
-    {
-        "category":"master",
-        "subtitle":"sfx.ground_slam_small",
-        "sounds":[{"name":"epicfight:sfx/ground_slam_small", "stream":true, "attenuation_distance":25}]
-    },
-
-    "sfx.ground_slam":
-    {
-        "category":"master",
-        "subtitle":"sfx.ground_slam",
-        "sounds":[{"name":"epicfight:sfx/ground_slam", "stream":true, "attenuation_distance":100}]
-    },
     "sfx.entity_move":
     {
         "category":"master",
         "subtitle":"sfx.entity_move",
         "sounds":[{"name":"epicfight:sfx/entity_move", "stream":true, "attenuation_distance":50}]
     },
-
+    
     "sfx.big_entity_move":
     {
         "category":"master",
         "subtitle":"sfx.big_entity_move",
         "sounds":[{"name":"epicfight:sfx/big_entity_move", "stream":true, "attenuation_distance":50}]
     },
+    
+    "sfx.no_sound":
+    {
+        "category":"master",
+        "subtitle":"sfx.no_sound",
+        "sounds":[{"name":"epicfight:sfx/no_sound", "stream":true, "attenuation_distance":50}]
+    },
+    
     "skill.forbidden_strength":
     {
         "category":"master",
         "subtitle":"skill.forbidden_strength",
         "sounds":[{"name":"epicfight:entity/skill/forbidden_strength", "stream":true, "attenuation_distance":50}]
     },
-
+    
     "skill.roll":
     {
         "category":"master",
         "subtitle":"skill.roll",
         "sounds":[{"name":"epicfight:entity/skill/roll", "stream":true}]
     },
+    
     "skill.rocket_jump":
     {
         "category":"master",
