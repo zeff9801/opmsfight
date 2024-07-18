@@ -115,7 +115,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		animator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
 		animator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
 		animator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
-		//animator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
+		animator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
 	}
 
 	public void copySkillsFrom(PlayerPatch<?> old) {

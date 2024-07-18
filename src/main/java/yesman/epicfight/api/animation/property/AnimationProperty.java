@@ -124,7 +124,7 @@ public abstract class AnimationProperty<T> {
 
 	}
 
-	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
+	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {//TODO to 1.20
 		public ActionAnimationProperty(String rl, @Nullable Codec<T> codecs) {
 			super(rl, codecs);
 		}
