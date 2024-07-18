@@ -8,6 +8,7 @@
     "MixinKeyboardHandler",
     "MixinLocalPlayer",
     "MixinLightTexture",
+    "MixinResourceLoadProgressGui",
     "MixinMinecraft"
   ],
   "mixins": [
