@@ -1,12 +1,8 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
@@ -17,14 +13,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.IDyeableArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
@@ -34,6 +31,11 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends BipedModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, BipedArmorLayer<E, M, M>, AM> {
@@ -58,9 +60,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		IVertexBuilder vertexConsumer = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture, model.getRenderProperty().isTransparent()), hasEffect);
 		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
-	
+
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, BipedArmorLayer<E, M, M> originalRenderer, MatrixStack poseStack, IRenderTypeBuffer buf, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, BipedArmorLayer<E, M, M> vanillaLayer, MatrixStack poseStack, IRenderTypeBuffer buf, int packedLightIn,
+							OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlotType slot : EquipmentSlotType.values()) {
 			if (slot.getType() != EquipmentSlotType.Group.ARMOR) {
 				continue;
@@ -75,16 +78,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					chestPart = true;
 				}
 			}
-			
+
 			if (slot == EquipmentSlotType.HEAD && this.firstPersonModel) {
 				continue;
 			}
-			
+
 			ItemStack stack = entityliving.getItemBySlot(slot);
 			Item item = stack.getItem();
-			
-			if (item instanceof ArmorItem armorItem) {
 
+			if (item instanceof ArmorItem armorItem) {
 				if (slot != item.getEquipmentSlot(stack)) {
 					return;
 				}
@@ -102,11 +104,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					poseStack.pushPose();
 					poseStack.scale(-1.0F, -1.0F, 1.0F);
 					poseStack.translate(1.0D, -1.501D, 0.0D);
-					originalRenderer.render(poseStack, buf, packedLightIn, entityliving, partialTicks, head, packedLightIn, bob, yRot, xRot);
+					vanillaLayer.render(poseStack, buf, packedLightIn, entityliving, partialTicks, head, packedLightIn, bob, yRot, xRot);
 					poseStack.popPose();
 				}
 
-				AnimatedMesh armorMesh = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				M defaultModel = vanillaLayer.getArmorModel(slot);
+				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, stack, slot, debuggingMode);
 
 				if (armorMesh == null) {
 					poseStack.popPose();
@@ -122,50 +125,60 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 
 				boolean hasEffect = stack.hasFoil();
-				
-				if (armorItem instanceof IDyeableArmorItem dyeableItem) {
+
+				/*if (armorItem instanceof IDyeableArmorItem  dyeableItem) {
 					int i = dyeableItem.getColor(stack);
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, slot, null), poses);
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, "overlay"), poses);
+
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, armorMesh, slot, null, defaultModel), poses);
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, armorMesh, slot, "overlay", defaultModel), poses);
 				} else {
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, null), poses);
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, armorMesh, slot, null, defaultModel), poses);
 				}
-				
+
+				ArmorTrim.getTrim(entityliving.level.registryAccess(), stack).ifPresent((armorTrim) -> {
+					this.renderTrim(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), armorItem.getMaterial(), armorTrim, poses);
+				});*/
+
+
 				poseStack.popPose();
 			}
 		}
 	}
-	
-	private AnimatedMesh getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlotType slot) {
-		ResourceLocation registryName = armorItem.getRegistryName();
-		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 
-		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
+	private AnimatedMesh getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, M originalModel, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlotType slot, boolean armorDebugging) {
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
+
+		if (ARMOR_MODELS.containsKey(registryName) && !armorDebugging) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			IResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "animmodels/armor/"  + armorItem.getRegistryName().getPath());
-			AnimatedMesh model;
-			
-			if (resourceManager.hasResource(rl)) {
+			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "animmodels/armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath() + ".json");
+			AnimatedMesh model = null;
+
+			try {
+				IResource resource = resourceManager.getResource(rl);
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
 				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
-			} else {
-				BipedModel<?> defaultModel = originalRenderer.getArmorModel(slot);
-				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
-				
-				if (customModel == defaultModel || !(customModel instanceof BipedModel)) {
+			} catch (FileNotFoundException e) {
+				// Resource not found, handle the case where the custom model should be used
+				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, originalModel);
+
+				if (customModel == originalModel || !(customModel instanceof BipedModel<?> humanoidModel)) {
 					model = this.mesh.getHumanoidArmorModel(slot);
 				} else {
-					model = CustomModelBakery.bakeBipedCustomArmorModel((BipedModel<?>)customModel, armorItem, slot, debuggingMode);
+					model = CustomModelBakery.bake(humanoidModel, armorItem, slot, armorDebugging);
 				}
+			} catch (IOException e) {
+				// Handle other I/O exceptions
+				throw new RuntimeException(e);
 			}
-			
-			ARMOR_MODELS.put(registryName, model);
-			
+
+
+            ARMOR_MODELS.put(registryName, model);
+
 			return model;
 		}
 	}
