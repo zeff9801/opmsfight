@@ -39,20 +39,48 @@ public class Armatures {
 	public static void build(IResourceManager resourceManager) {
 		ARMATURES.clear();
 		ModelBuildEvent.ArmatureBuild event = new ModelBuildEvent.ArmatureBuild(resourceManager, ARMATURES);
-		
-		BIPED = event.get(EpicFightMod.MODID, "entity/biped", HumanoidArmature::new);
 
+		BIPED = event.get(EpicFightMod.MODID, "entity/biped", HumanoidArmature::new);
+//		CREEPER = event.get(EpicFightMod.MODID, "entity/creeper", CreeperArmature::new);
+//		ENDERMAN = event.get(EpicFightMod.MODID, "entity/enderman", EndermanArmature::new);
+		SKELETON = event.get(EpicFightMod.MODID, "entity/skeleton", HumanoidArmature::new);
+//		SPIDER = event.get(EpicFightMod.MODID, "entity/spider", SpiderArmature::new);
+//		IRON_GOLEM = event.get(EpicFightMod.MODID, "entity/iron_golem", IronGolemArmature::new);
+//		RAVAGER = event.get(EpicFightMod.MODID, "entity/ravager", RavagerArmature::new);
+//		VEX = event.get(EpicFightMod.MODID, "entity/vex", VexArmature::new);
+//		PIGLIN = event.get(EpicFightMod.MODID, "entity/piglin", PiglinArmature::new);
+//		HOGLIN = event.get(EpicFightMod.MODID, "entity/hoglin", HoglinArmature::new);
+//		DRAGON = event.get(EpicFightMod.MODID, "entity/dragon", DragonArmature::new);
+//		WITHER = event.get(EpicFightMod.MODID, "entity/wither", WitherArmature::new);
+
+//		registerEntityTypeArmature(EntityType.CAVE_SPIDER, SPIDER);
+//		registerEntityTypeArmature(EntityType.CREEPER, CREEPER);
 		registerEntityTypeArmature(EntityType.DROWNED, BIPED);
+//		registerEntityTypeArmature(EntityType.ENDERMAN, ENDERMAN);
 		registerEntityTypeArmature(EntityType.EVOKER, BIPED);
+//		registerEntityTypeArmature(EntityType.HOGLIN, HOGLIN);
 		registerEntityTypeArmature(EntityType.HUSK, BIPED);
+//		registerEntityTypeArmature(EntityType.IRON_GOLEM, IRON_GOLEM);
+//		registerEntityTypeArmature(EntityType.PIGLIN_BRUTE, PIGLIN);
+//		registerEntityTypeArmature(EntityType.PIGLIN, PIGLIN);
 		registerEntityTypeArmature(EntityType.PILLAGER, BIPED);
+//		registerEntityTypeArmature(EntityType.RAVAGER, RAVAGER);
 		registerEntityTypeArmature(EntityType.SKELETON, SKELETON);
+//		registerEntityTypeArmature(EntityType.SPIDER, SPIDER);
 		registerEntityTypeArmature(EntityType.STRAY, SKELETON);
+//		registerEntityTypeArmature(EntityType.VEX, VEX);
 		registerEntityTypeArmature(EntityType.VINDICATOR, BIPED);
 		registerEntityTypeArmature(EntityType.WITCH, BIPED);
 		registerEntityTypeArmature(EntityType.WITHER_SKELETON, SKELETON);
+//		registerEntityTypeArmature(EntityType.ZOGLIN, HOGLIN);
 		registerEntityTypeArmature(EntityType.ZOMBIE, BIPED);
+		registerEntityTypeArmature(EntityType.ZOMBIE_VILLAGER, BIPED);
+//		registerEntityTypeArmature(EntityType.ZOMBIFIED_PIGLIN, PIGLIN);
+		registerEntityTypeArmature(EntityType.PLAYER, BIPED);
+//		registerEntityTypeArmature(EntityType.ENDER_DRAGON, DRAGON);
+//		registerEntityTypeArmature(EntityType.WITHER, WITHER);
 		registerEntityTypeArmature(EpicFightEntities.WITHER_SKELETON_MINION.get(), SKELETON);
+//		registerEntityTypeArmature(EpicFightEntities.WITHER_GHOST_CLONE.get(), WITHER);
 
 		ModLoader.get().postEvent(event);
 	}

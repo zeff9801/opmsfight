@@ -5,6 +5,7 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.api.utils.RegistryUtils;
 import yesman.epicfight.data.conditions.entity.*;
 import yesman.epicfight.data.conditions.itemstack.TagValueCondition;
 import yesman.epicfight.main.EpicFightMod;
@@ -12,6 +13,11 @@ import yesman.epicfight.main.EpicFightMod;
 import java.util.function.Supplier;
 
 public class EpicFightConditions  {
+
+	static {
+		RegistryUtils.createRegistrry(new ResourceLocation(EpicFightMod.MODID, "conditions"), Condition.class);
+	}
+
 	public static final IForgeRegistry<Condition<?>> REGISTRY = RegistryManager.ACTIVE.getRegistry(Condition.class);;
 	public static final DeferredRegister<Condition<?>> CONDITIONS = DeferredRegister.create(REGISTRY, EpicFightMod.MODID);
 

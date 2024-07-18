@@ -109,9 +109,6 @@ public class EpicFightMod {
 		Style.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, Styles.class);
 		WeaponCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, WeaponCategories.class);
 
-
-		bus.addListener(EpicFightAttributes::registerNewMobs);
-		bus.addListener(EpicFightAttributes::modifyExistingMobs);
 		bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
 		bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
 

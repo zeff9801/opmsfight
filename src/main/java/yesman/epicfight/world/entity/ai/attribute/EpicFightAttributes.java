@@ -40,49 +40,69 @@ public class EpicFightAttributes {
 	public static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("1c2249f0-19f3-11ec-9621-0242ac130002");
 	public static final RegistryObject<Attribute> MAX_EXECUTION_RESISTANCE = ATTRIBUTES.register("execution_resistance", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".execution_resistance", 0.0D, 0.0D, 10.0D).setSyncable(true));
 
-    public static void registerNewMobs(EntityAttributeCreationEvent event) {
-		event.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), AbstractSkeletonEntity.createAttributes().build());
+	public static void registerNewMobs(EntityAttributeCreationEvent event) {
 		event.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostClone.createAttributes().build());
+		event.put(EpicFightEntities.DODGE_LEFT.get(), LivingEntity.createLivingAttributes().build());
 	}
-	
+
 	public static void modifyExistingMobs(EntityAttributeModificationEvent event) {
+		commonCreature(EntityType.CAVE_SPIDER, event);
+		commonCreature(EntityType.EVOKER, event);
+		commonCreature(EntityType.IRON_GOLEM, event);
+		humanoid(EntityType.PILLAGER, event);
+		commonCreature(EntityType.RAVAGER, event);
+		commonCreature(EntityType.SPIDER, event);
+		commonCreature(EntityType.VEX, event);
+		humanoid(EntityType.VINDICATOR, event);
+		humanoid(EntityType.WITCH, event);
+		commonCreature(EntityType.HOGLIN, event);
+		commonCreature(EntityType.ZOGLIN, event);
+		commonCreature(EntityType.ENDER_DRAGON, event);
+		commonCreature(EntityType.CREEPER, event);
+		humanoid(EntityType.DROWNED, event);
+		commonCreature(EntityType.ENDERMAN, event);
+		humanoid(EntityType.HUSK, event);
+		humanoid(EntityType.PIGLIN, event);
+		humanoid(EntityType.PIGLIN_BRUTE, event);
+		humanoid(EntityType.SKELETON, event);
+		humanoid(EntityType.STRAY, event);
+		humanoid(EntityType.WITHER_SKELETON, event);
+		humanoid(EntityType.ZOMBIE, event);
+		humanoid(EntityType.ZOMBIE_VILLAGER, event);
+		humanoid(EntityType.ZOMBIFIED_PIGLIN, event);
+		commonCreature(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
 		player(EntityType.PLAYER, event);
+		commonCreature(EntityType.WITHER, event);
 	}
-    
-    private static void commonCreature(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+
+	private static void commonCreature(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
 		event.add(entityType, EpicFightAttributes.WEIGHT.get());
 		event.add(entityType, EpicFightAttributes.ARMOR_NEGATION.get());
 		event.add(entityType, EpicFightAttributes.IMPACT.get());
 		event.add(entityType, EpicFightAttributes.MAX_STRIKES.get());
 		event.add(entityType, EpicFightAttributes.STUN_ARMOR.get());
-		event.add(entityType, EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
 	}
-    
-    private static void humanoid(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
-    	commonCreature(entityType, event);
-		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get());
+
+	private static void humanoid(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+		commonCreature(entityType, event);
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_SPEED.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_MAX_STRIKES.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_IMPACT.get());
 	}
-    
-    private static void player(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
-    	humanoid(entityType, event);
+
+	private static void player(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+		humanoid(entityType, event);
 		event.add(entityType, EpicFightAttributes.MAX_STAMINA.get());
+		event.add(entityType, EpicFightAttributes.STAMINA_REGEN.get());
 	}
-    
-    private static void dragon(EntityType<? extends EnderDragonEntity> entityType, EntityAttributeModificationEvent event) {
-    	commonCreature(entityType, event);
-		event.add(entityType, Attributes.ATTACK_DAMAGE);
-	}
-    
+
 	public static AttributeModifier getArmorNegationModifier(double value) {
 		return new AttributeModifier(EpicFightAttributes.ARMOR_NEGATION_MODIFIER, EpicFightMod.MODID + ":weapon_modifier", value, AttributeModifier.Operation.ADDITION);
 	}
 
 	public static AttributeModifier getMaxStrikesModifier(int value) {
-		return new AttributeModifier(EpicFightAttributes.MAX_STRIKE_MODIFIER, EpicFightMod.MODID + ":weapon_modifier", (double) value, AttributeModifier.Operation.ADDITION);
+		return new AttributeModifier(EpicFightAttributes.MAX_STRIKE_MODIFIER, EpicFightMod.MODID + ":weapon_modifier", value, AttributeModifier.Operation.ADDITION);
 	}
 
 	public static AttributeModifier getImpactModifier(double value) {

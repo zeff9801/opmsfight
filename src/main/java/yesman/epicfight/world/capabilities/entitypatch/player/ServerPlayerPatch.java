@@ -76,9 +76,9 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 //		}, 10);
 
 
-		
-		EpicFightNetworkManager.sendToPlayer(new SPAddSkill(learnedSkill.toArray(new String[0])), this.original);
-		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
+
+//		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
 	
 	@Override
@@ -98,8 +98,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 //		}
 
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
-//		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer); //TODO This is the right packet
-		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer); //TODO This is the right packet
 	}
 
 	@Override
