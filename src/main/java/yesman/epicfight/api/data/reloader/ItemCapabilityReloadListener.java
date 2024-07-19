@@ -27,6 +27,7 @@ import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
@@ -37,6 +38,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class ItemCapabilityReloadListener extends JsonReloadListener {
@@ -127,10 +129,10 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 
 			for (INBT jsonElement : jsonArray) {
 				CompoundNBT innerTag = ((CompoundNBT)jsonElement);
-				//Supplier<Condition<ItemStack>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(innerTag.getString("condition")));
-				//Condition<ItemStack> condition = conditionProvider.get().read(innerTag.getCompound("predicate"));
+				Supplier<Condition<ItemStack>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(innerTag.getString("condition")));
+				Condition<ItemStack> condition = conditionProvider.get().read(innerTag.getCompound("predicate"));
 
-			//list.add(Pair.of(condition, deserializeWeapon(item, innerTag)));
+			list.add(Pair.of(condition, deserializeWeapon(item, innerTag)));
 			}
 
 			capability = new TagBasedSeparativeCapability(list, innerDefaultCapabilityBuilder.build());

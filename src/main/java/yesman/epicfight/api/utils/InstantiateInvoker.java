@@ -6,7 +6,11 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.collider.Collider;
+import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 
 import javax.annotation.Nullable;
@@ -32,12 +36,12 @@ public class InstantiateInvoker {
 		
 		registerKeyword(String.class, (s) -> s);
 		registerKeyword(Collider.class, (s) -> ColliderPreset.get(new ResourceLocation(s)));
-		//registerKeyword(Joint.class, (s) -> {
-		//	String[] armature$joint = s.split("\\.");
-		//	Armature armature = Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
-		//	return armature.searchJointByName(armature$joint[1]);
-		//});
-		//registerKeyword(Armature.class, (s) -> Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(s), Armature::new));
+		registerKeyword(Joint.class, (s) -> {
+			String[] armature$joint = s.split("\\.");
+			Armature armature = Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
+			return armature.searchJointByName(armature$joint[1]);
+		});
+		registerKeyword(Armature.class, (s) -> Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(s), Armature::new));
 		registerKeyword(Hand.class, Hand::valueOf);
 	}
 	
