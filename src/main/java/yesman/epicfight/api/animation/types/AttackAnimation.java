@@ -345,9 +345,9 @@ public class AttackAnimation extends ActionAnimation {
 			extendedSource.setStunType(opt);
 		});
 
-//		phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).ifPresent((opt) -> {
-//			opt.forEach(extendedSource::addExtraDamage);
-//		});
+		phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).ifPresent((opt) -> {
+			opt.forEach(extendedSource::addExtraDamage);
+		});
 
 		phase.getProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER).ifPresent((opt) -> {
 			extendedSource.setInitialPosition(opt.apply(entitypatch));

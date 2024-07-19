@@ -1,13 +1,8 @@
 package yesman.epicfight.skill;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.CreatureAttribute;
@@ -18,19 +13,19 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.text.*;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
-import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public abstract class SpecialAttackSkill extends Skill {
 	public static Skill.Builder<? extends SpecialAttackSkill> createBuilder(ResourceLocation resourceLocation) {
@@ -109,7 +104,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		
 		this.getProperty(AttackPhaseProperty.EXTRA_DAMAGE, propertyMap).ifPresent((extraDamage) -> {
 			damageComponent.append(new TranslationTextComponent(extraDamage.toString(),
-					new StringTextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(extraDamage.getArgument() * 100F) + "%").withStyle(TextFormatting.RED)))
+					new StringTextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damageComponent) + "%").withStyle(TextFormatting.RED)))
 				.withStyle(TextFormatting.DARK_GRAY);
 		});
 		
