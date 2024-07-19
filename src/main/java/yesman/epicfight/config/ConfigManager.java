@@ -26,7 +26,9 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue GLOBAL_STUN;
 	public static final ForgeConfigSpec.IntValue SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER;
 	public static final ForgeConfigSpec.IntValue SKILL_BOOK_CHEST_LOOT_MODIFYER;
-
+	public static final ForgeConfigSpec.ConfigValue<Double> GUARD_SCREEN_SHAKE_MULTIPLY;
+	public static ForgeConfigSpec.ConfigValue<Double> SCREEN_SHAKE_AMPLITUDE_MULTIPLY;
+	public static ForgeConfigSpec.ConfigValue<Boolean> DISABLE_SCREEN_SHAKE;
 
     static {
         try (CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve(EpicFightMod.CONFIG_FILE_PATH).toString())).sync().autosave().writingMode(WritingMode.REPLACE).build()) {
@@ -49,6 +51,10 @@ public class ConfigManager {
 
 		SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER = server.defineInRange("loot.skill_book_mob_drop_chance_modifier", 0, -100, 100);
 		SKILL_BOOK_CHEST_LOOT_MODIFYER = server.defineInRange("loot.skill_book_chest_drop_chance_modifier", 0, -100, 100);
+
+		DISABLE_SCREEN_SHAKE = client.define("disable_screen_shake", false);
+		SCREEN_SHAKE_AMPLITUDE_MULTIPLY = client.defineInRange("global_screen_shake_amplitude", 1.0, 0.0, 10.0);
+		GUARD_SCREEN_SHAKE_MULTIPLY = server.defineInRange("multiply", 1.0, 0.0, 10.0);
 
 		INGAME_CONFIG = new ClientConfig(client);
 		CLIENT_CONFIG = client.build();

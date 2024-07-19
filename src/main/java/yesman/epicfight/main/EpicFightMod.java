@@ -42,6 +42,7 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.PlayerModeCommand;
 import yesman.epicfight.server.commands.PlayerSkillCommand;
+import yesman.epicfight.server.commands.ShakeCameraCommand;
 import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -85,7 +86,6 @@ public class EpicFightMod {
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
 
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
-
 
 		bus.addListener(this::constructMod);
 		bus.addListener(this::doClientStuff);
@@ -197,6 +197,7 @@ public class EpicFightMod {
 	private void command(final RegisterCommandsEvent event) {
 		PlayerModeCommand.register(event.getDispatcher());
 		PlayerSkillCommand.register(event.getDispatcher());
+		ShakeCameraCommand.register(event.getDispatcher());
 	}
 
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent  event) {

@@ -1,16 +1,8 @@
 package yesman.epicfight.skill;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.BiFunction;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -27,9 +19,12 @@ import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.gameasset.EpicFightSounds;
+import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.server.CameraShake;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
@@ -43,6 +38,12 @@ import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.BiFunction;
 
 public class GuardSkill extends Skill {
 	protected static final SkillDataKey<Integer> LAST_HIT_TICK = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
@@ -249,6 +250,13 @@ public class GuardSkill extends Skill {
 		if (entitypatch != null) {
 			entitypatch.onAttackBlocked(event, playerpatch);
 		}
+		float impact = event.getAmount() / 3.0F;
+		if (event.getDamageSource() instanceof EpicFightDamageSource) {
+			impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
+		}
+
+		float amplitude = Math.min(5.0F, Math.max(0.3F, impact / 2.0F)) * ((Double) ConfigManager.GUARD_SCREEN_SHAKE_MULTIPLY.get()).floatValue();
+		EpicFightNetworkManager.sendToPlayer(new CameraShake(20, amplitude, 1.5F), (ServerPlayerEntity)playerpatch.getOriginal());
 	}
 	
 	protected float getPenaltyMultiplier(CapabilityItem itemCapapbility) {
