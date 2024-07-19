@@ -1,4 +1,3 @@
-
 package yesman.epicfight.skill;
 
 import yesman.epicfight.api.utils.ExtendableEnum;

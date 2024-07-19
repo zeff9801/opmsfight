@@ -1,11 +1,8 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
@@ -22,6 +19,8 @@ import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
+
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
@@ -55,7 +54,7 @@ public class SkillEditScreen extends Screen {
 					int l = this.height / 2 - 78;
 					
 					for (Skill learnedSkill : this.skills.getLearnedSkills(skillCategory)) {
-						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, new TranslationTextComponent(learnedSkill.getTranslatableText()), (pressedButton) -> {
+						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, new TranslationTextComponent(learnedSkill.getTranslationKey()), (pressedButton) -> {
 							if (this.minecraft.player.experienceLevel >= learnedSkill.getRequiredXp() || this.minecraft.player.isCreative()) {
 								this.skills.skillContainers[learnedSkill.getCategory().universalOrdinal()].setSkill(learnedSkill);
 								EpicFightNetworkManager.sendToServer(new CPChangeSkill(learnedSkill.getCategory().universalOrdinal(), -1, learnedSkill.toString(), !this.minecraft.player.isCreative()));

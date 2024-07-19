@@ -1,9 +1,6 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.function.Function;
-
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.TieredItem;
@@ -14,6 +11,7 @@ import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -21,6 +19,8 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.ZoomInType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.function.Function;
 
 @SuppressWarnings("deprecation") // getLevel
 public class WeaponCapabilityPresets {
@@ -172,19 +172,19 @@ public class WeaponCapabilityPresets {
                     .livingMotionModifier(Styles.TWO_HAND, LivingMotions.CREATIVE_IDLE, Animations.BIPED_HOLD_GREATSWORD)
                     .livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD);
 
-    public static final Function<Item, CapabilityItem.Builder> UCHIGATANA = (item) ->
+    public static final Function<Item, CapabilityItem.Builder> KATANA = (item) ->
             WeaponCapability.builder()
-                    .category(WeaponCategories.UCHIGATANA)
+                    .category(WeaponCategories.KATANA)
                     .styleProvider((entitypatch) -> {
-//                        if (entitypatch instanceof PlayerPatch<?> playerpatch && (playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().hasData(SkillDataKeys.SHEATH.get()) &&
-//                                playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().getDataValue(SkillDataKeys.SHEATH.get()))) {
-//                            return Styles.SHEATH;
-//                        }
+                        if (entitypatch instanceof PlayerPatch<?> playerpatch && (playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().hasData(SkillDataKeys.SHEATH.get()) &&
+                                playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().getDataValue(SkillDataKeys.SHEATH.get()))) {
+                            return Styles.SHEATH;
+                        }
                         return Styles.TWO_HAND;
                     })
                     .passiveSkill(EpicFightSkills.BATTOJUTSU_PASSIVE)
                     .hitSound(EpicFightSounds.BLADE_HIT)
-                    .collider(ColliderPreset.UCHIGATANA)
+                    .collider(ColliderPreset.KATANA)
                     .canBePlacedOffhand(false)
                     .newStyleCombo(Styles.SHEATH, Animations.UCHIGATANA_SHEATHING_AUTO, Animations.UCHIGATANA_SHEATHING_DASH, Animations.UCHIGATANA_SHEATH_AIR_SLASH)
                     .newStyleCombo(Styles.TWO_HAND, Animations.UCHIGATANA_AUTO1, Animations.UCHIGATANA_AUTO2, Animations.UCHIGATANA_AUTO3, Animations.UCHIGATANA_DASH, Animations.UCHIGATANA_AIR_SLASH)

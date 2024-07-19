@@ -13,6 +13,8 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("rawtypes")
 public class EpicFightCapabilities {
 	@CapabilityInject(EntityPatch.class)
@@ -23,7 +25,9 @@ public class EpicFightCapabilities {
     public static final Capability<ProjectilePatch> CAPABILITY_PROJECTILE = null;
 	@CapabilityInject(CapabilitySkill.class)
     public static final Capability<CapabilitySkill> CAPABILITY_SKILL = null;
-	
+
+
+
 	public static void registerCapabilities() {
 		CapabilityManager.INSTANCE.register(CapabilityItem.class, new IStorage<CapabilityItem>() {
 			@Override
@@ -73,6 +77,11 @@ public class EpicFightCapabilities {
 	public static CapabilityItem getItemStackCapability(ItemStack stack) {
 		return stack.isEmpty() ? CapabilityItem.EMPTY : stack.getCapability(CAPABILITY_ITEM, null).orElse(CapabilityItem.EMPTY);
 	}
+
+	public static CapabilityItem getItemStackCapabilityOr(ItemStack stack, @Nullable CapabilityItem defaultCap) {
+		return stack.isEmpty() ? defaultCap : stack.getCapability(CAPABILITY_ITEM).orElse(defaultCap);
+	}
+
 	@SuppressWarnings("unchecked")
 	public static <T extends EntityPatch> T getEntityPatch(Entity entity, Class<T> type) {
 		if (entity != null) {

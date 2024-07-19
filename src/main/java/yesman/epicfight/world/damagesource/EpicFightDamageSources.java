@@ -20,7 +20,9 @@ public class EpicFightDamageSources {
         COUNTER("counter"),
         WEAPON_INNATE("weapon_innate"),
         GUARD_PUNCTURE("guard_puncture"),
-        PARTIAL_DAMAGE("partial_damage");
+        PARTIAL_DAMAGE("partial_damage"),
+        FALL_DAMAGE("fall");
+
 
 
         public String identifierName;
@@ -60,5 +62,9 @@ public class EpicFightDamageSources {
 
     public static EpicFightDamageSource enderDragonBreath(LivingEntity owner, Entity causingEntity) {
         return new EpicFightDamageSource(TYPE.ENDER_DRAGON_BREATH, owner, owner);
+    }
+
+    public static EpicFightDamageSource guardPuncture(LivingEntity owner, Entity causingEntity) {
+        return new EpicFightDamageSource(TYPE.GUARD_PUNCTURE, owner, owner);
     }
 }

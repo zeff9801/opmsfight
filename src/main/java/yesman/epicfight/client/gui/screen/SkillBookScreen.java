@@ -1,17 +1,13 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.List;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -52,13 +48,13 @@ public class SkillBookScreen extends Screen {
 				if (playerpatch.getSkill(this.skill.getCategory()).getSkill() != null) {
 					tooltip = (button, matrixStack, mouseX, mouseY) -> {
 						this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslationTextComponent("gui." + EpicFightMod.MODID + ".replace",
-								new TranslationTextComponent(skill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+								new TranslationTextComponent(skill.getTranslationKey()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 					};
 				}
 			} else {
 				tooltip = (button, matrixStack, mouseX, mouseY) -> {
 					this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslationTextComponent("gui." + EpicFightMod.MODID + ".require_learning",
-							new TranslationTextComponent(priorSkill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+							new TranslationTextComponent(priorSkill.getTranslationKey()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				};
 			}
 		}
@@ -96,7 +92,7 @@ public class SkillBookScreen extends Screen {
 		AbstractGui.blit(matrixStack, posX + 25, posY + 50, 50, 50, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
 		
-		String translationName = this.skill.getTranslatableText();
+		String translationName = this.skill.getTranslationKey();
 		
 		String skillName = new TranslationTextComponent(translationName).getString();
 		int width = this.font.width(skillName);
@@ -106,16 +102,16 @@ public class SkillBookScreen extends Screen {
 		width = this.font.width(skillCategory);
 		this.font.draw(matrixStack, skillCategory, posX + 50 - (float) width / 2, posY + 130, 0);
 		
-		List<IReorderingProcessor> list = this.font.split(new TranslationTextComponent(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
-		int height = posY + 20;
-
-        for (IReorderingProcessor ireorderingprocessor1 : list) {
-            if (ireorderingprocessor1 != null) {
-                this.font.draw(matrixStack, ireorderingprocessor1, posX + 105, height, 0);
-            }
-
-            height += 10;
-        }
+//		List<IReorderingProcessor> list = this.font.split(new TranslationTextComponent(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
+//		int height = posY + 20;
+//
+//        for (IReorderingProcessor ireorderingprocessor1 : list) {
+//            if (ireorderingprocessor1 != null) {
+//                this.font.draw(matrixStack, ireorderingprocessor1, posX + 105, height, 0);
+//            }
+//
+//            height += 10;
+//        }
 		
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}

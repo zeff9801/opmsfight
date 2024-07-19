@@ -1,3 +1,4 @@
+
 package yesman.epicfight.skill;
 
 public enum SkillCategories implements SkillCategory {
@@ -10,8 +11,6 @@ public enum SkillCategories implements SkillCategory {
 	GUARD(true, true, true),
 	KNOCKDOWN_WAKEUP(false, false, false),
 	MOVER(true, true, true),
-	CHARGING_JUMP(true, true, true),
-	GROUND_SLAM(true, true, true),
 	IDENTITY(true, true, true);
 
 	boolean shouldSave;

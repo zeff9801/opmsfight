@@ -1,4 +1,3 @@
-
 package yesman.epicfight.world.entity.eventlistener;
 
 import yesman.epicfight.skill.Skill;
@@ -13,10 +12,9 @@ public class SkillConsumeEvent extends PlayerEvent<PlayerPatch<?>> {
     private float amount;
     private Skill.Resource resource;
 
-    //TODO Uncomment once skills ported
-//    public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource) {
-////        this(playerpatch, skill, resource, skill.getDefaultConsumptionAmount(playerpatch));
-//    }
+    public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource) {
+        this(playerpatch, skill, resource, skill.getDefaultConsumptionAmount(playerpatch));
+    }
 
     public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource, float amount) {
         super(playerpatch, true);

@@ -27,6 +27,7 @@ import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -36,7 +37,6 @@ import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
 import yesman.epicfight.events.*;
 import yesman.epicfight.gameasset.ColliderPreset;
-import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -44,10 +44,7 @@ import yesman.epicfight.server.commands.PlayerModeCommand;
 import yesman.epicfight.server.commands.PlayerSkillCommand;
 import yesman.epicfight.server.commands.ShakeCameraCommand;
 import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
-import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SkillCategory;
-import yesman.epicfight.skill.SkillSlot;
-import yesman.epicfight.skill.SkillSlots;
+import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -95,8 +92,6 @@ public class EpicFightMod {
 		//bus.addListener(this::buildCreativeTabWithSkillBooks);
 		bus.addListener(EpicFightAttributes::registerNewMobs);
 		bus.addListener(EpicFightAttributes::modifyExistingMobs);
-		//bus.addListener(SkillManager::createSkillRegistry);
-		//bus.addListener(SkillManager::registerSkills);
 		//bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
 
 		MinecraftForge.EVENT_BUS.addListener(this::command);
@@ -126,10 +121,10 @@ public class EpicFightMod {
 		//EpicFightSounds.SOUNDS.register(bus);
 		//EpicFightDataSerializers.ENTITY_DATA_SERIALIZER.register(bus);
 		EpicFightConditions.CONDITIONS.register(bus);
-		//SkillDataKeys.DATA_KEYS.register(bus);
+		SkillDataKeys.DATA_KEYS.register(bus);
+		SkillManager.SKILLS.register(bus);
 		//EpicFightPaintingVariants.PAINTING_VARIANTS.register(bus);
 		//EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
-
 
 		ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
 		ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
@@ -176,7 +171,6 @@ public class EpicFightMod {
 
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
 		event.enqueueWork(EpicFightCapabilities::registerCapabilities);
-		event.enqueueWork(EpicFightSkills::registerSkills);//old
 		event.enqueueWork(ProviderProjectile::registerPatches);//old
 		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);//old
 
@@ -213,7 +207,7 @@ public class EpicFightMod {
 		}
 
 		event.addListener(new ColliderPreset());
-		//event.addListener(new SkillManager());
+		event.addListener(new SkillManager());
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());

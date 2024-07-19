@@ -58,7 +58,7 @@ WeaponTypeReloadListener extends JsonReloadListener {
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "sword"), WeaponCapabilityPresets.SWORD);
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "spear"), WeaponCapabilityPresets.SPEAR);
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "greatsword"), WeaponCapabilityPresets.GREATSWORD);
-		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "uchigatana"), WeaponCapabilityPresets.UCHIGATANA);
+		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "katana"), WeaponCapabilityPresets.KATANA);
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "tachi"), WeaponCapabilityPresets.TACHI);
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "longsword"), WeaponCapabilityPresets.LONGSWORD);
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "dagger"), WeaponCapabilityPresets.DAGGER);

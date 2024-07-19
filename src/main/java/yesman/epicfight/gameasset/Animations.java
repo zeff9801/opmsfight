@@ -35,8 +35,10 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -380,8 +382,8 @@ public class Animations {
 		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/combat/spear_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/spear_onehand_airslash", biped);
-		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped);
-		//.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER));
+		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped)
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER));
 		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, biped.toolR, "biped/combat/spear_mount_attack", biped)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 		SPEAR_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_spear_hit", biped);
@@ -396,7 +398,7 @@ public class Animations {
 		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.5F, 0.65F, 1.5F, null, biped.toolR, "biped/combat/greatsword_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
 		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", biped, false)
-				//.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER))
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
 
@@ -431,7 +433,7 @@ public class Animations {
 		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, biped.torso, "biped/combat/sword_dual_airslash", biped);
 
 
-		//UCHIGATANA
+		//KATANA
 		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", biped);
 		BIPED_HOLD_UCHIGATANA = new StaticAnimation(true, "biped/living/hold_uchigatana", biped);
 		UCHIGATANA_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_uchigatana", biped);
@@ -669,8 +671,8 @@ public class Animations {
 
 
 		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, biped.toolR, "biped/combat/longsword_airslash", biped);
-		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, biped.toolR, "biped/combat/greatsword_airslash", biped);
-		//.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER));
+		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, biped.toolR, "biped/combat/greatsword_airslash", biped)
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER));
 
 
 

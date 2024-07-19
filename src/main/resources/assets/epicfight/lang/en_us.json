@@ -77,7 +77,7 @@
 	"epicfight.weapon_category.pickaxe": "Pickaxe",
 	"epicfight.weapon_category.shovel": "Shovel",
 	"epicfight.weapon_category.sword": "Sword",
-	"epicfight.weapon_category.uchigatana": "Uchigatana",
+	"epicfight.weapon_category.katana": "Katana",
 	"epicfight.weapon_category.spear": "Spear",
 	"epicfight.weapon_category.tachi": "Tachi",
 	"epicfight.weapon_category.trident": "Trident",
@@ -212,7 +212,7 @@
 	"gui.epicfight.available_weapon_types": "Available Weapon Types",
 	
 	"item.epicfight.bokken": "Bokken",
-	"item.epicfight.uchigatana": "Uchigatana",
+	"item.epicfight.katana": "Katana",
 	"item.epicfight.stray_hat": "Stray Hat",
 	"item.epicfight.stray_robe": "Stray Robe",
 	"item.epicfight.stray_pants": "Stray Pants",
@@ -246,7 +246,7 @@
 	"item.minecraft.splash_potion.effect.blooming": "Splash potion of Blooming",
 	"item.minecraft.lingering_potion.effect.blooming": "Lingering potion of Blooming",
 	
-	"item.epicfight.uchigatana.tooltip": "Sheathe Uchigatana after 5 seconds of inactivity and your next attack will be empowered.",
+	"item.epicfight.uchigatana.tooltip": "Sheathe Katana after 5 seconds of inactivity and your next attack will be empowered.",
 	"itemGroup.epicfight.items": "EpicFight Items",
 	
 	"inventory.epicfight.guide_innate_tooltip": "[%s] to see Innate skill",

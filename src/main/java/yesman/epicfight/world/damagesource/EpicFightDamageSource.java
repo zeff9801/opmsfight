@@ -11,9 +11,10 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 
+import java.util.List;
 import java.util.Set;
 
-public class EpicFightDamageSource extends EntityDamageSource {
+	public class EpicFightDamageSource extends EntityDamageSource {
 
 	private DamageSourceElements damageSourceElements = new DamageSourceElements();
 	private StaticAnimation animation;
@@ -21,7 +22,7 @@ public class EpicFightDamageSource extends EntityDamageSource {
 
 	private Entity directEntity; //If projectile, this is the entity that cast it
 
-	private final EpicFightDamageSources.TYPE sourceType;
+	private List<EpicFightDamageSources.TYPE> sourceTypes;
 
 	public EpicFightDamageSource(DamageSource damageSource) {
 		this(damageSource.msgId, damageSource.getEntity(), damageSource.getDirectEntity());
@@ -30,19 +31,19 @@ public class EpicFightDamageSource extends EntityDamageSource {
 	public EpicFightDamageSource(String sourceIdentifier, Entity sourceOwner, Entity directSourceOwner) {
 		super(sourceIdentifier, sourceOwner);
 		this.directEntity = directSourceOwner;
-		this.sourceType = EpicFightDamageSources.TYPE.VANILLA_GENERIC;
+		this.sourceTypes.add(EpicFightDamageSources.TYPE.VANILLA_GENERIC);
 		this.initialPosition = sourceOwner.position();
 	}
 
 	public EpicFightDamageSource(EpicFightDamageSources.TYPE sourceType, Entity sourceOwner) {
 		super(sourceType.identifierName, sourceOwner);
-		this.sourceType = sourceType;
+		this.sourceTypes.add(sourceType);
 		this.initialPosition = sourceOwner.position();
 	}
 
 	public EpicFightDamageSource(EpicFightDamageSources.TYPE sourceType, Entity sourceOwner, Entity directSourceOwner) {
 		super(sourceType.identifierName, sourceOwner);
-		this.sourceType = sourceType;
+		this.sourceTypes.add(sourceType);
 		this.initialPosition = sourceOwner.position();
 		this.directEntity = directSourceOwner;
 	}
@@ -141,7 +142,11 @@ public class EpicFightDamageSource extends EntityDamageSource {
 		return this.animation == null ? Animations.DUMMY_ANIMATION : this.animation;
 	}
 
+	public void addDamageType(EpicFightDamageSources.TYPE type) {
+		this.sourceTypes.add(type);
+	}
+
 	public boolean is(EpicFightDamageSources.TYPE type) {
-		return this.sourceType.equals(type);
+		return this.sourceTypes.contains(type);
 	}
 }

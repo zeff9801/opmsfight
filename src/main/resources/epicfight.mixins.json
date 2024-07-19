@@ -6,14 +6,17 @@
   "client": [
     "MixinBufferBuilder",
     "MixinKeyboardHandler",
-    "MixinLocalPlayer",
     "MixinLightTexture",
-    "MixinResourceLoadProgressGui",
-    "MixinMinecraft"
+    "MixinLocalPlayer",
+    "MixinMinecraft",
+    "MixinMinecraftInvoker",
+    "MixinMovementInputFromOptions",
+    "MixinResourceLoadProgressGui"
   ],
   "mixins": [
     "MixinCapabilityProviderInvoker",
     "MixinLivingEntity",
+    "MixinLivingEntityAccessor",
     "MixinMob",
     "MixinPlayer",
     "MixinServerPlayer"

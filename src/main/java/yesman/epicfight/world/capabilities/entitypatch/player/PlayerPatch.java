@@ -1,9 +1,13 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
@@ -16,11 +20,12 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.world.damagesource.StunType;
+import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.mixin.MixinLivingEntityAccessor;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -28,14 +33,14 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.eventlistener.AttackSpeedModifyEvent;
-import yesman.epicfight.world.entity.eventlistener.FallEvent;
-import yesman.epicfight.world.entity.eventlistener.ModifyBaseDamageEvent;
-import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
+import yesman.epicfight.world.entity.eventlistener.*;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
@@ -53,7 +58,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	protected int tickSinceLastAction;
 	protected int lastChargingTick;
 	protected int chargingAmount;
-//	protected ChargeableSkill chargingSkill; //TODO Implement ChargeableSkill
+	protected ChargeableSkill chargingSkill;
 
 	
 	public PlayerPatch() {
@@ -280,6 +285,37 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return this.getModifiedAttackSpeed(this.getAdvancedHoldingItemCapability(hand), baseSpeed);
 	}
 
+	public double getWeaponAttribute(Attribute attribute, ItemStack itemstack) {
+		ModifiableAttributeInstance attrInstance = new ModifiableAttributeInstance(attribute, (ai)->{});
+		Collection<AttributeModifier> itemModifiers = itemstack.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(attribute);
+		double baseValue = this.original.getAttribute(attribute) == null ? attribute.getDefaultValue() : this.original.getAttribute(attribute).getBaseValue();
+		attrInstance.setBaseValue(baseValue);
+
+		for (AttributeModifier modifier : this.original.getAttribute(attribute).getModifiers()) {
+			if (!itemModifiers.contains(modifier)) {
+				attrInstance.addTransientModifier(modifier);
+			}
+		}
+
+		for (AttributeModifier modifier : itemModifiers) {
+			if (!attrInstance.hasModifier(modifier)) {
+				attrInstance.addTransientModifier(modifier);
+			}
+		}
+
+		CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapabilityOr(itemstack, null);
+
+		if (itemCapability != null) {
+			for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(attribute)) {
+				if (!attrInstance.hasModifier(modifier)) {
+					attrInstance.addTransientModifier(modifier);
+				}
+			}
+		}
+
+		return attrInstance.getValue();
+	}
+
 	public float getModifiedAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
 		AttackSpeedModifyEvent event = new AttackSpeedModifyEvent(this, itemCapability, baseSpeed);
 		this.eventListeners.triggerEvents(EventType.MODIFY_ATTACK_SPEED_EVENT, event);
@@ -295,28 +331,27 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		}
 	}
 
-	//TODO Does some stuff to prevent crit damages, i don't think we need this so we can remove
-//	@Override
-//	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
-//		float fallDist = this.original.fallDistance;
-//		boolean onGround = this.original.isOnGround();
-//		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE);
-//		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
-//
-//		// Prevents crit and sweeping edge effect
-//		this.epicFightDamageSource = damageSource;
-//		this.original.attackStrengthTicker = Integer.MAX_VALUE;
-//		this.original.fallDistance = 0.0F;
-//		this.original.setOnGround(false);
-//		this.setOffhandDamage(hand, mainHandAttributes, offHandAttributes);
-//		this.original.attack(target);
-//		this.recoverMainhandDamage(hand, mainHandAttributes, offHandAttributes);
-//		this.epicFightDamageSource = null;
-//		this.original.fallDistance = fallDist;
-//		this.original.onGround = onGround;
-//
-//		return super.attack(damageSource, target, hand);
-//	}
+	@Override
+	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
+		float fallDist = this.original.fallDistance;
+		boolean onGround = this.original.isOnGround();
+		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE);
+		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
+
+		// Prevents crit and sweeping edge effect
+		this.epicFightDamageSource = damageSource;
+		((MixinLivingEntityAccessor)this.original).setAttackStrengthTicker(Integer.MAX_VALUE);
+		this.original.fallDistance = 0.0F;
+		this.original.setOnGround(false);
+		this.setOffhandDamage(hand, mainHandAttributes, offHandAttributes);
+		this.original.attack(target);
+		this.recoverMainhandDamage(hand, mainHandAttributes, offHandAttributes);
+		this.epicFightDamageSource = null;
+		this.original.fallDistance = fallDist;
+		this.original.setOnGround(onGround);
+
+		return super.attack(damageSource, target, hand);
+	}
 
 	@Override
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, Hand hand) {
@@ -359,45 +394,45 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		this.original.getEntityData().set(STAMINA, f1);
 	}
 
-	//TODO Uncomment when we will port skills
-//	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
-//		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumptionAmount(this));
-//	}
-//
-//	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
-//		return this.consumeForSkill(skill, consumeResource, amount, false);
-//	}
-//
-//
-//	/**
-//	 * Client : Checks if a player has enough resource
-//	 * Server : Checks and consumes the resource if it meets the condition
-//	 * @param amount
-//	 * @return check result
-//	 * Use this
-//	 */
-//	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount, boolean activateConsumeForce) {
-//		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
-//		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
-//
-//		if (skillConsumeEvent.isCanceled()) {
-//			return false;
-//		}
-//
-//		if (skillConsumeEvent.getResourceType().predicate.canExecute(skill, this, amount)) {
-//			if (!this.isLogicalClient()) {
-//				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
-//			}
-//
-//			return true;
-//		} else if (activateConsumeForce) {
-//			if (!this.isLogicalClient()) {
-//				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
-//			}
-//		}
-//
-//		return false;
-//	}
+
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
+		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumptionAmount(this));
+	}
+
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
+		return this.consumeForSkill(skill, consumeResource, amount, false);
+	}
+
+
+	/**
+	 * Client : Checks if a player has enough resource
+	 * Server : Checks and consumes the resource if it meets the condition
+	 * @param amount
+	 * @return check result
+	 * Use this
+	 */
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount, boolean activateConsumeForce) {
+		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
+		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
+
+		if (skillConsumeEvent.isCanceled()) {
+			return false;
+		}
+
+		if (skillConsumeEvent.getResourceType().predicate.canExecute(skill, this, amount)) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
+
+			return true;
+		} else if (activateConsumeForce) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
+		}
+
+		return false;
+	}
 
 	public void resetActionTick() {
 		this.tickSinceLastAction = 0;
@@ -407,59 +442,59 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return this.tickSinceLastAction;
 	}
 
-//	public void startSkillCharging(ChargeableSkill chargingSkill) {
-//		chargingSkill.startCharging(this);
-//		this.lastChargingTick = this.original.tickCount;
-//		this.chargingSkill = chargingSkill;
-//	}
-//
-//	public void resetSkillCharging() {
-//		if (this.chargingSkill != null) {
-//			this.chargingAmount = 0;
-//			this.chargingSkill.resetCharging(this);
-//			this.chargingSkill = null;
-//		}
-//	}
-//
-//	public boolean isChargingSkill() {
-//		return this.chargingSkill != null;
-//	}
-//
-//	public boolean isChargingSkill(Skill chargingSkill) {
-//		return this.chargingSkill == chargingSkill;
-//	}
+	public void startSkillCharging(ChargeableSkill chargingSkill) {
+		chargingSkill.startCharging(this);
+		this.lastChargingTick = this.original.tickCount;
+		this.chargingSkill = chargingSkill;
+	}
 
-//	public int getLastChargingTick() {
-//		return this.lastChargingTick;
-//	}
+	public void resetSkillCharging() {
+		if (this.chargingSkill != null) {
+			this.chargingAmount = 0;
+			this.chargingSkill.resetCharging(this);
+			this.chargingSkill = null;
+		}
+	}
 
-//	public void setChargingAmount(int amount) {
-//		if (this.isChargingSkill()) {
-//			this.chargingAmount = Math.min(amount, this.getChargingSkill().getMaxChargingTicks());
-//		} else {
-//			this.chargingAmount = 0;
-//		}
-//	}
-//
-//	public int getChargingAmount() {
-//		return this.chargingAmount;
-//	}
-//
-//	public float getSkillChargingTicks(float partialTicks) {
-//		return this.isChargingSkill() ? (this.original.tickCount - this.getLastChargingTick() - 1.0F) + partialTicks : 0;
-//	}
-//
-//	public int getSkillChargingTicks() {
-//		return this.isChargingSkill() ? Math.min(this.original.tickCount - this.getLastChargingTick(), this.chargingSkill.getMaxChargingTicks()) : 0;
-//	}
-//
-//	public int getAccumulatedChargeAmount() {
-//		return this.getChargingSkill() != null ? this.getChargingSkill().getChargingAmount(this) : 0;
-//	}
-//
-//	public ChargeableSkill getChargingSkill() {
-//		return this.chargingSkill;
-//	}
+	public boolean isChargingSkill() {
+		return this.chargingSkill != null;
+	}
+
+	public boolean isChargingSkill(Skill chargingSkill) {
+		return this.chargingSkill == chargingSkill;
+	}
+
+	public int getLastChargingTick() {
+		return this.lastChargingTick;
+	}
+
+	public void setChargingAmount(int amount) {
+		if (this.isChargingSkill()) {
+			this.chargingAmount = Math.min(amount, this.getChargingSkill().getMaxChargingTicks());
+		} else {
+			this.chargingAmount = 0;
+		}
+	}
+
+	public int getChargingAmount() {
+		return this.chargingAmount;
+	}
+
+	public float getSkillChargingTicks(float partialTicks) {
+		return this.isChargingSkill() ? (this.original.tickCount - this.getLastChargingTick() - 1.0F) + partialTicks : 0;
+	}
+
+	public int getSkillChargingTicks() {
+		return this.isChargingSkill() ? Math.min(this.original.tickCount - this.getLastChargingTick(), this.chargingSkill.getMaxChargingTicks()) : 0;
+	}
+
+	public int getAccumulatedChargeAmount() {
+		return this.getChargingSkill() != null ? this.getChargingSkill().getChargingAmount(this) : 0;
+	}
+
+	public ChargeableSkill getChargingSkill() {
+		return this.chargingSkill;
+	}
 
 	public boolean footsOnGround() {
 		return this.original.isFallFlying() || this.currentLivingMotion == LivingMotions.FALL;

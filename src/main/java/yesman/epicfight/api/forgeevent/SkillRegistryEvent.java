@@ -30,10 +30,10 @@ public class SkillRegistryEvent extends Event implements IModBusEvent {
 	}
 	
 	private static void registerIfAbsent(Map<ResourceLocation, Skill> map, Skill skill) {
-		if (map.containsKey(skill.getRegistryName())) {
-            EpicFightMod.LOGGER.info("Duplicated skill name : {}. Registration was skipped.", skill.getRegistryName());
+		if (map.containsKey(skill.getSkillRegistryName())) {
+            EpicFightMod.LOGGER.info("Duplicated skill name : {}. Registration was skipped.", skill.getSkillRegistryName());
 		} else {
-			map.put(skill.getRegistryName(), skill);
+			map.put(skill.getSkillRegistryName(), skill);
 		}
 	}
 }

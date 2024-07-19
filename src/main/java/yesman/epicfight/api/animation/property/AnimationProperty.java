@@ -19,6 +19,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.BasicAttack;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.StunType;
 
@@ -272,6 +273,7 @@ public abstract class AnimationProperty<T> {
 		public static final AttackPhaseProperty<RegistryObject<HitParticleType>> PARTICLE = new AttackPhaseProperty<RegistryObject<HitParticleType>> ();
 		public static final AttackPhaseProperty<Priority> HIT_PRIORITY = new AttackPhaseProperty<Priority> ();
 		public static final AttackPhaseProperty<Boolean> FINISHER = new AttackPhaseProperty<Boolean> ();
+		public static final AttackPhaseProperty<Set<EpicFightDamageSources.TYPE>> SOURCE_TAG = new AttackPhaseProperty<>();
 		public static final AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> SOURCE_LOCATION_PROVIDER = new AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> ();
 	}
 	@FunctionalInterface

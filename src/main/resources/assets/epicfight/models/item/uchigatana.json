@@ -2,7 +2,7 @@
 	"credit": "End_Rage waz here",
 	"parent": "item/generated",
 	"textures": {
-		"layer0": "epicfight:item/uchigatana"
+		"layer0": "epicfight:item/katana"
 	},
 	"display": {
 		"thirdperson_righthand": {

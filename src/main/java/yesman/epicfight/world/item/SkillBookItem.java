@@ -1,9 +1,5 @@
 package yesman.epicfight.world.item;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -24,6 +20,9 @@ import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class SkillBookItem extends Item {
 	public static void setContainingSkill(String name, ItemStack stack) {
@@ -55,7 +54,7 @@ public class SkillBookItem extends Item {
 			Skill skill = EpicFightSkills.getSkill(stack.getTag().getString("skill"));
 			
 			if (skill != null) {
-				tooltip.add(new TranslationTextComponent(skill.getTranslatableText()).withStyle(TextFormatting.DARK_GRAY));
+				tooltip.add(new TranslationTextComponent(skill.getTranslationKey()).withStyle(TextFormatting.DARK_GRAY));
 			}
 		}
 	}

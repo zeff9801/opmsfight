@@ -8,8 +8,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.data.reloader.SkillManager;
-import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
@@ -34,7 +32,7 @@ public class SkillActivated extends EntityPatchCondition {
     @Override
     public CompoundNBT serializePredicate() {
         CompoundNBT tag = new CompoundNBT();
-        tag.putString("skill", this.skill.getRegistryName().toString());
+        tag.putString("skill", this.skill.getSkillRegistryName().toString());
 
         return tag;
     }

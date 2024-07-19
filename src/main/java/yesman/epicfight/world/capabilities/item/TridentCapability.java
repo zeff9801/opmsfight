@@ -1,10 +1,6 @@
 
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
@@ -19,6 +15,9 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class TridentCapability extends RangedWeaponCapability {
 	private List<AnimationProvider<?>> attackMotion;
@@ -68,8 +67,6 @@ public class TridentCapability extends RangedWeaponCapability {
 			return EpicFightSkills.TSUNAMI;
 		} else if (EnchantmentHelper.hasChanneling(itemstack)) {
 			return EpicFightSkills.WRATHFUL_LIGHTING;
-		} else if (EnchantmentHelper.getLoyalty(itemstack) > 0) {
-			return EpicFightSkills.EVERLASTING_ALLEGIANCE;
 		} else {
 			return null;
 		}

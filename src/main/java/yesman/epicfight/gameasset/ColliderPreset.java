@@ -70,7 +70,7 @@ public class ColliderPreset implements IFutureReloadListener {
 			new OBBCollider(0.4D, 0.4D, 0.4D, 0D, 0D, -0.3D));
 	public static final Collider TACHI = registerCollider(new ResourceLocation(EpicFightMod.MODID, "tachi"),
 			new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 0D, -0.95D));
-	public static final Collider UCHIGATANA = registerCollider(new ResourceLocation(EpicFightMod.MODID, "uchigatana"),
+	public static final Collider KATANA = registerCollider(new ResourceLocation(EpicFightMod.MODID, "katana"),
 			new MultiOBBCollider(5, 0.4D, 0.4D, 0.7D, 0D, 0D, -0.7D));
 	public static final Collider SWORD = registerCollider(new ResourceLocation(EpicFightMod.MODID, "sword"),
 			new MultiOBBCollider(3, 0.4D, 0.4D, 0.7D, 0D, 0D, -0.35D));
