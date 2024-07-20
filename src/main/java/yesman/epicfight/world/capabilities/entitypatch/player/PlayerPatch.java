@@ -44,7 +44,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
-	private static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
+	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final DataParameter<Float> STAMINA = new DataParameter<Float> (253, DataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
@@ -241,8 +241,8 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		if (skill == null) {
 			return null;
 		}
-		//TODO Needs port to latest version after implementing most of SkillContainer new code
-		return this.getSkillCapability().skillContainers[skill.getCategory().universalOrdinal()];
+
+		return this.getSkillCapability().getSkillContainer(skill);
 	}
 
 	public SkillContainer getSkill(SkillSlot slot) {
@@ -252,10 +252,6 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public SkillContainer getSkill(int slotIndex) {
 		return this.getSkillCapability().skillContainers[slotIndex];
 	}
-
-	public SkillContainer getSkill(SkillCategory category) {
-		return this.getSkill(category.universalOrdinal());
-	} //TODO Remove once we port most of skills code, since its not used
 
 	public CapabilitySkill getSkillCapability() {
 		return this.original.getCapability(EpicFightCapabilities.CAPABILITY_SKILL).orElse(CapabilitySkill.EMPTY);

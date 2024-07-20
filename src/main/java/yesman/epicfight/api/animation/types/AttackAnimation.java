@@ -345,6 +345,10 @@ public class AttackAnimation extends ActionAnimation {
 			extendedSource.setStunType(opt);
 		});
 
+		phase.getProperty(AttackPhaseProperty.SOURCE_TAG).ifPresent((opt) -> {
+			opt.forEach(extendedSource::addDamageType);
+		});
+
 		phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).ifPresent((opt) -> {
 			opt.forEach(extendedSource::addExtraDamage);
 		});

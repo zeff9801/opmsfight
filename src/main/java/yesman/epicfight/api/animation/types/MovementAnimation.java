@@ -5,7 +5,6 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MovementAnimation extends StaticAnimation {
-
 	public MovementAnimation(boolean isRepeat, String path, Armature armature) {
 		super(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, isRepeat, path, armature);
 	}

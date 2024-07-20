@@ -284,7 +284,6 @@ public class Layer {
 		protected boolean isBaseLayer() {
 			return true;
 		}
-
 	}
 
 	@OnlyIn(Dist.CLIENT)

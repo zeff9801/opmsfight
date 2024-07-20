@@ -136,7 +136,7 @@ public class ClientEvents {
 			LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
 
 			if (newCap != null) {
-				//			newCap.copySkillsFrom(oldCap); //TODO Uncomment this if skills do not get copied over after player respawned
+				newCap.copySkillsFrom(oldCap);
 				newCap.onRespawnLocalPlayer(event);
 				newCap.toMode(oldCap.getPlayerMode(), false);
 				ClientEngine.getInstance().controllEngine.setPlayerPatch(newCap);

@@ -38,17 +38,17 @@ public class LinkAnimation extends DynamicAnimation {
 
 	@Override
 	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getStatesMap(entitypatch, time);
+		return this.toAnimation.getStatesMap(entitypatch, this, 0.0F);
 	}
 
 	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(entitypatch, 0.0F);
+		return this.toAnimation.getState(entitypatch, this, 0.0F);
 	}
 
 	@Override
 	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(stateFactor, entitypatch, 0.0F);
+		return this.toAnimation.getState(stateFactor, entitypatch, this, 0.0F);
 	}
 
 	@Override
@@ -157,7 +157,7 @@ public class LinkAnimation extends DynamicAnimation {
 
 	@Override
 	public String toString() {
-		return "LinkAnimation " + this.toAnimation;
+		return "From " + this.fromAnimation + " to " + this.toAnimation;
 	}
 
 	@Override

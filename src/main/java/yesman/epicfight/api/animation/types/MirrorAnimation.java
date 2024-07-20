@@ -29,8 +29,11 @@ public class MirrorAnimation extends StaticAnimation {
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		StaticAnimation animation = this.checkHandAndReturnAnimation(entitypatch.getOriginal().getUsedItemHand());
-		entitypatch.getClientAnimator().playAnimation(animation, 0.0F);
+
+		if (entitypatch.isLogicalClient()) {
+			StaticAnimation animation = this.checkHandAndReturnAnimation(entitypatch.getOriginal().getUsedItemHand());
+			entitypatch.getClientAnimator().playAnimation(animation, 0.0F);
+		}
 	}
 
 	@Override
@@ -96,7 +99,6 @@ public class MirrorAnimation extends StaticAnimation {
 
 		return this;
 	}
-
 
 	@Override
 	public <T> StaticAnimation addState(EntityState.StateFactor<T> factor, T val) {

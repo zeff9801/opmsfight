@@ -42,7 +42,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	protected final StateSpectrum stateSpectrum = new StateSpectrum();
 	protected ResourceLocation resourceLocation;
 
-
 	public StaticAnimation() {
 		super(0.0F, true);
 		this.resourceLocation = null;
@@ -179,7 +178,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
-
 			}
 		} else {
 			for (String jointName : joint1) {
@@ -316,12 +314,10 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		});
 	}
 
-
 	@Override
 	public boolean isStaticAnimation() {
 		return true;
 	}
-
 
 	@Override
 	public boolean doesHeadRotFollowEntityHead() {
@@ -332,7 +328,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	public int getId() {
 		return this.animationId;
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -407,6 +402,9 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		return classPath.substring(classPath.lastIndexOf(".") + 1) + " " + this.getLocation();
 	}
 
+	/**
+	 * Internal use only
+	 */
 	@Deprecated
 	public StaticAnimation addPropertyUnsafe(AnimationProperty<?> propertyType, Object value) {
 		this.properties.put(propertyType, value);

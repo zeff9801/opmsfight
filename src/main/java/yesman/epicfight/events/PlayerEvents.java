@@ -137,7 +137,6 @@ public class PlayerEvents {
 		}
 	}
 
-
 	@SubscribeEvent
 	public static void attackEntityEvent(AttackEntityEvent event) {
 		boolean isLivingTarget = event.getTarget() instanceof LivingEntity livingEntity && livingEntity.attackable();
@@ -154,6 +153,4 @@ public class PlayerEvents {
 	public static boolean fakePlayerCheck(PlayerEntity source) {
 		return source instanceof FakePlayer;
 	}
-	
-
 }

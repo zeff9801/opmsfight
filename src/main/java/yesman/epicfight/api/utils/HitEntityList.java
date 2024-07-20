@@ -1,6 +1,7 @@
 package yesman.epicfight.api.utils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import com.google.common.collect.Lists;
@@ -10,6 +11,8 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -98,14 +101,14 @@ public class HitEntityList {
 					} else {
 						GoalSelector targetingAi = mob.targetSelector;
 
-						/*for (WrappedGoal goal : targetingAi.getAvailableGoals()) { TODO
+						for (PrioritizedGoal goal : targetingAi.availableGoals) {
 							if (goal.getGoal() instanceof NearestAttackableTargetGoal<?> targetGoal) {
-								if (targetGoal.targetConditions.test(mob, attacker.getOriginal())) {
-									secondTargets.add(mob);
-									continue Outer;
-								}
+//								if (targetGoal.targetConditions.test(mob, attacker.getOriginal())) { //TODO Mixin #targetConditions because its protected
+//									secondTargets.add(mob);
+//									continue Outer;
+//								}
 							}
-						}*/
+						}
 					}
 				}
 				lastTargets.add(e);

@@ -7,6 +7,8 @@ import java.util.function.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -31,7 +33,7 @@ public class StateSpectrum {
 			}
 		}
 
-		return null;
+		return stateFactor.defaultValue();
 	}
 
 	public TypeFlexibleHashMap<StateFactor<?>> getStateMap(LivingEntityPatch<?> entitypatch, float time) {
@@ -92,12 +94,17 @@ public class StateSpectrum {
 		public void removeState(StateFactor<?> state) {
 			this.states.remove(state);
 		}
+
+		@Override
+		public String toString() {
+			return String.format("Time: %.2f ~ %.2f, States: %s", this.start, this.end, this.states);
+		}
 	}
 
 	static class ConditionalStatesInTime extends StatesInTime {
 		float start;
 		float end;
-		Map<Integer, Map<StateFactor<?>, Object>> conditionalStates = Maps.newHashMap();
+		Int2ObjectMap<Map<StateFactor<?>, Object>> conditionalStates = new Int2ObjectOpenHashMap<>();
 		Function<LivingEntityPatch<?>, Integer> condition;
 
 		public ConditionalStatesInTime(Function<LivingEntityPatch<?>, Integer> condition, float start, float end) {
@@ -113,6 +120,7 @@ public class StateSpectrum {
 			return this;
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public Set<Map.Entry<StateFactor<?>, Object>> getStates(LivingEntityPatch<?> entitypatch) {
 			return this.conditionalStates.get(this.condition.apply(entitypatch)).entrySet();
@@ -139,6 +147,26 @@ public class StateSpectrum {
 			for (Map<StateFactor<?>, Object> states : this.conditionalStates.values()) {
 				states.remove(state);
 			}
+		}
+
+		@SuppressWarnings("deprecation")
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			sb.append(String.format("Time: %.2f ~ %.2f, ", this.start, this.end));
+			int entryCnt = 0;
+
+			for (Map.Entry<Integer, Map<StateFactor<?>, Object>> entry : this.conditionalStates.entrySet()) {
+				sb.append(String.format("States %d: %s", entry.getKey(), entry.getValue()));
+				entryCnt++;
+
+				if (entryCnt < this.conditionalStates.size()) {
+					sb.append(", ");
+				}
+			}
+
+			return sb.toString();
 		}
 	}
 
@@ -175,6 +203,11 @@ public class StateSpectrum {
 		@Override
 		public void removeState(StateFactor<?> state) {
 			this.states.remove(state);
+		}
+
+		@Override
+		public String toString() {
+			return String.format("States: %s", this.states);
 		}
 	}
 

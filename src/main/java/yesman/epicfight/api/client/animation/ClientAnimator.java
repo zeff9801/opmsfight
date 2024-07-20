@@ -271,7 +271,6 @@ public class ClientAnimator extends Animator {
 		return composedPose;
 	}
 
-
 	public void applyBindModifier(Pose basePose, Pose result, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses, boolean useCurrentMotion) {
 		List<Priority> list = Lists.newArrayList(poses.keySet());
 		Collections.reverse(list);

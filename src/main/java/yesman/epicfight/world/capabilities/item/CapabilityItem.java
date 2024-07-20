@@ -28,6 +28,7 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.skill.guard.GuardSkill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -129,37 +130,36 @@ public class CapabilityItem {
 	}
 
 	public void changeWeaponInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
-
-		Skill weaponInnateSkill  = this.getInnateSkill(playerpatch, itemstack);
+		Skill weaponInnateSkill = this.getInnateSkill(playerpatch, itemstack);
 		String skillName = "";
 		SPChangeSkill.State state = SPChangeSkill.State.ENABLE;
-		SkillContainer weaponInnateSkillContainer  = playerpatch.getSkill(SkillCategories.WEAPON_INNATE);
-		
-		if (weaponInnateSkill  != null) {
-			if (weaponInnateSkillContainer .getSkill() != weaponInnateSkill ) {
-				weaponInnateSkillContainer .setSkill(weaponInnateSkill );
+		SkillContainer weaponInnateSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
+
+		if (weaponInnateSkill != null) {
+			if (weaponInnateSkillContainer.getSkill() != weaponInnateSkill) {
+				weaponInnateSkillContainer.setSkill(weaponInnateSkill);
 			}
-			
-			skillName = weaponInnateSkill .toString();
+
+			skillName = weaponInnateSkill.toString();
 		} else {
 			state = SPChangeSkill.State.DISABLE;
 		}
-		
+
 		weaponInnateSkillContainer.setDisabled(weaponInnateSkill == null);
 
-		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_INNATE.universalOrdinal(), skillName, state), (ServerPlayerEntity)playerpatch.getOriginal());
-		
+		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_INNATE, skillName, state), (ServerPlayerEntity) playerpatch.getOriginal());
+
 		Skill skill = this.getPassiveSkill();
-		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_PASSIVE);
-		
+		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE);
+
 		if (skill != null) {
 			if (passiveSkillContainer.getSkill() != skill) {
 				passiveSkillContainer.setSkill(skill);
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getCategory().universalOrdinal(), skill.toString(), SPChangeSkill.State.ENABLE), (ServerPlayerEntity)playerpatch.getOriginal());
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, skill.toString(), SPChangeSkill.State.ENABLE), (ServerPlayerEntity)playerpatch.getOriginal());
 			}
 		} else {
 			passiveSkillContainer.setSkill(null);
-			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_PASSIVE.universalOrdinal(), "empty", SPChangeSkill.State.ENABLE), (ServerPlayerEntity)playerpatch.getOriginal());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, "empty", SPChangeSkill.State.ENABLE), (ServerPlayerEntity)playerpatch.getOriginal());
 		}
 	}
 	

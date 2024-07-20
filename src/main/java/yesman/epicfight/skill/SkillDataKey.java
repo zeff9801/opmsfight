@@ -4,7 +4,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.IdMapper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -111,8 +110,8 @@ public class SkillDataKey<T> extends ForgeRegistryEntry<SkillDataKey<?>> {
     }
 
     @SuppressWarnings("unchecked")
-    public static IdMapper<SkillDataKey<?>> getIdMap() {
-        return SkillDataKeys.REGISTRY.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
+    public static ClearableIdMapper<SkillDataKey<?>> getIdMap() {
+        return SkillDataKeys.REGISTRY.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
     }
 
     @SuppressWarnings("unchecked")

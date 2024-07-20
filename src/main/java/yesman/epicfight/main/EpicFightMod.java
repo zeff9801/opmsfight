@@ -43,7 +43,7 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.PlayerModeCommand;
 import yesman.epicfight.server.commands.PlayerSkillCommand;
 import yesman.epicfight.server.commands.ShakeCameraCommand;
-import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
+import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -175,7 +175,7 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);//old
 
 
-		event.enqueueWork(EpicFightCommandArgumentTypes::registerArgumentTypes);
+		event.enqueueWork(SkillArgument::registerArgumentTypes);
 		//event.enqueueWork(EpicFightPotions::addRecipes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);

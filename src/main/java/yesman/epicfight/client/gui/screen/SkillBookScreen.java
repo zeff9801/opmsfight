@@ -38,14 +38,14 @@ public class SkillBookScreen extends Screen {
 	@Override
 	protected void init() {
 		LocalPlayerPatch playerpatch = (LocalPlayerPatch) this.opener.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		boolean isUsing = this.skill.equals(playerpatch.getSkill(this.skill.getCategory()).getSkill());
+		boolean isUsing = this.skill.equals(playerpatch.getSkill(this.skill).getSkill());
 		Skill priorSkill = this.skill.getPriorSkill();
-		boolean condition = priorSkill == null || playerpatch.getSkill(priorSkill.getCategory()).getSkill() == priorSkill;
+		boolean condition = priorSkill == null || playerpatch.getSkill(priorSkill).getSkill() == priorSkill;
 		Button.ITooltip tooltip = Button.NO_TOOLTIP;
 		
 		if (!isUsing) {
 			if (condition) {
-				if (playerpatch.getSkill(this.skill.getCategory()).getSkill() != null) {
+				if (playerpatch.getSkill(this.skill).getSkill() != null) {
 					tooltip = (button, matrixStack, mouseX, mouseY) -> {
 						this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslationTextComponent("gui." + EpicFightMod.MODID + ".replace",
 								new TranslationTextComponent(skill.getTranslationKey()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
@@ -62,7 +62,7 @@ public class SkillBookScreen extends Screen {
 		Button changeButton = new Button((this.width + 130) / 2, (this.height + 90) / 2, 46, 20,
 			new TranslationTextComponent("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (p_onPress_1_) -> {
 				if (playerpatch != null) {
-					playerpatch.getSkill(this.skill.getCategory()).setSkill(this.skill);
+					playerpatch.getSkill(this.skill).setSkill(this.skill);
 					this.minecraft.setScreen((Screen) null);
 					playerpatch.getSkillCapability().addLearnedSkill(this.skill);
 					int i = this.hand == Hand.MAIN_HAND ? this.opener.inventory.selected : 40;

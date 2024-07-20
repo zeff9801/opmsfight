@@ -22,11 +22,12 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.*;
-import yesman.epicfight.skill.SkillCategory;
-import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.*;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.eventlistener.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
@@ -40,44 +41,41 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	private boolean updatedMotionCurrentTick;
 	
 	@Override
-	public void onJoinWorld(ServerPlayerEntity entityIn, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entityIn, event);
+	public void onJoinWorld(ServerPlayerEntity player, EntityJoinWorldEvent event) {
+		super.onJoinWorld(player, event);
 
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		
+
 		for (SkillContainer skill : skillCapability.skillContainers) {
 			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronize()) {
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().universalOrdinal(), skill.getSkill().toString(), SPChangeSkill.State.ENABLE), this.original);
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSlot(), skill.getSkill().toString(), SPChangeSkill.State.ENABLE), this.original);
 			}
 		}
-		
+
 		List<String> learnedSkill = Lists.newArrayList();
-		
+
 		for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (skillCapability.hasCategory(category)) {
 				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
 		}
 
-		//TODO Implement this
-//		this.eventListeners.addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, PLAYER_EVENT_UUID, (playerevent) -> {
-//			if (playerevent.getDamageSource().isBasicAttack()) {
-//				SkillContainer container = this.getSkill(SkillSlots.WEAPON_INNATE);
-//				ItemStack mainHandItem = this.getOriginal().getMainHandItem();
-//
-//				if (!container.isFull() && !container.isActivated() && container.hasSkill(EpicFightCapabilities.getItemStackCapability(mainHandItem).getInnateSkill(this, mainHandItem))) {
-//					float value = container.getResource() + playerevent.getAttackDamage();
-//
-//					if (value > 0.0F) {
-//						this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
-//					}
-//				}
-//			}
-//		}, 10);
+		this.eventListeners.addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, PLAYER_EVENT_UUID, (playerevent) -> {
+			if (playerevent.getDamageSource().isBasicAttack()) {
+				SkillContainer container = this.getSkill(SkillSlots.WEAPON_INNATE);
+				ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 
+				if (!container.isFull() && !container.isActivated() && container.hasSkill(EpicFightCapabilities.getItemStackCapability(mainHandItem).getInnateSkill(this, mainHandItem))) {
+					float value = container.getResource() + playerevent.getAttackDamage();
 
+					if (value > 0.0F) {
+						this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
+					}
+				}
+			}
+		}, 10);
 
-//		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
+		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
 		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
 	
@@ -86,19 +84,18 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
 		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 
-		//TODO Implement once skills
-//		for (SkillContainer container : this.getSkillCapability().skillContainers) {
-//			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
-//				if (key.syncronizeTrackingPlayers()) {
-//					EpicFightNetworkManager.sendToPlayer(
-//							new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()),
-//							trackingPlayer);
-//				}
-//			}
-//		}
+		for (SkillContainer container : this.getSkillCapability().skillContainers) {
+			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
+				if (key.syncronizeTrackingPlayers()) {
+					EpicFightNetworkManager.sendToPlayer(
+							new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()),
+							trackingPlayer);
+				}
+			}
+		}
 
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
-		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer); //TODO This is the right packet
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
 	}
 
 	@Override
@@ -113,14 +110,13 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, Hand hand) {
-		//TODO Implement once skills
-//		if (this.isChargingSkill()) {
-//			Skill skill = this.chargingSkill.asSkill();
-//			skill.cancelOnServer(this, null);
-//			this.resetSkillCharging();
-//
-//			EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(this.getSkill(skill).getSlotId()), this.original);
-//		}
+		if (this.isChargingSkill()) {
+			Skill skill = this.chargingSkill.asSkill();
+			skill.cancelOnServer(this, null);
+			this.resetSkillCharging();
+
+			EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(this.getSkill(skill).getSlotId()), this.original);
+		}
 
 
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
@@ -243,14 +239,13 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		}
 	}
 
-	//Implement
-//	@Override
-//	public void onDodgeSuccess(DamageSource damageSource) {
-//		super.onDodgeSuccess(damageSource);
-//
-//		DodgeSuccessEvent dodgeSuccessEvent = new DodgeSuccessEvent(this, damageSource);
-//		this.getEventListener().triggerEvents(EventType.DODGE_SUCCESS_EVENT, dodgeSuccessEvent);
-//	}
+	@Override
+	public void onDodgeSuccess(DamageSource damageSource) {
+		super.onDodgeSuccess(damageSource);
+
+		DodgeSuccessEvent dodgeSuccessEvent = new DodgeSuccessEvent(this, damageSource);
+		this.getEventListener().triggerEvents(EventType.DODGE_SUCCESS_EVENT, dodgeSuccessEvent);
+	}
 
 	@Override
 	public void toMiningMode(boolean synchronize) {
@@ -295,12 +290,11 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		this.attackTarget = setTargetEvent.getTarget();
 	}
 
-	//Implement when skills
-//	@Override
-//	public void startSkillCharging(ChargeableSkill chargingSkill) {
-//		super.startSkillCharging(chargingSkill);
-//		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.chargingBegin(this.getSkill((Skill)chargingSkill).getSlotId()), this.getOriginal());
-//	}
+	@Override
+	public void startSkillCharging(ChargeableSkill chargingSkill) {
+		super.startSkillCharging(chargingSkill);
+		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.chargingBegin(this.getSkill((Skill)chargingSkill).getSlotId()), this.getOriginal());
+	}
 
 	@Override
 	public LivingEntity getTarget() {

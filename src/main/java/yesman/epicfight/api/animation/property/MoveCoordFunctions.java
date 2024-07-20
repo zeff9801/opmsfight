@@ -190,41 +190,6 @@ public class MoveCoordFunctions {
         }
     };
 
-//    public static final MoveCoordSetter TRACE_LOCROT_TARGET = (self, entitypatch, transformSheet) -> {
-//        LivingEntity attackTarget = entitypatch.getTarget();
-//
-//        if (attackTarget != null) {
-//            TransformSheet transform = self.getCoord().copyAll();
-//            Keyframe[] keyframes = transform.getKeyframes();
-//            int startFrame = 0;
-//            int endFrame = keyframes.length - 1;
-//            Vec3f keyLast = keyframes[endFrame].transform().translation();
-//            Vector3d pos = entitypatch.getOriginal().position();
-//            Vector3d targetpos = attackTarget.position();
-//            Vector3d toTarget = targetpos.subtract(pos);
-//            float horizontalDistance = Math.max((float)MathUtils.horizontalDistance(targetpos.subtract(pos)) - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
-//            Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
-//            float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
-//
-//            float yRot = (float)MathUtils.getYRotOfVector(toTarget);
-//            float clampedYRot = MathUtils.rotlerp(entitypatch.getOriginal().yRot, yRot, entitypatch.getYRotLimit());
-//
-//            entitypatch.getOriginal().yRot = (clampedYRot);
-//
-//            for (int i = startFrame; i <= endFrame; i++) {
-//                Vec3f translation = keyframes[i].transform().translation();
-//
-//                if (translation.z < 0.0F) {
-//                    translation.z *= scale;
-//                }
-//            }
-//
-//            transformSheet.readFrom(transform);
-//        } else {
-//            transformSheet.readFrom(self.getCoord().copyAll());
-//        }
-//    };
-
     public static final MoveCoordSetter TRACE_LOCROT_TARGET = (self, entitypatch, transformSheet) -> {
         LivingEntity attackTarget = entitypatch.getTarget();
 

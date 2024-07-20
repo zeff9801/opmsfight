@@ -19,7 +19,6 @@ import java.util.Optional;
 public abstract class DynamicAnimation {
 	protected final boolean isRepeat;
 	protected final float convertTime;
-	protected float totalTime = 0.0F;
 	
 	public DynamicAnimation() {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
@@ -54,10 +53,7 @@ public abstract class DynamicAnimation {
 
 	public void begin(LivingEntityPatch<?> entitypatch) {}
 	public void tick(LivingEntityPatch<?> entitypatch) {}
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {}
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
-
-	public void linkTick(LivingEntityPatch<?> entitypatch, LinkAnimation linkAnimation) {};
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
 
 	public boolean hasTransformFor(String joint) {
@@ -104,7 +100,7 @@ public abstract class DynamicAnimation {
 	}
 
 	public float getTotalTime() {
-		return getAnimationClip().getClipTime();
+		return this.getAnimationClip().getClipTime();
 	}
 
 	public float getConvertTime() {

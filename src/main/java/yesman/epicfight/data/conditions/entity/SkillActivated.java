@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
@@ -23,8 +24,7 @@ public class SkillActivated extends EntityPatchCondition {
             throw new IllegalArgumentException("Undefined skill");
         }
 
-//        this.skill = SkillManager.getSkill(tag.getString("skill")); //TODO Uncoomment once #getSkill exists in SkillManager
-        this.skill = null;
+        this.skill = SkillManager.getSkill(tag.getString("skill"));
 
         return this;
     }

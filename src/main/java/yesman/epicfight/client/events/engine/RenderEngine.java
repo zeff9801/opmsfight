@@ -197,7 +197,6 @@ public class RenderEngine {
 				throw new IllegalArgumentException("Datapack Mob Patch Crash: Invalid Renderer type " + renderer);
 			}
 		}
-
 	}
 
 	public RenderItemBase getItemRenderer(ItemStack itemstack) {
@@ -374,7 +373,6 @@ public class RenderEngine {
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 	public static class Events {
 		static RenderEngine renderEngine;
-		private static final ResourceLocation GUI_BARS_LOCATION = new ResourceLocation("textures/gui/bars.png");
 
 		@SubscribeEvent
 		public static void renderLivingEvent(RenderLivingEvent.Pre<? extends LivingEntity, ? extends EntityModel<? extends LivingEntity>> event) {
@@ -391,7 +389,7 @@ public class RenderEngine {
 
 				if ((event.getPartialRenderTick() == 0.0F || event.getPartialRenderTick() == 1.0F) && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
 					playerpatch = localPlayerPatch;
-					originalYRot = playerpatch.getCameraYRot();
+					originalYRot = playerpatch.getModelYRot();
 					playerpatch.setModelYRotInGui(livingentity.yRot);
 					event.getMatrixStack().translate(0, 0.1D, 0);
 				}

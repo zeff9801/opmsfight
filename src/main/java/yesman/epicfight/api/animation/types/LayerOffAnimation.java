@@ -1,6 +1,8 @@
 package yesman.epicfight.api.animation.types;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
@@ -11,12 +13,12 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.Optional;
 
+@OnlyIn(Dist.CLIENT)
 public class LayerOffAnimation extends DynamicAnimation {
 	private final AnimationClip animationClip = new AnimationClip();
-
 	private DynamicAnimation lastAnimation;
 	private Pose lastPose;
-	private Priority layerPriority;
+	private final Priority layerPriority;
 	
 	public LayerOffAnimation(Priority layerPriority) {
 		this.layerPriority = layerPriority;
@@ -25,10 +27,10 @@ public class LayerOffAnimation extends DynamicAnimation {
 	public void setLastPose(Pose pose) {
 		this.lastPose = pose;
 	}
-	
+
 	@Override
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
-		if (entitypatch.isLogicalClient()) {
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
+		if (entitypatch.isLogicalClient() && isEnd) {
 			entitypatch.getClientAnimator().baseLayer.disableLayer(this.layerPriority);
 		}
 	}
@@ -36,7 +38,10 @@ public class LayerOffAnimation extends DynamicAnimation {
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
-		return Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.totalTime);
+		Pose interpolatedPose = Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.getTotalTime());
+		interpolatedPose.removeJointIf((joint) -> !this.lastPose.getJointTransformData().containsKey(joint.getKey()));
+
+		return interpolatedPose;
 	}
 
 	@Override

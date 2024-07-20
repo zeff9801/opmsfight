@@ -87,11 +87,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	public void tick(LivingEvent.LivingUpdateEvent event) {
 		this.prevStamina = this.getStamina();
 
-//		if (this.isChargingSkill()) {
-//			this.prevChargingAmount = this.getChargingSkill().getChargingAmount(this);
-//		} else {
-//			this.prevChargingAmount = 0;
-//		}
+		if (this.isChargingSkill()) {
+			this.prevChargingAmount = this.getChargingSkill().getChargingAmount(this);
+		} else {
+			this.prevChargingAmount = 0;
+		}
 
 		super.tick(event);
 	}
@@ -99,6 +99,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	@Override
 	public void clientTick(LivingEvent.LivingUpdateEvent event) {
 		this.prevStamina = this.getStamina();
+
 		super.clientTick(event);
 
 		RayTraceResult cameraHitResult = this.minecraft.hitResult;
@@ -176,32 +177,32 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 			CapabilityItem itemCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
 
-//			switch (itemCap.getZoomInType()) {
-//				case ALWAYS:
-//					ClientEngine.getInstance().renderEngine.zoomIn();
-//					break;
-//				case USE_TICK:
-//					if (this.original.getUseItemRemainingTicks() > 0) {
-//						ClientEngine.getInstance().renderEngine.zoomIn();
-//					} else {
-//						ClientEngine.getInstance().renderEngine.zoomOut(40);
-//					}
-//
-//					break;
-//				case AIMING:
-//					if (this.getClientAnimator().isAiming()) {
-//						ClientEngine.getInstance().renderEngine.zoomIn();
-//					} else {
-//						ClientEngine.getInstance().renderEngine.zoomOut(40);
-//					}
-//
-//					break;
-//				case CUSTOM:
-//					//Zoom manually handled
-//					break;
-//				default:
-//					ClientEngine.getInstance().renderEngine.zoomOut(0);
-//			}
+			switch (itemCap.getZoomInType()) {
+				case ALWAYS:
+					ClientEngine.getInstance().renderEngine.zoomIn();
+					break;
+				case USE_TICK:
+					if (this.original.getUseItemRemainingTicks() > 0) {
+						ClientEngine.getInstance().renderEngine.zoomIn();
+					} else {
+						ClientEngine.getInstance().renderEngine.zoomOut(40);
+					}
+
+					break;
+				case AIMING:
+					if (this.getClientAnimator().isAiming()) {
+						ClientEngine.getInstance().renderEngine.zoomIn();
+					} else {
+						ClientEngine.getInstance().renderEngine.zoomOut(40);
+					}
+
+					break;
+				case CUSTOM:
+					//Zoom manually handled
+					break;
+				default:
+					ClientEngine.getInstance().renderEngine.zoomOut(0);
+			}
 	}
 
 	@Override
@@ -390,5 +391,4 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			Minecraft.getInstance().setScreen(new SkillBookScreen(this.original, itemstack, hand));
 		}
 	}
-
 }

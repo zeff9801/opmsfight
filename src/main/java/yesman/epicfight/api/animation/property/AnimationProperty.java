@@ -126,7 +126,7 @@ public abstract class AnimationProperty<T> {
 
 	}
 
-	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {//TODO to 1.20
+	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
 		public ActionAnimationProperty(String rl, @Nullable Codec<T> codecs) {
 			super(rl, codecs);
 		}
@@ -218,12 +218,12 @@ public abstract class AnimationProperty<T> {
 		 * This property determines if the player's camera is fixed during the attacking phase.
 		 */
 		public static final AttackAnimationProperty<Boolean> LOCK_ROTATION = new AttackAnimationProperty<Boolean> ();
-		
+
 		/**
 		 * This property determines the animation can be rotated vertically based on the player's view.
 		 */
 		public static final AttackAnimationProperty<Boolean> ROTATE_X = new AttackAnimationProperty<Boolean> ();
-		
+
 		/**
 		 * This property determines if the animation has a fixed amount of move distance not depending on the distance between attacker and target entity
 		 */
@@ -259,30 +259,25 @@ public abstract class AnimationProperty<T> {
 		public AttackPhaseProperty() {
 			this(null, null);
 		}
-		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION_MODIFIER = new AttackPhaseProperty<ValueModifier> ("armor_negation", ValueModifier.CODECS);
-		public static final AttackPhaseProperty<ValueModifier> DAMAGE_MODIFIER = new AttackPhaseProperty<ValueModifier> ("damage", ValueModifier.CODECS);
 
-		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES_MODIFIER = new AttackPhaseProperty<ValueModifier> ();
-		public static final AttackPhaseProperty<ValueModifier> DAMAGE = new AttackPhaseProperty<ValueModifier> ();
-		public static final AttackPhaseProperty<Set<ExtraDamageInstance>> EXTRA_DAMAGE = new AttackPhaseProperty<>();
-		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION = new AttackPhaseProperty<ValueModifier> ();
+		public static final AttackPhaseProperty<ValueModifier> MAX_STRIKES_MODIFIER = new AttackPhaseProperty<ValueModifier> ("max_strikes", ValueModifier.CODECS);
+		public static final AttackPhaseProperty<ValueModifier> DAMAGE_MODIFIER = new AttackPhaseProperty<ValueModifier> ("damage", ValueModifier.CODECS);
+		public static final AttackPhaseProperty<Set<ExtraDamageInstance>> EXTRA_DAMAGE = new AttackPhaseProperty<Set<ExtraDamageInstance>> ();
+		public static final AttackPhaseProperty<ValueModifier> ARMOR_NEGATION_MODIFIER = new AttackPhaseProperty<ValueModifier> ("armor_negation", ValueModifier.CODECS);
 		public static final AttackPhaseProperty<ValueModifier> IMPACT_MODIFIER = new AttackPhaseProperty<ValueModifier> ("impact", ValueModifier.CODECS);
 		public static final AttackPhaseProperty<StunType> STUN_TYPE = new AttackPhaseProperty<StunType> ();
 		public static final AttackPhaseProperty<SoundEvent> SWING_SOUND = new AttackPhaseProperty<SoundEvent> ();
 		public static final AttackPhaseProperty<SoundEvent> HIT_SOUND = new AttackPhaseProperty<SoundEvent> ();
 		public static final AttackPhaseProperty<RegistryObject<HitParticleType>> PARTICLE = new AttackPhaseProperty<RegistryObject<HitParticleType>> ();
 		public static final AttackPhaseProperty<Priority> HIT_PRIORITY = new AttackPhaseProperty<Priority> ();
-		public static final AttackPhaseProperty<Boolean> FINISHER = new AttackPhaseProperty<Boolean> ();
 		public static final AttackPhaseProperty<Set<EpicFightDamageSources.TYPE>> SOURCE_TAG = new AttackPhaseProperty<>();
 		public static final AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> SOURCE_LOCATION_PROVIDER = new AttackPhaseProperty<Function<LivingEntityPatch<?>, Vector3d>> ();
 	}
+
+
 	@FunctionalInterface
-	public interface PlaybackSpeedModifier {
-		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
-	}
-	@FunctionalInterface
-	public interface PlaybackTimeModifier {
-		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
+	public interface Registerer<T> {
+		void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
 	}
 
 	@FunctionalInterface
@@ -291,7 +286,12 @@ public abstract class AnimationProperty<T> {
 	}
 
 	@FunctionalInterface
-	public interface Registerer<T> {
-		void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
+	public interface PlaybackSpeedModifier {
+		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
+	}
+
+	@FunctionalInterface
+	public interface PlaybackTimeModifier {
+		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
 	}
 }

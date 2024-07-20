@@ -136,7 +136,7 @@ public class EntityEvents {
 			if (event.getSource() instanceof EpicFightDamageSource  instance) {
 				epicFightDamageSource = instance;
 			} else if (event.getSource() instanceof IndirectEntityDamageSource && event.getSource().getDirectEntity() != null) {
-				ProjectilePatch<?> projectileCap = event.getSource().getDirectEntity().getCapability(EpicFightCapabilities.CAPABILITY_PROJECTILE, null).orElse(null);
+				ProjectilePatch<?> projectileCap = EpicFightCapabilities.getEntityPatch(event.getSource().getDirectEntity(), ProjectilePatch.class);
 
 				if (projectileCap != null) {
 					epicFightDamageSource = projectileCap.getEpicFightDamageSource(event.getSource());
@@ -146,7 +146,7 @@ public class EntityEvents {
 				baseDamage = attackerEntityPatch.getModifiedBaseDamage(baseDamage);
 			}
 
-			if (epicFightDamageSource != null) {
+			if (epicFightDamageSource != null && !epicFightDamageSource.is(EpicFightDamageSources.TYPE.PARTIAL_DAMAGE)) {
 				LivingEntity hitEntity = event.getEntityLiving();
 
 
@@ -176,21 +176,19 @@ public class EntityEvents {
 
 				event.setAmount(totalDamage);
 
-//				TODO Once we implement execution skills
-//				if (epicFightDamageSource.is(EpicFightDamageSources.TYPE.EXECUTION)) {
-//					float amount = event.getAmount();
-//					event.setAmount(2147483647F);
-//
-//					if (hitLivingEntityPatch != null) {
-//						int executionResistance = hitLivingEntityPatch.getExecutionResistance();
-//
-//						if (executionResistance > 0) {
-//
-////							hitLivingEntityPatch.setExecutionResistance(executionResistance - 1);
-//							event.setAmount(amount);
-//						}
-//					}
-//				}
+				if (epicFightDamageSource.is(EpicFightDamageSources.TYPE.EXECUTION)) {
+					float amount = event.getAmount();
+					event.setAmount(2147483647F);
+
+					if (hitLivingEntityPatch != null) {
+						int executionResistance = hitLivingEntityPatch.getExecutionResistance();
+
+						if (executionResistance > 0) {
+							hitLivingEntityPatch.setExecutionResistance(executionResistance - 1);
+							event.setAmount(amount);
+						}
+					}
+				}
 
 				if (event.getAmount() > 0.0F) {
 					if (hitHurtableEntityPatch != null) {

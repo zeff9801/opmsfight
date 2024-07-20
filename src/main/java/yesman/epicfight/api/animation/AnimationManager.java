@@ -15,6 +15,7 @@ import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
@@ -45,10 +46,6 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	private String currentWorkingModid;
 
 
-	private String modid;
-	private int namespaceHash;
-	private int counter = 0;
-
 	public StaticAnimation byId(int animationId) {
 		if (!this.animationIdMap.contains(animationId)) {
 			throw new NoSuchElementException("No animation id " + animationId);
@@ -73,7 +70,6 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 		return this.animationRegistry.get(rl);
 	}
 
-
 	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
 		if (!this.animationClips.containsKey(animation.getLocation())) {
 			animation.loadAnimation(resourceManager);
@@ -94,7 +90,6 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 		return ImmutableMap.copyOf(filteredItems);
 	}
 
-
 	public int registerAnimation(StaticAnimation staticAnimation) {
 		if (this.currentWorkingModid != null) {
 			if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
@@ -112,6 +107,21 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 
 		return -1;
 	}
+
+//	/**
+//	 * Registers animations created by datapack edit screen
+//	 */
+//	public void registerUserAnimation(ClipHoldingAnimation animation) {
+//		this.animationRegistry.put(animation.getCreator().getRegistryName(), animation.cast());
+//	}
+//
+//	/**
+//	 * Remove user animations created by datapack edit screen
+//	 */
+//	public void removeUserAnimation(ClipHoldingAnimation animation) {
+//		this.animationRegistry.remove(animation.getCreator().getRegistryName());
+//	}
+
 	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {
 		if (!this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
 			throw new IllegalStateException("Animation refresh exception: No animation named " + staticAnimation.getRegistryName());
@@ -172,6 +182,7 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 			this.currentWorkingModid = null;
 		});
 
+		SkillManager.reloadAllSkillsAnimations();
 		return prepareAnimationMap(resourceManager);
 	}
 
@@ -205,8 +216,6 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 						e.printStackTrace();
 					}
 				});
-
-		//SkillManager.reloadAllSkillsAnimations();
 
 		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
 			list.addAll(anim.getClipHolders());

@@ -4,7 +4,6 @@ import com.ibm.icu.impl.Pair;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
-import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
@@ -17,7 +16,6 @@ public class AnimationPlayer {
 	protected boolean doNotResetNext;
 	protected boolean reversed;
 	protected DynamicAnimation play;
-	private TransformSheet actionAnimationCoord = new TransformSheet();
 
 	public AnimationPlayer() {
 		this.setPlayAnimation(Animations.DUMMY_ANIMATION);
@@ -60,13 +58,7 @@ public class AnimationPlayer {
 			}
 		}
 	}
-	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, MoveCoordFunctions.MoveCoordSetter moveCoordSetter) {
-		moveCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
-	}
 
-	public TransformSheet getActionAnimationCoord() {
-		return this.actionAnimationCoord;
-	}
 	public void reset() {
 		this.elapsedTime = 0;
 		this.prevElapsedTime = 0;

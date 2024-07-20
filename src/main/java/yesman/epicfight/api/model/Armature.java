@@ -28,7 +28,6 @@ public class Armature {
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
 
-
 	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
 		this.name = name;
 		this.jointNumber = jointNumber;
