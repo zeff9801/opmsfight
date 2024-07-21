@@ -52,7 +52,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 	public void render(IVertexBuilder vertexConsumer, ActiveRenderInfo camera, float partialTicks) {
 		MatrixStack poseStack = new MatrixStack();
 		this.setupPoseStack(poseStack, camera, partialTicks);
-//		poseStack.mulPoseMatrix(this.modelMatrix); //TODO MatrixStack has to be extended and #mulPoseMatrix ported into it
+		poseStack.last().pose().multiply(modelMatrix);
 		float alpha = this.alphaO + (this.alpha - this.alphaO) * partialTicks;
 		((AnimatedMesh)this.particleMesh).drawWithPoseNoTexture(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, this.poseMatrices);
 	}

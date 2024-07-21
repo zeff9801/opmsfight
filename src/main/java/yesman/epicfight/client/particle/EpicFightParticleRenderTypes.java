@@ -1,6 +1,7 @@
 package yesman.epicfight.client.particle;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.GL11;
@@ -160,21 +161,20 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			RenderSystem.enableDepthTest();
 
-			Minecraft mc = Minecraft.getInstance();
-			mc.gameRenderer.lightTexture().turnOnLightLayer();
+			RenderSystem.disableTexture();
+			RenderHelper.turnBackOn();
 
 			bufferBuilder.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR_LIGHTMAP);
 		}
 
 		public void end(Tessellator tessellator) {
+			tessellator.getBuilder().sortQuads(0.0F, 0.0F, 0.0F);
 			tessellator.end();
-
+			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableCull();
-
-			Minecraft mc = Minecraft.getInstance();
-			mc.gameRenderer.lightTexture().turnOffLightLayer();
+			RenderHelper.turnOff();
 		}
 
 		@Override
