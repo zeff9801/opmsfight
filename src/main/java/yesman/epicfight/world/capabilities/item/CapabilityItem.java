@@ -14,6 +14,7 @@ import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -26,7 +27,6 @@ import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.skill.guard.GuardSkill;
@@ -45,7 +45,7 @@ public class CapabilityItem {
 	public static CapabilityItem EMPTY = CapabilityItem.builder().build();
 	protected static List<AnimationProvider<?>> commonAutoAttackMotion;
 	protected final WeaponCategory weaponCategory;
-	
+
 	static {
 		commonAutoAttackMotion = Lists.newArrayList();
 		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO1);
@@ -58,51 +58,43 @@ public class CapabilityItem {
 	public static List<AnimationProvider<?>> getBasicAutoAttackMotion() {
 		return commonAutoAttackMotion;
 	}
-	
+
 	protected Map<Style, Map<Attribute, AttributeModifier>> attributeMap;
-	
+
 	protected CapabilityItem(CapabilityItem.Builder builder) {
 		this.weaponCategory = builder.category;
 		this.attributeMap = builder.attributeMap;
 	}
-	
+
 	public void modifyItemTooltip(ItemStack itemstack, List<ITextComponent> itemTooltip, LivingEntityPatch<?> entitypatch) {
-//		if (!this.getStyle(entitypatch).canUseOffhand()) {
-//			itemTooltip.add(1, new StringTextComponent(" ").append(new TranslationTextComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(TextFormatting.DARK_GRAY)));
-//		}
-//
-//		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
-//
-//		if (attribute != null) {
-//			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
-//			Attribute impact = EpicFightAttributes.IMPACT.get();
-//			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
-//
-//			if (attribute.containsKey(armorNegation)) {
-//				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
-//				if (value > 0.0D) {
-//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-//				}
-//			}
-//
-//			if (attribute.containsKey(impact)) {
-//				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
-//				if (value > 0.0D) {
-//					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
-//					value *= (1.0F + i * 0.12F);
-//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-//				}
-//			}
-//
-//			if (attribute.containsKey(maxStrikes)) {
-//				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
-//				if (value > 0.0D) {
-//					itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
-//				}
-//			} else {
-//				itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
-//			}
-//		}
+	}
+
+	private Object findComponentArgument(ITextComponent component, String key) {
+		// check the content.
+		if (component instanceof TranslationTextComponent contents) {
+			// is self?
+			if (contents.getKey().equals(key)) {
+				return component;
+			}
+			// check all arguments.
+			for (Object arg : contents.getArgs()) {
+				if (arg instanceof ITextComponent argComponent) {
+					Object ret = findComponentArgument(argComponent, key);
+					if (ret != null) {
+						return ret;
+					}
+				}
+			}
+		}
+		// check all sibling.
+		for (ITextComponent siblingComponent : component.getSiblings()) {
+			Object ret = findComponentArgument(siblingComponent, key);
+			if (ret != null) {
+				return ret;
+			}
+		}
+
+		return null;
 	}
 
 	public List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
@@ -113,18 +105,16 @@ public class CapabilityItem {
 		return null;
 	}
 
-
 	@Nullable
 	public Skill getInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
 		return null;
 	}
 
-	
 	@Nullable
 	public Skill getPassiveSkill() {
 		return null;
 	}
-	
+
 	public WeaponCategory getWeaponCategory() {
 		return this.weaponCategory;
 	}
@@ -147,7 +137,7 @@ public class CapabilityItem {
 
 		weaponInnateSkillContainer.setDisabled(weaponInnateSkill == null);
 
-		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_INNATE, skillName, state), (ServerPlayerEntity) playerpatch.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_INNATE, skillName, state), (ServerPlayerEntity)playerpatch.getOriginal());
 
 		Skill skill = this.getPassiveSkill();
 		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE);
@@ -159,10 +149,10 @@ public class CapabilityItem {
 			}
 		} else {
 			passiveSkillContainer.setSkill(null);
-			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, "empty", SPChangeSkill.State.ENABLE), (ServerPlayerEntity)playerpatch.getOriginal());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, "empty", SPChangeSkill.State.ENABLE), (ServerPlayerEntity) playerpatch.getOriginal());
 		}
 	}
-	
+
 	public SoundEvent getSmashingSound() {
 		return EpicFightSounds.WHOOSH;
 	}
@@ -178,12 +168,12 @@ public class CapabilityItem {
 	public HitParticleType getHitParticle() {
 		return EpicFightParticles.HIT_BLUNT.get();
 	}
-	
+
 	public void addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
-		Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.<Attribute, AttributeModifier>newHashMap());
+		Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.newHashMap());
 		map.put(attributePair.getFirst(), attributePair.getSecond());
 	}
-	
+
 	public void addStyleAttributes(Style style, double armorNegation, double impact, int maxStrikes) {
 		if (Double.compare(armorNegation, 0.0D) != 0) {
 			this.addStyleAttibutes(style, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(armorNegation)));
@@ -203,8 +193,8 @@ public class CapabilityItem {
 		return attributes;
 	}
 
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, LivingEntityPatch<?> entitypatch) {
-		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, @Nullable LivingEntityPatch<?> entitypatch) {
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 
 		if (entitypatch != null) {
 			Map<Attribute, AttributeModifier> modifierMap = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
@@ -234,7 +224,7 @@ public class CapabilityItem {
 	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, Hand hand) {
 		return Maps.newHashMap();
 	}
-	
+
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
 		return this.canBePlacedOffhand() ? Styles.ONE_HAND : Styles.TWO_HAND;
 	}
@@ -250,11 +240,11 @@ public class CapabilityItem {
 	public boolean shouldCancelCombo(LivingEntityPatch<?> entitypatch) {
 		return true;
 	}
-	
+
 	public boolean isEmpty() {
 		return this == CapabilityItem.EMPTY;
 	}
-	
+
 	public CapabilityItem getResult(ItemStack item) {
 		return this;
 	}
@@ -267,15 +257,15 @@ public class CapabilityItem {
 		this.addStyleAttributes(Styles.ONE_HAND, armorNegation1, impact1, maxStrikes1);
 		this.addStyleAttributes(Styles.TWO_HAND, armorNegation2, impact2, maxStrikes2);
 	}
-	
+
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
 		return this.getStyle(entitypatch).canUseOffhand() && EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).canHoldInOffhandAlone();
 	}
-	
+
 	public boolean canHoldInOffhandAlone() {
 		return true;
 	}
-	
+
 	public UseAction getUseAnimation(LivingEntityPatch<?> entitypatch) {
 		return UseAction.NONE;
 	}

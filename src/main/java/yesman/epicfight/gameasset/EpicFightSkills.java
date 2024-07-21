@@ -107,7 +107,7 @@ public class EpicFightSkills {
 	public static Skill BLADE_RUSH;
 	public static Skill WRATHFUL_LIGHTING;
 	public static Skill TSUNAMI;
-//	public static Skill EVERLASTING_ALLEGIANCE;
+	public static Skill EVERLASTING_ALLEGIANCE;
 	/** Battle style skills **/
 	public static Skill METEOR_STRIKE;
 	public static Skill REVELATION;

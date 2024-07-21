@@ -5,8 +5,8 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.ibm.icu.impl.Pair;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import io.netty.util.internal.StringUtil;
 import net.minecraft.client.resources.JsonReloadListener;
 import net.minecraft.item.Item;
@@ -28,8 +28,9 @@ import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
-import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
@@ -45,9 +46,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class
-WeaponTypeReloadListener extends JsonReloadListener {
-
+public class WeaponTypeReloadListener extends JsonReloadListener {
 	public static void registerDefaultWeaponTypes() {
 		Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> typeEntry = Maps.newHashMap();
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "axe"), WeaponCapabilityPresets.AXE);
@@ -74,7 +73,6 @@ WeaponTypeReloadListener extends JsonReloadListener {
 
 	public static final String DIRECTORY = "capabilities/weapons/types";
 
-
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
 	private static final Map<ResourceLocation, CompoundNBT> TAGMAP = Maps.newHashMap();
@@ -82,7 +80,6 @@ WeaponTypeReloadListener extends JsonReloadListener {
 	public WeaponTypeReloadListener() {
 		super(GSON, DIRECTORY);
 	}
-
 
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> packEntry, IResourceManager resourceManager, IProfiler profilerFiller) {
@@ -190,7 +187,7 @@ WeaponTypeReloadListener extends JsonReloadListener {
 		for (String key : innateSkillsTag.getAllKeys()) {
 			Style style = Style.ENUM_MANAGER.getOrThrow(key);
 
-			//builder.innateSkill(style, (itemstack) -> SkillManager.getSkill(innateSkillsTag.getString(key)));
+			builder.innateSkill(style, (itemstack) -> SkillManager.getSkill(innateSkillsTag.getString(key)));
 		}
 
 		CompoundNBT livingmotionModifierTag = tag.getCompound("livingmotion_modifier");
@@ -213,18 +210,18 @@ WeaponTypeReloadListener extends JsonReloadListener {
 
 		for (INBT caseTag : stylesTag.getList("cases", Constants.NBT.TAG_COMPOUND)) {
 			CompoundNBT caseCompTag = (CompoundNBT)caseTag;
-			List<Condition.EntityPatchCondition> conditionList = Lists.newArrayList();
+			List<EntityPatchCondition> conditionList = Lists.newArrayList();
 
 			for (INBT offhandTag : caseCompTag.getList("conditions", Constants.NBT.TAG_COMPOUND)) {
 				CompoundNBT offhandCompound = (CompoundNBT)offhandTag;
-				Supplier<Condition.EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
-				Condition.EntityPatchCondition condition = conditionProvider.get();
+				Supplier<EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
+				EntityPatchCondition condition = conditionProvider.get();
 				condition.read(offhandCompound);
 				conditionList.add(condition);
 			}
 
 			conditions.add(Pair.of((entitypatch) -> {
-				for (Condition.EntityPatchCondition condition : conditionList) {
+				for (EntityPatchCondition condition : conditionList) {
 					if (!condition.predicate(entitypatch)) {
 						return false;
 					}
@@ -236,8 +233,8 @@ WeaponTypeReloadListener extends JsonReloadListener {
 
 		builder.styleProvider((entitypatch) -> {
 			for (Pair<Predicate<LivingEntityPatch<?>>, Style> entry : conditions) {
-				if (entry.first.test(entitypatch)) {
-					return entry.second;
+				if (entry.getFirst().test(entitypatch)) {
+					return entry.getSecond();
 				}
 			}
 
@@ -246,18 +243,18 @@ WeaponTypeReloadListener extends JsonReloadListener {
 
 		if (tag.contains("offhand_item_compatible_predicate")) {
 			ListNBT offhandValidatorList = tag.getList("offhand_item_compatible_predicate", Constants.NBT.TAG_COMPOUND);
-			List<Condition.EntityPatchCondition> conditionList = Lists.newArrayList();
+			List<EntityPatchCondition> conditionList = Lists.newArrayList();
 
 			for (INBT offhandTag : offhandValidatorList) {
 				CompoundNBT offhandCompound = (CompoundNBT)offhandTag;
-				Supplier<Condition.EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
-				Condition.EntityPatchCondition condition = conditionProvider.get();
+				Supplier<EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
+				EntityPatchCondition condition = conditionProvider.get();
 				condition.read(offhandCompound);
 				conditionList.add(condition);
 			}
 
 			builder.weaponCombinationPredicator((entitypatch) -> {
-				for (Condition.EntityPatchCondition condition : conditionList) {
+				for (EntityPatchCondition condition : conditionList) {
 					if (!condition.predicate(entitypatch)) {
 						return false;
 					}
@@ -291,8 +288,6 @@ WeaponTypeReloadListener extends JsonReloadListener {
 		WeaponTypeReloadListener.registerDefaultWeaponTypes();
 	}
 
-
-
 	@OnlyIn(Dist.CLIENT)
 	public static void processServerPacket(SPDatapackSync packet) {
 		if (packet.getType() == SPDatapackSync.Type.WEAPON_TYPE) {
@@ -306,5 +301,4 @@ WeaponTypeReloadListener extends JsonReloadListener {
 			ItemCapabilityReloadListener.weaponTypeProcessedCheck();
 		}
 	}
-
 }

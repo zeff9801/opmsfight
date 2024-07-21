@@ -67,6 +67,8 @@ public class TridentCapability extends RangedWeaponCapability {
 			return EpicFightSkills.TSUNAMI;
 		} else if (EnchantmentHelper.hasChanneling(itemstack)) {
 			return EpicFightSkills.WRATHFUL_LIGHTING;
+		} else if (EnchantmentHelper.getLoyalty(itemstack) > 0) {
+			return EpicFightSkills.EVERLASTING_ALLEGIANCE;
 		} else {
 			return null;
 		}
