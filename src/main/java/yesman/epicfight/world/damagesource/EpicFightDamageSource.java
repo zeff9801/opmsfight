@@ -11,6 +11,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ import java.util.Set;
 
 	private Entity directEntity; //If projectile, this is the entity that cast it
 
-	private List<EpicFightDamageSources.TYPE> sourceTypes;
+	private List<EpicFightDamageSources.TYPE> sourceTypes = new ArrayList<>() {};
 
 	public EpicFightDamageSource(DamageSource damageSource) {
 		this(damageSource.msgId, damageSource.getEntity(), damageSource.getDirectEntity());
