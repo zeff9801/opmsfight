@@ -1,17 +1,11 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
-import javax.annotation.Nonnull;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.IRideable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.item.ShootableItem;
-import net.minecraft.item.UseAction;
+import net.minecraft.item.*;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -45,6 +39,8 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
+
+import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> extends PlayerPatch<T> {
@@ -140,7 +136,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentCompositeMotion = LivingMotions.DRINK;
 			else if (useAnim == UseAction.EAT)
 				currentCompositeMotion = LivingMotions.EAT;
-		//	else if (useAnim == UseAction.SPYGLASS)
+		//	else if (useAnim == UseAction.SPYGLASS) TODO extend and add spyglass action with a custom goggle
 		//		currentCompositeMotion = LivingMotions.SPECTATE;
 			else
 				currentCompositeMotion = currentLivingMotion;

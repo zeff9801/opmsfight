@@ -16,10 +16,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import yesman.epicfight.api.animation.AnimationClip;
-import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
@@ -257,7 +254,6 @@ public class Animations {
 	public static StaticAnimation RUSHING_TEMPO2;
 	public static StaticAnimation RUSHING_TEMPO3;
 	public static StaticAnimation RELENTLESS_COMBO;
-	public static StaticAnimation LETHAL_SLICING_TWICE;
 	public static StaticAnimation EVISCERATE_FIRST;
 	public static StaticAnimation EVISCERATE_SECOND;
 	public static StaticAnimation BLADE_RUSH_COMBO1;
@@ -276,34 +272,6 @@ public class Animations {
 	public static StaticAnimation OFF_ANIMATION_HIGHEST;
 	public static StaticAnimation OFF_ANIMATION_MIDDLE;
 	public static StaticAnimation OFF_ANIMATION_LOWEST;
-
-	public static StaticAnimation BIPED_HOLD_KATANA_SHEATHING;
-	public static StaticAnimation BIPED_HOLD_KATANA;
-	public static StaticAnimation BIPED_WALK_UNSHEATHING;
-	public static StaticAnimation BIPED_RUN_UNSHEATHING;
-	public static StaticAnimation BIPED_KATANA_SCRAP;
-	public static StaticAnimation COMMON_GUARD_BREAK;
-	public static StaticAnimation KATANA_AUTO1;
-	public static StaticAnimation KATANA_AUTO2;
-	public static StaticAnimation KATANA_AUTO3;
-	public static StaticAnimation KATANA_AIR_SLASH;
-	public static StaticAnimation KATANA_SHEATHING_AUTO;
-	public static StaticAnimation KATANA_SHEATHING_DASH;
-	public static StaticAnimation KATANA_SHEATH_AIR_SLASH;
-	public static StaticAnimation KATANA_GUARD;
-	public static StaticAnimation KATANA_GUARD_HIT;
-	public static StaticAnimation GUILLOTINE_AXE;
-	public static StaticAnimation SPEAR_THRUST;
-	public static StaticAnimation SPEAR_SLASH;
-	public static StaticAnimation GIANT_WHIRLWIND;
-	public static StaticAnimation FATAL_DRAW;
-	public static StaticAnimation FATAL_DRAW_DASH;
-	public static StaticAnimation LETHAL_SLICING;
-	public static StaticAnimation LETHAL_SLICING_ONCE;
-	public static StaticAnimation BLADE_RUSH_FIRST;
-	public static StaticAnimation BLADE_RUSH_SECOND;
-	public static StaticAnimation BLADE_RUSH_THIRD;
-	public static StaticAnimation BLADE_RUSH_FINISHER;
 
 	public static StaticAnimation BIPED_STAFF_IDLE;
 	public static StaticAnimation BIPED_STAFF_RUN;
@@ -356,7 +324,39 @@ public class Animations {
 
 			return dot < 0.0D ? 1 : 0;
 		}, "biped/living/creative_fly", BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
+		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_mainhand", "biped/living/spyglass_offhand", biped)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+					if (self.isLinkAnimation()) {
+						return speed;
+					}
 
+					return 0.0F;
+				})
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+					if (entitypatch.isFirstPerson()) {
+						pose.getJointTransformData().clear();
+					} else if (!(self.isLinkAnimation())) {
+						LivingMotion livingMotion = entitypatch.getCurrentLivingMotion();
+						Pose rawPose;
+
+						if (livingMotion == LivingMotions.SWIM || livingMotion == LivingMotions.FLY || livingMotion == LivingMotions.CREATIVE_FLY) {
+							rawPose = self.getRawPose(3.3333F);
+						} else {
+							float xRot = MathHelper.clamp((entitypatch.getOriginal().xRot + 90.0F) * 0.0166666666666667F, 0.0F, 3.0F);
+							rawPose = self.getRawPose(xRot);
+							float f = 90.0F;
+							float ratio = (f - Math.abs(entitypatch.getOriginal().xRot)) / f;
+							float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
+							rawPose.getJointTransformData().get("Chest").frontResult(
+									JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(MathHelper.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio))
+									, OpenMatrix4f::mulAsOriginInverse
+							);
+						}
+
+						pose.getJointTransformData().putAll(rawPose.getJointTransformData());
+					}
+				})
+				.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
