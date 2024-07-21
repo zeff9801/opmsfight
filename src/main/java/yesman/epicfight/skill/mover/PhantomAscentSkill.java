@@ -13,6 +13,7 @@ import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.utils.DamageSourceHelper;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillDataKeys;
@@ -32,8 +33,8 @@ public class PhantomAscentSkill extends Skill {
     public PhantomAscentSkill(Builder<? extends Skill> builder) {
         super(builder);
 
-//        this.animations[0] = () -> Animations.BIPED_PHANTOM_ASCENT_FORWARD; //TODO Needs animations
-//        this.animations[1] = () -> Animations.BIPED_PHANTOM_ASCENT_BACKWARD;
+        this.animations[0] = () -> Animations.BIPED_PHANTOM_ASCENT_FORWARD;
+        this.animations[1] = () -> Animations.BIPED_PHANTOM_ASCENT_BACKWARD;
     }
 
     @Override

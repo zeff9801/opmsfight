@@ -304,8 +304,12 @@ public class Animations {
 	public static StaticAnimation BLADE_RUSH_SECOND;
 	public static StaticAnimation BLADE_RUSH_THIRD;
 	public static StaticAnimation BLADE_RUSH_FINISHER;
+
 	public static StaticAnimation BIPED_STAFF_IDLE;
 	public static StaticAnimation BIPED_STAFF_RUN;
+	public static StaticAnimation STAFF_AUTO1;
+	public static StaticAnimation STAFF_AUTO2;
+	public static StaticAnimation STAFF_AUTO3;
 
 	public static StaticAnimation BIPED_PHANTOM_ASCENT_FORWARD;
 	public static StaticAnimation BIPED_PHANTOM_ASCENT_BACKWARD;
@@ -477,7 +481,26 @@ public class Animations {
 				.newTimePair(0.0F, Float.MAX_VALUE)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, true)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, true);
+		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
+				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
+				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
+					Vector3d pos = entitypatch.getOriginal().position();
 
+					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
+					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
+				}, AnimationEvent.Side.CLIENT));
+		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
+				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
+				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
+					Vector3d pos = entitypatch.getOriginal().position();
+
+					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
+					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
+				}, AnimationEvent.Side.CLIENT));
 		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", biped);
 		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
