@@ -319,6 +319,20 @@ public class Animations {
 	private static void build() {
 		HumanoidArmature biped = Armatures.BIPED;
 
+		//Map
+		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+
 		//Biped Animations
 		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
 		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);

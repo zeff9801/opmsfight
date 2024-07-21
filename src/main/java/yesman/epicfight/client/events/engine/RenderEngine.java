@@ -143,7 +143,7 @@ public class RenderEngine {
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
 		RenderTrident tridentRenderer = new RenderTrident();
-//		RenderMap mapRenderer = new RenderMap();
+		RenderMap mapRenderer = new RenderMap();
 		RenderShield shieldRenderer = new RenderShield();
 
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
@@ -151,7 +151,7 @@ public class RenderEngine {
 		this.itemRendererMapByInstance.put(Items.SHIELD, shieldRenderer);
 		this.itemRendererMapByInstance.put(Items.CROSSBOW, crossbowRenderer);
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
-//		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
+		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
 		this.itemRendererMapByInstance.put(EpicFightItems.KATANA.get(), new RenderKatana());
 
 		//Render by item class
@@ -164,7 +164,7 @@ public class RenderEngine {
 		this.itemRendererMapByClass.put(BowCapability.class, bowRenderer);
 		this.itemRendererMapByClass.put(CrossbowCapability.class, crossbowRenderer);
 		this.itemRendererMapByClass.put(TridentCapability.class, tridentRenderer);
-//		this.itemRendererMapByClass.put(MapCapability.class, mapRenderer);
+		this.itemRendererMapByClass.put(MapCapability.class, mapRenderer);
 		this.itemRendererMapByClass.put(ShieldCapability.class, shieldRenderer);
 
 		this.aimHelper = new AimHelperRenderer();
