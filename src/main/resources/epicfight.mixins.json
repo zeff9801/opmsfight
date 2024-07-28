@@ -1,17 +1,18 @@
 {
   "required": true,
-  "minVersion": "0.8",
-  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.8.4",
+  "compatibilityLevel": "JAVA_11",
   "package": "yesman.epicfight.mixin",
   "client": [
     "MixinBufferBuilder",
     "MixinKeyboardHandler",
     "MixinLightTexture",
     "MixinLocalPlayer",
-    "MixinMinecraft",
+    "MixinMinecraft_EpicFight",
     "MixinMinecraftInvoker",
     "MixinMovementInputFromOptions",
-    "MixinResourceLoadProgressGui"
+    "MixinResourceLoadProgressGui",
+    "MixinKeyBindingMap"
   ],
   "mixins": [
     "MixinCapabilityProviderInvoker",

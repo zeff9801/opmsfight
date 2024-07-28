@@ -225,10 +225,7 @@ public class ControllEngine {
 			} else {
 				if (EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey().equals(EpicFightKeyMappings.ATTACK.getKey())) {
 					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
-						if (this.minecraft.hitResult.getType() == RayTraceResult.Type.BLOCK && this.playerpatch.getTarget() == null) {
-							((MixinMinecraftInvoker)this.minecraft).invokeStartAttack();
-							this.setKeyBind(EpicFightKeyMappings.ATTACK, true);
-						} else if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
+						if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
 							if (!this.player.isSpectator()) {
 								this.reserveKey(SkillSlots.WEAPON_INNATE, EpicFightKeyMappings.WEAPON_INNATE_SKILL);
 							}
