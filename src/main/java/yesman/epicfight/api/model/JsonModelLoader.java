@@ -56,7 +56,7 @@ public class JsonModelLoader {
 				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
-			} catch (NoSuchElementException e) {
+			} catch (FileNotFoundException e) {
 				// In this case, reads the animation data from mod.jar (Especially in a server)
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
