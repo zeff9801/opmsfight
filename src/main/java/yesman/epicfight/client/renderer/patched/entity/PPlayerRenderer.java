@@ -26,4 +26,30 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayerEntit
 		this.addPatchedLayer(CapeLayer.class, new PatchedCapeLayer());
 		this.addPatchedLayer(HeldItemLayer.class, new PatchedItemInHandLayer<>());
 	}
+
+	@Override
+	protected void prepareModel(HumanoidMesh mesh, AbstractClientPlayerEntity entity, AbstractClientPlayerPatch<AbstractClientPlayerEntity> entitypatch, PlayerRenderer renderer) {
+		super.prepareModel(mesh, entity, entitypatch, renderer);
+
+		renderer.setModelProperties(entity);
+		PlayerModel<AbstractClientPlayerEntity> model = renderer.getModel();
+
+		mesh.head.hidden = !model.head.visible;
+		mesh.hat.hidden = !model.hat.visible;
+		mesh.jacket.hidden = !model.jacket.visible;
+		mesh.torso.hidden = !model.body.visible;
+		mesh.leftArm.hidden = !model.leftArm.visible;
+		mesh.leftLeg.hidden = !model.leftLeg.visible;
+		mesh.leftPants.hidden = !model.leftPants.visible;
+		mesh.leftSleeve.hidden = !model.leftSleeve.visible;
+		mesh.rightArm.hidden = !model.rightArm.visible;
+		mesh.rightLeg.hidden = !model.rightLeg.visible;
+		mesh.rightPants.hidden = !model.rightPants.visible;
+		mesh.rightSleeve.hidden = !model.rightSleeve.visible;
+	}
+
+	@Override
+	public HumanoidMesh getMesh(AbstractClientPlayerPatch<AbstractClientPlayerEntity> entitypatch) {
+		return entitypatch.getOriginal().getModelName().equals("slim") ? Meshes.ALEX : Meshes.BIPED;
+	}
 }
