@@ -20,7 +20,7 @@ import java.util.Optional;
 
 public class BasicAttackAnimation extends AttackAnimation {
 
-	boolean STIFF_COMBO_ATTACKS = false;
+	boolean STIFF_COMBO_ATTACKS = true;
 
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		this(convertTime, antic, antic, contact, recovery, collider, colliderJoint, path, armature);
