@@ -90,44 +90,34 @@ public class ControllEngine {
 
 
 	public void handleEpicFightKeyMappings() {
-		if (EpicFightKeyMappings.SKILL_EDIT.consumeClick()) {
-			if (this.playerpatch.getSkillCapability() != null) {
-				Minecraft.getInstance().setScreen(new SkillEditScreen(this.playerpatch.getSkillCapability()));
-			}
-		}
 
-		if (EpicFightKeyMappings.CONFIG.consumeClick()) {
-			Minecraft.getInstance().setScreen(new IngameConfigurationScreen(this.minecraft, null));
-		}
+		while (this.options.keyAttack.consumeClick()) {
+			if (this.playerpatch.isBattleMode() && this.currentChargingKey != this.options.keyAttack) {
+//				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
+//					SkillSlot slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
+//
+//					if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
+//						this.player.resetAttackStrengthTicker();
+//						this.attackLightPressToggle = false;
+//						this.releaseAllServedKeys();
+//					} else {
+//						if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
+//							this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
+//						}
+//					}
+//
+//					this.lockHotkeys();
+//					this.attackLightPressToggle = false;
+//					this.weaponInnatePressToggle = false;
+//					this.weaponInnatePressCounter = 0;
+//				} else {
+//					if (!this.weaponInnatePressToggle) {
+//						this.weaponInnatePressToggle = true;
+//					}
+//				}
 
-		while (EpicFightKeyMappings.ATTACK.consumeClick()) {
-			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.ATTACK) {
-				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
-					SkillSlot slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
-
-					if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
-						this.player.resetAttackStrengthTicker();
-						this.attackLightPressToggle = false;
-						this.releaseAllServedKeys();
-					} else {
-						if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
-							this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
-						}
-					}
-
-					this.lockHotkeys();
-					this.attackLightPressToggle = false;
-					this.weaponInnatePressToggle = false;
-					this.weaponInnatePressCounter = 0;
-				} else {
-					if (!this.weaponInnatePressToggle) {
-						this.weaponInnatePressToggle = true;
-					}
-				}
-
-				//Disable vanilla attack
-				if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
-					this.disableKey(this.options.keyAttack);
+				if (!this.weaponInnatePressToggle) {
+					this.weaponInnatePressToggle = true;
 				}
 			}
 		}
@@ -218,16 +208,15 @@ public class ControllEngine {
 		}
 
 		if (this.weaponInnatePressToggle) {
-			if (!this.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL)) {
+			if (!this.isKeyDown(this.options.keyAttack)) { //Might break
 				this.attackLightPressToggle = true;
 				this.weaponInnatePressToggle = false;
 				this.weaponInnatePressCounter = 0;
 			} else {
-				if (EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey().equals(EpicFightKeyMappings.ATTACK.getKey())) {
 					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 						if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
 							if (!this.player.isSpectator()) {
-								this.reserveKey(SkillSlots.WEAPON_INNATE, EpicFightKeyMappings.WEAPON_INNATE_SKILL);
+								this.reserveKey(SkillSlots.WEAPON_INNATE, this.options.keyAttack);
 							}
 						} else {
 							this.lockHotkeys();
@@ -238,7 +227,6 @@ public class ControllEngine {
 					} else {
 						this.weaponInnatePressCounter++;
 					}
-				}
 			}
 		}
 
@@ -250,7 +238,7 @@ public class ControllEngine {
 				this.releaseAllServedKeys();
 			} else {
 				if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
-					this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
+					this.reserveKey(slot, this.options.keyAttack);
 				}
 			}
 

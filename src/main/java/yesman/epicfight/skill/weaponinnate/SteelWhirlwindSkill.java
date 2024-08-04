@@ -110,7 +110,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 
     @Override
     public KeyBinding getKeyMapping() {
-        return EpicFightKeyMappings.WEAPON_INNATE_SKILL;
+        return Minecraft.getInstance().options.keyAttack;
     }
 
     @Override
