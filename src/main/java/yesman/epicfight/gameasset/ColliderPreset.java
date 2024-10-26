@@ -95,6 +95,9 @@ public class ColliderPreset implements IFutureReloadListener {
 			new OBBCollider(0.7D, 0.7D, 1.0D, 0.0D, 1.0D, -1.0D),
 			new OBBCollider(1.5D, 0.7D, 1.0D, 0.0D, 1.0D, -1.0D)
 	));
+	public static final Collider STAFF = new MultiOBBCollider(4, 0.5, 0.5, 1.9, 0.0, 0.0, 0.0);
+	public static final Collider STAFF_EXTENTION = new MultiOBBCollider(4, 0.5, 0.5, 2.5, 0.0, 0.0, 0.0);
+	public static final Collider STAFF_CHARYBDIS = new MultiOBBCollider(4, 0.6, 0.6, 2.3, 0.0, 0.0, 0.0);
 
 	public static Collider deserializeSimpleCollider(CompoundNBT tag) throws IllegalArgumentException {
 		int number = tag.getInt("number");
