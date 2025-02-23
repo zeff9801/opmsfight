@@ -1,14 +1,8 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -33,12 +27,19 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 @OnlyIn(Dist.CLIENT)
 public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, R, AM> {
 
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>, AM>> patchedLayers = Maps.newHashMap();
 
-
+	private static final double SHIFT_TRANSLATION = 0.15D;
+	private static final float MAX_HEAD_ROTATION = 85.0F;
+	private static final float MAX_ROTATION_DIFF = 2500.0F;
 
 	@Override
 	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
@@ -87,59 +88,58 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 
 	protected void prepareVanillaModel(E entityIn, M model, LivingRenderer<E, M> renderer, float partialTicks) {
+		if (entityIn == null || model == null || renderer == null) {
+			return;
+		}
+
 		boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
 		model.riding = shouldSit;
 		model.young = entityIn.isBaby();
-		float f = MathHelper.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
-		float f1 = MathHelper.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
-		float f2 = f1 - f;
+		float bodyRot = MathHelper.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
+		float headRot = MathHelper.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
+		float headBodyRotDiff = headRot - bodyRot;
 
-		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingentity) {
-			f = MathHelper.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
-			f2 = f1 - f;
-			float f3 = MathHelper.wrapDegrees(f2);
-			if (f3 < -85.0F) {
-				f3 = -85.0F;
+		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingEntity) {
+			bodyRot = MathHelper.rotLerp(partialTicks, livingEntity.yBodyRotO, livingEntity.yBodyRot);
+			headBodyRotDiff = headRot - bodyRot;
+			float wrappedDiff = MathHelper.wrapDegrees(headBodyRotDiff);
+			if (wrappedDiff < -MAX_HEAD_ROTATION) {
+				wrappedDiff = -MAX_HEAD_ROTATION;
 			}
-
-			if (f3 >= 85.0F) {
-				f3 = 85.0F;
+			if (wrappedDiff >= MAX_HEAD_ROTATION) {
+				wrappedDiff = MAX_HEAD_ROTATION;
 			}
-
-			f = f1 - f3;
-			if (f3 * f3 > 2500.0F) {
-				f += f3 * 0.2F;
+			bodyRot = headRot - wrappedDiff;
+			if (wrappedDiff * wrappedDiff > MAX_ROTATION_DIFF) {
+				bodyRot += wrappedDiff * 0.2F;
 			}
-
-			f2 = f1 - f;
+			headBodyRotDiff = headRot - bodyRot;
 		}
 
-		float f6 = MathHelper.lerp(partialTicks, entityIn.xRotO, entityIn.xRot);
-
+		float xRot = MathHelper.lerp(partialTicks, entityIn.xRotO, entityIn.xRot);
 		if (EntityUtils.isEntityUpsideDown(entityIn)) {
-			f6 *= -1.0F;
-			f2 *= -1.0F;
+			xRot *= -1.0F;
+			headBodyRotDiff *= -1.0F;
 		}
 
-		float f7 = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
-		float f8 = 0.0F;
-		float f5 = 0.0F;
+		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
+		float animationPosition = 0.0F;
+		float animationSpeed = 0.0F;
 
 		if (!shouldSit && entityIn.isAlive()) {
 			//TODO If weird shit happens with walk animations, this might be the reason
-			f8 = entityIn.animationPosition * (partialTicks);
-			f5 = entityIn.animationPosition - entityIn.animationSpeed * (1.0F - partialTicks);
+			animationPosition = entityIn.animationPosition * partialTicks;
+			animationSpeed = entityIn.animationPosition - entityIn.animationSpeed * (1.0F - partialTicks);
 			if (entityIn.isBaby()) {
-				f5 *= 3.0F;
+				animationSpeed *= 3.0F;
 			}
-
-			if (f8 > 1.0F) {
-				f8 = 1.0F;
+			if (animationPosition > 1.0F) {
+				animationPosition = 1.0F;
 			}
 		}
 
-		model.prepareMobModel(entityIn, f5, f8, partialTicks);
-		model.setupAnim(entityIn, f5, f8, f7, f2, f6);
+		model.prepareMobModel(entityIn, animationSpeed, animationPosition, partialTicks);
+		model.setupAnim(entityIn, animationSpeed, animationPosition, bob, headBodyRotDiff, xRot);
 	}
 
 	protected void prepareModel(AM mesh, E entity, T entitypatch, R renderer) {
@@ -156,15 +156,15 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
         float f2 = f1 - f;
 		float f7 = entityIn.getViewXRot(partialTicks);
 		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
-		
+
 		while (iter.hasNext()) {
 			LayerRenderer<E, M> layer = iter.next();
 			Class<?> rendererClass = layer.getClass();
-			
+
 			if (rendererClass.isAnonymousClass()) {
 				rendererClass = rendererClass.getSuperclass();
 			}
-			
+
 			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
 				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
 				iter.remove();
@@ -214,13 +214,13 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	protected int getOverlayCoord(E entity, T entitypatch, float partialTicks) {
 		return OverlayTexture.pack(0, OverlayTexture.v(entity.hurtTime > 5));
 	}
-	
+
+
 	@Override
 	public void mulPoseStack(MatrixStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		super.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-        
-        if (entityIn.isShiftKeyDown()) {
-			poseStack.translate(0.0D, 0.15D, 0.0D);
+		if (entityIn.isShiftKeyDown()) {
+			poseStack.translate(0.0D, SHIFT_TRANSLATION, 0.0D);
 		}
 	}
 

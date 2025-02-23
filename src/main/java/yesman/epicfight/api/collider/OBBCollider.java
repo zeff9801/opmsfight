@@ -41,24 +41,25 @@ public class OBBCollider extends Collider {
 
 	protected OBBCollider(AxisAlignedBB outerAABB, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
 		super(new Vector3d(centerX, centerY, centerZ), outerAABB);
-		this.modelVertex = new Vector3d[4];
-		this.modelNormal = new Vector3d[3];
+		this.modelVertex = new Vector3d[] {
+				new Vector3d(vertexX, vertexY, -vertexZ),
+				new Vector3d(vertexX, vertexY, vertexZ),
+				new Vector3d(-vertexX, vertexY, vertexZ),
+				new Vector3d(-vertexX, vertexY, -vertexZ)
+		};
+		this.modelNormal = new Vector3d[] {
+				new Vector3d(1, 0, 0),
+				new Vector3d(0, 1, 0),
+				new Vector3d(0, 0, -1)
+		};
 		this.rotatedVertex = new Vector3d[4];
 		this.rotatedNormal = new Vector3d[3];
-		this.modelVertex[0] = new Vector3d(vertexX, vertexY, -vertexZ);
-		this.modelVertex[1] = new Vector3d(vertexX, vertexY, vertexZ);
-		this.modelVertex[2] = new Vector3d(-vertexX, vertexY, vertexZ);
-		this.modelVertex[3] = new Vector3d(-vertexX, vertexY, -vertexZ);
-		this.modelNormal[0] = new Vector3d(1, 0, 0);
-		this.modelNormal[1] = new Vector3d(0, 1, 0);
-		this.modelNormal[2] = new Vector3d(0, 0, -1);
-		this.rotatedVertex[0] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedVertex[1] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedVertex[2] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedVertex[3] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedNormal[0] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedNormal[1] = new Vector3d(0.0D, 0.0D, 0.0D);
-		this.rotatedNormal[2] = new Vector3d(0.0D, 0.0D, 0.0D);
+		for (int i = 0; i < 4; i++) {
+			this.rotatedVertex[i] = new Vector3d(0.0D, 0.0D, 0.0D);
+		}
+		for (int i = 0; i < 3; i++) {
+			this.rotatedNormal[i] = new Vector3d(0.0D, 0.0D, 0.0D);
+		}
 	}
 
 	static AxisAlignedBB getInitialAABB(double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
@@ -104,34 +105,32 @@ public class OBBCollider extends Collider {
 		double ySize = (aabbCopy.maxY - aabbCopy.minY) / 2;
 		double zSize = (aabbCopy.maxZ - aabbCopy.minZ) / 2;
 		this.worldCenter = new Vector3d(-((float)aabbCopy.minX + xSize), (float)aabbCopy.minY + ySize, -((float)aabbCopy.minZ + zSize));
-		this.rotatedVertex = new Vector3d[4];
-		this.rotatedNormal = new Vector3d[3];
-		this.rotatedVertex[0] = new Vector3d(-xSize, ySize, -zSize);
-		this.rotatedVertex[1] = new Vector3d(-xSize, ySize, zSize);
-		this.rotatedVertex[2] = new Vector3d(xSize, ySize, zSize);
-		this.rotatedVertex[3] = new Vector3d(xSize, ySize, -zSize);
-		this.rotatedNormal[0] = new Vector3d(1, 0, 0);
-		this.rotatedNormal[1] = new Vector3d(0, 1, 0);
-		this.rotatedNormal[2] = new Vector3d(0, 0, 1);
+		this.rotatedVertex = new Vector3d[] {
+				new Vector3d(-xSize, ySize, -zSize),
+				new Vector3d(-xSize, ySize, zSize),
+				new Vector3d(xSize, ySize, zSize),
+				new Vector3d(xSize, ySize, -zSize)
+		};
+		this.rotatedNormal = new Vector3d[] {
+				new Vector3d(1, 0, 0),
+				new Vector3d(0, 1, 0),
+				new Vector3d(0, 0, 1)
+		};
 	}
 
 	/**
-	 * Transform every elements of this Bounding Box
+	 * Transform every element of this Bounding Box
 	 **/
 	@Override
 	public void transform(OpenMatrix4f modelMatrix) {
 		OpenMatrix4f noTranslation = modelMatrix.removeTranslation();
-
 		for (int i = 0; i < this.modelVertex.length; i++) {
 			this.rotatedVertex[i] = OpenMatrix4f.transform(noTranslation, this.modelVertex[i]);
 		}
-
 		for (int i = 0; i < this.modelNormal.length; i++) {
 			this.rotatedNormal[i] = OpenMatrix4f.transform(noTranslation, this.modelNormal[i]);
 		}
-
 		this.scale = noTranslation.toScaleVector();
-
 		super.transform(modelMatrix);
 	}
 
@@ -194,29 +193,29 @@ public class OBBCollider extends Collider {
 	private static boolean collisionDetection(Vector3d seperateAxis, Vector3d toOpponent, OBBCollider box1, OBBCollider box2) {
 		Vector3d maxProj1 = null, maxProj2 = null, distance;
 		double maxDot1 = -1, maxDot2 = -1;
+		double dot;
+
 		distance = seperateAxis.dot(toOpponent) > 0.0F ? toOpponent : toOpponent.scale(-1.0D);
 
 		for (Vector3d vertexVector : box1.rotatedVertex) {
-			Vector3d temp = seperateAxis.dot(vertexVector) > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
-			double dot = seperateAxis.dot(temp);
-
+			dot = seperateAxis.dot(vertexVector);
 			if (dot > maxDot1) {
 				maxDot1 = dot;
-				maxProj1 = temp;
+				maxProj1 = dot > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
 			}
 		}
 
 		for (Vector3d vertexVector : box2.rotatedVertex) {
-			Vector3d temp = seperateAxis.dot(vertexVector) > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
-			double dot = seperateAxis.dot(temp);
-
+			dot = seperateAxis.dot(vertexVector);
 			if (dot > maxDot2) {
 				maxDot2 = dot;
-				maxProj2 = temp;
+				maxProj2 = dot > 0.0F ? vertexVector : vertexVector.scale(-1.0D);
 			}
 		}
 
-		return !(MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length());
+		return !(MathUtils.projectVector(distance, seperateAxis).length() >
+				MathUtils.projectVector(maxProj1, seperateAxis).length() +
+						MathUtils.projectVector(maxProj2, seperateAxis).length());
 	}
 
 	@Override
