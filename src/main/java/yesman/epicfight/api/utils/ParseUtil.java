@@ -1,24 +1,10 @@
 package yesman.epicfight.api.utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
@@ -33,6 +19,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import yesman.epicfight.api.utils.math.Vec3f;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ParseUtil {
     public static int[] toIntArray(JsonArray array) {
@@ -129,6 +121,10 @@ public class ParseUtil {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static <T> T nvl(T a, T b) {
+        return a == null ? b : a;
     }
 
     public static String snakeToSpacedCamel(Object obj) {

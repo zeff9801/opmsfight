@@ -250,7 +250,7 @@ public class MoveCoordFunctions {
 
         for (int i = startFrame; i <= endFrame; i++) {
             Vec3f translation = keyframes[i].transform().translation();
-            OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternionf(rotator), translation, translation);
+            OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
         }
 
         transformSheet.readFrom(transform);

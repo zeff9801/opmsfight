@@ -86,7 +86,7 @@ public interface ProceduralAnimation {
 	default void applyFabrikToJoint(Vec3f recalculatedPosition, Pose pose, Armature armature, Joint startJoint, Joint endJoint, Quaternionf tipRotation) {
 		FABRIK fabrik = new FABRIK(pose, armature, startJoint, endJoint);
     	fabrik.run(recalculatedPosition, 10);
-    	OpenMatrix4f tipRotationMatrix = OpenMatrix4f.fromQuaternionf(tipRotation);
+    	OpenMatrix4f tipRotationMatrix = OpenMatrix4f.fromQuaternion(tipRotation);
     	OpenMatrix4f animRotation = armature.getBindedTransformFor(pose, endJoint).removeTranslation();
     	OpenMatrix4f animToTipRotation = OpenMatrix4f.mul(OpenMatrix4f.invert(animRotation, null), tipRotationMatrix, null);
     	pose.getOrDefaultTransform(endJoint.getName()).overwriteRotation(JointTransform.fromMatrixNoScale(animToTipRotation));

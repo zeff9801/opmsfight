@@ -1,15 +1,14 @@
 package yesman.epicfight.api.animation;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import com.joml.Quaternionf;
 import net.minecraft.util.math.MathHelper;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.MatrixOperation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+
+import java.util.Map;
 
 public class JointTransform {
 	public static final String ANIMATION_TRANSFORM = "animation_transform";
@@ -112,7 +111,7 @@ public class JointTransform {
 	}
 
 	public OpenMatrix4f toMatrix() {
-		OpenMatrix4f matrix = new OpenMatrix4f().translate(this.translation).mulBack(OpenMatrix4f.fromQuaternionf(this.rotation)).scale(this.scale);
+		OpenMatrix4f matrix = new OpenMatrix4f().translate(this.translation).mulBack(OpenMatrix4f.fromQuaternion(this.rotation)).scale(this.scale);
 		return matrix;
 	}
 
@@ -150,7 +149,7 @@ public class JointTransform {
 	}
 
 	public static JointTransform fromMatrixNoScale(OpenMatrix4f matrix) {
-		return new JointTransform(matrix.toTranslationVector(), matrix.toQuaternionf(), new Vec3f(1.0F, 1.0F, 1.0F));
+		return new JointTransform(matrix.toTranslationVector(), matrix.toQuaternion(), new Vec3f(1.0F, 1.0F, 1.0F));
 	}
 
 	public static JointTransform getTranslation(Vec3f vec) {
@@ -166,7 +165,7 @@ public class JointTransform {
 	}
 
 	public static JointTransform fromMatrix(OpenMatrix4f matrix) {
-		return new JointTransform(matrix.toTranslationVector(), matrix.toQuaternionf(), matrix.toScaleVector());
+		return new JointTransform(matrix.toTranslationVector(), matrix.toQuaternion(), matrix.toScaleVector());
 	}
 
 	public static JointTransform translationRotation(Vec3f vec, Quaternionf quat) {

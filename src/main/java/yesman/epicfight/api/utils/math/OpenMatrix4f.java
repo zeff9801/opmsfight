@@ -1,22 +1,19 @@
 package yesman.epicfight.api.utils.math;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.joml.Quaternionf;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import yesman.epicfight.api.animation.JointTransform;
+
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.joml.Quaternionf;
-import com.mojang.datafixers.util.Pair;
-
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.BufferUtils;
-import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
@@ -70,7 +67,7 @@ public class OpenMatrix4f {
 	}
 
 	public OpenMatrix4f(final JointTransform jointTransform) {
-		load(OpenMatrix4f.fromQuaternionf(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
+		load(OpenMatrix4f.fromQuaternion(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
 	}
 
 	public OpenMatrix4f setIdentity() {
@@ -293,6 +290,16 @@ public class OpenMatrix4f {
 		dest.m31 = m31;
 		dest.m32 = m32;
 		dest.m33 = m33;
+		return dest;
+	}
+
+	public static OpenMatrix4f mulMatrices(OpenMatrix4f... srcs) {
+		OpenMatrix4f dest = new OpenMatrix4f();
+
+		for (OpenMatrix4f src : srcs) {
+			dest.mulBack(src);
+		}
+
 		return dest;
 	}
 
@@ -575,11 +582,11 @@ public class OpenMatrix4f {
 		return new Vec3f(matrix.m30, matrix.m31, matrix.m32);
 	}
 
-	public Quaternionf toQuaternionf() {
-		return OpenMatrix4f.toQuaternionf(this);
+	public Quaternionf toQuaternion() {
+		return OpenMatrix4f.toQuaternion(this);
 	}
 
-	public static Quaternionf toQuaternionf(OpenMatrix4f matrix) {
+	public static Quaternionf toQuaternion(OpenMatrix4f matrix) {
 		float w, x, y, z;
 		float diagonal = matrix.m00 + matrix.m11 + matrix.m22;
 
@@ -612,7 +619,7 @@ public class OpenMatrix4f {
 		return new Quaternionf(x, y, z, w);
 	}
 
-	public static OpenMatrix4f fromQuaternionf(Quaternionf quaternion) {
+	public static OpenMatrix4f fromQuaternion(Quaternionf quaternion) {
 		OpenMatrix4f matrix = new OpenMatrix4f();
 		float x = quaternion.x();
 		float y = quaternion.y();
@@ -711,31 +718,15 @@ public class OpenMatrix4f {
 	}
 
 	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
-		float[] arr = new float[16];
-		arr[0] = visibleMat.m00;
-		arr[1] = visibleMat.m10;
-		arr[2] = visibleMat.m20;
-		arr[3] = visibleMat.m30;
-		arr[4] = visibleMat.m01;
-		arr[5] = visibleMat.m11;
-		arr[6] = visibleMat.m21;
-		arr[7] = visibleMat.m31;
-		arr[8] = visibleMat.m02;
-		arr[9] = visibleMat.m12;
-		arr[10] = visibleMat.m22;
-		arr[11] = visibleMat.m32;
-		arr[12] = visibleMat.m03;
-		arr[13] = visibleMat.m13;
-		arr[14] = visibleMat.m23;
-		arr[15] = visibleMat.m33;
-
-		return new Matrix4f(arr);
+		MATRIX_TRANSFORMER.position(0);
+		visibleMat.store(MATRIX_TRANSFORMER);
+		MATRIX_TRANSFORMER.position(0);
+		return new Matrix4f(MATRIX_TRANSFORMER.array());
 	}
 
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
-		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
-		buf.position(0);
-		mat4f.store(buf);
-		return OpenMatrix4f.load(null, buf);
+		MATRIX_TRANSFORMER.position(0);
+		mat4f.store(MATRIX_TRANSFORMER);
+		return OpenMatrix4f.load(null, MATRIX_TRANSFORMER);
 	}
 }

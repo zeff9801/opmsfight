@@ -33,7 +33,7 @@ public abstract class Animator {
 	/** Standby until the current animation is completely end. Mostly used for link two animations having the same last & first keyframe pose on {@link DynamicAnimation#end(LivingEntityPatch, boolean)} **/
 	public abstract void reserveAnimation(StaticAnimation nextAnimation);
 	public abstract EntityState getEntityState();
-	/** Give a null value as a parameter to get an animation that is the highest priority on client **/
+	/** Give a null value as a parameter to get an animation that is highest priority on client **/
 	public abstract AnimationPlayer getPlayerFor(@Nullable DynamicAnimation playingAnimation);
 	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
 	public abstract Pose getPose(float partialTicks);

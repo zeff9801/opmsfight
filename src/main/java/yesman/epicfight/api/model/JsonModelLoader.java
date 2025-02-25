@@ -553,7 +553,7 @@ public class JsonModelLoader {
 
 			matrix.mulFront(invLocalTransform);
 
-			JointTransform transform = new JointTransform(matrix.toTranslationVector(), matrix.toQuaternionf(), matrix.toScaleVector());
+			JointTransform transform = new JointTransform(matrix.toTranslationVector(), matrix.toQuaternion(), matrix.toScaleVector());
 			keyframeList.add(new Keyframe(timeStamp, transform));
 		}
 
