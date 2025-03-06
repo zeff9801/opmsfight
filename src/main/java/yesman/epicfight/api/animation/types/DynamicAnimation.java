@@ -5,10 +5,14 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.*;
+import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -19,16 +23,15 @@ import java.util.Optional;
 public abstract class DynamicAnimation {
 	protected final boolean isRepeat;
 	protected final float convertTime;
-	
+
 	public DynamicAnimation() {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
 	}
-	
+
 	public DynamicAnimation(float convertTime, boolean isRepeat) {
 		this.isRepeat = isRepeat;
 		this.convertTime = convertTime;
 	}
-
 
 	public final Pose getRawPose(float time) {
 		return this.getAnimationClip().getPoseInTime(time);
@@ -69,11 +72,11 @@ public abstract class DynamicAnimation {
 		return EntityState.DEFAULT_STATE;
 	}
 
-	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		return new TypeFlexibleHashMap<> (false);
 	}
 
-	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
 		return stateFactor.defaultValue();
 	}
 
@@ -88,7 +91,7 @@ public abstract class DynamicAnimation {
 	}
 
 	public TransformSheet getCoord() {
-		return this.getTransfroms().get("Root");
+		return this.getTransfroms().containsKey("Root") ? this.getTransfroms().get("Root") : ActionAnimation.EMPTY_SHEET;
 	}
 
 	public DynamicAnimation getRealAnimation() {
@@ -164,7 +167,5 @@ public abstract class DynamicAnimation {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
-
-	}
+	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {	}
 }

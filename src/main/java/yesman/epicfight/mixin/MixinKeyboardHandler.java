@@ -21,7 +21,7 @@ public abstract class MixinKeyboardHandler {
 	private void epicfight_handleDebugKeys(int key, CallbackInfoReturnable<Boolean> info) {
 		if (!(this.debugCrashKeyTime > 0L && this.debugCrashKeyTime < Util.getMillis() - 100L)) {
             if (key == GLFW.GLFW_KEY_Y) {
-                boolean flag = ClientEngine.getInstance().switchArmorModelDebuggingMode();
+                boolean flag = ClientEngine.getInstance().switchVanillaModelDebuggingMode();
                 this.debugFeedbackTranslated(flag ? "debug.armor_model_debugging.on" : "debug.armor_model_debugging.off");
                 info.cancel();
                 info.setReturnValue(true);

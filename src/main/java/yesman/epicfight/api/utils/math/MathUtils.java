@@ -6,6 +6,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 public class MathUtils {
 	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f();
@@ -15,6 +19,13 @@ public class MathUtils {
 		modelMatrix.translate(entityPosition).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 
 		return modelMatrix;
+	}
+
+	public static <T, R> Function<T, R> memoize(Function<T, R> function) {
+		Map<T, R> cache = new HashMap<>();
+		return (T input) -> {
+			return cache.computeIfAbsent(input, function);
+		};
 	}
 
 	/**

@@ -8,7 +8,7 @@ import net.minecraft.resources.IResource;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.*;
 import yesman.epicfight.main.EpicFightMod;
@@ -42,6 +42,7 @@ public class ClientAnimationDataReader {
 		ClientAnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 		propertySetter.applyClientData(animation);
 	}
+
 	public void applyClientData(StaticAnimation animation) {
 		if (this.layerInfo != null) {
 			if (this.layerInfo.jointMaskEntry.isValid()) {
@@ -61,7 +62,7 @@ public class ClientAnimationDataReader {
 
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, this.multilayerInfo.priority);
-			multilayerAnimation.addProperty(AnimationProperty.StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+			multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
 
 				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
@@ -82,6 +83,7 @@ public class ClientAnimationDataReader {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, this.trailInfo);
 		}
 	}
+
 	private ClientAnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
 		this.layerInfo = layerInfo;
@@ -91,7 +93,7 @@ public class ClientAnimationDataReader {
 	@OnlyIn(Dist.CLIENT)
 	public static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
-			return deserializeLayerInfo(jsonObject, null);
+			return deserializeLayerInfo(jsonObject,  null);
 		}
 
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject, Layer.LayerType defaultLayerType) {
@@ -100,24 +102,27 @@ public class ClientAnimationDataReader {
 			Layer.LayerType layerType = jsonObject.has("layer") ? Layer.LayerType.valueOf(GsonHelper.getAsString(jsonObject, "layer")) : Layer.LayerType.BASE_LAYER;
 
 			if (jsonObject.has("masks")) {
-				builder.defaultMask(JointMaskEntry.ALL);
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
 
-				maskArray.forEach(element -> {
-					JsonObject jointMaskEntry = element.getAsJsonObject();
-					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
-					String type = GsonHelper.getAsString(jointMaskEntry, "type");
+				if (maskArray.size() > 0) {
+					builder.defaultMask(JointMaskReloadListener.getNoneMask());
 
-					if (!type.contains(":")) {
-						type = (new StringBuilder(EpicFightMod.MODID)).append(":").append(type).toString();
-					}
+					maskArray.forEach(element -> {
+						JsonObject jointMaskEntry = element.getAsJsonObject();
+						String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
+						String type = GsonHelper.getAsString(jointMaskEntry, "type");
 
-					if (livingMotionName.equals("ALL")) {
-						builder.defaultMask(JointMaskReloadListener.getJointMaskEntry(type));
-					} else {
-						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), JointMaskReloadListener.getJointMaskEntry(type));
-					}
-				});
+						if (!type.contains(":")) {
+							type = (new StringBuilder(EpicFightMod.MODID)).append(":").append(type).toString();
+						}
+
+						if (livingMotionName.equals("ALL")) {
+							builder.defaultMask(JointMaskReloadListener.getJointMaskEntry(type));
+						} else {
+							builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), JointMaskReloadListener.getJointMaskEntry(type));
+						}
+					});
+				}
 			}
 
 			return new LayerInfo(builder.create(), priority, (defaultLayerType == null) ? layerType : defaultLayerType);

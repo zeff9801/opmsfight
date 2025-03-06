@@ -1,24 +1,19 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.io.File;
-import java.io.IOException;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.client.gui.widget.RewindableButton;
 import yesman.epicfight.config.Option;
+import yesman.epicfight.config.OptionHandler.BooleanOptionHandler;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -32,15 +27,15 @@ public class IngameConfigurationScreen extends Screen {
 	
 	@Override
 	protected void init() {
-		Option<Boolean> showHealthIndicator = EpicFightMod.CLIENT_CONFIGS.showHealthIndicator;
-		Option<Boolean> showTargetIndicator = EpicFightMod.CLIENT_CONFIGS.showTargetIndicator;
-		Option<Boolean> filterAnimation = EpicFightMod.CLIENT_CONFIGS.filterAnimation;
+		BooleanOptionHandler showHealthIndicator = EpicFightMod.CLIENT_CONFIGS.showHealthIndicator;
+		BooleanOptionHandler showTargetIndicator = EpicFightMod.CLIENT_CONFIGS.showTargetIndicator;
+		BooleanOptionHandler filterAnimation = EpicFightMod.CLIENT_CONFIGS.filterAnimation;
 		Option<Integer> longPressCounter = EpicFightMod.CLIENT_CONFIGS.longPressCount;
-		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer;
+		BooleanOptionHandler enableAimHelper = EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer;
 		Option<Double> aimHelperColor = EpicFightMod.CLIENT_CONFIGS.aimHelperColor;
-		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch;
-		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_CONFIGS.autoPreparation;
-		Option<Boolean> offBlood = EpicFightMod.CLIENT_CONFIGS.offBloodEffects;
+		BooleanOptionHandler cameraAutoSwitch = EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch;
+		BooleanOptionHandler autoPreparation = EpicFightMod.CLIENT_CONFIGS.autoPreparation;
+		BooleanOptionHandler offBlood = EpicFightMod.CLIENT_CONFIGS.offBloodEffects;
 		
 		Button longPressCounterButton = this.addButton(new RewindableButton(this.width / 2 - 165, this.height / 4 - 32, 160, 20,
 			new TranslationTextComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))),

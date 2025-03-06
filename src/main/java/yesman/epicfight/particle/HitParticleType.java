@@ -1,13 +1,13 @@
 package yesman.epicfight.particle;
 
-import java.util.Random;
-import java.util.function.BiFunction;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
+
+import java.util.Random;
+import java.util.function.BiFunction;
 
 public class HitParticleType extends BasicParticleType {
 	public static final BiFunction<Entity, Entity, Vector3d> CENTER_OF_TARGET = (target, attacker) -> {
@@ -49,7 +49,7 @@ public class HitParticleType extends BasicParticleType {
 	};
 
 	public static final BiFunction<Entity, Entity, Vector3d> ATTACKER_XY_ROTATION = (target, attacker) -> {
-		return new Vector3d(attacker.getViewXRot(1.0F), attacker.getViewYRot(1.0F), -1.0D);
+		return new Vector3d(attacker.xRot, 180.0F - attacker.yRot, -1.0D);
 	};
 
 	public static final BiFunction<Entity, Entity, Vector3d> ATTACKER_Y_ROTATION = (target, attacker) -> {
@@ -59,12 +59,12 @@ public class HitParticleType extends BasicParticleType {
 	public BiFunction<Entity, Entity, Vector3d> positionProvider;
 	public BiFunction<Entity, Entity, Vector3d> argumentProvider;
 
-	public HitParticleType(boolean p_i50791_1_) {
-		this(p_i50791_1_, CENTER_OF_TARGET, ZERO);
+	public HitParticleType(boolean pOverrideLimiter) {
+		this(pOverrideLimiter, CENTER_OF_TARGET, ZERO);
 	}
 
-	public HitParticleType(boolean p_i50791_1_, BiFunction<Entity, Entity, Vector3d> positionProvider, BiFunction<Entity, Entity, Vector3d> argumentProvider) {
-		super(p_i50791_1_);
+	public HitParticleType(boolean pOverrideLimiter, BiFunction<Entity, Entity, Vector3d> positionProvider, BiFunction<Entity, Entity, Vector3d> argumentProvider) {
+		super(pOverrideLimiter);
 		this.positionProvider = positionProvider;
 		this.argumentProvider = argumentProvider;
 	}

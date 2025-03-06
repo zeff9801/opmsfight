@@ -78,7 +78,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
 		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
-	
+
 	@Override
 	public void onStartTracking(ServerPlayerEntity trackingPlayer) {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
@@ -118,7 +118,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 			EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(this.getSkill(skill).getSlotId()), this.original);
 		}
 
-
 		CapabilityItem mainHandCap = (hand == Hand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(Hand.MAIN_HAND);
 		mainHandCap.changeWeaponInnateSkill(this, (hand == Hand.MAIN_HAND) ? to : this.original.getMainHandItem());
 
@@ -127,6 +126,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 				Multimap<Attribute, AttributeModifier> modifiers = from.getAttributeModifiers(EquipmentSlotType.MAINHAND);
 				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
+
 			if (!fromCap.isEmpty()) {
 				Multimap<Attribute, AttributeModifier> modifiers = fromCap.getAllAttributeModifiers(EquipmentSlotType.MAINHAND);
 				modifiers.get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::removeModifier);
@@ -139,6 +139,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 				Multimap<Attribute, AttributeModifier> modifiers = to.getAttributeModifiers(EquipmentSlotType.MAINHAND);
 				modifiers.get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
+
 			if (!toCap.isEmpty()) {
 				Multimap<Attribute, AttributeModifier> modifiers = toCap.getAttributeModifiers(EquipmentSlotType.MAINHAND, this);
 				modifiers.get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::addTransientModifier);
@@ -148,13 +149,20 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 			}
 		}
 
-		this.modifyLivingMotionByCurrentItem();
+		this.modifyLivingMotionByCurrentItem(true);
 
 		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 
 	public void modifyLivingMotionByCurrentItem() {
-		if (this.updatedMotionCurrentTick) {
+		this.modifyLivingMotionByCurrentItem(false);
+	}
+
+	/**
+	 * @param checkOldAnimations: when true, it compares the animations and send the packet if it has any changes
+	 */
+	public void modifyLivingMotionByCurrentItem(boolean checkOldAnimations) {
+		if (this.updatedMotionCurrentTick && checkOldAnimations) {
 			return;
 		}
 
@@ -186,7 +194,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 			}
 		}
 
-		if (this.updatedMotionCurrentTick) {
+		if (this.updatedMotionCurrentTick || !checkOldAnimations) {
 			this.getAnimator().resetLivingAnimations();
 			newLivingAnimations.forEach(this.getAnimator()::addLivingAnimation);
 

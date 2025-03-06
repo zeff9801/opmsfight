@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
@@ -17,33 +18,35 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.animation.*;
-import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.*;
+import yesman.epicfight.api.client.model.transformer.VanillaModelTransformer;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
-import yesman.epicfight.gameasset.Armatures;
+import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class JsonModelLoader {
-
 	public static final OpenMatrix4f BLENDER_TO_MINECRAFT_COORD = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
-
 	private JsonObject rootJson;
 	private IResourceManager resourceManager;
 	private ResourceLocation resourceLocation;
+	private final String filehash;
 
 	public JsonModelLoader(IResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
 		JsonReader jsonReader = null;
@@ -53,7 +56,10 @@ public class JsonModelLoader {
 		try {
 			try {
 				IResource resource = resourceManager.getResource(resourceLocation);
-				jsonReader = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+				InputStream inputStream = resource.getInputStream();
+				InputStreamReader isr = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+
+				jsonReader = new JsonReader(isr);
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			} catch (FileNotFoundException e) {
@@ -66,13 +72,14 @@ public class JsonModelLoader {
 				}
 
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
+				InputStreamReader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
+
 				jsonReader = new JsonReader(reader);
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
 		} catch (IOException e) {
-			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
+			throw new IllegalStateException("Can't read " + resourceLocation + " because of " + e);
 		} finally {
 			if (jsonReader != null) {
 				try {
@@ -82,6 +89,30 @@ public class JsonModelLoader {
 				}
 			}
 		}
+
+		this.filehash = getSHA256Hash(this.rootJson.toString());
+	}
+
+	public static String getSHA256Hash(String str){
+		String hashStream = "";
+
+		try {
+			MessageDigest sh = MessageDigest.getInstance("SHA-256");
+			sh.update(str.getBytes());
+			byte byteData[] = sh.digest();
+			StringBuffer sb = new StringBuffer();
+
+			for (int i = 0; i < byteData.length; i++) {
+				sb.append(Integer.toString((byteData[i] & 0xFF) + 0x100, 16).substring(1));
+			}
+
+			hashStream = sb.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			hashStream = null;
+		}
+
+		return hashStream;
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -94,6 +125,8 @@ public class JsonModelLoader {
 		jsonReader.setLenient(true);
 		this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 		jsonReader.close();
+
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -101,6 +134,7 @@ public class JsonModelLoader {
 		this.resourceManager = Minecraft.getInstance().getResourceManager();
 		this.rootJson = rootJson;
 		this.resourceLocation = rl;
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 
 	@OnlyIn(Dist.CLIENT)
@@ -139,12 +173,12 @@ public class JsonModelLoader {
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public <T extends Mesh.RawMesh> T loadMesh(Meshes.MeshContructor<VertexIndicator, T> constructor) {
+	public <T extends RawMesh> T loadMesh(Meshes.MeshContructor<RawMesh.RawModelPart, VertexBuilder, T> constructor) {
 		ResourceLocation parent = this.getParent();
 
 		if (parent != null) {
 			T mesh = Meshes.getOrCreateRawMesh(this.resourceManager, parent, constructor);
-			return constructor.invoke(null, mesh, this.getRenderProperties(), null);
+			return constructor.invoke(null, null, mesh, this.getRenderProperties());
 		} else {
 			JsonObject obj = this.rootJson.getAsJsonObject("vertices");
 			JsonObject positions = obj.getAsJsonObject("positions");
@@ -178,7 +212,7 @@ public class JsonModelLoader {
 			float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
 
 			Map<String, float[]> arrayMap = Maps.newHashMap();
-			Map<String, ModelPart<VertexIndicator>> meshMap = Maps.newHashMap();
+			Map<MeshPartDefinition, List<VertexBuilder>> meshMap = Maps.newHashMap();
 
 			arrayMap.put("positions", positionArray);
 			arrayMap.put("normals", normalArray);
@@ -186,25 +220,25 @@ public class JsonModelLoader {
 
 			if (parts != null) {
 				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
-					meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.create(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()))));
+					meshMap.put(VanillaModelTransformer.VanillaMeshPartDefinition.of(e.getKey()), VertexBuilder.createVertexIndicator(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray())));
 				}
 			}
 
 			if (indices != null) {
-				meshMap.put("noGroups", new ModelPart<>(VertexIndicator.create(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()))));
+				meshMap.put(VanillaModelTransformer.VanillaMeshPartDefinition.of("noGroups"), VertexBuilder.createVertexIndicator(ParseUtil.toIntArray(indices.get("array").getAsJsonArray())));
 			}
 
-			return constructor.invoke(arrayMap, null, this.getRenderProperties(), meshMap);
+			return constructor.invoke(arrayMap, meshMap, null, this.getRenderProperties());
 		}
 	}
 
 	@OnlyIn(Dist.CLIENT)
-	public <T extends AnimatedMesh> T loadAnimatedMesh(Meshes.MeshContructor<VertexIndicator.AnimatedVertexIndicator, T> constructor) {
+	public <T extends AnimatedMesh> T loadAnimatedMesh(Meshes.MeshContructor<AnimatedMesh.AnimatedModelPart, AnimatedVertexBuilder, T> constructor) {
 		ResourceLocation parent = this.getParent();
 
 		if (parent != null) {
 			T mesh = Meshes.getOrCreateAnimatedMesh(this.resourceManager, parent, constructor);
-			return constructor.invoke(null, mesh, this.getRenderProperties(), null);
+			return constructor.invoke(null, null, mesh, this.getRenderProperties());
 		} else {
 			JsonObject obj = this.rootJson.getAsJsonObject("vertices");
 			JsonObject positions = obj.getAsJsonObject("positions");
@@ -244,7 +278,7 @@ public class JsonModelLoader {
 			int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
 
 			Map<String, float[]> arrayMap = Maps.newHashMap();
-			Map<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
+			Map<MeshPartDefinition, List<AnimatedVertexBuilder>> meshMap = Maps.newHashMap();
 
 			arrayMap.put("positions", positionArray);
 			arrayMap.put("normals", normalArray);
@@ -253,19 +287,19 @@ public class JsonModelLoader {
 
 			if (parts != null) {
 				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
-					meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+					meshMap.put(VanillaModelTransformer.VanillaMeshPartDefinition.of(e.getKey()), VertexBuilder.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray));
 				}
 			}
 
 			if (indices != null) {
-				meshMap.put("noGroups", new ModelPart<>(VertexIndicator.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+				meshMap.put(VanillaModelTransformer.VanillaMeshPartDefinition.of("noGroups"), VertexBuilder.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray));
 			}
 
-			return constructor.invoke(arrayMap, null, this.getRenderProperties(), meshMap);
+			return constructor.invoke(arrayMap, meshMap, null, this.getRenderProperties());
 		}
 	}
 
-	public <T extends Armature> T loadArmature(Armatures.ArmatureContructor<T> constructor) {
+	public <T extends Armature> T loadArmature(ArmatureContructor<T> constructor) {
 		JsonObject obj = this.rootJson.getAsJsonObject("armature");
 		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
 		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
@@ -388,7 +422,7 @@ public class JsonModelLoader {
 					}
 
 					TransformSheet sheet = getTransformSheet(times, transforms, new OpenMatrix4f(), true);
-					((ActionAnimation)animation).addProperty(AnimationProperty.ActionAnimationProperty.COORD, sheet);
+					((ActionAnimation)animation).addProperty(ActionAnimationProperty.COORD, sheet);
 					root = false;
 					continue;
 				} else {
@@ -484,6 +518,10 @@ public class JsonModelLoader {
 		return this.rootJson;
 	}
 
+	public String getFileHash() {
+		return this.filehash;
+	}
+
 	public AnimationClip loadAnimationClip(Armature armature) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		AnimationClip clip = new AnimationClip();
@@ -542,7 +580,7 @@ public class JsonModelLoader {
 
 			float[] matrixElements = new float[16];
 
-            System.arraycopy(trasnformMatrix, i * 16 + 0, matrixElements, 0, 16);
+			System.arraycopy(trasnformMatrix, i * 16 + 0, matrixElements, 0, 16);
 
 			OpenMatrix4f matrix = OpenMatrix4f.load(null, matrixElements);
 			matrix.transpose();

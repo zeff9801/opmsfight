@@ -17,15 +17,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.fml.RegistryObject;
-import yesman.epicfight.api.animation.*;
+import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.utils.*;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.HitEntityList;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
@@ -46,12 +48,12 @@ public class AttackAnimation extends ActionAnimation {
 	public final Phase[] phases;
 
 	/** Entities that collided **/
-	public static final TypeKey<List<LivingEntity>> HIT_ENTITIES = Lists::newArrayList;
+	public static final TypeFlexibleHashMap.TypeKey<List<LivingEntity>> HIT_ENTITIES = Lists::newArrayList;
 
 	/** Entities that actually hurt **/
-	public static final TypeKey<List<LivingEntity>> HURT_ENTITIES = Lists::newArrayList;
+	public static final TypeFlexibleHashMap.TypeKey<List<LivingEntity>> HURT_ENTITIES = Lists::newArrayList;
 
-	public static final TypeKey<Integer> MAX_STRIKES_COUNT = () -> 0;
+	public static final TypeFlexibleHashMap.TypeKey<Integer> MAX_STRIKES_COUNT = () -> 0;
 
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, colliderJoint, collider));
@@ -116,7 +118,6 @@ public class AttackAnimation extends ActionAnimation {
 
 		entitypatch.setLastAttackSuccess(false);
 	}
-
 	@Override
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {
 		super.linkTick(entitypatch, linkAnimation);
@@ -124,7 +125,7 @@ public class AttackAnimation extends ActionAnimation {
 		if (!entitypatch.isLogicalClient() && entitypatch instanceof MobPatch<?> mobpatch) {
 			AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 			float elapsedTime = player.getElapsedTime();
-			EntityState state = this.getState(entitypatch, linkAnimation, elapsedTime);
+			EntityState state = linkAnimation.getState(entitypatch, elapsedTime);
 
 			if (state.getLevel() == 1 && !state.turningLocked()) {
 				mobpatch.getOriginal().getNavigation().stop();
@@ -140,6 +141,15 @@ public class AttackAnimation extends ActionAnimation {
 		if (!entitypatch.isLogicalClient()) {
 			this.attackTick(entitypatch, linkAnimation);
 		}
+	}
+
+	@Override
+	public Object getModifiedLinkState(EntityState.StateFactor<?> factor, Object val, LivingEntityPatch<?> entitypatch, float elapsedTime) {
+		if (factor == EntityState.ATTACKING && elapsedTime < this.getPlaySpeed(entitypatch, this) * EpicFightOptions.A_TICK) {
+			return false;
+		}
+
+		return val;
 	}
 
 	@Override
@@ -172,8 +182,8 @@ public class AttackAnimation extends ActionAnimation {
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 		float prevElapsedTime = player.getPrevElapsedTime();
 		float elapsedTime = player.getElapsedTime();
-		EntityState prevState = this.getState(entitypatch, animation, prevElapsedTime);
-		EntityState state = this.getState(entitypatch, animation, elapsedTime);
+		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
+		EntityState state = animation.getState(entitypatch, elapsedTime);
 		Phase phase = this.getPhaseByTime(animation.isLinkAnimation() ? 0.0F : elapsedTime);
 
 		if (state.getLevel() == 1 && !state.turningLocked()) {
@@ -254,50 +264,6 @@ public class AttackAnimation extends ActionAnimation {
 		}
 
 		return null;
-	}
-
-	@Override
-	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
-		if (animation.isLinkAnimation()) {
-			EntityState state = super.getState(entitypatch, animation, 0.0F);
-
-			if (time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
-				state.setState(EntityState.ATTACKING, false);
-			}
-
-			return state;
-		}
-
-		return super.getState(entitypatch, animation, time);
-	}
-
-	@Override
-	protected TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
-		if (animation.isLinkAnimation()) {
-			TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, 0.0F);
-
-			if (time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
-				stateMap.put((EntityState.StateFactor<?>)EntityState.ATTACKING, Boolean.valueOf(false));
-			}
-
-			return stateMap;
-		}
-
-		return super.getStatesMap(entitypatch, animation, time);
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	protected <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
-		if (animation.isLinkAnimation()) {
-			if (stateFactor == EntityState.ATTACKING && time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
-				return (T)Boolean.valueOf(false);
-			}
-
-			return super.getState(stateFactor, entitypatch, animation, 0.0F);
-		}
-
-		return super.getState(stateFactor, entitypatch, animation, time);
 	}
 
 	protected int getMaxStrikes(LivingEntityPatch<?> entitypatch, Phase phase) {

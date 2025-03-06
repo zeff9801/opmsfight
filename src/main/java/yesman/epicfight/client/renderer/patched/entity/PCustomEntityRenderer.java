@@ -12,7 +12,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.AnimatedMesh;
@@ -42,7 +41,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
         Armature armature = entitypatch.getArmature();
         poseStack.pushPose();
         this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
-        OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+        OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 
         if (renderType != null) {
             AnimatedMesh mesh = this.getMesh(entitypatch);

@@ -1,7 +1,5 @@
 package yesman.epicfight.client;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -9,6 +7,8 @@ import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+
+import javax.annotation.Nullable;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEngine {
@@ -21,7 +21,7 @@ public class ClientEngine {
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
 	public ControllEngine controllEngine;
-	private boolean armorModelDebuggingMode = false;
+	private boolean vanillaModelDebuggingMode = false;
 
 	public ClientEngine() {
 		instance = this;
@@ -30,13 +30,13 @@ public class ClientEngine {
 		this.controllEngine = new ControllEngine();
 	}
 
-	public boolean switchArmorModelDebuggingMode() {
-		this.armorModelDebuggingMode = !this.armorModelDebuggingMode;
-		return this.armorModelDebuggingMode;
+	public boolean switchVanillaModelDebuggingMode() {
+		this.vanillaModelDebuggingMode = !this.vanillaModelDebuggingMode;
+		return this.vanillaModelDebuggingMode;
 	}
 
-	public boolean isArmorModelDebuggingMode() {
-		return this.armorModelDebuggingMode;
+	public boolean isVanillaModelDebuggingMode() {
+		return this.vanillaModelDebuggingMode;
 	}
 
 	@Nullable

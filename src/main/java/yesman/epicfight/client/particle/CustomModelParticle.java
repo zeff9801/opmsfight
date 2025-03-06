@@ -1,8 +1,10 @@
 package yesman.epicfight.client.particle;
 
+
+
+import com.joml.Quaternionf;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -11,34 +13,34 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import com.joml.Quaternionf;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CustomModelParticle <M extends Mesh<?>> extends Particle {
-	protected final M  particleMesh;
+public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle {
+	protected final MeshProvider<M> particleMeshProvider;
 	protected float pitch;
 	protected float pitchO;
 	protected float yaw;
 	protected float yawO;
 	protected float scale = 1.0F;
 	protected float scaleO = 1.0F;
-	
-	public CustomModelParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, M  particleMesh) {
+
+	public CustomModelParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, MeshProvider<M> particleMesh) {
 		super(level, x, y, z, xd, yd, zd);
-		this.particleMesh = particleMesh;
+		this.particleMeshProvider = particleMesh;
 	}
-	
+
 	@Override
 	public void render(IVertexBuilder vertexConsumer, ActiveRenderInfo camera, float partialTicks) {
 		MatrixStack poseStack = new MatrixStack();
 		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
 
-		this.particleMesh.drawRawModelNoLighting(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
+		this.particleMeshProvider.get().draw(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_TEXTURED, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
 	}
-	
+
 	@Override
 	public void tick() {
 		if (this.age++ >= this.lifetime) {
@@ -50,7 +52,7 @@ public abstract class CustomModelParticle <M extends Mesh<?>> extends Particle {
 			this.scaleO = this.scale;
 		}
 	}
-	
+
 	public void prepareDraw(MatrixStack poseStack, float partialTicks) {}
 
 	protected void setupPoseStack(MatrixStack poseStack, ActiveRenderInfo camera, float partialTicks) {

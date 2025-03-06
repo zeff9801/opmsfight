@@ -1,6 +1,6 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
@@ -30,12 +30,11 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, R, AM> {
 
-	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>, AM>> patchedLayers = Maps.newHashMap();
+	protected final List<PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>>> customLayers = Lists.newArrayList();
 
 	private static final double SHIFT_TRANSLATION = 0.15D;
 	private static final float MAX_HEAD_ROTATION = 85.0F;
@@ -53,8 +52,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
-		
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
+
 		if (renderType != null) {
 			this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
 

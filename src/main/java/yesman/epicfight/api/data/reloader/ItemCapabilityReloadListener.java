@@ -24,8 +24,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.collider.Collider;
-import yesman.epicfight.api.collider.MultiOBBCollider;
-import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.data.conditions.Condition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.ColliderPreset;
@@ -42,12 +40,21 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class ItemCapabilityReloadListener extends JsonReloadListener {
+	public static final String DIRECTORY = "capabilities";
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Map<Item, CompoundNBT> CAPABILITY_ARMOR_DATA_MAP = Maps.newHashMap();
 	private static final Map<Item, CompoundNBT> CAPABILITY_WEAPON_DATA_MAP = Maps.newHashMap();
-	
+
 	public ItemCapabilityReloadListener() {
-		super(GSON, "capabilities");
+		super(GSON, DIRECTORY);
+	}
+
+	@Override
+	protected Map<ResourceLocation, JsonElement> prepare(IResourceManager resourceManager, IProfiler profileIn) {
+		CAPABILITY_ARMOR_DATA_MAP.clear();
+		CAPABILITY_WEAPON_DATA_MAP.clear();
+
+		return super.prepare(resourceManager, profileIn);
 	}
 
 	@Override
@@ -93,17 +100,17 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 
 		ItemCapabilityProvider.addDefaultItems();
 	}
-	
+
 	public static CapabilityItem deserializeArmor(Item item, CompoundNBT tag) {
 		ArmorCapability.Builder builder = ArmorCapability.builder();
-		
+
 		if (tag.contains("attributes")) {
 			CompoundNBT attributes = tag.getCompound("attributes");
 			builder.weight(attributes.getDouble("weight")).stunArmor(attributes.getDouble("stun_armor"));
 		}
-		
+
 		builder.item(item);
-		
+
 		return builder.build();
 	}
 
@@ -132,7 +139,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 				Supplier<Condition<ItemStack>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(innerTag.getString("condition")));
 				Condition<ItemStack> condition = conditionProvider.get().read(innerTag.getCompound("predicate"));
 
-			list.add(Pair.of(condition, deserializeWeapon(item, innerTag)));
+				list.add(Pair.of(condition, deserializeWeapon(item, innerTag)));
 			}
 
 			capability = new TagBasedSeparativeCapability(list, innerDefaultCapabilityBuilder.build());
@@ -168,10 +175,10 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 
 		return capability;
 	}
-	
+
 	private static Map<Attribute, AttributeModifier> deserializeAttributes(CompoundNBT tag) {
 		Map<Attribute, AttributeModifier> modifierMap = Maps.newHashMap();
-		
+
 		if (tag.contains("armor_negation")) {
 			modifierMap.put(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(tag.getDouble("armor_negation")));
 		}
@@ -187,41 +194,10 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 		if (tag.contains("speed_bonus")) {
 			modifierMap.put(Attributes.ATTACK_SPEED, EpicFightAttributes.getSpeedBonusModifier(tag.getDouble("speed_bonus")));
 		}
-		
+
 		return modifierMap;
 	}
-	
-	private static Collider deserializeCollider(Item item, CompoundNBT tag) {
-		int number = tag.getInt("number");
-		
-		if (number < 1) {
-            EpicFightMod.LOGGER.warn("Datapack deserialization error: the number of colliders must bigger than 0! {}", item);
-			return null;
-		}
-		
-		ListNBT sizeVector = tag.getList("size", 6);
-		ListNBT centerVector = tag.getList("center", 6);
-		
-		double sizeX = sizeVector.getDouble(0);
-		double sizeY = sizeVector.getDouble(1);
-		double sizeZ = sizeVector.getDouble(2);
-		
-		double centerX = centerVector.getDouble(0);
-		double centerY = centerVector.getDouble(1);
-		double centerZ = centerVector.getDouble(2);
-		
-		if (sizeX < 0 || sizeY < 0 || sizeZ < 0) {
-            EpicFightMod.LOGGER.warn("Datapack deserialization error: the size of the collider must be non-negative! {}", item);
-			return null;
-		}
-		
-		if (number == 1) {
-			return new OBBCollider(sizeX, sizeY, sizeZ, centerX, centerY, centerZ);
-		} else {
-			return new MultiOBBCollider(number, sizeX, sizeY, sizeZ, centerX, centerY, centerZ);
-		}
-	}
-	
+
 	public static Stream<CompoundNBT> getArmorDataStream() {
 		Stream<CompoundNBT> tagStream = CAPABILITY_ARMOR_DATA_MAP.entrySet().stream().map((entry) -> {
 			entry.getValue().putInt("id", Item.getId(entry.getKey()));
@@ -229,7 +205,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 		});
 		return tagStream;
 	}
-	
+
 	public static Stream<CompoundNBT> getWeaponDataStream() {
 		Stream<CompoundNBT> tagStream = CAPABILITY_WEAPON_DATA_MAP.entrySet().stream().map((entry) -> {
 			entry.getValue().putInt("id", Item.getId(entry.getKey()));
@@ -237,15 +213,15 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 		});
 		return tagStream;
 	}
-	
+
 	public static int armorCount() {
 		return CAPABILITY_ARMOR_DATA_MAP.size();
 	}
-	
+
 	public static int weaponCount() {
 		return CAPABILITY_WEAPON_DATA_MAP.size();
 	}
-	
+
 	private static boolean armorReceived = false;
 	private static boolean weaponReceived = false;
 	private static boolean weaponTypeReceived = false;
@@ -253,6 +229,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 	public static void weaponTypeProcessedCheck() {
 		weaponTypeReceived = true;
 	}
+
 	@OnlyIn(Dist.CLIENT)
 	public static void reset() {
 		armorReceived = false;
@@ -280,10 +257,11 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 			default:
 				break;
 		}
+
 		if (weaponTypeReceived && armorReceived && weaponReceived) {
 			CAPABILITY_ARMOR_DATA_MAP.forEach((item, tag) -> {
 				try {
-					CapabilityItem itemCap = deserializeWeapon(item, tag);
+					CapabilityItem itemCap = deserializeArmor(item, tag);
 					ItemCapabilityProvider.put(item, itemCap);
 				} catch (NoSuchElementException e) {
 					e.printStackTrace();

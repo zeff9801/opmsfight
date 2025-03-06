@@ -23,6 +23,10 @@ public class GsonHelper {
         return jsonObject.get(memberName).getAsString();
     }
 
+    public static boolean getAsBoolean(JsonObject jsonObject, String memberName) {
+        return jsonObject.get(memberName).getAsBoolean();
+    }
+
     public static JsonArray getAsJsonArray(JsonObject jsonObject, String memberName) {
         return jsonObject.get(memberName).getAsJsonArray();
     }

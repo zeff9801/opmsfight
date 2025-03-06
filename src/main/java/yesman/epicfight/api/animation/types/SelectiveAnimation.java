@@ -8,14 +8,14 @@ import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
 import java.util.function.Function;
 
 public class SelectiveAnimation extends StaticAnimation {
-	public static final TypeKey<Integer> PREVIOUS_STATE = new TypeKey<>() {
+	public static final TypeFlexibleHashMap.TypeKey<Integer> PREVIOUS_STATE = new TypeFlexibleHashMap.TypeKey<>() {
 		public Integer defaultValue() {
 			return -1;
 		}

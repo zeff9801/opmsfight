@@ -1,7 +1,6 @@
 package yesman.epicfight.client.particle;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-
 import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
@@ -15,8 +14,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.client.model.RawMesh;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -25,8 +25,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 @OnlyIn(Dist.CLIENT)
 public class ForceFieldParticle extends TexturedCustomModelParticle {
 	private LivingEntityPatch<?> caster;
-	
-	public ForceFieldParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, Mesh.RawMesh particleMesh, ResourceLocation texture) {
+
+	public ForceFieldParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, MeshProvider<RawMesh> particleMesh, ResourceLocation texture) {
 		super(level, x, y, z, xd, yd, zd, particleMesh, texture);
 		this.lifetime = 20;
 		this.hasPhysics = false;
@@ -85,7 +85,7 @@ public class ForceFieldParticle extends TexturedCustomModelParticle {
 		int k = i >> 16 & 255;
 		return 240 | k << 16;
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public static class Provider implements IParticleFactory<BasicParticleType> {
 		@Override

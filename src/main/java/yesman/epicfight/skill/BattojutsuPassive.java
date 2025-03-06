@@ -59,7 +59,7 @@ public class BattojutsuPassive extends Skill {
             if (container.getMaxResource() < value) {
                 ServerPlayerEntity serverPlayer = (ServerPlayerEntity) executer.getOriginal();
                 container.getDataManager().setDataSync(SkillDataKeys.SHEATH.get(), true, serverPlayer);
-                ((ServerPlayerPatch)container.getExecuter()).modifyLivingMotionByCurrentItem();
+                ((ServerPlayerPatch)container.getExecuter()).modifyLivingMotionByCurrentItem(false);
                 SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_UCHIGATANA_SCRAP, serverPlayer.getId(), 0.0F);
                 EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
             }

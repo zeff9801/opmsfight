@@ -6,15 +6,17 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.*;
-import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMask;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -113,8 +115,8 @@ public class ClientAnimator extends Animator {
 	public void resetLivingAnimations() {
 		super.resetLivingAnimations();
 		this.compositeLivingAnimations.clear();
-		this.defaultLivingAnimations.forEach(this::addLivingAnimation);
-		this.defaultCompositeLivingAnimations.forEach(this::addLivingAnimation);
+		this.defaultLivingAnimations.forEach((key, val) -> this.addLivingAnimation(key, val));
+		this.defaultCompositeLivingAnimations.forEach((key, val) -> this.addLivingAnimation(key, val));
 	}
 
 	public StaticAnimation getLivingMotion(LivingMotion motion) {
@@ -189,7 +191,7 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public void playDeathAnimation() {
-		if (!this.getPlayerFor(null).getAnimation().getProperty(AnimationProperty.ActionAnimationProperty.IS_DEATH_ANIMATION).orElse(false)) {
+		if (!this.getPlayerFor(null).getAnimation().getProperty(ActionAnimationProperty.IS_DEATH_ANIMATION).orElse(false)) {
 			this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.DUMMY_ANIMATION), 0.0F);
 			this.currentMotion = LivingMotions.DEATH;
 		}
@@ -283,8 +285,8 @@ public class ClientAnimator extends Animator {
 				LivingMotion livingMotion = this.getCompositeLayer(priority).getLivingMotion(this.entitypatch, useCurrentMotion);
 
 				if (nowPlaying.hasTransformFor(joint.getName()) && !jointMaskEntry.isMasked(livingMotion, joint.getName())) {
-					JointMask.JointMaskSet set = jointMaskEntry.getMask(livingMotion);
-					JointMask.BindModifier bindModifier = set.getBindModifier(joint.getName());
+					JointMaskSet set = jointMaskEntry.getMask(livingMotion);
+					BindModifier bindModifier = set.getBindModifier(joint.getName());
 
 					if (bindModifier != null) {
 						bindModifier.modify(this.entitypatch, basePose, result, livingMotion, jointMaskEntry, priority, joint, poses);
@@ -393,7 +395,7 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public EntityState getEntityState() {
-		TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = new TypeFlexibleHashMap<> (false);
+		TypeFlexibleHashMap<StateFactor<?>> stateMap = new TypeFlexibleHashMap<> (false);
 
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
 			if (!layer.disabled) {
