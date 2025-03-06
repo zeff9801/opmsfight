@@ -2,9 +2,9 @@ package yesman.epicfight.client.renderer.patched.layer;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.Model;
@@ -23,25 +23,24 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
-public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends BipedModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, BipedArmorLayer<E, M, M>, AM> {
-
-
-	private static final Map<ResourceLocation, AnimatedMesh> ARMOR_MODELS = new HashMap<>();
+@OnlyIn(Dist.CLIENT)
+public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends BipedModel<E>, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, BipedArmorLayer<E, M, M>, AM> {
+	private static final Map<ResourceLocation, AnimatedMesh> ARMOR_MODELS = Maps.newHashMap();
 	private static final Map<String, ResourceLocation> EPICFIGHT_OVERRIDING_TEXTURES = Maps.newHashMap();
+
 
 	public static void clearModels() {
 		ARMOR_MODELS.values().forEach(AnimatedMesh::destroy);
@@ -63,14 +62,13 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	final boolean firstPersonModel;
 
-	public WearableItemLayer(AM mesh, boolean doNotRenderHelment) {
-        super(mesh);
-        this.firstPersonModel = doNotRenderHelment;
-	}
+	public WearableItemLayer(MeshProvider<AM> meshProvider, boolean firstPersonModel) {
+		super(meshProvider);
 
+		this.firstPersonModel = firstPersonModel;
+	}
 	private void renderArmor(MatrixStack matStack, IRenderTypeBuffer multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
-		IVertexBuilder vertexConsumer = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture, model.getRenderProperty().isTransparent()), hasEffect);
-		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+		model.draw(matStack, multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -254,7 +252,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					armorItemList.set(3, head);
 				}
 
-				animatedMesh = CustomModelBakery.bakeArmor(entityliving, itemstack, armorItem, slot, originalModel, forgeHooksArmorModel, originalRenderer.getParentModel(), this.mesh);
+				animatedMesh = CustomModelBakery.bakeArmor(entityliving, itemstack, armorItem, slot, originalModel, forgeHooksArmorModel, originalRenderer.getParentModel(), this.mesh.get());
 			}
 
 			putModel(registryName, animatedMesh);

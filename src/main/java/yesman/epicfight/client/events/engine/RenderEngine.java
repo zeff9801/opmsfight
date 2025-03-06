@@ -107,10 +107,10 @@ public class RenderEngine {
 		this.entityRendererProvider.clear();
 //		this.entityRendererProvider.put(EntityType.CREEPER, PCreeperRenderer::new);
 //		this.entityRendererProvider.put(EntityType.ENDERMAN, PEndermanRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIE, entityType -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX));
+		this.entityRendererProvider.put(EntityType.ZOMBIE, (entityType) -> new PHumanoidRenderer<>(() -> Meshes.BIPED_OLD_TEX, entityType));
 		//		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, PZombieVillagerRenderer::new);
 //		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN));
-		this.entityRendererProvider.put(EntityType.HUSK, entityType -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX));
+		this.entityRendererProvider.put(EntityType.HUSK, (entityType) -> new PHumanoidRenderer<>(() -> Meshes.BIPED_OLD_TEX, entityType));
 		//this.entityRendererProvider.put(EntityType.SKELETON, (entityType) -> new PHumanoidRenderer<>(Meshes.SKELETON));
 		//this.entityRendererProvider.put(EntityType.WITHER_SKELETON, (entityType) -> new PHumanoidRenderer<>(Meshes.SKELETON));
 //		this.entityRendererProvider.put(EntityType.STRAY, PStrayRenderer::new);
@@ -135,7 +135,7 @@ public class RenderEngine {
 //		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostCloneRenderer::new);
 
 		this.firstPersonRenderer = new FirstPersonRenderer();
-		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED);
+		this.basicHumanoidRenderer = new PHumanoidRenderer<>(() -> Meshes.BIPED, EntityType.PLAYER);
 		this.aimHelper = new AimHelperRenderer();
 
 		RenderItemBase baseRenderer = new RenderItemBase();

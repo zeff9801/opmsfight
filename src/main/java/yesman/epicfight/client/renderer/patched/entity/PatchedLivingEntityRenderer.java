@@ -2,7 +2,6 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -16,8 +15,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.forgeevent.PrepareModelEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.EntityUtils;
@@ -55,15 +56,16 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 
 		if (renderType != null) {
-			this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
-
-			AM mesh = this.getMesh(entitypatch);
+			AM mesh = this.getMeshProvider(entitypatch).get();
 			this.prepareModel(mesh, entityIn, entitypatch, renderer);
 
-			IVertexBuilder builder = buffer.getBuffer(renderType);
-			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
+
+			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
+				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+			}
 		}
-		
+
 		if (!entityIn.isSpectator()) {
 			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
 		}
@@ -164,11 +166,9 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 				rendererClass = rendererClass.getSuperclass();
 			}
 
-			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
-				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
-				iter.remove();
-				return val;
-			});
+			for (PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>> patchedLayer : this.customLayers) {
+				patchedLayer.renderLayer(entityIn, entitypatch, null, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
+			}
 		}
 
 		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
@@ -223,7 +223,16 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		}
 	}
 
-	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>, AM> patchedLayer) {
+	@Override
+	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>> patchedLayer) {
+		this.patchedLayers.putIfAbsent(originalLayerClass, patchedLayer);
+	}
+
+
+	/**
+	 * Use this method in {@link PatchedRenderersEvent.Modify}}
+	 */
+	public void addPatchedLayerAlways(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends LayerRenderer<E, M>> patchedLayer) {
 		this.patchedLayers.put(originalLayerClass, patchedLayer);
 	}
 

@@ -3,6 +3,7 @@ package yesman.epicfight.client.renderer;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -12,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -33,7 +35,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		super();
 		this.addPatchedLayer(ElytraLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(HeldItemLayer.class, new PatchedItemInHandLayer<>());
-		this.addPatchedLayer(BipedArmorLayer.class, new WearableItemLayer<>(Meshes.BIPED, true));
+		this.addPatchedLayer(BipedArmorLayer.class, new WearableItemLayer<>(() -> Meshes.BIPED, true));
 		this.addPatchedLayer(HeadLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
@@ -61,7 +63,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		poseStack.translate(0.0F, -entity.getEyeHeight() - 0.05F, correction);
 		//poseStack.mulPoseMatrix(lastPose);
 
-		HumanoidMesh mesh = this.getMesh(entitypatch);
+		HumanoidMesh mesh = this.getMeshProvider(entitypatch).get();
 		this.prepareModel(mesh, entity, entitypatch, renderer);
 
 		if (!entitypatch.getOriginal().isInvisible()) {
@@ -73,11 +75,9 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 			mesh.leftSleeve.setHidden(false);
 			mesh.rightSleeve.setHidden(false);
 
-			//RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
-			//mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses); TODO
-			Armature armature = entitypatch.getArmature();
-			mesh.drawModelWithPose(poseStack, buffer.getBuffer(EpicFightRenderTypes.animatedModel(entitypatch.getOriginal().getSkinTextureLocation())),
-					packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+			RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
+			mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+
 
 		}
 
@@ -111,12 +111,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 			}
 		}
 	}
-
 	@Override
-	public HumanoidMesh getMesh(LocalPlayerPatch entitypatch) {
-		return entitypatch.getOriginal().getModelName().equals("slim") ? Meshes.ALEX : Meshes.BIPED;
+	public MeshProvider<HumanoidMesh> getMeshProvider(LocalPlayerPatch entitypatch) {
+		return entitypatch.getOriginal().getModelName().equals("slim") ? () -> Meshes.ALEX : () -> Meshes.BIPED;
 	}
-
+	@Override
+	public MeshProvider<HumanoidMesh> getDefaultMesh() {
+		return () -> Meshes.BIPED;
+	}
 	@Override
 	protected void prepareModel(HumanoidMesh mesh, ClientPlayerEntity entity, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer) {
 		mesh.initialize();
