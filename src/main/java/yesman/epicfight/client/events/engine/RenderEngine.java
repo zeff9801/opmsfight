@@ -134,7 +134,7 @@ public class RenderEngine {
 //		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), PWitherSkeletonMinionRenderer::new);
 //		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostCloneRenderer::new);
 
-		this.firstPersonRenderer = new FirstPersonRenderer();
+		this.firstPersonRenderer = new FirstPersonRenderer(EntityType.PLAYER);
 		this.basicHumanoidRenderer = new PHumanoidRenderer<>(() -> Meshes.BIPED, EntityType.PLAYER);
 		this.aimHelper = new AimHelperRenderer();
 

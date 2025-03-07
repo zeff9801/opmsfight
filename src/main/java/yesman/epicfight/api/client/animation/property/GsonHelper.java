@@ -1,6 +1,7 @@
 package yesman.epicfight.api.client.animation.property;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -33,6 +34,9 @@ public class GsonHelper {
 
     public static ClientAnimationDataReader fromJson(Gson gson, Reader reader, TypeToken<ClientAnimationDataReader> type) {
         return gson.fromJson(reader, type.getType());
+    }
+    public static JsonElement fromJson(Gson gson, Reader reader, Class<JsonElement> type) {
+        return gson.fromJson(reader, type);
     }
 }
 
