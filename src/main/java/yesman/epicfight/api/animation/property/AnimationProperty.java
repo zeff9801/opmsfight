@@ -245,7 +245,7 @@ public abstract class AnimationProperty<T> {
 		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ();
 
 		public static final MoveCoordFunctions.MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
-			transformSheet.readFrom(self.getCoord().copyAll());
+			transformSheet.readFrom(self.getCoord());
 		};
 	}
 

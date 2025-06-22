@@ -103,17 +103,28 @@ public class TransformSheet {
 		Keyframe endKeyframe = keyframes[keyframes.length - 1];
 		float pitchDeg = (float) Math.toDegrees(MathHelper.atan2(modifiedStartToEnd.y - startToEnd.y, modifiedStartToEnd.length()));
 		float yawDeg = (float) Math.toDegrees(MathUtils.getAngleBetween(modifiedStartToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise(), startToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise()));
+		OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
+		Vec3f zero = new Vec3f(0.0F, 0.0F, 0.0F);
+		Vec3f line = new Vec3f();
+		Vec3f modifiedLine = new Vec3f();
+		Vec3f animOnLine = new Vec3f();
+		Vec3f toNewKeyTransform = new Vec3f();
 
 		for (Keyframe kf : keyframes) {
 			float lerp = (kf.time() - startKeyframe.time()) / (endKeyframe.time() - startKeyframe.time());
-			Vec3f line = MathUtils.lerpVector(new Vec3f(0F, 0F, 0F), startToEnd, lerp);
-			Vec3f modifiedLine = MathUtils.lerpVector(new Vec3f(0F, 0F, 0F), modifiedStartToEnd, lerp);
+			line.set(startToEnd);
+			line.scale(lerp);
+			modifiedLine.set(modifiedStartToEnd);
+			modifiedLine.scale(lerp);
 			Vec3f keyTransform = kf.transform().translation();
-			Vec3f startToKeyTransform = keyTransform.copy().sub(startpos).multiply(-1.0F, 1.0F, -1.0F);
-			Vec3f animOnLine = startToKeyTransform.copy().sub(line);
-			OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
-			Vec3f toNewKeyTransform = modifiedLine.add(OpenMatrix4f.transform3v(rotator, animOnLine, null));
-			keyTransform.set(modifiedStart.copy().add((toNewKeyTransform)));
+			Vec3f startToKeyTransform = Vec3f.sub(keyTransform, startpos, animOnLine).multiply(-1.0F, 1.0F, -1.0F);
+			animOnLine.set(startToKeyTransform);
+			animOnLine.sub(line);
+			toNewKeyTransform.set(modifiedLine);
+			OpenMatrix4f.transform3v(rotator, animOnLine, animOnLine);
+			toNewKeyTransform.add(animOnLine);
+			keyTransform.set(modifiedStart);
+			keyTransform.add(toNewKeyTransform);
 		}
 	}
 
@@ -190,20 +201,30 @@ public class TransformSheet {
 			currentTime = this.keyframes[this.keyframes.length - 1].time() + currentTime;
 		}
 
-		int prev = 0, next = 1;
+		int low = 0;
+		int high = this.keyframes.length - 1;
+		int mid = 0;
 
-		for (int i = 1; i < this.keyframes.length; i++) {
-			if (currentTime <= this.keyframes[i].time()) {
+		while (low <= high) {
+			mid = (low + high) / 2;
+			if (this.keyframes[mid].time() < currentTime) {
+				low = mid + 1;
+			} else if (this.keyframes[mid].time() > currentTime) {
+				high = mid - 1;
+			} else {
+				low = mid;
 				break;
 			}
-
-			if (this.keyframes.length > next + 1) {
-				prev++;
-				next++;
-			}
 		}
+		
+		int prev = Math.max(0, high);
+		int next = Math.min(this.keyframes.length - 1, low);
 
 		float progression = (currentTime - this.keyframes[prev].time()) / (this.keyframes[next].time() - this.keyframes[prev].time());
+		
+		if (Float.isNaN(progression)) {
+			progression = 0.0F;
+		}
 
 		return new InterpolationInfo(prev, next, progression);
 	}

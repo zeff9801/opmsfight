@@ -8,7 +8,7 @@ import yesman.epicfight.main.EpicFightMod;
 public class EpicFightLootModifiers {
 	public static void register(RegistryEvent.Register<GlobalLootModifierSerializer<?>> event) {
 		event.getRegistry().registerAll(
-				new SkillBookModifier.Serializer().setRegistryName(new ResourceLocation(EpicFightMod.MODID, "skillbook_modifier"))
+				new SkillBookModifier.Serializer().setRegistryName(new ResourceLocation(EpicFightMod.MODID, "skillbook_loot_table_modifier"))
 		);
 	}
 }

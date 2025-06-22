@@ -34,28 +34,28 @@ public class TrailInfo {
             .b(0.75F)
             .texture(new ResourceLocation(EpicFightMod.MODID, "textures/particle/swing_trail.png"))
             .type(EpicFightParticles.SWING_TRAIL.get())
-            .create();
+            .build();
 
     public static final TrailInfo ANIMATION_DEFAULT_TRAIL = TrailInfo.builder()
             .time(0.1F, 0.2F)
             .joint("Tool_R")
             .itemSkinHand(Hand.MAIN_HAND)
-            .create();
+            .build();
 
-    public final Vector3d start;
-    public final Vector3d end;
-    public final IParticleData particle;
-    public final String joint;
-    public final float startTime;
-    public final float endTime;
-    public final float fadeTime;
-    public final float rCol;
-    public final float gCol;
-    public final float bCol;
-    public final int interpolateCount;
-    public final int trailLifetime;
-    public final ResourceLocation texturePath;
-    public final Hand hand;
+    public Vector3d start;
+    public Vector3d end;
+    public IParticleData particle;
+    public String joint;
+    public float startTime;
+    public float endTime;
+    public float fadeTime;
+    public float rCol;
+    public float gCol;
+    public float bCol;
+    public int interpolateCount;
+    public int trailLifetime;
+    public ResourceLocation texturePath;
+    public Hand hand;
 
     private TrailInfo(TrailInfo.Builder builder) {
         this.start = builder.start;
@@ -74,26 +74,8 @@ public class TrailInfo {
         this.hand = builder.hand;
     }
 
-    public TrailInfo overwrite(TrailInfo trailInfo) {
-        boolean validTime = isValidTime(trailInfo.startTime) && isValidTime(trailInfo.endTime);
-        boolean validColor = trailInfo.rCol >= 0.0F && trailInfo.gCol >= 0.0F && trailInfo.bCol >= 0.0F;
-        TrailInfo.Builder builder = new TrailInfo.Builder();
-
-        builder.startPos((trailInfo.start == null) ? this.start : trailInfo.start);
-        builder.endPos((trailInfo.end == null) ? this.end : trailInfo.end);
-        builder.joint((trailInfo.joint == null) ? this.joint : trailInfo.joint);
-        builder.type((trailInfo.particle == null) ? this.particle : trailInfo.particle);
-        builder.time((!validTime) ? this.startTime : trailInfo.startTime, (!validTime) ? this.endTime : trailInfo.endTime);
-        builder.fadeTime((!isValidTime(trailInfo.fadeTime)) ? this.fadeTime : trailInfo.fadeTime);
-        builder.r(!(validColor) ? this.rCol : trailInfo.rCol);
-        builder.g(!(validColor) ? this.gCol : trailInfo.gCol);
-        builder.b(!(validColor) ? this.bCol : trailInfo.bCol);
-        builder.interpolations((trailInfo.interpolateCount < 0) ? this.interpolateCount : trailInfo.interpolateCount);
-        builder.lifetime((trailInfo.trailLifetime < 0) ? this.trailLifetime : trailInfo.trailLifetime);
-        builder.texture((trailInfo.texturePath == null) ? this.texturePath : trailInfo.texturePath);
-        builder.itemSkinHand((trailInfo.hand == null) ? this.hand : trailInfo.hand);
-
-        return builder.create();
+    public TrailInfo.Builder copy() {
+        return new TrailInfo.Builder(this);
     }
 
     public static boolean isValidTime(float time) {
@@ -171,7 +153,7 @@ public class TrailInfo {
             trailBuilder.itemSkinHand(hand);
         }
 
-        return trailBuilder.create();
+        return trailBuilder.build();
     }
 
     public static TrailInfo deserialize(CompoundNBT compoundTag) {
@@ -233,7 +215,7 @@ public class TrailInfo {
             trailBuilder.itemSkinHand(hand);
         }
 
-        return trailBuilder.create();
+        return trailBuilder.build();
     }
 
     @OnlyIn(Dist.CLIENT)
@@ -253,7 +235,26 @@ public class TrailInfo {
         private ResourceLocation texturePath;
         private Hand hand = Hand.MAIN_HAND;
 
-        public TrailInfo.Builder startPos(Vector3d start) {
+        public Builder() {}
+        
+        public Builder(TrailInfo trailInfo) {
+        	this.start = trailInfo.start;
+            this.end = trailInfo.end;
+            this.joint = trailInfo.joint;
+            this.particle = trailInfo.particle;
+            this.startTime = trailInfo.startTime;
+            this.endTime = trailInfo.endTime;
+            this.fadeTime = trailInfo.fadeTime;
+            this.rCol = trailInfo.rCol;
+            this.gCol = trailInfo.gCol;
+            this.bCol = trailInfo.bCol;
+            this.interpolateCount = trailInfo.interpolateCount;
+            this.trailLifetime = trailInfo.trailLifetime;
+            this.texturePath = trailInfo.texturePath;
+            this.hand = trailInfo.hand;
+		}
+
+		public TrailInfo.Builder startPos(Vector3d start) {
             this.start = start;
             return this;
         }
@@ -324,8 +325,28 @@ public class TrailInfo {
             return this;
         }
 
-        public TrailInfo create() {
+        public TrailInfo build() {
             return new TrailInfo(this);
+        }
+        
+        public void build(TrailInfo trailInfo) {
+            boolean validTime = isValidTime(this.startTime) && isValidTime(this.endTime);
+            boolean validColor = this.rCol >= 0.0F && this.gCol >= 0.0F && this.bCol >= 0.0F;
+
+            trailInfo.start = (this.start == null) ? trailInfo.start : this.start;
+            trailInfo.end = (this.end == null) ? trailInfo.end : this.end;
+            trailInfo.joint = (this.joint == null) ? trailInfo.joint : this.joint;
+            trailInfo.particle = (this.particle == null) ? trailInfo.particle : this.particle;
+            trailInfo.startTime = (!validTime) ? trailInfo.startTime : this.startTime;
+            trailInfo.endTime = (!validTime) ? trailInfo.endTime : this.endTime;
+            trailInfo.fadeTime = (!isValidTime(this.fadeTime)) ? trailInfo.fadeTime : this.fadeTime;
+            trailInfo.rCol = !(validColor) ? trailInfo.rCol : this.rCol;
+            trailInfo.gCol = !(validColor) ? trailInfo.gCol : this.gCol;
+            trailInfo.bCol = !(validColor) ? trailInfo.bCol : this.bCol;
+            trailInfo.interpolateCount = (this.interpolateCount < 0) ? trailInfo.interpolateCount : this.interpolateCount;
+            trailInfo.trailLifetime = (this.trailLifetime < 0) ? trailInfo.trailLifetime : this.trailLifetime;
+            trailInfo.texturePath = (this.texturePath == null) ? trailInfo.texturePath : this.texturePath;
+            trailInfo.hand = (this.hand == null) ? trailInfo.hand : this.hand;
         }
     }
 }

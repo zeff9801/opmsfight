@@ -360,29 +360,32 @@ public class TrailParticle extends SpriteTexturedParticle {
 
 		@Override
 		public Particle createParticle(BasicParticleType typeIn, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			int eid = (int)Double.doubleToRawLongBits(x);
-			int animid = (int)Double.doubleToRawLongBits(z);
-			int jointId = (int)Double.doubleToRawLongBits(xSpeed);
-			int idx = (int)Double.doubleToRawLongBits(ySpeed);
-			Entity entity = level.getEntity(eid);
+			long eid = Double.doubleToRawLongBits(x);
+			long animid = Double.doubleToRawLongBits(z);
+			long jointId = Double.doubleToRawLongBits(xSpeed);
+			long index = Double.doubleToRawLongBits(ySpeed);
 
-			if (entity != null) {
-				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
-				StaticAnimation animation = AnimationManager.getInstance().byId(animid);
-				Optional<List<TrailInfo>> trailInfo = animation.getProperty(ClientAnimationProperties.TRAIL_EFFECT);
-				TrailInfo result = trailInfo.get().get(idx);
+			Entity entity = level.getEntity((int)eid);
+			LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
 
-				if (result.hand != null) {
-					ItemStack stack = entitypatch.getOriginal().getItemInHand(result.hand);
-					ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
+			if (entitypatch != null) {
+				StaticAnimation animation = AnimationManager.getInstance().byId((int)animid);
+				Optional<List<TrailInfo>> trailInfos = animation.getProperty(ClientAnimationProperties.TRAIL_EFFECT);
 
+				if (trailInfos.isPresent()) {
+					TrailInfo result = trailInfos.get().get((int)index);
+					ItemStack itemstack = entitypatch.getOriginal().getItemInHand(result.hand);
+					ItemSkin itemSkin = ItemSkins.getItemSkin(itemstack.getItem());
+					
 					if (itemSkin != null) {
-						result = itemSkin.trailInfo.overwrite(result);
+						result = itemSkin.trailInfo.copy().build();
 					}
-				}
-
-				if (entitypatch != null && animation != null && trailInfo.isPresent()) {
-					return new TrailParticle(level, entitypatch, entitypatch.getArmature().searchJointById(jointId), animation, result, this.IAnimatedSprite);
+					
+					Armature armature = animation.getArmature();
+					Joint joint = armature.searchJointById((int)jointId);
+					TrailParticle particle = new TrailParticle(level, entitypatch, joint, animation, result, this.IAnimatedSprite);
+					
+					return particle;
 				}
 			}
 

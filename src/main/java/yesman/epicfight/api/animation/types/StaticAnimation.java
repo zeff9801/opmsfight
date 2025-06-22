@@ -1,4 +1,3 @@
-
 package yesman.epicfight.api.animation.types;
 
 import com.google.common.collect.Maps;
@@ -216,7 +215,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 						ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 
 						if (itemSkin != null) {
-							trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
+							trailInfo = itemSkin.trailInfo.copy().build();
 						}
 					}
 
