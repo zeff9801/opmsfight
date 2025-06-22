@@ -455,6 +455,9 @@ public class AttackAnimation extends ActionAnimation {
 		public final float end;
 		public final Hand hand;
 		public JointColliderPair[] colliders;
+		
+		// Static object holder for performance optimization
+		private static final Set<Entity> ENTITY_SET_HOLDER = Sets.newHashSet();
 
 		//public final Joint first;
 		//public final Collider second;
@@ -522,7 +525,8 @@ public class AttackAnimation extends ActionAnimation {
 		}
 
 		public List<Entity> getCollidingEntities(LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float attackSpeed) {
-			Set<Entity> entities = Sets.newHashSet();
+			// Reuse Set object to avoid allocation
+			ENTITY_SET_HOLDER.clear();
 
 			for (Pair<Joint, Collider> colliderInfo : this.colliders) {
 				Collider collider = colliderInfo.getSecond();
@@ -531,10 +535,10 @@ public class AttackAnimation extends ActionAnimation {
 					collider = entitypatch.getColliderMatching(this.hand);
 				}
 
-				entities.addAll(collider.updateAndSelectCollideEntity(entitypatch, animation, prevElapsedTime, elapsedTime, colliderInfo.getFirst(), attackSpeed));
+				ENTITY_SET_HOLDER.addAll(collider.updateAndSelectCollideEntity(entitypatch, animation, prevElapsedTime, elapsedTime, colliderInfo.getFirst(), attackSpeed));
 			}
 
-			return new ArrayList<>(entities);
+			return new ArrayList<>(ENTITY_SET_HOLDER);
 		}
 
 		public JointColliderPair[] getColliders() {

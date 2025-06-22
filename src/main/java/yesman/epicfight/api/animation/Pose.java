@@ -19,6 +19,10 @@ public class Pose {
 		this.jointTransformData.putAll(pose.jointTransformData);
 	}
 
+	public void clear() {
+		this.jointTransformData.clear();
+	}
+
 	public Map<String, JointTransform> getJointTransformData() {
 		return this.jointTransformData;
 	}
@@ -42,6 +46,18 @@ public class Pose {
 		}
 
 		return pose;
+	}
+
+	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression, Pose dest, Set<String> mergedSet) {
+		mergedSet.clear();
+		mergedSet.addAll(pose1.jointTransformData.keySet());
+		mergedSet.addAll(pose2.jointTransformData.keySet());
+
+		for (String jointName : mergedSet) {
+			dest.putJointData(jointName, JointTransform.interpolate(pose1.getOrDefaultTransform(jointName), pose2.getOrDefaultTransform(jointName), pregression));
+		}
+
+		return dest;
 	}
 
 	public String toString() {

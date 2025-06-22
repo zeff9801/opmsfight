@@ -19,6 +19,17 @@ import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMask {
+	private static final OpenMatrix4f MATRIX_HOLDER_1 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_2 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_3 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_4 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_5 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_6 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_7 = new OpenMatrix4f();
+	private static final Vec3f VEC_HOLDER = new Vec3f();
+	private static final JointTransform JT_HOLDER_1 = JointTransform.empty();
+	private static final JointTransform JT_HOLDER_2 = JointTransform.empty();
+
 	@OnlyIn(Dist.CLIENT)
 	@FunctionalInterface
 	public interface BindModifier {
@@ -33,18 +44,19 @@ public class JointMask {
 
 		OpenMatrix4f lowestMatrix = lowestTransform.toMatrix();
 		OpenMatrix4f currentMatrix = currentTransform.toMatrix();
-		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(OpenMatrix4f.invert(currentMatrix, null), lowestMatrix, null);
+		OpenMatrix4f.invert(currentMatrix, MATRIX_HOLDER_1);
+		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(MATRIX_HOLDER_1, lowestMatrix, MATRIX_HOLDER_2);
 
 		for (Joint subJoint : joint.getSubJoints()) {
 			if (wholeEntry.isMasked(livingMotion, subJoint.getName())) {
-				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, null);
-				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, null);
-				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), null);
-				OpenMatrix4f lowestFinal = OpenMatrix4f.mul(lowestLocalTransform, childTransform, null);
-				OpenMatrix4f currentFinal = OpenMatrix4f.mul(currentLocalTransform, childTransform, null);
-				Vec3f vec = new Vec3f((currentFinal.m30 - lowestFinal.m30) * 0.5F, currentFinal.m31 - lowestFinal.m31, currentFinal.m32 - lowestFinal.m32);
+				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, MATRIX_HOLDER_3);
+				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, MATRIX_HOLDER_4);
+				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), MATRIX_HOLDER_5);
+				OpenMatrix4f lowestFinal = OpenMatrix4f.mul(lowestLocalTransform, childTransform, MATRIX_HOLDER_6);
+				OpenMatrix4f currentFinal = OpenMatrix4f.mul(currentLocalTransform, childTransform, MATRIX_HOLDER_7);
+				VEC_HOLDER.set((currentFinal.m30 - lowestFinal.m30) * 0.5F, currentFinal.m31 - lowestFinal.m31, currentFinal.m32 - lowestFinal.m32);
 				JointTransform jt = result.getJointTransformData().getOrDefault(subJoint.getName(), JointTransform.empty());
-				jt.parent(JointTransform.getTranslation(vec), OpenMatrix4f::mul);
+				jt.parent(JointTransform.getTranslation(VEC_HOLDER), OpenMatrix4f::mul);
 				jt.jointLocal(JointTransform.fromMatrixNoScale(currentToLowest), OpenMatrix4f::mul);
 			}
 		}

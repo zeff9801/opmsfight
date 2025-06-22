@@ -36,6 +36,11 @@ public class ClientAnimator extends Animator {
 	public final Layer.BaseLayer baseLayer;
 	private LivingMotion currentMotion;
 	private LivingMotion currentCompositeMotion;
+	
+	// Static object holders for performance optimization
+	private static final Map<Layer.Priority, Pair<DynamicAnimation, Pose>> LAYER_POSES_HOLDER = Maps.newLinkedHashMap();
+	private static final List<Priority> PRIORITY_LIST_HOLDER = Lists.newArrayList();
+	private static final TypeFlexibleHashMap<EntityState.StateFactor<?>> STATE_MAP_HOLDER = new TypeFlexibleHashMap<>(false);
 
 	public ClientAnimator(LivingEntityPatch<?> entitypatch) {
 		this(entitypatch, Layer.BaseLayer::new);
@@ -220,7 +225,8 @@ public class ClientAnimator extends Animator {
 		Pose composedPose = new Pose();
 		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, useCurrentMotion, partialTicks);
 
-		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
+		// Reuse Map object to avoid allocation
+		LAYER_POSES_HOLDER.clear();
 		composedPose.putJointData(baseLayerPose);
 
 		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.uppers()) {
@@ -232,13 +238,13 @@ public class ClientAnimator extends Animator {
 
 			if (!compositeLayer.isDisabled() && !compositeLayer.animationPlayer.isEmpty()) {
 				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, useCurrentMotion, partialTicks);
-				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
+				LAYER_POSES_HOLDER.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
 				composedPose.putJointData(layerPose);
 			}
 		}
 
 		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
-		this.applyBindModifier(baseLayerPose, composedPose, rootJoint, layerPoses, useCurrentMotion);
+		this.applyBindModifier(baseLayerPose, composedPose, rootJoint, LAYER_POSES_HOLDER, useCurrentMotion);
 
 		return composedPose;
 	}
@@ -246,7 +252,8 @@ public class ClientAnimator extends Animator {
 	public Pose getComposedLayerPoseBelow(Layer.Priority priorityLimit, float partialTicks) {
 		Pose composedPose = this.baseLayer.getEnabledPose(this.entitypatch, true, partialTicks);
 		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, true, partialTicks);
-		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
+		// Reuse Map object to avoid allocation
+		LAYER_POSES_HOLDER.clear();
 
 		for (Layer.Priority priority : priorityLimit.lowers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
@@ -257,25 +264,27 @@ public class ClientAnimator extends Animator {
 
 			if (!compositeLayer.isDisabled()) {
 				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, true, partialTicks);
-				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
+				LAYER_POSES_HOLDER.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
 				composedPose.putJointData(layerPose);
 			}
 		}
 
 		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
 
-		if (!layerPoses.isEmpty()) {
-			this.applyBindModifier(baseLayerPose, composedPose, rootJoint, layerPoses, true);
+		if (!LAYER_POSES_HOLDER.isEmpty()) {
+			this.applyBindModifier(baseLayerPose, composedPose, rootJoint, LAYER_POSES_HOLDER, true);
 		}
 
 		return composedPose;
 	}
 
 	public void applyBindModifier(Pose basePose, Pose result, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses, boolean useCurrentMotion) {
-		List<Priority> list = Lists.newArrayList(poses.keySet());
-		Collections.reverse(list);
+		// Reuse List object to avoid allocation
+		PRIORITY_LIST_HOLDER.clear();
+		PRIORITY_LIST_HOLDER.addAll(poses.keySet());
+		Collections.reverse(PRIORITY_LIST_HOLDER);
 
-		for (Layer.Priority priority : list) {
+		for (Layer.Priority priority : PRIORITY_LIST_HOLDER) {
 			DynamicAnimation nowPlaying = poses.get(priority).getFirst();
 			JointMaskEntry jointMaskEntry = nowPlaying.getJointMaskEntry(this.entitypatch, useCurrentMotion).orElse(null);
 
@@ -393,18 +402,19 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public EntityState getEntityState() {
-		TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = new TypeFlexibleHashMap<> (false);
+		// Reuse TypeFlexibleHashMap to avoid allocation
+		STATE_MAP_HOLDER.clear();
 
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
 			if (!layer.disabled) {
-				stateMap.putAll(layer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, layer.animationPlayer.getElapsedTime()));
+				STATE_MAP_HOLDER.putAll(layer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, layer.animationPlayer.getElapsedTime()));
 			}
 
 			if (layer.priority == this.baseLayer.baseLayerPriority) {
-				stateMap.putAll(this.baseLayer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, this.baseLayer.animationPlayer.getElapsedTime()));
+				STATE_MAP_HOLDER.putAll(this.baseLayer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, this.baseLayer.animationPlayer.getElapsedTime()));
 			}
 		}
 
-		return new EntityState(stateMap);
+		return new EntityState(STATE_MAP_HOLDER);
 	}
 }
