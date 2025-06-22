@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
@@ -14,10 +15,16 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayerEntity, AbstractClientPlayerPatch<AbstractClientPlayerEntity>, PlayerModel<AbstractClientPlayerEntity>, CapeLayer>  {
+public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayerEntity, AbstractClientPlayerPatch<AbstractClientPlayerEntity>, PlayerModel<AbstractClientPlayerEntity>, CapeLayer, HumanoidMesh>  {
+
+	public PatchedCapeLayer() {
+		super(null);
+	}
+
 
 	@Override
 	public void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayerEntity> entitypatch, AbstractClientPlayerEntity entityliving, CapeLayer originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {

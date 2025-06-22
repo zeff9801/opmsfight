@@ -1,6 +1,8 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.AbstractEyesLayer;
@@ -11,22 +13,23 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedEyesLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends ModelRenderLayer<E, T, M, AbstractEyesLayer<E, M>, AM> {
+public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends PatchedLayer<E, T, M, AbstractEyesLayer<E, M>, AM>{
+
 
 	private final RenderType renderType;
 
-	public PatchedEyesLayer(ResourceLocation eyeTexture, MeshProvider<AM> mesh) {
+	public PatchedEyeLayer(ResourceLocation eyeTexture, AM mesh) {
 		super(mesh);
 		this.renderType = RenderType.eyes(eyeTexture);
 	}
-
+	
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, AbstractEyesLayer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		this.mesh.get().draw(matrixStackIn, buffer, this.renderType, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+		IVertexBuilder ivertexbuilder = buffer.getBuffer(this.renderType);
+		this.mesh.drawModelWithPose(matrixStackIn, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 	}
 }

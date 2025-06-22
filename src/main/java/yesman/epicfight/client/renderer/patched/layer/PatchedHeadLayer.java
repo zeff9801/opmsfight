@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
@@ -14,10 +15,15 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & IHasHead> extends PatchedLayer<E, T, M, HeadLayer<E, M>> {
+public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & IHasHead, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, HeadLayer<E, M>, AM> {
+
+	public PatchedHeadLayer() {
+		super(null);
+	}
 
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, HeadLayer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {

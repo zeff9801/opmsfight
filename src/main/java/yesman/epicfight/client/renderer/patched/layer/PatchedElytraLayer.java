@@ -29,4 +29,3 @@ public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPa
 			poseStack.popPose();
 		}
 	}
-}
