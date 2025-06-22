@@ -1,46 +1,41 @@
 package yesman.epicfight.data.conditions;
 
-import com.google.gson.JsonElement;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import java.util.List;
+import java.util.function.Function;
+
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.JsonToNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
-import java.util.List;
-import java.util.function.Function;
+public class Condition<T> extends ForgeRegistryEntry<Condition<?>> {
 
-public class Condition<T> {
+	public Condition<T> read(CompoundNBT tag) {
+        return null;
+    }
 
-	public Condition<T> read(JsonElement json) throws CommandSyntaxException {
-		return this.read(JsonToNBT.parseTag(json.toString()));
+	public CompoundNBT serializePredicate() {
+		return null;
 	}
 
-    public Condition<T> read(CompoundNBT tag) {
-        return null;
-    }
+	public boolean predicate(T target) {
+		return false;
+	}
 
-    public CompoundNBT serializePredicate() {
-        return null;
-    }
-
-    public boolean predicate(T target) {
-        return false;
-    }
-
-    @OnlyIn(Dist.CLIENT)
+	@OnlyIn(Dist.CLIENT)
     public List<ParameterEditor> getAcceptingParameters(Screen screen) {
-        return null;
-    }
+		return null;
+	}
 
-    public static abstract class EntityPatchCondition extends Condition<LivingEntityPatch<?>> {
+	public static abstract class EntityPatchCondition extends Condition<LivingEntityPatch<?>> {
 	}
 
 	public static abstract class EntityCondition extends Condition<Entity> {

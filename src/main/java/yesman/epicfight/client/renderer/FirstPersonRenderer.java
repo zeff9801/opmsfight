@@ -5,18 +5,17 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
@@ -29,10 +28,11 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import java.util.Iterator;
 
 @OnlyIn(Dist.CLIENT)
-public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlayerEntity, LocalPlayerPatch, PlayerModel<ClientPlayerEntity>, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>>, HumanoidMesh> {
-	public FirstPersonRenderer(EntityType<?> entityType) {
-		super(entityType);
 
+public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlayerEntity, LocalPlayerPatch, PlayerModel<ClientPlayerEntity>, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>>, HumanoidMesh> {
+
+	public FirstPersonRenderer() {
+		super();
 		this.addPatchedLayer(ElytraLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(HeldItemLayer.class, new PatchedItemInHandLayer<>());
 		this.addPatchedLayer(BipedArmorLayer.class, new WearableItemLayer<>(() -> Meshes.BIPED, true));
@@ -42,7 +42,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		this.addPatchedLayer(SpinAttackEffectLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(CapeLayer.class, new EmptyLayer<>());
 	}
-
+	
 	@Override
 	public void render(ClientPlayerEntity entity, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
@@ -67,10 +67,9 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		this.prepareModel(mesh, entity, entitypatch, renderer);
 
 		if (!entitypatch.getOriginal().isInvisible()) {
-			for (AnimatedModelPart p : mesh.getAllParts()) {
+			for (AnimatedMesh.AnimatedModelPart p : mesh.getAllParts()) {
 				p.setHidden(true);
 			}
-
 			mesh.leftArm.setHidden(false);
 			mesh.rightArm.setHidden(false);
 			mesh.leftSleeve.setHidden(false);
@@ -78,6 +77,8 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 
 			RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
 			mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+
+
 		}
 
 		if (!entity.isSpectator()) {
@@ -88,14 +89,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 	}
 
 	@Override
-	protected void renderLayer(LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, LocalPlayerPatch entitypatch, ClientPlayerEntity entity, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
+	protected void renderLayer(LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, LocalPlayerPatch entitypatch, ClientPlayerEntity entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLightIn, float partialTicks) {
 		Iterator<LayerRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>>> iter = renderer.layers.iterator();
 
-		float f = MathUtils.lerpBetween(entity.yBodyRotO, entity.yBodyRot, partialTicks);
-		float f1 = MathUtils.lerpBetween(entity.yHeadRotO, entity.yHeadRot, partialTicks);
+		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
+		float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
 		float f2 = f1 - f;
-		float f7 = entity.getViewXRot(partialTicks);
-		float bob = this.getVanillaRendererBob(entity, renderer, partialTicks);
+		float f7 = entityIn.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
 
 		while (iter.hasNext()) {
 			LayerRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> layer = iter.next();
@@ -106,21 +107,18 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 			}
 
 			if (this.patchedLayers.containsKey(rendererClass)) {
-				this.patchedLayers.get(rendererClass).renderLayer(entity, entitypatch, layer, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
+				this.patchedLayers.get(rendererClass).renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
 			}
 		}
 	}
-
 	@Override
 	public MeshProvider<HumanoidMesh> getMeshProvider(LocalPlayerPatch entitypatch) {
 		return entitypatch.getOriginal().getModelName().equals("slim") ? () -> Meshes.ALEX : () -> Meshes.BIPED;
 	}
-
 	@Override
 	public MeshProvider<HumanoidMesh> getDefaultMesh() {
 		return () -> Meshes.BIPED;
 	}
-
 	@Override
 	protected void prepareModel(HumanoidMesh mesh, ClientPlayerEntity entity, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer) {
 		mesh.initialize();
