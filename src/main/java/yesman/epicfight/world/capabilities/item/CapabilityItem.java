@@ -259,7 +259,7 @@ public class CapabilityItem {
 	}
 
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
-		return this.getStyle(entitypatch).canUseOffhand() && EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).canHoldInOffhandAlone();
+		return !this.canBePlacedOffhand() && entitypatch.getOriginal().getOffhandItem().isEmpty();
 	}
 
 	public boolean canHoldInOffhandAlone() {
@@ -274,48 +274,12 @@ public class CapabilityItem {
 		return ZoomInType.NONE;
 	}
 
-	public enum WeaponCategories implements WeaponCategory {
-		NOT_WEAPON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
-
-		final int id;
-
-		WeaponCategories() {
-			this.id = WeaponCategory.ENUM_MANAGER.assign(this);
-		}
-
-		@Override
-		public int universalOrdinal() {
-			return this.id;
-		}
-	}
-
-	public enum Styles implements Style {
-		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), OCHS(false);
-
-		final boolean canUseOffhand;
-		final int id;
-
-		Styles(boolean canUseOffhand) {
-			this.id = Style.ENUM_MANAGER.assign(this);
-			this.canUseOffhand = canUseOffhand;
-		}
-
-		@Override
-		public int universalOrdinal() {
-			return this.id;
-		}
-
-		public boolean canUseOffhand() {
-			return this.canUseOffhand;
-		}
-	}
-
 	public enum ZoomInType {
 		NONE, ALWAYS, USE_TICK, AIMING, CUSTOM
 	}
 
 	public static CapabilityItem.Builder builder() {
-		return new CapabilityItem.Builder();
+		return new Builder();
 	}
 
 	public static class Builder {
@@ -325,7 +289,7 @@ public class CapabilityItem {
 
 		protected Builder() {
 			this.constructor = CapabilityItem::new;
-			this.category = WeaponCategories.FIST;
+			this.category = WeaponCategory.FIST;
 			this.attributeMap = Maps.newHashMap();
 		}
 
@@ -342,7 +306,6 @@ public class CapabilityItem {
 		public Builder addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
 			Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.newHashMap());
 			map.put(attributePair.getFirst(), attributePair.getSecond());
-
 			return this;
 		}
 

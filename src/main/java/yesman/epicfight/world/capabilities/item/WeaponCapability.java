@@ -30,6 +30,7 @@ import java.util.function.Function;
 public class WeaponCapability extends CapabilityItem {
 	protected final Function<LivingEntityPatch<?>, Style> stylegetter;
 	protected final Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
+	protected final Function<LivingEntityPatch<?>, UseAction> useAction;
 	protected final Skill passiveSkill;
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
@@ -51,6 +52,7 @@ public class WeaponCapability extends CapabilityItem {
 		this.livingMotionModifiers = weaponBuilder.livingMotionModifiers;
 		this.stylegetter = weaponBuilder.styleProvider;
 		this.weaponCombinationPredicator = weaponBuilder.weaponCombinationPredicator;
+		this.useAction = weaponBuilder.useAction;
 		this.passiveSkill = weaponBuilder.passiveSkill;
 		this.smashingSound = weaponBuilder.swingSound;
 		this.hitParticle = weaponBuilder.hitParticle;
@@ -148,7 +150,7 @@ public class WeaponCapability extends CapabilityItem {
 			}
 		}
 
-		return UseAction.NONE;
+		return this.useAction.apply(playerpatch);
 	}
 
 	@Override
@@ -173,6 +175,7 @@ public class WeaponCapability extends CapabilityItem {
 	public static class Builder extends CapabilityItem.Builder {
 		Function<LivingEntityPatch<?>, Style> styleProvider;
 		Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
+		Function<LivingEntityPatch<?>, UseAction> useAction;
 		Skill passiveSkill;
 		SoundEvent swingSound;
 		SoundEvent hitSound;
@@ -189,6 +192,7 @@ public class WeaponCapability extends CapabilityItem {
 			this.constructor = WeaponCapability::new;
 			this.styleProvider = (entitypatch) -> Styles.ONE_HAND;
 			this.weaponCombinationPredicator = (entitypatch) -> false;
+			this.useAction = (entitypatch) -> UseAction.NONE;
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;
 			this.hitSound = EpicFightSounds.BLUNT_HIT;
@@ -269,6 +273,11 @@ public class WeaponCapability extends CapabilityItem {
 
 		public Builder weaponCombinationPredicator(Function<LivingEntityPatch<?>, Boolean> predicator) {
 			this.weaponCombinationPredicator = predicator;
+			return this;
+		}
+
+		public Builder useAction(Function<LivingEntityPatch<?>, UseAction> useAction) {
+			this.useAction = useAction;
 			return this;
 		}
 

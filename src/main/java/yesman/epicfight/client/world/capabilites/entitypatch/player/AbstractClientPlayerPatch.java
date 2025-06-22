@@ -37,7 +37,7 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 
 import javax.annotation.Nonnull;
@@ -124,7 +124,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 			UseAction capUseAnim = activeItemCap.getUseAnimation(this);
 
 			if (useAnim == UseAction.BLOCK || capUseAnim == UseAction.BLOCK)
-				if (activeItemCap.getWeaponCategory() == WeaponCategories.SHIELD)
+				if (activeItemCap.getWeaponCategory() == WeaponCategory.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;

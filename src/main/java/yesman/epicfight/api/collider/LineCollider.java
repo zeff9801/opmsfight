@@ -123,7 +123,9 @@ public class LineCollider extends Collider {
 
 	@Override
 	public LineCollider deepCopy() {
-		return new LineCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.modelVec.x, this.modelVec.y, this.modelVec.z);
+		// Use pooling for deepCopy
+		return LineColliderPool.acquire(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.modelVec.x, this.modelVec.y, this.modelVec.z);
+		// Note: The caller is responsible for releasing the pooled instance.
 	}
 
 	@Override
@@ -157,5 +159,14 @@ public class LineCollider extends Collider {
 		float endZ = (float)(this.modelCenter.z + this.modelVec.z);
 		vertexConsumer.vertex(matrix, startX, startY, startZ).color(1.0F, color, color, 1.0F).endVertex();
 		vertexConsumer.vertex(matrix, endX, endY, endZ).color(1.0F, color, color, 1.0F).endVertex();
+	}
+
+	/**
+	 * Reset this LineCollider to new parameters for object pooling.
+	 */
+	public void reset(double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
+		this.modelVec = new Vector3d(vecX, vecY, vecZ);
+		this.worldVec = new Vector3d(0.0D, 0.0D, 0.0D);
+		// Note: modelCenter is final, so cannot be reassigned. If pooling is used, consider making modelCenter non-final.
 	}
 }

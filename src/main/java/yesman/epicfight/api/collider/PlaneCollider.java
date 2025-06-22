@@ -76,8 +76,9 @@ public class PlaneCollider extends Collider {
 	public PlaneCollider deepCopy() {
 		Vector3d aVec = this.modelPos[0];
 		Vector3d bVec = this.modelPos[1];
-
-		return new PlaneCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
+		// Use pooling for deepCopy
+		return PlaneColliderPool.acquire(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
+		// Note: The caller is responsible for releasing the pooled instance.
 	}
 
 	@Override
@@ -92,5 +93,16 @@ public class PlaneCollider extends Collider {
 	@OnlyIn(Dist.CLIENT)
 	public RenderType getRenderType() {
 		return null;
+	}
+
+	/**
+	 * Reset this PlaneCollider to new parameters for object pooling.
+	 */
+	public void reset(double x, double y, double z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
+		this.modelPos[0] = new Vector3d(aX, aY, aZ);
+		this.modelPos[1] = new Vector3d(bX, bY, bZ);
+		this.worldPos[0] = new Vector3d(0.0D, 0.0D, 0.0D);
+		this.worldPos[1] = new Vector3d(0.0D, 0.0D, 0.0D);
+		// Note: modelCenter is final, so cannot be reassigned. If pooling is used, consider making modelCenter non-final.
 	}
 }

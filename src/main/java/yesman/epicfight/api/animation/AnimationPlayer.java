@@ -16,6 +16,8 @@ public class AnimationPlayer {
 	protected boolean doNotResetNext;
 	protected boolean reversed;
 	protected DynamicAnimation play;
+	protected PlaybackSpeedModifier speedModifier;
+	protected PlaybackTimeModifier timeModifier;
 
 	public AnimationPlayer() {
 		this.setPlayAnimation(Animations.DUMMY_ANIMATION);
@@ -25,17 +27,15 @@ public class AnimationPlayer {
 		this.prevElapsedTime = this.elapsedTime;
 
 		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch, this.getAnimation());
-		PlaybackSpeedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 
-		if (playSpeedModifier != null) {
-			playbackSpeed = playSpeedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
+		if (this.speedModifier != null) {
+			playbackSpeed = this.speedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
 		}
 
 		this.elapsedTime += EpicFightOptions.A_TICK * playbackSpeed * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
-		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
 
-		if (playTimeModifier != null) {
-			Pair<Float, Float> time = playTimeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
+		if (this.timeModifier != null) {
+			Pair<Float, Float> time = this.timeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
 			this.prevElapsedTime = time.first;
 			this.elapsedTime = time.second;
 		}
@@ -73,6 +73,8 @@ public class AnimationPlayer {
 		}
 
 		this.play = animation;
+		this.speedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		this.timeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
 	}
 
 	public Pose getCurrentPose(LivingEntityPatch<?> entitypatch, float partialTicks) {
@@ -135,5 +137,9 @@ public class AnimationPlayer {
 	@Override
 	public String toString() {
 		return this.getAnimation() + " " + this.prevElapsedTime + " " + this.elapsedTime;
+	}
+
+	public void dispose() {
+		this.play = null;
 	}
 }

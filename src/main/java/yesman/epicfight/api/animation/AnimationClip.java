@@ -25,8 +25,8 @@ public class AnimationClip {
 	public final Pose getPoseInTime(float time) {
 		Pose pose = new Pose();
 		
-		for (String jointName : this.jointTransforms.keySet()) {
-			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
+		for (Map.Entry<String, TransformSheet> entry : this.jointTransforms.entrySet()) {
+			pose.putJointData(entry.getKey(), entry.getValue().getInterpolatedTransform(time));
 		}
 		
 		return pose;
@@ -35,11 +35,16 @@ public class AnimationClip {
 	public Map<String, TransformSheet> getJointTransforms() {
 		return this.jointTransforms;
 	}
+	
 	public void setClipTime(float clipTime) {
 		this.clipTime = clipTime;
 	}
 	
 	public float getClipTime() {
 		return this.clipTime;
+	}
+	
+	public void dispose() {
+		this.jointTransforms.clear();
 	}
 }

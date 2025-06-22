@@ -112,7 +112,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     implementation fg.deobf("curse.maven:oculus-581495:5194273")
     compileOnly fg.deobf("curse.maven:curios-309927:4419403")
-    compileOnly fg.deobf("curse.maven:fpm-333287:6011909")
+//    compileOnly fg.deobf("curse.maven:fpm-333287:6356567")
 
     compileOnly 'org.jetbrains:annotations:24.0.1'
     shadow 'org.jetbrains:annotations:24.0.1'

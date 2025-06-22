@@ -135,12 +135,13 @@ public class JointTransform {
 		JointTransform interpolated = interpolateSimple(prev, next, progression);
 
 		for (Map.Entry<String, TransformEntry> entry : prev.entries.entrySet()) {
-			JointTransform transform = next.entries.containsKey(entry.getKey()) ? next.entries.get(entry.getKey()).transform : JointTransform.empty();
+			TransformEntry nextEntry = next.entries.get(entry.getKey());
+			JointTransform transform = (nextEntry != null) ? nextEntry.transform : JointTransform.empty();
 			interpolated.entries.put(entry.getKey(), new TransformEntry(entry.getValue().multiplyFunction, interpolateSimple(entry.getValue().transform, transform, progression)));
 		}
 
 		for (Map.Entry<String, TransformEntry> entry : next.entries.entrySet()) {
-			if (!interpolated.entries.containsKey(entry.getKey())) {
+			if (!prev.entries.containsKey(entry.getKey())) {
 				interpolated.entries.put(entry.getKey(), new TransformEntry(entry.getValue().multiplyFunction, interpolateSimple(JointTransform.empty(), entry.getValue().transform, progression)));
 			}
 		}

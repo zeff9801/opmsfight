@@ -24,6 +24,8 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.Arrays;
+
 public class MoveCoordFunctions {
     @FunctionalInterface
     public interface MoveCoordSetter {
@@ -176,13 +178,11 @@ public class MoveCoordFunctions {
                 scale = Math.max(scale * dot, 1.0F);
             }
 
-            for (int i = startFrame; i <= endFrame; i++) {
-                Vec3f translation = keyframes[i].transform().translation();
-
-                if (translation.z < 0.0F) {
-                    translation.z *= scale;
-                }
-            }
+            final float finalScale = scale;
+            Arrays.stream(keyframes, startFrame, endFrame + 1)
+                    .map(kf -> kf.transform().translation())
+                    .filter(translation -> translation.z < 0.0F)
+                    .forEach(translation -> translation.z *= finalScale);
 
             transformSheet.readFrom(transform);
         } else {
@@ -209,13 +209,11 @@ public class MoveCoordFunctions {
             float clampedYRot = MathUtils.rotlerp(entitypatch.getYRot(), yRot, entitypatch.getYRotLimit());
             entitypatch.setYRot(clampedYRot);
 
-            for (int i = startFrame; i <= endFrame; i++) {
-                Vec3f translation = keyframes[i].transform().translation();
-
-                if (translation.z < 0.0F) {
-                    translation.z *= scale;
-                }
-            }
+            final float finalScale = scale;
+            Arrays.stream(keyframes, startFrame, endFrame + 1)
+                    .map(kf -> kf.transform().translation())
+                    .filter(translation -> translation.z < 0.0F)
+                    .forEach(translation -> translation.z *= finalScale);
 
             transformSheet.readFrom(transform);
         } else {
@@ -230,11 +228,7 @@ public class MoveCoordFunctions {
     public static final MoveCoordSetter RAW_COORD_WITH_X_ROT = (self, entitypatch, transformSheet) -> {
         float xRot = entitypatch.getOriginal().xRot;
         TransformSheet sheet = self.getCoord().copyAll();
-
-        for (Keyframe kf : sheet.getKeyframes()) {
-            kf.transform().translation().rotate(-xRot, Vec3f.X_AXIS);
-        }
-
+        Arrays.stream(sheet.getKeyframes()).forEach(kf -> kf.transform().translation().rotate(-xRot, Vec3f.X_AXIS));
         transformSheet.readFrom(sheet);
     };
 

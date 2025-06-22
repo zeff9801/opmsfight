@@ -65,6 +65,11 @@ public class VertexBuilder {
 			int position = drawingIndices[k];
 			int uv = drawingIndices[k + 1];
 			int normal = drawingIndices[k + 2];
+			
+			if (position < 0 || position >= aJointId.length) {
+				continue;
+			}
+			
 			AnimatedVertexBuilder vi = new AnimatedVertexBuilder(position, uv, normal, aJointId[position], aWeights[position], counts[position]);
 			vertexIndicators.add(vi);
 		}

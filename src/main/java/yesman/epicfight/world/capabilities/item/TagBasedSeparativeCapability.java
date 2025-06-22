@@ -11,7 +11,7 @@ public class TagBasedSeparativeCapability extends CapabilityItem {
 	private final CapabilityItem defaultCapability;
 
 	public TagBasedSeparativeCapability(List<Pair<Condition<ItemStack>, CapabilityItem>> variations, CapabilityItem defaultCapability) {
-		super(CapabilityItem.builder().category(WeaponCategories.NOT_WEAPON));
+		super(CapabilityItem.builder().category(WeaponCategory.NOT_WEAPON));
 		this.variations = variations;
 		this.defaultCapability = defaultCapability;
 	}

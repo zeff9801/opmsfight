@@ -24,6 +24,7 @@ public class Layer {
 	protected boolean disabled;
 	protected boolean paused;
 	public final AnimationPlayer animationPlayer;
+	private boolean dirty = false;
 
 	public Layer(Priority priority) {
 		this(priority, AnimationPlayer::new);
@@ -90,11 +91,9 @@ public class Layer {
 	}
 
 	public void update(LivingEntityPatch<?> entitypatch) {
-		if (this.paused) {
-			this.animationPlayer.setElapsedTime(this.animationPlayer.getElapsedTime());
-		} else {
-			this.animationPlayer.tick(entitypatch);
-		}
+		if (this.disabled || this.paused || !this.dirty) return;
+		this.animationPlayer.tick(entitypatch);
+		this.dirty = false;
 
 		if (this.isBaseLayer()) {
 			entitypatch.updateEntityState();
@@ -199,6 +198,12 @@ public class Layer {
 		return sb.toString();
 	}
 
+	public void markDirty() { this.dirty = true; }
+
+	public void dispose() {
+		this.animationPlayer.setPlayAnimation(null);
+	}
+
 	@OnlyIn(Dist.CLIENT)
 	public static class BaseLayer extends Layer {
 		protected Map<Layer.Priority, Layer> compositeLayers = Maps.newLinkedHashMap();
@@ -245,6 +250,13 @@ public class Layer {
 			for (Layer layer : this.compositeLayers.values()) {
 				layer.update(entitypatch);
 			}
+		}
+
+		@Override
+		public void dispose() {
+			super.dispose();
+			this.compositeLayers.values().forEach(Layer::dispose);
+			this.compositeLayers.clear();
 		}
 
 		public void offCompositeLayerLowerThan(LivingEntityPatch<?> entitypatch, StaticAnimation nextAnimation) {

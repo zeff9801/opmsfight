@@ -6,7 +6,6 @@ import net.minecraft.client.particle.IParticleFactory;
 import net.minecraft.client.particle.IParticleRenderType;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.BasicParticleType;
@@ -18,9 +17,7 @@ import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
-import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -52,14 +49,7 @@ public class EntityAfterImageParticle extends CustomModelParticle<AnimatedMesh> 
 
 	@Override
 	public void render(IVertexBuilder vertexConsumer, ActiveRenderInfo camera, float partialTicks) {
-		MatrixStack poseStack = new MatrixStack();
-		this.setupPoseStack(poseStack, camera, partialTicks);
-		poseStack.last().pose().multiply(modelMatrix);
-		float alpha = this.alphaO + (this.alpha - this.alphaO) * partialTicks;
-
-		AnimationShaderInstance animShader = EpicFightRenderTypes.getAnimationShader(GameRenderer.getPositionColorLightmapShader());
-		this.particleMeshProvider.get().drawWithShader(poseStack, animShader, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, null, this.poseMatrices);
-
+		super.render(vertexConsumer, camera, partialTicks);
 	}
 
 	@Override

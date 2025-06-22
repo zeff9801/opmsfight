@@ -16,7 +16,7 @@ public class GloveCapability extends WeaponCapability {
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
 		ItemStack offhandItme = entitypatch.getOriginal().getOffhandItem();
 		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(offhandItme);
-		boolean isFist = itemCap.getWeaponCategory() == WeaponCategories.FIST;
+		boolean isFist = itemCap.getWeaponCategory() == WeaponCategory.FIST;
 		return isFist || !(offhandItme.getItem() instanceof SwordItem || offhandItme.getItem() instanceof ToolItem);
 	}
 	

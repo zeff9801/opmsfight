@@ -33,12 +33,10 @@ public class Pose {
 
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
 		Pose pose = new Pose();
+		pose.putJointData(pose1);
 
-		Set<String> mergedSet = new HashSet<>(pose1.jointTransformData.keySet());
-		mergedSet.addAll(pose2.jointTransformData.keySet());
-
-		for (String jointName : mergedSet) {
-			pose.putJointData(jointName, JointTransform.interpolate(pose1.getOrDefaultTransform(jointName), pose2.getOrDefaultTransform(jointName), pregression));
+		for (Map.Entry<String, JointTransform> entry : pose2.jointTransformData.entrySet()) {
+			pose.putJointData(entry.getKey(), JointTransform.interpolate(pose1.getOrDefaultTransform(entry.getKey()), entry.getValue(), pregression));
 		}
 
 		return pose;

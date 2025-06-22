@@ -2,7 +2,7 @@ package yesman.epicfight.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(targets = {"net.irisshaders.iris.pipeline.programs.ExtendedShader"})
+//@Mixin(targets = {"net.irisshaders.iris.pipeline.programs.ExtendedShader"})
 public abstract class IrisMixinExtendedShader {
 	/*@Inject(at = @At(value = "TAIL"), method = "<init>", cancellable = true)
 	private void epicfight_constructor(IResourceManager resourceFactory, String name, VertexFormat vertexFormat, boolean usesTessellation, GlFramebuffer writingToBeforeTranslucent, GlFramebuffer writingToAfterTranslucent,

@@ -118,14 +118,12 @@ public class AttackAnimation extends ActionAnimation {
 
 		entitypatch.setLastAttackSuccess(false);
 	}
-	@Override
-	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {
-		super.linkTick(entitypatch, linkAnimation);
 
-		if (!entitypatch.isLogicalClient() && entitypatch instanceof MobPatch<?> mobpatch) {
+	private void handleMobAI(LivingEntityPatch<?> entitypatch) {
+		if (entitypatch instanceof MobPatch<?> mobpatch) {
 			AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 			float elapsedTime = player.getElapsedTime();
-			EntityState state = linkAnimation.getState(entitypatch, elapsedTime);
+			EntityState state = this.getState(entitypatch, elapsedTime);
 
 			if (state.getLevel() == 1 && !state.turningLocked()) {
 				mobpatch.getOriginal().getNavigation().stop();
@@ -137,8 +135,14 @@ public class AttackAnimation extends ActionAnimation {
 				}
 			}
 		}
+	}
+
+	@Override
+	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {
+		super.linkTick(entitypatch, linkAnimation);
 
 		if (!entitypatch.isLogicalClient()) {
+			this.handleMobAI(entitypatch);
 			this.attackTick(entitypatch, linkAnimation);
 		}
 	}
@@ -157,6 +161,7 @@ public class AttackAnimation extends ActionAnimation {
 		super.tick(entitypatch);
 
 		if (!entitypatch.isLogicalClient()) {
+			this.handleMobAI(entitypatch);
 			this.attackTick(entitypatch, this);
 		}
 	}
@@ -185,18 +190,6 @@ public class AttackAnimation extends ActionAnimation {
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		Phase phase = this.getPhaseByTime(animation.isLinkAnimation() ? 0.0F : elapsedTime);
-
-		if (state.getLevel() == 1 && !state.turningLocked()) {
-			if (entitypatch instanceof MobPatch<?> mobpatch) {
-				mobpatch.getOriginal().getNavigation().stop();
-				entitypatch.getOriginal().attackAnim = 2;
-				LivingEntity target = entitypatch.getTarget();
-
-				if (target != null) {
-					entitypatch.rotateTo(target, entitypatch.getYRotLimit(), false);
-				}
-			}
-		}
 
 		if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {
 			if (!prevState.attacking() || (phase != this.getPhaseByTime(prevElapsedTime) && (state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)))) {

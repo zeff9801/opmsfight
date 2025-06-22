@@ -24,8 +24,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.Styles;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
@@ -82,20 +81,20 @@ public class GuardSkill extends Skill {
                 .setCategory(SkillCategories.GUARD)
                 .setActivateType(ActivateType.ONE_SHOT)
                 .setResource(Resource.STAMINA)
-                .addGuardMotion(WeaponCategories.AXE, (item, player) -> Animations.SWORD_GUARD_HIT)
-                .addGuardMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT)
-                .addGuardMotion(WeaponCategories.KATANA, (item, player) -> Animations.UCHIGATANA_GUARD_HIT)
-                .addGuardMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
-                .addGuardMotion(WeaponCategories.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null)
-                .addGuardMotion(WeaponCategories.SWORD, (item, player) -> item.getStyle(player) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT)
-                .addGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
-                .addGuardBreakMotion(WeaponCategories.AXE, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
-                .addGuardBreakMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_BREAK)
-                .addGuardBreakMotion(WeaponCategories.KATANA, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
-                .addGuardBreakMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
-                .addGuardBreakMotion(WeaponCategories.SPEAR, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
-                .addGuardBreakMotion(WeaponCategories.SWORD, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
-                .addGuardBreakMotion(WeaponCategories.TACHI, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED);
+                .addGuardMotion(WeaponCategory.AXE, (item, player) -> Animations.SWORD_GUARD_HIT)
+                .addGuardMotion(WeaponCategory.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT)
+                .addGuardMotion(WeaponCategory.KATANA, (item, player) -> Animations.UCHIGATANA_GUARD_HIT)
+                .addGuardMotion(WeaponCategory.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+                .addGuardMotion(WeaponCategory.SPEAR, (item, player) -> item.getStyle(player).canUseOffhand() ? Animations.SPEAR_GUARD_HIT : null)
+                .addGuardMotion(WeaponCategory.SWORD, (item, player) -> item.getStyle(player).canUseOffhand() ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT)
+                .addGuardMotion(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+                .addGuardBreakMotion(WeaponCategory.AXE, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
+                .addGuardBreakMotion(WeaponCategory.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_BREAK)
+                .addGuardBreakMotion(WeaponCategory.KATANA, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
+                .addGuardBreakMotion(WeaponCategory.LONGSWORD, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
+                .addGuardBreakMotion(WeaponCategory.SPEAR, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
+                .addGuardBreakMotion(WeaponCategory.SWORD, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED)
+                .addGuardBreakMotion(WeaponCategory.TACHI, (item, player) -> Animations.BIPED_COMMON_NEUTRALIZED);
     }
 
     protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions;
@@ -348,7 +347,7 @@ public class GuardSkill extends Skill {
 
     @Override
     public List<WeaponCategory> getAvailableWeaponCategories() {
-        return List.copyOf(this.guardMotions.keySet());
+        return null;
     }
 
     protected boolean isAdvancedGuard() {

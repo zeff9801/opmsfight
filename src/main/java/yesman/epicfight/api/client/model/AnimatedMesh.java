@@ -51,6 +51,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
     protected final float[] weights;
     private final int maxJointCount;
     private int arrayObjectId;
+    private final RenderProperties properties;
 
     private VertexBuffer<Float> positionsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
     private VertexBuffer<Float> uvsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 2, false, ByteBuffer::putFloat);
@@ -60,6 +61,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 
     public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<MeshPartDefinition, List<AnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
         super(arrayMap, partBuilders, parent, properties);
+        this.properties = properties;
 
         this.weights = parent == null ? arrayMap.get("weights") : parent.weights;
         int maxJointId = 0;
@@ -178,14 +180,10 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
      * @param poses
      */
     public void draw(MatrixStack poseStack, IRenderTypeBuffer multiBufferSource, RenderType renderType, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-        if (EpicFightMod.CLIENT_CONFIGS.useAnimationShader.getValue()) {
-            renderType.setupRenderState();
-            AnimationShaderInstance animationShader = EpicFightRenderTypes.getAnimationShader(renderType);
-            this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, armature, poses);
-            renderType.clearRenderState();
+        if (this.properties.isTransparent()) {
+            this.drawToBuffer(poseStack, multiBufferSource.getBuffer(renderType), DrawingFunction.ENTITY_TEXTURED, packedLight, r, g, b, a, overlay, armature, poses);
         } else {
-            IVertexBuilder vertexConsumer = multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(renderType));
-            this.drawToBuffer(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_TEXTURED, packedLight, r, g, b, a, overlay, armature, poses);
+            this.drawWithShader(poseStack, multiBufferSource, renderType, packedLight, r, g, b, a, overlay, armature, poses);
         }
     }
 
@@ -245,9 +243,13 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
     /**
      * Draw the model with shader optimization by shader and vertex format
      */
+    public void drawWithShader(MatrixStack poseStack, IRenderTypeBuffer multiBufferSource, RenderType renderType, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
+        IVertexBuilder vertexConsumer = multiBufferSource.getBuffer(renderType);
+        this.drawToBuffer(poseStack, vertexConsumer, DrawingFunction.ENTITY_TEXTURED, packedLight, r, g, b, a, overlay, armature, poses);
+    }
+
     public void drawWithShader(MatrixStack poseStack, ShaderInstance shader, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-        AnimationShaderInstance animationShader = EpicFightRenderTypes.getAnimationShader(shader);
-        this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+        this.drawWithShader(poseStack, (AnimationShaderInstance)shader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
     }
 
     public void drawWithShader(MatrixStack poseStack, AnimationShaderInstance animationShaderInstance, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
@@ -259,58 +261,13 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
             return;
         }
 
-        /*for (int i = 0; i < 12; ++i) {
-            int j = RenderSystem.getShaderTexture(i);
-            animationShaderInstance._setSampler("Sampler" + i, j);
-        }*/
-
         if (animationShaderInstance.getModelViewMatrixShaderUniform() != null) {
             animationShaderInstance.getModelViewMatrixShaderUniform().set(poseStack.last().pose());
         }
 
-        /*if (animationShaderInstance.getProjectionMatrixShaderUniform() != null) {
-            animationShaderInstance.getProjectionMatrixShaderUniform().set(RenderSystem.getProjectionMatrix());
-        }*/
-
         if (animationShaderInstance.getNormalMatrixShaderUniform() != null) {
             animationShaderInstance.getNormalMatrixShaderUniform().set(poseStack.last().normal().adjugateAndDet());
         }
-
-        /*if (animationShaderInstance.getInverseViewRotationMatrixShaderUniform() != null) {
-            animationShaderInstance.getInverseViewRotationMatrixShaderUniform().set(RenderSystem.getInverseViewRotationMatrix());
-        }
-
-        if (animationShaderInstance.getColorModulatorShaderUniform() != null) {
-            animationShaderInstance.getColorModulatorShaderUniform().set(RenderSystem.getShaderColor());
-        }
-
-        if (animationShaderInstance.getGlintAlphaShaderUniform() != null) {
-            animationShaderInstance.getGlintAlphaShaderUniform().set(RenderSystem.getShaderGlintAlpha());
-        }
-
-        if (animationShaderInstance.getFogStartShaderUniform() != null) {
-            animationShaderInstance.getFogStartShaderUniform().set(RenderSystem.getShaderFogStart());
-        }
-
-        if (animationShaderInstance.getFogEndShaderUniform() != null) {
-            animationShaderInstance.getFogEndShaderUniform().set(RenderSystem.getShaderFogEnd());
-        }
-
-        if (animationShaderInstance.getFogColorShaderUniform() != null) {
-            animationShaderInstance.getFogColorShaderUniform().set(RenderSystem.getShaderFogColor());
-        }
-
-        if (animationShaderInstance.getFogShapeShaderUniform() != null) {
-            animationShaderInstance.getFogShapeShaderUniform().set(RenderSystem.getShaderFogShape().getIndex());
-        }
-
-        if (animationShaderInstance.getTextureMatrixShaderUniform() != null) {
-            animationShaderInstance.getTextureMatrixShaderUniform().set(RenderSystem.getTextureMatrix());
-        }
-
-        if (animationShaderInstance.getGameTimeShaderUniform() != null) {
-            animationShaderInstance.getGameTimeShaderUniform().set(RenderSystem.getShaderGameTime());
-        }*/
 
         if (animationShaderInstance.getScreenSizeShaderUniform() != null) {
             MainWindow window = Minecraft.getInstance().getWindow();
@@ -335,15 +292,12 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
             }
         }
 
-        //animationShaderInstance.setupShaderLights();
-
         int currentBoundVao = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BINDING);
         int currentBoundVbo = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BUFFER_BINDING);
 
         GL30.glBindVertexArray(this.arrayObjectId);
         EpicFightVertexFormatElement.bindDrawing(this);
 
-        //animationShaderInstance._getVertexFormat().setupBufferState();
         animationShaderInstance._apply();
 
         for (AnimatedModelPart part : this.parts.values()) {

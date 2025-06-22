@@ -23,7 +23,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.lwjgl.opengl.GL11;
 
 import java.util.List;
 
@@ -38,7 +37,7 @@ public class EditItemListScreen extends Screen {
 	private EditItemListScreen.ButtonList selectedItemList;
 	
 	protected EditItemListScreen(Screen parentScreen, EditSwitchingItemScreen.RegisteredItemList targetList, EditSwitchingItemScreen.RegisteredItemList opponentList) {
-		super(StringTextComponent.EMPTY);
+		super(new StringTextComponent(""));
 		this.parentScreen = parentScreen;
 		this.targetList = targetList;
 		this.opponentList = opponentList;
@@ -282,12 +281,12 @@ public class EditItemListScreen extends Screen {
 		
 		@Override
 		public int getRowLeft() {
-			return this.x0 + 2;
+			return this.x0 + 4;
 		}
 		
 		@Override
 		protected int getScrollbarPosition() {
-			return this.x1 - 6;
+			return this.x1 - 8;
 		}
 		
 		@OnlyIn(Dist.CLIENT)
@@ -300,34 +299,30 @@ public class EditItemListScreen extends Screen {
 			
 			@Override
 			public void render(MatrixStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-				int x = 0;
-				for (ItemButton button : buttonList) {
-					button.x = left + x;
+				for (int i=0; i < this.buttonList.size(); i++) {
+					ItemButton button = this.getButton(i);
+					button.x = left + i * 17;
 					button.y = top;
 					button.render(matrixStack, mouseX, mouseY, partialTicks);
-					x+=16;
 				}
 			}
 			
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
-				if (button == 0) {
-					int row = (int)((mouseX - ButtonList.this.x0 - 2) / 16);
-					int column = (int)((ButtonList.this.getScrollAmount() + mouseY - ButtonList.this.y0 - 4) / ButtonList.this.itemHeight);
-					ItemButton itembutton = this.getButton(row);
-					if (itembutton != null) {
-						itembutton = itembutton.isMouseOver(mouseX, mouseY) ? itembutton : null;
-						if (itembutton != null) {
-							itembutton.pressedAction.onPress(EditItemListScreen.this, itembutton, row, column);
-							itembutton.playDownSound(Minecraft.getInstance().getSoundManager());
-						}
+				for (int i=0; i < this.buttonList.size(); i++) {
+					ItemButton itemButton = this.getButton(i);
+					
+					if (itemButton.isMouseOver(mouseX, mouseY)) {
+						itemButton.pressedAction.onPress(EditItemListScreen.this, itemButton, i, this.list.children().indexOf(this));
+						return true;
 					}
 				}
+				
 				return false;
 			}
 			
 			public ItemButton getButton(int index) {
-				return this.buttonList.size() > index ? this.buttonList.get(index) : null;
+				return this.buttonList.get(index);
 			}
 		}
 	}
@@ -337,31 +332,30 @@ public class EditItemListScreen extends Screen {
 		private final IPressableExtended pressedAction;
 		
 		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, ITooltip onTooltip, EditItemListScreen screen, Item item) {
-			super(x, y, width, height, StringTextComponent.EMPTY, (button)->{}, onTooltip);
+			super(x, y, width, height, new StringTextComponent(""), (button) -> {}, onTooltip);
 			this.item = item;
 			this.pressedAction = pressedAction;
 		}
 		
 		@Override
 		public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			if (this.isMouseOver(mouseX, mouseY)) {
-				Tessellator tessellator = Tessellator.getInstance();
-				GlStateManager._disableTexture();
-				BufferBuilder bufferbuilder = tessellator.getBuilder();
-				bufferbuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-				bufferbuilder.vertex((double) this.x, (double) this.y + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x + this.width, (double) this.y + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x + this.width, (double) this.y, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x, (double) this.y, 0.0D).color(255, 255, 255, 255).endVertex();
-				tessellator.end();
-				this.onTooltip.onTooltip(this, matrixStack, mouseX, mouseY);
+			if (this.visible) {
+				Minecraft.getInstance().getItemRenderer().renderGuiItem(new ItemStack(this.item), this.x, this.y);
+				
+				if (this.isHovered) {
+					this.renderToolTip(matrixStack, mouseX, mouseY);
+				}
 			}
+		}
+		
+		public int getRowIndex() {
+			//for (int i=0; i < EditItemListScreen.this.selectedItemList.children().size(); i++) {
+				//if (EditItemListScreen.this.selectedItemList.getEntry(i).buttonList.contains(this)) {
+				//	return i;
+				//}
+		//	}
 			
-			try {
-				EditItemListScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), this.x, this.y);
-			} catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+			return -1;
 		}
 	}
 	

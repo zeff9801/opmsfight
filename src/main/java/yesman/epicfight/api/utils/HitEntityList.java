@@ -13,6 +13,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.Comparator;
 
 public class HitEntityList {
 	private final List<Entity> hitEntites;
@@ -30,6 +31,11 @@ public class HitEntityList {
 	public boolean next() {
 		this.index++;
 		return this.hitEntites.size() > this.index;
+	}
+
+	public void clear() {
+		this.hitEntites.clear();
+		this.index = -1;
 	}
 
 	public enum Priority {

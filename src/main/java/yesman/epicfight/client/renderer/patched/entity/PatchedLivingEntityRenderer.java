@@ -39,6 +39,7 @@ import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.client.renderer.patched.layer.RenderOriginalModelLayer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.mixin.accessor.LivingRendererAccessor;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -59,9 +60,14 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		List<Pair<ResourceLocation, JsonElement>> layers = Lists.newArrayList();
 
 		SimpleReloadableResourceManager resourceManager = (SimpleReloadableResourceManager) Minecraft.getInstance().getResourceManager();
-		Map<ResourceLocation, IResource> resources = resourceManager.getResources(new ResourceLocation(path));
+        Map<ResourceLocation, IResource> resources = null;
+        try {
+            resources = (Map<ResourceLocation, IResource>) resourceManager.getResources(new ResourceLocation(path));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
-		for (Map.Entry<ResourceLocation, IResource> entry : resources.entrySet()) {
+        for (Map.Entry<ResourceLocation, IResource> entry : resources.entrySet()) {
 			Reader reader = null;
 
 			try {
@@ -127,7 +133,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		boolean isVisible = this.isVisible(entity, entitypatch);
 		boolean isVisibleToPlayer = !isVisible && !entity.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
-		RenderType renderType = renderer.getRenderType(entity, isVisible, isVisibleToPlayer, isGlowing);
+		@SuppressWarnings("unchecked")
+		RenderType renderType = ((LivingRendererAccessor<E>)renderer).invokeGetRenderType(entity, isVisible, isVisibleToPlayer, isGlowing);
 
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();

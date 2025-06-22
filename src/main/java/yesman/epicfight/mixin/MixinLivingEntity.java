@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
@@ -22,7 +21,7 @@ public abstract class MixinLivingEntity {
 	@Shadow
 	protected void hurtArmor(DamageSource p_21122_, float p_21123_) {}
 	
-	@Inject(at = @At(value = "TAIL"), method = "blockUsingShield(Lnet/minecraft/entity/LivingEntity;)V", cancellable = true)
+	/*@Inject(at = @At(value = "TAIL"), method = "blockUsingShield(Lnet/minecraft/entity/LivingEntity;)V", cancellable = true)
 	private void epicfight_blockUsingShield(LivingEntity p_21200_, CallbackInfo info) {
 		LivingEntity self = (LivingEntity)((Object)this);
 		LivingEntityPatch<?> opponentEntitypatch = EpicFightCapabilities.getEntityPatch(p_21200_, LivingEntityPatch.class);
@@ -35,7 +34,7 @@ public abstract class MixinLivingEntity {
 			//	opponentEntitypatch.onAttackBlocked(opponentEntitypatch.getEpicFightDamageSource(), selfEntitypatch);
 			//}
 		}
-	}
+	}*/ //i dont think we use shields
 	
 	@Inject(at = @At(value = "RETURN"), method = "hurt", cancellable = true)
 	private void epicfight_hurt(DamageSource damagesource, float amount, CallbackInfoReturnable<Boolean> info) {

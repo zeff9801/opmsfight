@@ -23,7 +23,7 @@ import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
@@ -109,7 +109,7 @@ public class CustomHumanoidMobPatch<T extends CreatureEntity> extends HumanoidMo
 			UseAction secondUseAnim = activeItem.getUseAnimation(this);
 
 			if (useAnim == UseAction.BLOCK || secondUseAnim == UseAction.BLOCK)
-				if (activeItem.getWeaponCategory() == WeaponCategories.SHIELD)
+				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;

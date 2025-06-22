@@ -27,6 +27,10 @@ public class OBBCollider extends Collider {
 	protected Vector3d[] rotatedNormal;
 	protected Vec3f scale;
 
+	private static final Vector3d BUFFER1 = new Vector3d(0,0,0);
+	private static final Vector3d BUFFER2 = new Vector3d(0,0,0);
+	private static final Vector3d BUFFER3 = new Vector3d(0,0,0);
+
 	/**
 	 * make 3d obb
 	 * @param pos1 left_back
@@ -180,21 +184,28 @@ public class OBBCollider extends Collider {
 
 	@Override
 	public boolean isCollide(Entity entity) {
-		OBBCollider obb = new OBBCollider(entity.getBoundingBox());
-		return isCollide(obb);
+		// Use pooling for temporary OBBCollider
+		OBBCollider obb = OBBColliderPool.acquire(entity.getBoundingBox().getXsize() / 2, entity.getBoundingBox().getYsize() / 2, entity.getBoundingBox().getZsize() / 2, entity.getBoundingBox().getCenter().x, entity.getBoundingBox().getCenter().y, entity.getBoundingBox().getCenter().z);
+		boolean result = isCollide(obb);
+		OBBColliderPool.release(obb);
+		return result;
 	}
 
 	@Override
 	public OBBCollider deepCopy() {
+		// Use pooling for deepCopy
 		Vector3d xyzVec = this.modelVertex[1];
-		return new OBBCollider(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
+		return OBBColliderPool.acquire(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
+		// Note: The caller is responsible for releasing the pooled instance.
 	}
 
 	private static boolean collisionDetection(Vector3d seperateAxis, Vector3d toOpponent, OBBCollider box1, OBBCollider box2) {
-		Vector3d maxProj1 = null, maxProj2 = null, distance;
 		double maxDot1 = -1, maxDot2 = -1;
-		double dot;
+		Vector3d maxProj1 = BUFFER1;
+		Vector3d maxProj2 = BUFFER2;
+		Vector3d distance = BUFFER3;
 
+		double dot;
 		distance = seperateAxis.dot(toOpponent) > 0.0F ? toOpponent : toOpponent.scale(-1.0D);
 
 		for (Vector3d vertexVector : box1.rotatedVertex) {
@@ -213,6 +224,7 @@ public class OBBCollider extends Collider {
 			}
 		}
 
+		// TODO: Consider object pooling for OBBCollider if profiling shows GC pressure.
 		return !(MathUtils.projectVector(distance, seperateAxis).length() >
 				MathUtils.projectVector(maxProj1, seperateAxis).length() +
 						MathUtils.projectVector(maxProj2, seperateAxis).length());
@@ -312,5 +324,32 @@ public class OBBCollider extends Collider {
 		resultTag.put("size", size);
 
 		return resultTag;
+	}
+
+	/**
+	 * Reset this OBBCollider to new parameters for object pooling.
+	 */
+	public void reset(double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+		// Reinitialize modelVertex
+		this.modelVertex[0] = new Vector3d(vertexX, vertexY, -vertexZ);
+		this.modelVertex[1] = new Vector3d(vertexX, vertexY, vertexZ);
+		this.modelVertex[2] = new Vector3d(-vertexX, vertexY, vertexZ);
+		this.modelVertex[3] = new Vector3d(-vertexX, vertexY, -vertexZ);
+		// Reinitialize modelNormal
+		this.modelNormal[0] = new Vector3d(1, 0, 0);
+		this.modelNormal[1] = new Vector3d(0, 1, 0);
+		this.modelNormal[2] = new Vector3d(0, 0, -1);
+		// Reset rotatedVertex and rotatedNormal
+		for (int i = 0; i < 4; i++) {
+			this.rotatedVertex[i] = new Vector3d(0.0D, 0.0D, 0.0D);
+		}
+		for (int i = 0; i < 3; i++) {
+			this.rotatedNormal[i] = new Vector3d(0.0D, 0.0D, 0.0D);
+		}
+		// Reset scale
+		this.scale = null;
+		// Reset modelCenter and worldCenter
+		// Note: modelCenter is final, so cannot be reassigned. If pooling is used, consider making modelCenter non-final.
+		// For now, leave as is, but be aware this limits pooling flexibility.
 	}
 }

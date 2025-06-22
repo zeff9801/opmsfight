@@ -25,8 +25,8 @@ import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
+import yesman.epicfight.world.capabilities.item.Styles;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
@@ -65,8 +65,8 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 	@SuppressWarnings("unchecked")
 	protected void setWeaponMotions() {
 		this.weaponLivingMotions = Maps.newHashMap();
-		this.weaponLivingMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(
-			CapabilityItem.Styles.TWO_HAND, Sets.newHashSet(
+		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
+			Styles.TWO_HAND, Sets.newHashSet(
 				Pair.of(LivingMotions.WALK, Animations.BIPED_WALK_TWOHAND),
 				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
 			)
@@ -82,8 +82,8 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 			Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>> motionByStyle = this.weaponAttackMotions.get(itemCap.getWeaponCategory());
 			Style style = itemCap.getStyle(this);
 
-			if (motionByStyle.containsKey(style) || motionByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
-				return motionByStyle.getOrDefault(style, motionByStyle.get(CapabilityItem.Styles.COMMON));
+			if (motionByStyle.containsKey(style) || motionByStyle.containsKey(Styles.COMMON)) {
+				return motionByStyle.getOrDefault(style, motionByStyle.get(Styles.COMMON));
 			}
 		}
 
@@ -177,8 +177,8 @@ public abstract class HumanoidMobPatch<T extends CreatureEntity> extends MobPatc
 			Map<Style, Set<Pair<LivingMotion, StaticAnimation>>> mapByStyle = this.weaponLivingMotions.get(mainhandCap.getWeaponCategory());
 			Style style = mainhandCap.getStyle(this);
 
-			if (mapByStyle.containsKey(style) || mapByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
-				Set<Pair<LivingMotion, StaticAnimation>> animModifierSet = mapByStyle.getOrDefault(style, mapByStyle.get(CapabilityItem.Styles.COMMON));
+			if (mapByStyle.containsKey(style) || mapByStyle.containsKey(Styles.COMMON)) {
+				Set<Pair<LivingMotion, StaticAnimation>> animModifierSet = mapByStyle.getOrDefault(style, mapByStyle.get(Styles.COMMON));
 
 				for (Pair<LivingMotion, StaticAnimation> pair : animModifierSet) {
 					this.animator.addLivingAnimation(pair.getFirst(), pair.getSecond());
