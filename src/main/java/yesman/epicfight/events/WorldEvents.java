@@ -68,7 +68,7 @@ public class WorldEvents {
 		}
 	}
 
-	public static void synchronizeWorldData(ServerPlayerEntity player) {
+	private static void synchronizeWorldData(ServerPlayerEntity player) {
 		List<CompoundNBT> skillParams = SkillManager.getSkillParams();
 
 		SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(skillParams.size(), SPDatapackSync.Type.SKILL_PARAMS);
@@ -90,7 +90,6 @@ public class WorldEvents {
 
 		skillParams.forEach(skillParamsPacket::write);
 		EpicFightNetworkManager.sendToPlayer(skillParamsPacket, player);
-
 
 		SPDatapackSync armorPacket = new SPDatapackSync(ItemCapabilityReloadListener.armorCount(), SPDatapackSync.Type.ARMOR);
 		SPDatapackSync weaponPacket = new SPDatapackSync(ItemCapabilityReloadListener.weaponCount(), SPDatapackSync.Type.WEAPON);

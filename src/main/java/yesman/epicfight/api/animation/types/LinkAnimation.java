@@ -5,7 +5,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -38,37 +38,18 @@ public class LinkAnimation extends DynamicAnimation {
 
 	@Override
 	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		TypeFlexibleHashMap<EntityState.StateFactor<?>> map = this.toAnimation.getStatesMap(entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
-
-		for (Map.Entry<EntityState.StateFactor<?>, Object> entry : map.entrySet()) {
-			Object val = this.toAnimation.getModifiedLinkState(entry.getKey(), entry.getValue(), entitypatch, time);
-			map.put(entry.getKey(), val);
-		}
-
-		return map;
+		return this.toAnimation.getStatesMap(entitypatch, this, 0.0F);
 	}
 
 	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		EntityState state = this.toAnimation.getState(entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
-		TypeFlexibleHashMap<EntityState.StateFactor<?>> map = state.getStateMap();
-
-		for (Map.Entry<EntityState.StateFactor<?>, Object> entry : map.entrySet()) {
-			Object val = this.toAnimation.getModifiedLinkState(entry.getKey(), entry.getValue(), entitypatch, time);
-			map.put(entry.getKey(), val);
-		}
-
-		return state;
+		return this.toAnimation.getState(entitypatch, this, 0.0F);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
-		T state = this.toAnimation.getState(stateFactor, entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
-
-		return (T)this.toAnimation.getModifiedLinkState(stateFactor, state, entitypatch, time);
+		return this.toAnimation.getState(stateFactor, entitypatch, this, 0.0F);
 	}
-
 
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
@@ -92,20 +73,21 @@ public class LinkAnimation extends DynamicAnimation {
 
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		JointTransform jt = pose.getOrDefaultTransform("Root");
-		Vec3f jointPosition = jt.translation();
-		OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
-		OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
-		Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
-		worldPosition.x = 0.0F;
-		worldPosition.y = (this.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
-		worldPosition.z = 0.0F;
-		OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
-		jointPosition.x = worldPosition.x;
-		jointPosition.y = worldPosition.y;
-		jointPosition.z = worldPosition.z;
-
-		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
+		// Bad implementation: Add root joint as coord in loading animation
+		if (this.toAnimation instanceof ActionAnimation) {
+			JointTransform jt = pose.getOrDefaultTransform("Root");
+			Vec3f jointPosition = jt.translation();
+			OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
+			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
+			worldPosition.x = 0.0F;
+			worldPosition.y = (this.toAnimation.getProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
+			worldPosition.z = 0.0F;
+			OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
+			jointPosition.x = worldPosition.x;
+			jointPosition.y = worldPosition.y;
+			jointPosition.z = worldPosition.z;
+		}
 	}
 
 	@Override

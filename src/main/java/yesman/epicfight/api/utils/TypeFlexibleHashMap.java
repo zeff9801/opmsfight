@@ -1,9 +1,10 @@
-package yesman.epicfight.api.utils.datastruct;
-
-import com.google.common.collect.ImmutableMap;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap.TypeKey;
+package yesman.epicfight.api.utils;
 
 import java.util.HashMap;
+
+import com.google.common.collect.ImmutableMap;
+
+import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 
 @SuppressWarnings("serial")
 public class TypeFlexibleHashMap<A extends TypeKey<?>> extends HashMap<A, Object> {

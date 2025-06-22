@@ -1,8 +1,15 @@
 package yesman.epicfight.client.renderer;
 
+import java.util.Map;
+import java.util.OptionalDouble;
+import java.util.function.Function;
+
 import com.google.common.collect.Maps;
+import org.lwjgl.opengl.GL11;
+
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.mojang.blaze3d.vertex.VertexBuilderUtils;
+
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderState;
@@ -12,12 +19,7 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.lwjgl.opengl.GL11;
 import yesman.epicfight.main.EpicFightMod;
-
-import java.util.Map;
-import java.util.OptionalDouble;
-import java.util.function.Function;
 
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
@@ -138,8 +140,7 @@ public class EpicFightRenderTypes extends RenderType {
 				.setCullState(NO_CULL)
 				.createCompositeState(false)
 	);
-
-
+	
 	public static RenderType animatedModel(ResourceLocation locationIn) {
 		return ANIMATED_MODEL.apply(locationIn);
 	}

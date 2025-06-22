@@ -81,7 +81,8 @@ public class EpicFightMod {
 	public EpicFightMod() {
 		instance = this;
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
-		final IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+
+		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
 		bus.addListener(this::constructMod);
 		bus.addListener(this::doClientStuff);
@@ -93,9 +94,8 @@ public class EpicFightMod {
 		bus.addListener(EpicFightAttributes::modifyExistingMobs);
 		//bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
 
-
 		MinecraftForge.EVENT_BUS.addListener(this::command);
-		MinecraftForge.EVENT_BUS.addListener(this::addReloadListnerEvent);
+		MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
 
 
 		LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
@@ -152,11 +152,6 @@ public class EpicFightMod {
 		SkillSlot.ENUM_MANAGER.loadEnum();
 		Style.ENUM_MANAGER.loadEnum();
 		WeaponCategory.ENUM_MANAGER.loadEnum();
-		/*		event.enqueueWork(LivingMotion.ENUM_MANAGER::loadEnum);
-		event.enqueueWork(SkillCategory.ENUM_MANAGER::loadEnum);
-		event.enqueueWork(SkillSlot.ENUM_MANAGER::loadEnum);
-		event.enqueueWork(Style.ENUM_MANAGER::loadEnum);
-		event.enqueueWork(WeaponCategory.ENUM_MANAGER::loadEnum);*/
 	}
 
 	private void doClientStuff(final FMLClientSetupEvent event) {
@@ -206,7 +201,7 @@ public class EpicFightMod {
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}
 
-	private void addReloadListnerEvent(final AddReloadListenerEvent event) {
+	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
 		if (!isPhysicalClient()) {
 			event.addListener(AnimationManager.getInstance());
 		}

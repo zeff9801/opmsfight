@@ -1,8 +1,10 @@
 package yesman.epicfight.client.events;
 
 import com.mojang.datafixers.util.Pair;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.UseAction;
@@ -125,10 +127,7 @@ public class ClientEvents {
 			ClientEngine.getInstance().controllEngine.setPlayerPatch(playerpatch);
 		}
 	}
-
-	/**
-	 * Bad code: should be fixed after Forge provides any parameters that can figure out if respawning caused by dimension changes
-	 */
+	
 	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
 		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
@@ -154,7 +153,7 @@ public class ClientEvents {
 			WeaponTypeReloadListener.clear();
 
 			ClientEngine.getInstance().renderEngine.zoomOut(0);
-			ClientEngine.getInstance().renderEngine.bootstrap();
+			ClientEngine.getInstance().renderEngine.registerRenderer();
 		}
 	}
 

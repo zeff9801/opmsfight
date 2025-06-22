@@ -35,8 +35,6 @@ public class AirAttack extends Skill {
 
 		if (attackMotion != null) {
 			super.executeOnServer(executer, args);
-			//executer.getSkill(this).activate();
-			executer.modifyLivingMotionByCurrentItem(false);
 			executer.playAnimationSynchronized(attackMotion, 0);
 		}
 	}

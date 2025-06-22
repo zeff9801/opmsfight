@@ -9,13 +9,11 @@ import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -74,12 +72,7 @@ public class SPChangeLivingMotion {
 		}
 
 		for (int i = 0; i < msg.count; i++) {
-			try {
-				animationList.add(AnimationManager.getInstance().byId(buf.readInt()));
-			} catch (NoSuchElementException e) {
-				e.printStackTrace();
-				animationList.add(Animations.DUMMY_ANIMATION);
-			}
+			animationList.add(AnimationManager.getInstance().byId(buf.readInt()));
 		}
 
 		msg.motionList = motionList;

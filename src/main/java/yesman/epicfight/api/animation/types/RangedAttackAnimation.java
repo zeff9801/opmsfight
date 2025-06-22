@@ -13,8 +13,8 @@ public class RangedAttackAnimation extends AttackAnimation {
 
 	@Override
 	public void hurtCollidingEntities(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
-		if (entitypatch.getTarget() != null && (entitypatch.getOriginal() instanceof IRangedAttackMob rangedAttackMob)) {
-			rangedAttackMob.performRangedAttack(entitypatch.getTarget(), elapsedTime);
+		if (state.attacking() && entitypatch.getTarget() != null && (entitypatch.getOriginal() instanceof IRangedAttackMob)) {
+			((IRangedAttackMob)entitypatch.getOriginal()).performRangedAttack(entitypatch.getTarget(), elapsedTime);
 		}
 	}
 }

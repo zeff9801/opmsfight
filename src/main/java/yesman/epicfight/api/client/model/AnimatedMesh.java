@@ -1,198 +1,65 @@
 package yesman.epicfight.api.client.model;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.Map;
+
 import com.google.gson.JsonObject;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.client.MainWindow;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.shader.ShaderInstance;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL30;
-import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
+import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
-import yesman.epicfight.api.utils.GLConstants;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec4f;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
-import yesman.epicfight.client.renderer.EpicFightVertexFormatElement;
-import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
 import yesman.epicfight.main.EpicFightMod;
 
-import javax.annotation.Nullable;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
-import java.util.function.Supplier;
-
 @OnlyIn(Dist.CLIENT)
-public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder> {
-    protected final float[] weights;
-    private final int maxJointCount;
-    private int arrayObjectId;
+public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
+    public static final ModelPart<AnimatedVertexIndicator> EMPTY = new ModelPart<>(null, null);
+    final float[] weights;
+    final int maxJointId;
 
-    private VertexBuffer<Float> positionsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
-    private VertexBuffer<Float> uvsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 2, false, ByteBuffer::putFloat);
-    private VertexBuffer<Byte> normalsBuffer = new VertexBuffer<> (GLConstants.GL_BYTE, 3, true, ByteBuffer::put);
-    private VertexBuffer<Short> jointsBuffer = new VertexBuffer<> (GLConstants.GL_SHORT, 3, false, ByteBuffer::putShort);
-    private VertexBuffer<Float> weightsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
+    public AnimatedMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
+        super(arrayMap, parent, properties, parts);
 
-    public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<MeshPartDefinition, List<AnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
-        super(arrayMap, partBuilders, parent, properties);
-
-        this.weights = parent == null ? arrayMap.get("weights") : parent.weights;
+        this.weights = (parent == null) ? arrayMap.get("weights") : parent.weights;
         int maxJointId = 0;
 
-        for (Map.Entry<String, AnimatedModelPart> entry : this.parts.entrySet()) {
-            for (AnimatedVertexBuilder vi : entry.getValue().getVertices()) {
-                if (maxJointId < vi.joint.getX()) {
-                    maxJointId = vi.joint.getX();
-                }
-
-                if (maxJointId < vi.joint.getY()) {
-                    maxJointId = vi.joint.getY();
-                }
-
-                if (maxJointId < vi.joint.getZ()) {
-                    maxJointId = vi.joint.getZ();
+        for (Map.Entry<String, ModelPart<AnimatedVertexIndicator>> entry : parts.entrySet()) {
+            for (AnimatedVertexIndicator vi : entry.getValue().getVertices()) {
+                for (int ji : vi.joint) {
+                    if (ji > maxJointId) {
+                        maxJointId = ji;
+                    }
                 }
             }
         }
 
-        this.maxJointCount = maxJointId;
-        this.arrayObjectId = GL30.glGenVertexArrays();
-
-        List<Float> positionList = Lists.newArrayList();
-        List<Float> uvList = Lists.newArrayList();
-        List<Byte> normalList = Lists.newArrayList();
-        List<Short> jointList = Lists.newArrayList();
-        List<Float> weightList = Lists.newArrayList();
-        Map<AnimatedVertexBuilder, Integer> vertexBuilderMap = Maps.newHashMap();
-
-        int currentBoundVao = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BINDING);
-        int currentBoundVbo = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BUFFER_BINDING);
-
-        GL30.glBindVertexArray(this.arrayObjectId);
-
-        for (AnimatedModelPart part : this.parts.values()) {
-            part.createVbo(vertexBuilderMap, this.positions, this.uvs, this.normals, this.weights, positionList, uvList, normalList, jointList, weightList);
-        }
-
-        this.positionsBuffer.bindVertexData(positionList);
-        this.uvsBuffer.bindVertexData(uvList);
-        this.normalsBuffer.bindVertexData(normalList);
-        this.jointsBuffer.bindVertexData(jointList);
-        this.weightsBuffer.bindVertexData(weightList);
-
-        GL30.glBindVertexArray(currentBoundVao);
-        GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, currentBoundVbo);
-    }
-
-    public void pointPositionsBuffer(int attrIndex) {
-        this.positionsBuffer.vertexAttribPointer(attrIndex);
-    }
-
-    public void uvPositionsBuffer(int attrIndex) {
-        this.uvsBuffer.vertexAttribPointer(attrIndex);
-    }
-
-    public void normalPositionsBuffer(int attrIndex) {
-        this.normalsBuffer.vertexAttribPointer(attrIndex);
-    }
-
-    public void jointPositionsBuffer(int attrIndex) {
-        this.jointsBuffer.vertexAttribPointer(attrIndex);
-    }
-
-    public void weightPositionsBuffer(int attrIndex) {
-        this.weightsBuffer.vertexAttribPointer(attrIndex);
-    }
-
-    public void destroy() {
-        this.positionsBuffer.destroy();
-        this.uvsBuffer.destroy();
-        this.normalsBuffer.destroy();
-        this.jointsBuffer.destroy();
-        this.weightsBuffer.destroy();
-        this.parts.values().forEach(part -> RenderSystem.glDeleteBuffers(part.indexBufferId));
-
-        GL30.glDeleteVertexArrays(this.arrayObjectId);
-        this.arrayObjectId = -1;
+        this.maxJointId = maxJointId;
     }
 
     @Override
-    protected Map<String, AnimatedModelPart> createModelPart(Map<MeshPartDefinition, List<AnimatedVertexBuilder>> partBuilders) {
-        Map<String, AnimatedModelPart> parts = Maps.newHashMap();
-
-        partBuilders.forEach((partDefinition, vertexBuilder) -> {
-            parts.put(partDefinition.partName(), new AnimatedModelPart(vertexBuilder, partDefinition.getModelPartAnimationProvider()));
-        });
-
-        return parts;
-    }
-
-    @Override
-    protected AnimatedModelPart getOrLogException(Map<String, AnimatedModelPart> parts, String name) {
+    protected ModelPart<AnimatedVertexIndicator> getOrLogException(Map<String, ModelPart<AnimatedVertexIndicator>> parts, String name) {
         if (!parts.containsKey(name)) {
             EpicFightMod.LOGGER.debug("Cannot find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
-            return null;
+            return EMPTY;
         }
 
         return parts.get(name);
     }
 
-    /**
-     * Draws the model without applying animation
-     */
-    @Override
-    public void draw(MatrixStack poseStack, IVertexBuilder vertexConsumer, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay) {
-        for (AnimatedModelPart part : this.parts.values()) {
-            part.draw(poseStack, vertexConsumer, drawingFunction, packedLight, r, g, b, a, overlay);
-        }
-    }
-
-    /**
-     * Draws the model depending on animation shader option
-     * @param armature give this parameter as null if @param poses already bound origin translation
-     * @param poses
-     */
-    public void draw(MatrixStack poseStack, IRenderTypeBuffer multiBufferSource, RenderType renderType, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-        if (EpicFightMod.CLIENT_CONFIGS.useAnimationShader.getValue()) {
-            renderType.setupRenderState();
-            AnimationShaderInstance animationShader = EpicFightRenderTypes.getAnimationShader(renderType);
-            this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, armature, poses);
-            renderType.clearRenderState();
-        } else {
-            IVertexBuilder vertexConsumer = multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(renderType));
-            this.drawToBuffer(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_TEXTURED, packedLight, r, g, b, a, overlay, armature, poses);
-        }
-    }
-
-    /**
-     * Draws the model to vanilla buffer
-     */
-    public void drawToBuffer(MatrixStack poseStack, IVertexBuilder builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
+    public void draw(MatrixStack poseStack, IVertexBuilder builder, DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
         Matrix4f matrix4f = poseStack.last().pose();
         Matrix3f matrix3f = poseStack.last().normal();
         OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
@@ -205,9 +72,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
             }
         }
 
-        for (ModelPart<AnimatedVertexBuilder> part : this.parts.values()) {
-            if (!part.isHidden()) {
-                for (AnimatedVertexBuilder vi : part.getVertices()) {
+        for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
+            if (!part.hidden) {
+                for (AnimatedVertexIndicator vi : part.getVertices()) {
                     int pos = vi.position * 3;
                     int norm = vi.normal * 3;
                     int uv = vi.uv * 2;
@@ -217,9 +84,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
                     Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
                     Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 
-                    for (int i = 0; i < vi.count; i++) {
-                        int jointIndex = vi.getJointId(i);
-                        int weightIndex = vi.getWeightIndex(i);
+                    for (int i = 0; i < vi.joint.size(); i++) {
+                        int jointIndex = vi.joint.getInt(i);
+                        int weightIndex = vi.weight.getInt(i);
                         float weight = this.weights[weightIndex];
 
                         if (armature != null) {
@@ -236,278 +103,20 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
                     posVec.transform(matrix4f);
                     normVec.transform(matrix3f);
 
-                    drawingFunction.draw(builder, posVec.x(), posVec.y(), posVec.z(), normVec.x(), normVec.y(), normVec.z(), packedLight, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
+                    drawingFunction.draw(builder, posVec, normVec, packedLight, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
                 }
             }
         }
     }
 
-    /**
-     * Draw the model with shader optimization by shader and vertex format
-     */
-    public void drawWithShader(MatrixStack poseStack, ShaderInstance shader, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-        AnimationShaderInstance animationShader = EpicFightRenderTypes.getAnimationShader(shader);
-        this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+    public void drawModelWithPose(MatrixStack poseStack, IVertexBuilder builder, int packedLight, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
+        this.draw(poseStack, builder, DrawingFunction.ENTITY_TRANSLUCENT, packedLight, r, g, b, a, overlayCoord, armature, poses);
     }
 
-    public void drawWithShader(MatrixStack poseStack, AnimationShaderInstance animationShaderInstance, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-        if (this.arrayObjectId < 0) {
-            throw new IllegalStateException("Mesh destroyed");
-        }
-
-        if (animationShaderInstance == null) {
-            return;
-        }
-
-        /*for (int i = 0; i < 12; ++i) {
-            int j = RenderSystem.getShaderTexture(i);
-            animationShaderInstance._setSampler("Sampler" + i, j);
-        }*/
-
-        if (animationShaderInstance.getModelViewMatrixShaderUniform() != null) {
-            animationShaderInstance.getModelViewMatrixShaderUniform().set(poseStack.last().pose());
-        }
-
-        /*if (animationShaderInstance.getProjectionMatrixShaderUniform() != null) {
-            animationShaderInstance.getProjectionMatrixShaderUniform().set(RenderSystem.getProjectionMatrix());
-        }*/
-
-        if (animationShaderInstance.getNormalMatrixShaderUniform() != null) {
-            animationShaderInstance.getNormalMatrixShaderUniform().set(poseStack.last().normal().adjugateAndDet());
-        }
-
-        /*if (animationShaderInstance.getInverseViewRotationMatrixShaderUniform() != null) {
-            animationShaderInstance.getInverseViewRotationMatrixShaderUniform().set(RenderSystem.getInverseViewRotationMatrix());
-        }
-
-        if (animationShaderInstance.getColorModulatorShaderUniform() != null) {
-            animationShaderInstance.getColorModulatorShaderUniform().set(RenderSystem.getShaderColor());
-        }
-
-        if (animationShaderInstance.getGlintAlphaShaderUniform() != null) {
-            animationShaderInstance.getGlintAlphaShaderUniform().set(RenderSystem.getShaderGlintAlpha());
-        }
-
-        if (animationShaderInstance.getFogStartShaderUniform() != null) {
-            animationShaderInstance.getFogStartShaderUniform().set(RenderSystem.getShaderFogStart());
-        }
-
-        if (animationShaderInstance.getFogEndShaderUniform() != null) {
-            animationShaderInstance.getFogEndShaderUniform().set(RenderSystem.getShaderFogEnd());
-        }
-
-        if (animationShaderInstance.getFogColorShaderUniform() != null) {
-            animationShaderInstance.getFogColorShaderUniform().set(RenderSystem.getShaderFogColor());
-        }
-
-        if (animationShaderInstance.getFogShapeShaderUniform() != null) {
-            animationShaderInstance.getFogShapeShaderUniform().set(RenderSystem.getShaderFogShape().getIndex());
-        }
-
-        if (animationShaderInstance.getTextureMatrixShaderUniform() != null) {
-            animationShaderInstance.getTextureMatrixShaderUniform().set(RenderSystem.getTextureMatrix());
-        }
-
-        if (animationShaderInstance.getGameTimeShaderUniform() != null) {
-            animationShaderInstance.getGameTimeShaderUniform().set(RenderSystem.getShaderGameTime());
-        }*/
-
-        if (animationShaderInstance.getScreenSizeShaderUniform() != null) {
-            MainWindow window = Minecraft.getInstance().getWindow();
-            animationShaderInstance.getScreenSizeShaderUniform().set((float) window.getWidth(), (float) window.getHeight());
-        }
-
-        if (animationShaderInstance.getColorShaderUniform() != null) {
-            animationShaderInstance.getColorShaderUniform().set(r, g, b, a);
-        }
-
-        if (animationShaderInstance.getOverlayShaderUniform() != null) {
-            animationShaderInstance.getOverlayShaderUniform().set(overlay & '\uffff', overlay >> 16 & '\uffff');
-        }
-
-        if (animationShaderInstance.getLightShaderUniform() != null) {
-            animationShaderInstance.getLightShaderUniform().set(packedLight & '\uffff', packedLight >> 16 & '\uffff');
-        }
-
-        for (int i = 0; i < poses.length; i++) {
-            if (animationShaderInstance.getPoses(i) != null) {
-                animationShaderInstance.getPoses(i).set(OpenMatrix4f.exportToMojangMatrix(armature == null ? poses[i] : OpenMatrix4f.mul(poses[i], armature.searchJointById(i).getToOrigin(), null)));
-            }
-        }
-
-        //animationShaderInstance.setupShaderLights();
-
-        int currentBoundVao = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BINDING);
-        int currentBoundVbo = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BUFFER_BINDING);
-
-        GL30.glBindVertexArray(this.arrayObjectId);
-        EpicFightVertexFormatElement.bindDrawing(this);
-
-        //animationShaderInstance._getVertexFormat().setupBufferState();
-        animationShaderInstance._apply();
-
-        for (AnimatedModelPart part : this.parts.values()) {
-            part.drawWithShader();
-        }
-
-        animationShaderInstance._clear();
-        animationShaderInstance._getVertexFormat().clearBufferState();
-
-        EpicFightVertexFormatElement.unbindDrawing();
-
-        GL30.glBindVertexArray(currentBoundVao);
-        GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, currentBoundVbo);
+    public void drawWithPoseNoTexture(MatrixStack poseStack, IVertexBuilder builder, int packedLight, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+        this.draw(poseStack, builder, DrawingFunction.ENTITY_PARTICLE, packedLight, r, g, b, a, overlayCoord, null, poses);
     }
 
-    public int getMaxJointCount() {
-        return this.maxJointCount;
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public class AnimatedModelPart extends ModelPart<AnimatedVertexBuilder> {
-        private int indexBufferId;
-
-        public AnimatedModelPart(List<AnimatedVertexBuilder> animatedMeshPartList, @Nullable Supplier<OpenMatrix4f> vanillaPartTracer) {
-            super(animatedMeshPartList, vanillaPartTracer);
-        }
-
-        private void createVbo(Map<AnimatedVertexBuilder, Integer> vertexBuilderMap, float positions[], float uvs[], float normals[], float weights[], List<Float> position, List<Float> uv, List<Byte> normal, List<Short> joint, List<Float> weight) {
-            ByteBuffer indicesBuffer = ByteBuffer.allocateDirect(this.getVertices().size() * 4).order(ByteOrder.nativeOrder());
-
-            for (AnimatedVertexBuilder vb : this.getVertices()) {
-                if (vertexBuilderMap.containsKey(vb)) {
-                    indicesBuffer.putInt(vertexBuilderMap.get(vb));
-                } else {
-                    int next = vertexBuilderMap.size();
-                    indicesBuffer.putInt(next);
-                    vertexBuilderMap.put(vb, next);
-                    position.add(positions[vb.position * 3]);
-                    position.add(positions[vb.position * 3 + 1]);
-                    position.add(positions[vb.position * 3 + 2]);
-                    uv.add(uvs[vb.uv * 2]);
-                    uv.add(uvs[vb.uv * 2 + 1]);
-                    normal.add(normalIntValue(normals[vb.normal * 3]));
-                    normal.add(normalIntValue(normals[vb.normal * 3 + 1]));
-                    normal.add(normalIntValue(normals[vb.normal * 3 + 2]));
-                    joint.add((short)vb.joint.getX());
-                    joint.add((short)vb.joint.getY());
-                    joint.add((short)vb.joint.getZ());
-                    weight.add(vb.weight.getX() > -1 ? weights[vb.weight.getY()] : 0.0F);
-                    weight.add(vb.weight.getY() > -1 ? weights[vb.weight.getY()] : 0.0F);
-                    weight.add(vb.weight.getZ() > -1 ? weights[vb.weight.getZ()] : 0.0F);
-
-                }
-            }
-
-            indicesBuffer.flip();
-
-            this.indexBufferId = GlStateManager._glGenBuffers();
-            GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
-            GlStateManager._glBufferData(GLConstants.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GLConstants.GL_STATIC_DRAW);
-            GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
-
-        @Override
-        public void draw(MatrixStack poseStack, IVertexBuilder builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay) {
-            if (this.isHidden()) {
-                return;
-            }
-
-            Matrix4f matrix4f = poseStack.last().pose();
-            Matrix3f matrix3f = poseStack.last().normal();
-
-            for (AnimatedVertexBuilder vi : this.getVertices()) {
-                int pos = vi.position * 3;
-                int norm = vi.normal * 3;
-                int uv = vi.uv * 2;
-                Vector4f posVec = new Vector4f(positions[pos], positions[pos + 1], positions[pos + 2], 1.0F);
-                Vector3f normVec = new Vector3f(normals[norm], normals[norm + 1], normals[norm + 2]);
-                posVec.transform(matrix4f);
-                normVec.transform(matrix3f);
-
-                drawingFunction.draw(builder, posVec.x(), posVec.y(), posVec.z(), normVec.x(), normVec.y(), normVec.z(), packedLight, r, g, b, a, uvs[uv], uvs[uv + 1], overlay);
-            }
-        }
-
-        public void drawWithShader() {
-            if (this.isHidden()) {
-                return;
-            }
-
-            GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
-            RenderSystem.drawArrays(GL11.GL_TRIANGLES, this.getVertices().size(), GL11.GL_INT);
-            GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, 0);
-        }
-
-        static byte normalIntValue(float f) {
-            return (byte)((int)(MathHelper.clamp(f, -1.0F, 1.0F) * 127.0F) & 255);
-        }
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    private class VertexBuffer<T extends Number> {
-        private int vertexBufferIds;
-        private final int glType;
-        private final int size;
-        private final boolean normalize;
-        private final BiConsumer<ByteBuffer, T> bufferUploader;
-
-        public VertexBuffer(int glType, int size, boolean normalize, BiConsumer<ByteBuffer, T> bufferUploader) {
-            this.vertexBufferIds = GlStateManager._glGenBuffers();
-            this.glType = glType;
-            this.size = size;
-            this.normalize = normalize;
-            this.bufferUploader = bufferUploader;
-        }
-
-        public void bindVertexData(List<T> data) {
-            if (this.vertexBufferIds < 0) {
-                throw new RuntimeException("vertex buffer is already destroyed");
-            }
-
-            ByteBuffer buf = ByteBuffer.allocateDirect(data.size() * 4).order(ByteOrder.nativeOrder());
-
-            for (T f : data) {
-                this.bufferUploader.accept(buf, f);
-            }
-
-            buf.flip();
-
-            GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, this.vertexBufferIds);
-            GlStateManager._glBufferData(GLConstants.GL_ARRAY_BUFFER, buf, GLConstants.GL_STATIC_DRAW);
-            GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, 0);
-        }
-
-        public void vertexAttribPointer(int attrIndex) {
-            if (this.vertexBufferIds < 0) {
-                throw new RuntimeException("vertex buffer is already destroyed");
-            }
-
-            GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, this.vertexBufferIds);
-
-            switch (this.glType) {
-                case GLConstants.GL_DOUBLE, GLConstants.GL_FLOAT -> {
-                    GlStateManager._vertexAttribPointer(attrIndex, this.size, this.glType, this.normalize, 0, 0);
-                }
-                case GLConstants.GL_BYTE, GLConstants.GL_SHORT, GLConstants.GL_INT -> {
-                    if (this.normalize) {
-                        GlStateManager._vertexAttribPointer(attrIndex, this.size, this.glType, true, 0, 0);
-                    } else {
-                     //   GlStateManager._vertexAttribIPointer(attrIndex, this.size, this.glType, 0, 0);
-                    }
-                }
-            }
-        }
-
-        public void destroy() {
-            RenderSystem.glDeleteBuffers(this.vertexBufferIds);
-            this.vertexBufferIds = -1;
-        }
-    }
-
-    /**
-     * Export this model as Json format
-     */
     public JsonObject toJsonObject() {
         JsonObject root = new JsonObject();
         JsonObject vertices = new JsonObject();
@@ -533,46 +142,29 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
             normals[k+2] = normVector.z;
         }
 
-        int[] indices = new int[this.vertexCount * 3];
+        int[] indices = new int[this.totalVertices * 3];
         int[] vcounts = new int[positions.length / 3];
         IntList vIndexList = new IntArrayList();
-        Int2ObjectMap<AnimatedVertexBuilder> positionMap = new Int2ObjectOpenHashMap<>();
+        Int2ObjectMap<AnimatedVertexIndicator> positionMap = new Int2ObjectOpenHashMap<>();
         int[] vIndices;
         int i = 0;
 
-        for (AnimatedModelPart part : this.parts.values()) {
-            for (AnimatedVertexBuilder vertexIndicator : part.getVertices()) {
+        for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
+            for (AnimatedVertexIndicator vertexIndicator : part.getVertices()) {
                 indices[i * 3] = vertexIndicator.position;
                 indices[i * 3 + 1] = vertexIndicator.uv;
                 indices[i * 3 + 2] = vertexIndicator.normal;
-                vcounts[vertexIndicator.position] = vertexIndicator.count;
+                vcounts[vertexIndicator.position] = vertexIndicator.joint.size();
                 positionMap.put(vertexIndicator.position, vertexIndicator);
                 i++;
             }
         }
 
         for (i = 0; i < vcounts.length; i++) {
-            AnimatedVertexBuilder vi = positionMap.get(i);
-
-            switch (vcounts[i]) {
-                case 1 -> {
-                    vIndexList.add(vi.joint.getX());
-                    vIndexList.add(vi.weight.getX());
-                }
-                case 2 -> {
-                    vIndexList.add(vi.joint.getX());
-                    vIndexList.add(vi.weight.getX());
-                    vIndexList.add(vi.joint.getY());
-                    vIndexList.add(vi.weight.getY());
-                }
-                case 3 -> {
-                    vIndexList.add(vi.joint.getX());
-                    vIndexList.add(vi.weight.getX());
-                    vIndexList.add(vi.joint.getY());
-                    vIndexList.add(vi.weight.getY());
-                    vIndexList.add(vi.joint.getZ());
-                    vIndexList.add(vi.weight.getZ());
-                }
+            for (int j = 0; j < vcounts[i]; j++) {
+                AnimatedVertexIndicator vi = positionMap.get(i);
+                vIndexList.add(vi.joint.getInt(j));
+                vIndexList.add(vi.weight.getInt(j));
             }
         }
 
@@ -584,10 +176,10 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
         if (!this.parts.isEmpty()) {
             JsonObject parts = new JsonObject();
 
-            for (Map.Entry<String, AnimatedModelPart> partEntry : this.parts.entrySet()) {
+            for (Map.Entry<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> partEntry : this.parts.entrySet()) {
                 IntList indicesArray = new IntArrayList();
 
-                for (AnimatedVertexBuilder vertexIndicator : partEntry.getValue().getVertices()) {
+                for (VertexIndicator.AnimatedVertexIndicator vertexIndicator : partEntry.getValue().getVertices()) {
                     indicesArray.add(vertexIndicator.position);
                     indicesArray.add(vertexIndicator.uv);
                     indicesArray.add(vertexIndicator.normal);
@@ -614,5 +206,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
         }
 
         return root;
+    }
+
+    public int getMaxJointId() {
+        return this.maxJointId;
     }
 }

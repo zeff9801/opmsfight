@@ -1,8 +1,13 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -21,9 +26,6 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>, AM extends AnimatedMesh> {
@@ -64,13 +66,14 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		}
 	}
 
-	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks, boolean toOrigin) {
+	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
 		this.setJointTransforms(entitypatch, armature, pose, partialTicks);
-		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose, toOrigin);
+		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose);
 
 		return poseMatrices;
 	}
+
 	public abstract AM getMesh(T entitypatch);
 
 	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {}

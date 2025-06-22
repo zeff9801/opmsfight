@@ -51,7 +51,7 @@ public class TrailParticle extends SpriteTexturedParticle {
 	protected boolean animationEnd;
 	protected float startEdgeCorrection = 0.0F;
 
-	protected TrailParticle(ClientWorld level, LivingEntityPatch<?> entitypatch, Joint joint, StaticAnimation animation, TrailInfo trailInfo, IAnimatedSprite spriteSet) {
+	protected TrailParticle(ClientWorld level, LivingEntityPatch<?> entitypatch, Joint joint, StaticAnimation animation, TrailInfo trailInfo, IAnimatedSprite IAnimatedSprite) {
 		super(level, 0, 0, 0);
 
 		this.joint = joint;
@@ -67,7 +67,7 @@ public class TrailParticle extends SpriteTexturedParticle {
 
 		float size = (float)Math.max(this.trailInfo.start.length(), this.trailInfo.end.length()) * 2.0F;
 		this.setSize(size, size);
-		this.setSpriteFromAge(spriteSet);
+		this.setSpriteFromAge(IAnimatedSprite);
 
 		Pose prevPose = this.entitypatch.getAnimator().getPose(0.0F);
 		Pose middlePose = this.entitypatch.getAnimator().getPose(0.5F);
@@ -77,14 +77,14 @@ public class TrailParticle extends SpriteTexturedParticle {
 		Vector3d posCur = this.entitypatch.getOriginal().getPosition(1.0F);
 
 		OpenMatrix4f prvmodelTf = OpenMatrix4f.createTranslation((float)posOld.x, (float)posOld.y, (float)posOld.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(0.0F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(0.0F)));
 		OpenMatrix4f middleModelTf = OpenMatrix4f.createTranslation((float)posMid.x, (float)posMid.y, (float)posMid.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(0.5F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(0.5F)));
 		OpenMatrix4f curModelTf = OpenMatrix4f.createTranslation((float)posCur.x, (float)posCur.y, (float)posCur.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(1.0F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(1.0F)));
 
 		OpenMatrix4f prevJointTf = this.entitypatch.getArmature().getBindedTransformFor(prevPose, this.joint).mulFront(prvmodelTf);
 		OpenMatrix4f middleJointTf = this.entitypatch.getArmature().getBindedTransformFor(middlePose, this.joint).mulFront(middleModelTf);
@@ -104,15 +104,6 @@ public class TrailParticle extends SpriteTexturedParticle {
 		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
 		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
 		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
-
-		if (this.trailInfo.texturePath != null) {
-			TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-			Texture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
-
-			RenderSystem.bindTexture(abstracttexture.getId());
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-		}
 	}
 
 	@Deprecated /** This constructor is only for {@link ModelPreviewer} **/
@@ -152,15 +143,6 @@ public class TrailParticle extends SpriteTexturedParticle {
 		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
 		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
 		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
-
-		if (this.trailInfo.texturePath != null) {
-			TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-			Texture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
-
-			RenderSystem.bindTexture(abstracttexture.getId());
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-		}
 	}
 
 	@Override
@@ -207,14 +189,14 @@ public class TrailParticle extends SpriteTexturedParticle {
 		Vector3d posCur = this.entitypatch.getOriginal().getPosition(1.0F);
 
 		OpenMatrix4f prvmodelTf = OpenMatrix4f.createTranslation((float)posOld.x, (float)posOld.y, (float)posOld.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(0.0F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(0.0F)));
 		OpenMatrix4f middleModelTf = OpenMatrix4f.createTranslation((float)posMid.x, (float)posMid.y, (float)posMid.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(0.5F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(0.5F)));
 		OpenMatrix4f curModelTf = OpenMatrix4f.createTranslation((float)posCur.x, (float)posCur.y, (float)posCur.z)
-				.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
-						.mulBack(this.entitypatch.getModelMatrix(1.0F)));
+										.mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
+										.mulBack(this.entitypatch.getModelMatrix(1.0F)));
 
 		OpenMatrix4f prevJointTf = this.entitypatch.getArmature().getBindedTransformFor(prevPose, this.joint).mulFront(prvmodelTf);
 		OpenMatrix4f middleJointTf = this.entitypatch.getArmature().getBindedTransformFor(middlePose, this.joint).mulFront(middleModelTf);
@@ -285,10 +267,18 @@ public class TrailParticle extends SpriteTexturedParticle {
 			return;
 		}
 
-		MatrixStack poseStack = new MatrixStack();
+		TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
+		Texture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
+
+        RenderSystem.bindTexture(abstracttexture != null ? abstracttexture.getId() : 0);
+        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+	    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		// RenderSystem.setShaderTexture(0, abstracttexture.getId());
+
+		MatrixStack MatrixStack = new MatrixStack();
 		int light = this.getLightColor(partialTick);
-		this.setupPoseStack(poseStack, camera, partialTick);
-		Matrix4f matrix4f = poseStack.last().pose();
+		this.setupMatrixStack(MatrixStack, camera, partialTick);
+		Matrix4f matrix4f = MatrixStack.last().pose();
 		int edges = this.visibleTrailEdges.size() - 1;
 		boolean startFade = this.visibleTrailEdges.get(0).lifetime == 1;
 		boolean endFade = this.visibleTrailEdges.get(edges).lifetime == this.trailInfo.trailLifetime;
@@ -337,21 +327,21 @@ public class TrailParticle extends SpriteTexturedParticle {
 
 	@Override
 	public boolean shouldCull() {
-		return false;
-	}
+        return false;
+    }
 
 	@Override
 	public IParticleRenderType getRenderType() {
-		return EpicFightParticleRenderTypes.TRAIL_PROVIDER.apply(this.trailInfo.texturePath);
+		return EpicFightParticleRenderTypes.TRAIL;
 	}
 
-	protected void setupPoseStack(MatrixStack poseStack, ActiveRenderInfo camera, float partialTicks) {
-		Vector3d vec3 = camera.getPosition();
-		float x = (float)-vec3.x();
-		float y = (float)-vec3.y();
-		float z = (float)-vec3.z();
+	protected void setupMatrixStack(MatrixStack MatrixStack, ActiveRenderInfo camera, float partialTicks) {
+		Vector3d Vector3d = camera.getPosition();
+		float x = (float)-Vector3d.x();
+		float y = (float)-Vector3d.y();
+		float z = (float)-Vector3d.z();
 
-		poseStack.translate(x, y, z);
+		MatrixStack.translate(x, y, z);
 	}
 
 	protected void makeTrailEdges(List<Vector3d> startPositions, List<Vector3d> endPositions, List<TrailEdge> dest) {
@@ -362,10 +352,10 @@ public class TrailParticle extends SpriteTexturedParticle {
 
 	@OnlyIn(Dist.CLIENT)
 	public static class Provider implements IParticleFactory<BasicParticleType> {
-		private final IAnimatedSprite spriteSet;
+		private final IAnimatedSprite IAnimatedSprite;
 
-		public Provider(IAnimatedSprite spriteSet) {
-			this.spriteSet = spriteSet;
+		public Provider(IAnimatedSprite IAnimatedSprite) {
+			this.IAnimatedSprite = IAnimatedSprite;
 		}
 
 		@Override
@@ -386,13 +376,13 @@ public class TrailParticle extends SpriteTexturedParticle {
 					ItemStack stack = entitypatch.getOriginal().getItemInHand(result.hand);
 					ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 
-					if (itemSkin != null && itemSkin.trailInfo() != null) {
-						result = itemSkin.trailInfo().overwrite(result);
+					if (itemSkin != null) {
+						result = itemSkin.trailInfo.overwrite(result);
 					}
 				}
 
 				if (entitypatch != null && animation != null && trailInfo.isPresent()) {
-					return new TrailParticle(level, entitypatch, entitypatch.getArmature().searchJointById(jointId), animation, result, this.spriteSet);
+					return new TrailParticle(level, entitypatch, entitypatch.getArmature().searchJointById(jointId), animation, result, this.IAnimatedSprite);
 				}
 			}
 

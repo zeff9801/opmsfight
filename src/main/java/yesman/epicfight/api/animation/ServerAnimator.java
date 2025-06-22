@@ -32,12 +32,10 @@ public class ServerAnimator extends Animator {
 		Pose lastPose = this.animationPlayer.getAnimation().getPoseByTime(this.entitypatch, 0.0F, 0.0F);
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		if (!nextAnimation.isMetaAnimation()) {
-			nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), lastPose, true, modifyTime, this.entitypatch, this.linkAnimation);
-			this.linkAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
-			this.entitypatch.updateEntityState();
-			this.nextPlaying = nextAnimation;
-		}
+		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), lastPose, true, modifyTime, this.entitypatch, this.linkAnimation);
+		this.linkAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
+		this.entitypatch.updateEntityState();
+		this.nextPlaying = nextAnimation;
 	}
 
 	@Override

@@ -7,20 +7,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.model.Model;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.transformer.HumanoidModelTransformer;
-import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.File;
@@ -35,13 +29,10 @@ import java.util.zip.ZipOutputStream;
 @OnlyIn(Dist.CLIENT)
 public class CustomModelBakery {
 	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
-	static final List<HumanoidModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
+	static final List<ArmorModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
 	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
-	static final Set<ModelPart> MODEL_PARTS = Sets.newHashSet();
 
-	//public static final HumanoidModelTransformer VANILLA_TRANSFORMER = new VanillaModelTransformer();
-
-	public static void registerNewTransformer(HumanoidModelTransformer transformer) {
+	public static void registerNewTransformer(ArmorModelTransformer transformer) {
 		MODEL_TRANSFORMERS.add(transformer);
 	}
 
@@ -71,19 +62,13 @@ public class CustomModelBakery {
 		out.close();
 	}
 
-	public static AnimatedMesh bakeArmor(LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlotType slot, BipedModel<?> originalModel, Model forgeModel, BipedModel<?> entityModel, HumanoidMesh entityMesh) {
+	public static AnimatedMesh bake(BipedModel<?> armorModel, ArmorItem armorItem, EquipmentSlotType slot, boolean debuggingMode) {
 		AnimatedMesh animatedArmorModel = null;
 
 		if (!EXCEPTIONAL_MODELS.contains(armorItem)) {
-			if (forgeModel == originalModel || !(forgeModel instanceof BipedModel humanoidModel)) {
-				return entityMesh.getHumanoidArmorModel(slot);
-			}
-
-			ResourceLocation modelName = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-
-			for (HumanoidModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
+			for (ArmorModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
 				try {
-					animatedArmorModel = modelTransformer.transformArmorModel(modelName, humanoidModel);
+					animatedArmorModel = modelTransformer.transformModel(armorModel, armorItem, slot, debuggingMode);
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't transform the model of " + ForgeRegistries.ITEMS.getKey(armorItem) + " because of :");
 					e.printStackTrace();
@@ -96,7 +81,8 @@ public class CustomModelBakery {
 			}
 
 			if (animatedArmorModel == null) {
-				//animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(modelName, humanoidModel);
+				//TODO i cba to fix so i simply do not render
+				//animatedArmorModel = VANILLA_TRANSFORMER.transformModel(armorModel, armorItem, slot, debuggingMode);
 			}
 		}
 
@@ -104,5 +90,4 @@ public class CustomModelBakery {
 
 		return animatedArmorModel;
 	}
-
 }

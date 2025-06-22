@@ -17,7 +17,10 @@ public class DashAttackAnimation extends AttackAnimation {
 	}
 
 	public DashAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature, boolean directional) {
-		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, colliderJoint, collider));
+		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
+
+		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
+		this.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.333F));
 
 		if (directional) {
 			this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);

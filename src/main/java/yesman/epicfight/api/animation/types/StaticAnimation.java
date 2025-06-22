@@ -1,7 +1,7 @@
+
 package yesman.epicfight.api.animation.types;
 
 import com.google.common.collect.Maps;
-import io.netty.util.internal.StringUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
@@ -9,31 +9,22 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationEvent;
-import yesman.epicfight.api.animation.property.AnimationEvent.TimePeriodEvent;
-import yesman.epicfight.api.animation.property.AnimationEvent.TimeStampedEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
-import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-import yesman.epicfight.world.entity.eventlistener.AnimationBeginEvent;
-import yesman.epicfight.world.entity.eventlistener.AnimationEndEvent;
-import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 import java.util.*;
 import java.util.function.Function;
@@ -50,7 +41,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	protected final ResourceLocation registryName;
 	protected final StateSpectrum stateSpectrum = new StateSpectrum();
 	protected ResourceLocation resourceLocation;
-	private final String filehash;
 
 	public StaticAnimation() {
 		super(0.0F, true);
@@ -58,7 +48,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = null;
 		this.armature = null;
 		this.animationId = -1;
-		this.filehash = StringUtil.EMPTY_STRING;
 	}
 
 	public StaticAnimation(boolean repeatPlay, String path, Armature armature) {
@@ -76,17 +65,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
 		this.animationId = AnimationManager.getInstance().registerAnimation(this);
-
-		String fileHash;
-
-		try {
-			JsonModelLoader jsonfile = new JsonModelLoader(AnimationManager.getAnimationResourceManager(), this.resourceLocation);
-			fileHash = jsonfile.getFileHash();
-		} catch (NoSuchElementException e) {
-			fileHash = StringUtil.EMPTY_STRING;
-		}
-
-		this.filehash = fileHash;
 	}
 
 	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean noRegister) {
@@ -102,20 +80,8 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 
 		if (noRegister) {
 			this.animationId = -1;
-			this.filehash = StringUtil.EMPTY_STRING;
 		} else {
 			this.animationId = AnimationManager.getInstance().registerAnimation(this);
-
-			String fileHash;
-
-			try {
-				JsonModelLoader jsonfile = new JsonModelLoader(AnimationManager.getAnimationResourceManager(), this.resourceLocation);
-				fileHash = jsonfile.getFileHash();
-			} catch (NoSuchElementException e) {
-				fileHash = StringUtil.EMPTY_STRING;
-			}
-
-			this.filehash = fileHash;
 		}
 	}
 
@@ -127,7 +93,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = new ResourceLocation(registryName);
 		this.armature = armature;
 		this.animationId = -1;
-		this.filehash = StringUtil.EMPTY_STRING;
 	}
 
 	public static void loadClip(IResourceManager resourceManager, StaticAnimation animation) throws Exception {
@@ -162,7 +127,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		dest.resetNextStartTime();
 
 		float playTime = this.getPlaySpeed(entitypatch, dest);
-		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		AnimationProperty.PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 
 		if (playSpeedModifier != null) {
 			playTime = playSpeedModifier.modify(dest, entitypatch, playTime, 0.0F, playTime);
@@ -183,7 +148,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 
 		Map<String, JointTransform> data1 = startPose.getJointTransformData();
 		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStartTime, 0.0F).getJointTransformData();
-		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
+		Set<String> joint1 = new HashSet<>(isOnSameLayer ? data1.keySet() : Set.of());
 		Set<String> joint2 = new HashSet<> (data2.keySet());
 
 		if (entitypatch.isLogicalClient()) {
@@ -250,8 +215,8 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
 						ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 
-						if (itemSkin != null && itemSkin.trailInfo() != null) {
-							trailInfo = itemSkin.trailInfo().overwrite(trailInfo);
+						if (itemSkin != null) {
+							trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
 						}
 					}
 
@@ -263,18 +228,10 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 				}
 			});
 		}
-
-		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-			playerpatch.getEventListener().triggerEvents(EventType.ANIMATION_BEGIN_EVENT, new AnimationBeginEvent(playerpatch, this));
-		}
 	}
 
 	@Override
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
-		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-			playerpatch.getEventListener().triggerEvents(EventType.ANIMATION_END_EVENT, new AnimationEndEvent(playerpatch, this, isEnd));
-		}
-
 		this.getProperty(StaticAnimationProperty.ON_END_EVENTS).ifPresent((events) -> {
 			for (AnimationEvent event : events) {
 				event.executeIfRightSide(entitypatch, this);
@@ -297,7 +254,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 				float prevElapsed = player.getPrevElapsedTime();
 				float elapsed = player.getElapsedTime();
 
-				for (TimeStampedEvent event : events) {
+				for (AnimationEvent.TimeStampedEvent event : events) {
 					event.executeIfRightSide(entitypatch, this, prevElapsed, elapsed);
 				}
 			}
@@ -310,26 +267,37 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 				float prevElapsed = player.getPrevElapsedTime();
 				float elapsed = player.getElapsedTime();
 
-				for (TimePeriodEvent event : events) {
+				for (AnimationEvent.TimePeriodEvent event : events) {
 					event.executeIfRightSide(entitypatch, this, prevElapsed, elapsed);
 				}
 			}
 		});
 	}
 
-	@Override
-	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return new EntityState(this.getStatesMap(entitypatch, time));
 	}
 
-	@Override
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+	protected TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getStateMap(entitypatch, time);
 	}
 
-	@Override
-	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+	protected <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getSingleState(stateFactor, entitypatch, time);
+	}
+	@Override
+	public final EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(entitypatch, this, time);
+	}
+
+	@Override
+	public final TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getStatesMap(entitypatch, this, time);
+	}
+
+	@Override
+	public final <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(stateFactor, entitypatch, this, time);
 	}
 
 	@Override
@@ -411,15 +379,11 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 
 	@Override
 	public ResourceLocation getRegistryName() {
-		return this.registryName;
+		return this.resourceLocation;
 	}
 
 	public Armature getArmature() {
 		return this.armature;
-	}
-
-	public String getFileHash() {
-		return this.filehash;
 	}
 
 	@Override
@@ -429,7 +393,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 
 	@Override
 	public TransformSheet getCoord() {
-		return this.getProperty(ActionAnimationProperty.COORD).orElse(super.getCoord());
+		return this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).orElse(super.getCoord());
 	}
 
 	@Override
@@ -457,12 +421,12 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		return this;
 	}
 
-	public <V extends AnimationEvent> StaticAnimation addEvents(TimeStampedEvent... events) {
+	public <V extends AnimationEvent> StaticAnimation addEvents(AnimationEvent.TimeStampedEvent... events) {
 		this.properties.put(StaticAnimationProperty.TIME_STAMPED_EVENTS, events);
 		return this;
 	}
 
-	public <V extends AnimationEvent> StaticAnimation addEvents(TimePeriodEvent... events) {
+	public <V extends AnimationEvent> StaticAnimation addEvents(AnimationEvent.TimePeriodEvent... events) {
 		this.properties.put(StaticAnimationProperty.TIME_PERIOD_EVENTS, events);
 		return this;
 	}
@@ -493,33 +457,29 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		return this;
 	}
 
-	public <T> StaticAnimation addState(StateFactor<T> factor, T val) {
+	public <T> StaticAnimation addState(EntityState.StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addState(factor, val);
 		return this;
 	}
 
-	public <T> StaticAnimation removeState(StateFactor<T> factor) {
+	public <T> StaticAnimation removeState(EntityState.StateFactor<T> factor) {
 		this.stateSpectrumBlueprint.removeState(factor);
 		return this;
 	}
 
-	public <T> StaticAnimation addConditionalState(int metadata, StateFactor<T> factor, T val) {
+	public <T> StaticAnimation addConditionalState(int metadata, EntityState.StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addConditionalState(metadata, factor, val);
 		return this;
 	}
 
-	public <T> StaticAnimation addStateRemoveOld(StateFactor<T> factor, T val) {
+	public <T> StaticAnimation addStateRemoveOld(EntityState.StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addStateRemoveOld(factor, val);
 		return this;
 	}
 
-	public <T> StaticAnimation addStateIfNotExist(StateFactor<T> factor, T val) {
+	public <T> StaticAnimation addStateIfNotExist(EntityState.StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
 		return this;
-	}
-
-	public Object getModifiedLinkState(StateFactor<?> factor, Object val, LivingEntityPatch<?> entitypatch, float elapsedTime) {
-		return val;
 	}
 
 	@Override
@@ -531,8 +491,53 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		return List.of(this);
 	}
 
+
 	@Override
 	public StaticAnimation get() {
 		return AnimationManager.getInstance().refreshAnimation(this);
 	}
+
+
+//	public static class Event implements Comparable<Event> {
+//		public static final float ON_BEGIN = Float.MIN_VALUE;
+//		public static final float ON_END = Float.MAX_VALUE;
+//		final float time;
+//		final Side executionSide;
+//		final Consumer<LivingEntityPatch<?>> event;
+//
+//		private Event(float time, Side executionSide, Consumer<LivingEntityPatch<?>> event) {
+//			this.time = time;
+//			this.executionSide = executionSide;
+//			this.event = event;
+//		}
+//
+//		@Override
+//		public int compareTo(Event arg0) {
+//			if(this.time == arg0.time) {
+//				return 0;
+//			} else {
+//				return this.time > arg0.time ? 1 : -1;
+//			}
+//		}
+//
+//		public void testAndExecute(LivingEntityPatch<?> entitypatch) {
+//			if (this.executionSide.predicate.test(entitypatch.isLogicalClient())) {
+//				this.event.accept(entitypatch);
+//			}
+//		}
+//
+//		public static Event create(float time, Consumer<LivingEntityPatch<?>> event, Side isRemote) {
+//			return new Event(time, isRemote, event);
+//		}
+//
+//		public enum Side {
+//			CLIENT((isLogicalClient) -> isLogicalClient), SERVER((isLogicalClient) -> !isLogicalClient), BOTH((isLogicalClient) -> true);
+//
+//			Predicate<Boolean> predicate;
+//
+//			Side(Predicate<Boolean> predicate) {
+//				this.predicate = predicate;
+//			}
+//		}
+//	}
 }

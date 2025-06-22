@@ -397,6 +397,7 @@ public class Animations {
 		BIPED_RUN_GREATSWORD = new MovementAnimation(true, "biped/living/run_greatsword", biped);
 		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", biped);
 		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", biped);
+		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
 
 		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", biped);
 
@@ -501,6 +502,27 @@ public class Animations {
 					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, AnimationEvent.Side.CLIENT));
 		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", biped);
+		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
+				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
+				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
+					Vector3d pos = entitypatch.getOriginal().position();
+
+					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
+					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
+				}, AnimationEvent.Side.CLIENT));
+		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
+				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
+				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
+					Vector3d pos = entitypatch.getOriginal().position();
+
+					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
+					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
+				}, AnimationEvent.Side.CLIENT));
+
 		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
 		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, biped.toolR, "biped/combat/fist_auto2", biped)

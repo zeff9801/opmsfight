@@ -369,9 +369,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	@Override
 	public void correctRotation() {
-		if (!this.useModelYRot) {
-			this.modelYRot = this.getOriginal().yRot;
-		}
 		if (this.targetLockedOn) {
 			if (this.rayTarget != null && !this.rayTarget.isDeadOrDying()) {
 				Vector3d playerPosition = this.original.position();

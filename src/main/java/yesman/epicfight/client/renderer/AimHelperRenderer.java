@@ -41,24 +41,26 @@ public class AimHelperRenderer {
 		matStackIn.pushPose();
 		matStackIn.translate(-projectedView.x, -projectedView.y, -projectedView.z);
 		Matrix4f matrix = matStackIn.last().pose();
-
+		
 		int color = EpicFightMod.CLIENT_CONFIGS.aimHelperRealColor;
 		float f1 = (float)(color >> 16 & 255) / 255.0F;
 		float f2 = (float)(color >> 8 & 255) / 255.0F;
 		float f3 = (float)(color & 255) / 255.0F;
-
+		
 		Tessellator tesselator = Tessellator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
-//		RenderSystem.setShader(GameRenderer::getRendertypeLinesShader); TODO
-//		RenderSystem.disableTexture();
+		
+		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
-		RenderSystem.disableCull();
-		RenderSystem.lineWidth(2.0F);
-
+		RenderSystem.lineWidth(3.0F);
 		bufferBuilder.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(matrix, pos2.x, pos2.y, pos2.z).color(f1, f2, f3, 0.5F).normal(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z).endVertex();
-		bufferBuilder.vertex(matrix, pos1.x, pos1.y, pos1.z).color(f1, f2, f3, 0.5F).normal(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z).endVertex();
+		bufferBuilder.vertex(matrix, pos1.x, pos1.y, pos1.z).color(f1, f2, f3, 0.5F).endVertex();
+		bufferBuilder.vertex(matrix, pos2.x, pos2.y, pos2.z).color(f1, f2, f3, 0.5F).endVertex();
 		tesselator.end();
+		
+		float length = Vec3f.sub(pos2, pos1, null).length();
+		float ratio = Math.min(50.0F, length);
+		ratio = (51.0F - ratio) / 50.0F;
 		
 		matStackIn.popPose();
 	}

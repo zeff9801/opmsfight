@@ -1,27 +1,30 @@
 package yesman.epicfight.client.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.*;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.client.model.ModelPart;
+import yesman.epicfight.api.client.model.VertexIndicator;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
 import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.gameasset.Armatures;
 
 import java.util.Iterator;
 
@@ -38,54 +41,41 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(SpinAttackEffectLayer.class, new EmptyLayer<>());
-		this.addPatchedLayer(CapeLayer.class, new EmptyLayer<>());
 	}
 	
 	@Override
-	public void render(ClientPlayerEntity entity, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
+	public void 	render(ClientPlayerEntity entityIn, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack matStackIn, int packedLightIn, float partialTicks) {
+		Armature armature = entitypatch.getArmature();
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
-		OpenMatrix4f[] poses = entitypatch.getArmature().getPoseAsTransformMatrix(pose, false);
-		poseStack.pushPose();
+		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
+		matStackIn.pushPose();
+		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.head);
+		mat.translate(0, 0.2F, 0);
 
-		Matrix4f lastPose = new Matrix4f(poseStack.last().pose());
-		//poseStack.setIdentity(); TODO
-
-		float correction = 0.0F;
-
-		if (entity.isVisuallySwimming()) {
-			correction = 0.25F;
-		} else if (entity.isFallFlying()) {
-			correction = 100.0F;
-		}
-
-		poseStack.translate(0.0F, -entity.getEyeHeight() - 0.05F, correction);
-		//poseStack.mulPoseMatrix(lastPose);
-
+		Vec3f translateVectorOfHead = mat.toTranslationVector();
+		matStackIn.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
 		HumanoidMesh mesh = this.getMesh(entitypatch);
-		this.prepareModel(mesh, entity, entitypatch, renderer);
+		this.prepareModel(mesh, entityIn, entitypatch, renderer);
 
 		if (!entitypatch.getOriginal().isInvisible()) {
-			for (AnimatedMesh.AnimatedModelPart p : mesh.getAllParts()) {
-				p.setHidden(true);
+			for (ModelPart<VertexIndicator.AnimatedVertexIndicator> p : mesh.getAllParts()) {
+				p.hidden = true;
 			}
-			mesh.leftArm.setHidden(false);
-			mesh.rightArm.setHidden(false);
-			mesh.leftSleeve.setHidden(false);
-			mesh.rightSleeve.setHidden(false);
 
-			//RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
-			//mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses); TODO
-			Armature armature = entitypatch.getArmature();
-			mesh.drawModelWithPose(poseStack, buffer.getBuffer(EpicFightRenderTypes.animatedModel(entitypatch.getOriginal().getSkinTextureLocation())),
-					packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+			mesh.leftArm.hidden = false;
+			mesh.rightArm.hidden = false;
+			mesh.leftSleeve.hidden = false;
+			mesh.rightSleeve.hidden = false;
 
+			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.animatedModel(entitypatch.getOriginal().getSkinTextureLocation())),
+					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 		}
 
-		if (!entity.isSpectator()) {
-			this.renderLayer(renderer, entitypatch, entity, poses, buffer, poseStack, packedLight, partialTicks);
+		if (!entityIn.isSpectator()) {
+			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTicks);
 		}
 
-		poseStack.popPose();
+		matStackIn.popPose();
 	}
 
 	@Override
@@ -120,7 +110,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 	@Override
 	protected void prepareModel(HumanoidMesh mesh, ClientPlayerEntity entity, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer) {
 		mesh.initialize();
-		mesh.head.setHidden(true);
-		mesh.hat.setHidden(true);
+		mesh.head.hidden = true;
+		mesh.hat.hidden = true;
 	}
 }

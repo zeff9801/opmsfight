@@ -8,7 +8,8 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -17,7 +18,7 @@ import java.util.Map;
 
 public abstract class Animator {
 	protected final Map<LivingMotion, StaticAnimation> livingAnimations = Maps.newHashMap();
-	protected final TypeFlexibleHashMap<TypeFlexibleHashMap.TypeKey<?>> animationVariables = new TypeFlexibleHashMap<> (false);
+	protected final TypeFlexibleHashMap<TypeKey<?>> animationVariables = new TypeFlexibleHashMap<> (false);
 	protected LivingEntityPatch<?> entitypatch;
 
 	public Animator() {
@@ -69,11 +70,11 @@ public abstract class Animator {
 		return ImmutableMap.copyOf(this.livingAnimations);
 	}
 
-	public void removeAnimationVariables(TypeFlexibleHashMap.TypeKey<?> typeKey) {
+	public void removeAnimationVariables(TypeKey<?> typeKey) {
 		this.animationVariables.remove(typeKey);
 	}
 
-	public <T> void putAnimationVariable(TypeFlexibleHashMap.TypeKey<T> typeKey, T value) {
+	public <T> void putAnimationVariable(TypeKey<T> typeKey, T value) {
 		if (this.animationVariables.containsKey(typeKey)) {
 			this.animationVariables.replace(typeKey, value);
 		} else {
@@ -81,7 +82,7 @@ public abstract class Animator {
 		}
 	}
 
-	public <T> T getAnimationVariables(TypeFlexibleHashMap.TypeKey<T> key) {
+	public <T> T getAnimationVariables(TypeKey<T> key) {
 		return this.animationVariables.get(key);
 	}
 

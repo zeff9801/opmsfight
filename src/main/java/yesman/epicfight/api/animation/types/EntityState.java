@@ -1,10 +1,10 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.function.Function;
+
 import net.minecraft.util.DamageSource;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
-
-import java.util.function.Function;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 
 public class EntityState {
 	public static class StateFactor<T> implements TypeFlexibleHashMap.TypeKey<T> {
@@ -52,10 +52,6 @@ public class EntityState {
 
 	public <T> T getState(StateFactor<T> stateFactor) {
 		return this.stateMap.getOrDefault(stateFactor);
-	}
-
-	public TypeFlexibleHashMap<StateFactor<?>> getStateMap() {
-		return this.stateMap;
 	}
 
 	public boolean turningLocked() {

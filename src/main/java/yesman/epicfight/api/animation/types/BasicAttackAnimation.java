@@ -3,15 +3,12 @@ package yesman.epicfight.api.animation.types;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
-import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
-import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
@@ -31,23 +28,23 @@ public class BasicAttackAnimation extends AttackAnimation {
 
 	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
-		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
-		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
-		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, Hand hand, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, colliderJoint, path, armature);
-		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
-		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
-		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 
 	public BasicAttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
 		super(convertTime, path, armature, phases);
-		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
-		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
-		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false);
+		this.addProperty(AnimationProperty.StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 
 	@Override
@@ -77,9 +74,9 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public void postInit() {
 		super.postInit();
 
-		if (!this.properties.containsKey(AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
+		if (!this.properties.containsKey(AnimationProperty.AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
 			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.getTotalTime())));
-			this.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
+			this.addProperty(AnimationProperty.AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
 		}
 	}
 
@@ -87,19 +84,18 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
 		super.end(entitypatch, nextAnimation, isEnd);
 
-
 		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient() && !STIFF_COMBO_ATTACKS) {
 			float playbackSpeed = EpicFightOptions.A_TICK * this.getPlaySpeed(entitypatch, this);
 			entitypatch.getClientAnimator().baseLayer.copyLayerTo(entitypatch.getClientAnimator().baseLayer.getLayer(Layer.Priority.HIGHEST), playbackSpeed);
 		}
 	}
 
+
 	@Override
+	protected TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		TypeFlexibleHashMap<EntityState.StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, time);
 
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);
-
-		if (!STIFF_COMBO_ATTACKS) {
+		if (!STIFF_COMBO_ATTACKS){
 			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
 			stateMap.put(EntityState.UPDATE_LIVING_MOTION, (Object)true);
 		}
@@ -111,7 +107,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 	protected Vector3d getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
 		Vector3d vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
 
-		if (entitypatch.shouldBlockMoving() && this.getProperty(ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
+		if (entitypatch.shouldBlockMoving() && this.getProperty(AnimationProperty.ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
 			vec3 = vec3.scale(0.0F);
 		}
 
