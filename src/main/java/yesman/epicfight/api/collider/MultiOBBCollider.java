@@ -29,8 +29,10 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		super(arrayLength, centerX, centerY, centerZ, null);
 
 		AxisAlignedBB aabb = OBBCollider.getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
+		OBBCollider colliderForAll = new OBBCollider(aabb, vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
+
 		for (int i = 0; i < arrayLength; i++) {
-			this.colliders.add(OBBColliderPool.acquire(vertexX, vertexY, vertexZ, centerX, centerY, centerZ));
+			this.colliders.add(colliderForAll);
 		}
 	}
 
@@ -54,8 +56,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		float interIndex = Math.min((float)(this.numberOfColliders - 1) / (colliderCount - 1), 1.0F);
 
 		for (int i = 0; i < colliderCount; i++) {
-			OBBCollider obb = OBBColliderPool.acquire(this.colliders.get((int)index).modelVertex[1].x, this.colliders.get((int)index).modelVertex[1].y, this.colliders.get((int)index).modelVertex[1].z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
-			colliders.add(obb);
+			colliders.add(this.colliders.get((int)index).deepCopy());
 			index += interIndex;
 		}
 
@@ -84,10 +85,6 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 			poseStack.popPose();
 
 			interpolation += partialScale;
-		}
-		// Release all pooled colliders
-		for (OBBCollider obb : colliders) {
-			OBBColliderPool.release(obb);
 		}
 	}
 

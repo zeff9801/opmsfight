@@ -81,13 +81,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 		}
 
 		if (!entity.isSpectator()) {
-			this.LayerRenderer(renderer, entitypatch, entity, poses, buffer, poseStack, packedLight, partialTicks);
+			this.renderLayer(renderer, entitypatch, entity, poses, buffer, poseStack, packedLight, partialTicks);
 		}
 
 		poseStack.popPose();
 	}
 
-	protected void LayerRenderer(LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, LocalPlayerPatch entitypatch, ClientPlayerEntity entity, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
+	@Override
+	protected void renderLayer(LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, LocalPlayerPatch entitypatch, ClientPlayerEntity entity, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
 		Iterator<LayerRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>>> iter = renderer.layers.iterator();
 
 		float f = MathUtils.lerpBetween(entity.yBodyRotO, entity.yBodyRot, partialTicks);

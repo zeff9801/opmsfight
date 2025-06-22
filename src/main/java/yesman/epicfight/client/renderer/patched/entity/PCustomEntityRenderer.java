@@ -19,7 +19,6 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.api.client.model.Mesh;
 
 @OnlyIn(Dist.CLIENT)
 public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, LivingEntityPatch<LivingEntity>, EntityRenderer<LivingEntity>, AnimatedMesh> {
@@ -47,7 +46,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
         if (renderType != null) {
             AnimatedMesh mesh = this.getMesh(entitypatch);
             IVertexBuilder builder = buffer.getBuffer(renderType);
-            mesh.drawToBuffer(poseStack, builder, Mesh.DrawingFunction.ENTITY_TEXTURED, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), armature, poseMatrices);
+            mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), armature, poseMatrices);
         }
 
         if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
@@ -65,12 +64,8 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
         return OverlayTexture.pack(0, OverlayTexture.v(entity.hurtTime > 5));
     }
 
+    @Override
     public AnimatedMesh getMesh(LivingEntityPatch<LivingEntity> entitypatch) {
         return this.mesh;
-    }
-
-    @Override
-    public yesman.epicfight.api.client.model.MeshProvider<AnimatedMesh> getDefaultMesh() {
-        return () -> this.mesh;
     }
 }

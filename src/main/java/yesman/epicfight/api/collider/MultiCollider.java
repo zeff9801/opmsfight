@@ -47,15 +47,12 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		float partialScale = 1.0F / (numberOf - 1);
 		float interpolation = 0.0F;
 		List<Collider> colliders = Lists.newArrayList();
-		List<Collider> pooledToRelease = Lists.newArrayList();
 		LivingEntity original = entitypatch.getOriginal();
 		float index = 0.0F;
 		float interIndex = Math.min((float)(this.numberOfColliders - 1) / (numberOf - 1), 1.0F);
 
 		for (int i = 0; i < numberOf; i++) {
-			Collider c = this.colliders.get((int)index).deepCopy();
-			colliders.add(c);
-			pooledToRelease.add(c);
+			colliders.add(this.colliders.get((int)index).deepCopy());
 			index += interIndex;
 		}
 
@@ -110,17 +107,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 
 			return false;
 		});
-
-		// Release all pooled colliders
-		for (Collider c : pooledToRelease) {
-			if (c instanceof OBBCollider) {
-				OBBColliderPool.release((OBBCollider)c);
-			} else if (c instanceof LineCollider) {
-				LineColliderPool.release((LineCollider)c);
-			} else if (c instanceof PlaneCollider) {
-				PlaneColliderPool.release((PlaneCollider)c);
-			}
-		}
 
 		return entities;
 	}

@@ -18,7 +18,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
@@ -30,10 +31,10 @@ import java.util.List;
 public class ImpactGuardSkill extends GuardSkill {
     public static GuardSkill.Builder createEnergizingGuardBuilder() {
         return GuardSkill.createGuardBuilder()
-                .addAdvancedGuardMotion(WeaponCategory.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
-                .addAdvancedGuardMotion(WeaponCategory.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null)
-                .addAdvancedGuardMotion(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
-                .addAdvancedGuardMotion(WeaponCategory.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
+                .addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+                .addAdvancedGuardMotion(WeaponCategories.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null)
+                .addAdvancedGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+                .addAdvancedGuardMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
     }
 
     protected float superiorPenalizer;

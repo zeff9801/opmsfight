@@ -13,6 +13,7 @@ import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
@@ -61,10 +62,10 @@ public class MeteorSlamSkill extends Skill {
         return (new MeteorSlamSkill.Builder())
                 .setCategory(SkillCategories.IDENTITY)
                 .setResource(Resource.NONE)
-                .addSlamMotion(WeaponCategory.SPEAR, (item, player) -> Animations.METEOR_SLAM)
-                .addSlamMotion(WeaponCategory.GREATSWORD, (item, player) -> Animations.METEOR_SLAM)
-                .addSlamMotion(WeaponCategory.TACHI, (item, player) -> Animations.METEOR_SLAM)
-                .addSlamMotion(WeaponCategory.LONGSWORD, (item, player) -> Animations.METEOR_SLAM);
+                .addSlamMotion(WeaponCategories.SPEAR, (item, player) -> Animations.METEOR_SLAM)
+                .addSlamMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.METEOR_SLAM)
+                .addSlamMotion(WeaponCategories.TACHI, (item, player) -> Animations.METEOR_SLAM)
+                .addSlamMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.METEOR_SLAM);
     }
 
     protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> slamMotions;

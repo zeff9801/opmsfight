@@ -18,7 +18,8 @@ import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillDataManager;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -31,14 +32,14 @@ public class ParryingSkill extends GuardSkill {
 
     public static GuardSkill.Builder createActiveGuardBuilder() {
         return GuardSkill.createGuardBuilder()
-                .addAdvancedGuardMotion(WeaponCategory.SWORD, (itemCap, playerpatch) -> itemCap.getStyle(playerpatch) == Styles.ONE_HAND ?
+                .addAdvancedGuardMotion(WeaponCategories.SWORD, (itemCap, playerpatch) -> itemCap.getStyle(playerpatch) == Styles.ONE_HAND ?
                         new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 } :
                         new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT2, Animations.SWORD_GUARD_ACTIVE_HIT3 })
-                .addAdvancedGuardMotion(WeaponCategory.LONGSWORD, (itemCap, playerpatch) ->
+                .addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (itemCap, playerpatch) ->
                         new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 })
-                .addAdvancedGuardMotion(WeaponCategory.KATANA, (itemCap, playerpatch) ->
+                .addAdvancedGuardMotion(WeaponCategories.KATANA, (itemCap, playerpatch) ->
                         new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 })
-                .addAdvancedGuardMotion(WeaponCategory.TACHI, (itemCap, playerpatch) ->
+                .addAdvancedGuardMotion(WeaponCategories.TACHI, (itemCap, playerpatch) ->
                         new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 });
     }
 

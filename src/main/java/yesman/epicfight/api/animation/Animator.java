@@ -74,7 +74,11 @@ public abstract class Animator {
 	}
 
 	public <T> void putAnimationVariable(TypeFlexibleHashMap.TypeKey<T> typeKey, T value) {
-		this.animationVariables.put(typeKey, value);
+		if (this.animationVariables.containsKey(typeKey)) {
+			this.animationVariables.replace(typeKey, value);
+		} else {
+			this.animationVariables.put(typeKey, value);
+		}
 	}
 
 	public <T> T getAnimationVariables(TypeFlexibleHashMap.TypeKey<T> key) {
@@ -83,11 +87,5 @@ public abstract class Animator {
 
 	public void resetLivingAnimations() {
 		this.livingAnimations.clear();
-	}
-
-	public void dispose() {
-		this.livingAnimations.clear();
-		this.animationVariables.clear();
-		this.entitypatch = null;
 	}
 }

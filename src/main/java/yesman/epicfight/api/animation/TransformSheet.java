@@ -186,55 +186,24 @@ public class TransformSheet {
 	}
 
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
-		if (this.keyframes.length == 0) {
-			return new InterpolationInfo(0, 0, 0.0F);
-		}
-
 		if (currentTime < 0.0F) {
 			currentTime = this.keyframes[this.keyframes.length - 1].time() + currentTime;
 		}
 
-		if (this.keyframes.length == 1) {
-			return new InterpolationInfo(0, 0, 0.0F);
-		}
+		int prev = 0, next = 1;
 
-		// Binary search to find the correct interval.
-		// All keyframes with index < 'low' will have a time smaller than 'currentTime'.
-		// All keyframes with index >= 'low' will have a time greater than or equal to 'currentTime'.
-		int low = 1;
-		int high = this.keyframes.length - 1;
-		int searchResult = -1;
-
-		while (low <= high) {
-			int mid = (low + high) >>> 1;
-			float midTime = this.keyframes[mid].time();
-
-			if (midTime < currentTime) {
-				low = mid + 1;
-			} else if (midTime > currentTime) {
-				high = mid - 1;
-			} else {
-				searchResult = mid;
+		for (int i = 1; i < this.keyframes.length; i++) {
+			if (currentTime <= this.keyframes[i].time()) {
 				break;
+			}
+
+			if (this.keyframes.length > next + 1) {
+				prev++;
+				next++;
 			}
 		}
 
-		if (searchResult == -1) {
-			searchResult = low;
-		}
-
-		int prev = searchResult - 1;
-		int next = Math.min(searchResult, this.keyframes.length - 1);
-
-		if (prev < 0) {
-			prev = 0;
-		}
-
-		float prevTime = this.keyframes[prev].time();
-		float nextTime = this.keyframes[next].time();
-		float timeDiff = nextTime - prevTime;
-
-		float progression = (timeDiff > 0) ? ((currentTime - prevTime) / timeDiff) : 0.0F;
+		float progression = (currentTime - this.keyframes[prev].time()) / (this.keyframes[next].time() - this.keyframes[prev].time());
 
 		return new InterpolationInfo(prev, next, progression);
 	}

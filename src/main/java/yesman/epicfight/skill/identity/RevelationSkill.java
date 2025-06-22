@@ -20,6 +20,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -36,9 +37,9 @@ public class RevelationSkill extends Skill {
                 .setCategory(SkillCategories.IDENTITY)
                 .setActivateType(ActivateType.DURATION)
                 .setResource(Resource.NONE)
-                .addMotion(WeaponCategory.LONGSWORD, (item, player) -> Animations.REVELATION_TWOHAND)
-                .addMotion(WeaponCategory.GREATSWORD, (item, player) -> Animations.REVELATION_TWOHAND)
-                .addMotion(WeaponCategory.TACHI, (item, player) -> Animations.REVELATION_TWOHAND)
+                .addMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.REVELATION_TWOHAND)
+                .addMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.REVELATION_TWOHAND)
+                .addMotion(WeaponCategories.TACHI, (item, player) -> Animations.REVELATION_TWOHAND)
                 ;
     }
 

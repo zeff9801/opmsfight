@@ -3,7 +3,6 @@ package yesman.epicfight.client.renderer;
 import java.util.function.BiConsumer;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraftforge.api.distmarker.Dist;
@@ -30,7 +29,8 @@ public class EpicFightVertexFormatElement extends VertexFormatElement {
 		this.onSetupBuffer = onSetupBuffer;
 	}
 	
-	public void setupBufferState(MatrixStack poseStack, int id, long p_166967_, int p_166968_) {
+	@Override
+	public void setupBufferState(int id, long p_166967_, int p_166968_) {
 		if (drawing == null) {
 			throw new RuntimeException("No mesh bound");
 		}
@@ -39,6 +39,7 @@ public class EpicFightVertexFormatElement extends VertexFormatElement {
 		this.onSetupBuffer.accept(drawing, id);
 	}
 	
+	@Override
 	public void clearBufferState(int id) {
 		GlStateManager._disableVertexAttribArray(id);
 	}

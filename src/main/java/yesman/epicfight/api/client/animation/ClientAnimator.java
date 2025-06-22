@@ -139,9 +139,13 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public void tick() {
-		if (this.baseLayer.disabled && this.baseLayer.compositeLayers.values().stream().allMatch(Layer::isDisabled)) {
-			return; // Skip update if all layers are disabled
-		}
+		// Layer debugging
+		/**
+		 for (Layer layer : this.getAllLayers()) {
+		 System.out.println(layer);
+		 }
+		 System.out.println();
+		 **/
 		this.baseLayer.update(this.entitypatch);
 
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
@@ -404,13 +408,5 @@ public class ClientAnimator extends Animator {
 		}
 
 		return new EntityState(stateMap);
-	}
-
-	public void dispose() {
-		this.livingAnimations.clear();
-		this.compositeLivingAnimations.clear();
-		this.defaultLivingAnimations.clear();
-		this.defaultCompositeLivingAnimations.clear();
-		this.baseLayer.dispose();
 	}
 }

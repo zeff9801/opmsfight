@@ -47,9 +47,10 @@ import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.item.Styles;
-import yesman.epicfight.world.capabilities.item.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
@@ -100,6 +101,8 @@ public class EpicFightMod {
 		LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
 		SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
 		SkillSlot.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillSlots.class);
+		Style.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, Styles.class);
+		WeaponCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, WeaponCategories.class);
 
 		bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
 		bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
@@ -147,6 +150,8 @@ public class EpicFightMod {
 		LivingMotion.ENUM_MANAGER.loadEnum();
 		SkillCategory.ENUM_MANAGER.loadEnum();
 		SkillSlot.ENUM_MANAGER.loadEnum();
+		Style.ENUM_MANAGER.loadEnum();
+		WeaponCategory.ENUM_MANAGER.loadEnum();
 		/*		event.enqueueWork(LivingMotion.ENUM_MANAGER::loadEnum);
 		event.enqueueWork(SkillCategory.ENUM_MANAGER::loadEnum);
 		event.enqueueWork(SkillSlot.ENUM_MANAGER::loadEnum);

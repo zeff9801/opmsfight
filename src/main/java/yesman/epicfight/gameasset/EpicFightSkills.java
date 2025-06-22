@@ -25,7 +25,7 @@ import yesman.epicfight.skill.mover.DemolitionLeapSkill;
 import yesman.epicfight.skill.mover.PhantomAscentSkill;
 import yesman.epicfight.skill.passive.*;
 import yesman.epicfight.skill.weaponinnate.*;
-import yesman.epicfight.world.capabilities.item.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.StunType;
@@ -131,7 +131,7 @@ public class EpicFightSkills {
 
 		BERSERKER = modRegistry.build("berserker", BerserkerSkill::new, PassiveSkill.createPassiveBuilder());
 		DEATH_HARVEST = modRegistry.build("death_harvest", DeathHarvestSkill::new, PassiveSkill.createPassiveBuilder());
-		EMERGENCY_ESCAPE = modRegistry.build("emergency_escape", EmergencyEscapeSkill::new, EmergencyEscapeSkill.createEmergencyEscapeBuilder().addAvailableWeaponCategory(WeaponCategory.SWORD, WeaponCategory.KATANA, WeaponCategory.DAGGER));
+		EMERGENCY_ESCAPE = modRegistry.build("emergency_escape", EmergencyEscapeSkill::new, EmergencyEscapeSkill.createEmergencyEscapeBuilder().addAvailableWeaponCategory(WeaponCategories.SWORD, WeaponCategories.KATANA, WeaponCategories.DAGGER));
 		ENDURANCE = modRegistry.build("endurance", EnduranceSkill::new, PassiveSkill.createPassiveBuilder().setResource(Resource.COOLDOWN).setActivateType(ActivateType.DURATION));
 		FORBIDDEN_STRENGTH = modRegistry.build("forbidden_strength", ForbiddenStrengthSkill::new, PassiveSkill.createPassiveBuilder());
 		HYPERVITALITY = modRegistry.build("hypervitality", HyperVitalitySkill::new, PassiveSkill.createPassiveBuilder().setResource(Resource.COOLDOWN).setActivateType(ActivateType.TOGGLE));

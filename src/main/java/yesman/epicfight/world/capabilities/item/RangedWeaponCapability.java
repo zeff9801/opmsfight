@@ -1,3 +1,4 @@
+
 package yesman.epicfight.world.capabilities.item;
 
 import java.util.Map;
@@ -54,13 +55,12 @@ public class RangedWeaponCapability extends CapabilityItem {
 		return this.zoomInType;
 	}
 
-	public static class Builder extends WeaponCapability.Builder {
+	public static class Builder extends CapabilityItem.Builder {
 		private Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
 		private ZoomInType zoomInType = ZoomInType.USE_TICK;
 
 		protected Builder() {
-			super();
-			this.category = WeaponCategory.RANGED;
+			this.category = WeaponCategories.RANGED;
 			this.constructor = RangedWeaponCapability::new;
 			this.rangeAnimationModifiers = Maps.newHashMap();
 		}

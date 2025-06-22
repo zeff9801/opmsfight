@@ -34,20 +34,12 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
-		java.util.List<LineCollider> pooledColliders = new java.util.ArrayList<>();
-		float index = 0.0F;
-		float interIndex = Math.min((float)(this.numberOfColliders - 1) / (numberOf - 1), 1.0F);
-
-		for (int i = 0; i < numberOf; i++) {
-			LineCollider lc = LineColliderPool.acquire(this.colliders.get((int)index).modelCenter.x, this.colliders.get((int)index).modelCenter.y, this.colliders.get((int)index).modelCenter.z, this.colliders.get((int)index).modelVec.x, this.colliders.get((int)index).modelVec.y, this.colliders.get((int)index).modelVec.z);
-			pooledColliders.add(lc);
-			index += interIndex;
-		}
+		List<LineCollider> colliders = this.colliders.subList(0, numberOf);
 
 		TransformSheet coordTransform = animation.getCoord();
 		float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
 
-		for (LineCollider lineCollider : pooledColliders) {
+		for (LineCollider lineCollider : colliders) {
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
 			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1);
 			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2);
@@ -69,10 +61,6 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 			poseStack.popPose();
 
 			interpolation += partialScale;
-		}
-		// Release all pooled colliders
-		for (LineCollider lc : pooledColliders) {
-			LineColliderPool.release(lc);
 		}
 	}
 

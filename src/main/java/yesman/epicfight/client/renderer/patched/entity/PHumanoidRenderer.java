@@ -3,6 +3,7 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
+import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -17,6 +18,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
+import yesman.epicfight.client.renderer.patched.layer.PatchedElytraLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedHeadLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
@@ -30,8 +32,9 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 		super(entityType);
 
 		this.mesh = mesh;
-		this.addPatchedLayer(BipedArmorLayer.class, new WearableItemLayer<>(this.mesh, false));
+		this.addPatchedLayer(ElytraLayer.class, new PatchedElytraLayer<>());
 		this.addPatchedLayer(HeldItemLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(BipedArmorLayer.class, new WearableItemLayer<>(mesh, false));
 		this.addPatchedLayer(HeadLayer.class, new PatchedHeadLayer<>());
 	}
 

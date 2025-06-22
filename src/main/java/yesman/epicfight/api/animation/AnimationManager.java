@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonElement>> {
@@ -88,9 +87,13 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	}
 
 	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
-		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream()
-				.filter(entry -> !this.userAnimations.containsKey(entry.getKey()) && filter.test(entry.getValue()))
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> !this.userAnimations.containsKey(entry.getKey()) && filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
+			map.put(entry.getKey(), entry.getValue());
+			return map;
+		}, (map1, map2) -> {
+			map1.putAll(map2);
+			return map1;
+		});
 
 		return ImmutableMap.copyOf(filteredItems);
 	}
@@ -220,15 +223,19 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 					}
 				});
 
-		this.animationRegistry.values().stream()
-				.flatMap(anim -> anim.getClipHolders().stream())
-				.forEach((animation) -> {
-					animation.postInit();
+		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
+			list.addAll(anim.getClipHolders());
+			return list;
+		}, (list1, list2) -> {
+			list1.addAll(list2);
+			return list1;
+		}).forEach((animation) -> {
+			animation.postInit();
 
-					if (EpicFightMod.isPhysicalClient()) {
-						AnimationManager.readAnimationProperties(animation);
-					}
-				});
+			if (EpicFightMod.isPhysicalClient()) {
+				AnimationManager.readAnimationProperties(animation);
+			}
+		});
 	}
 
 	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {

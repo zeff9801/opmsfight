@@ -37,7 +37,6 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
@@ -188,13 +187,18 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		Set<String> joint2 = new HashSet<> (data2.keySet());
 
 		if (entitypatch.isLogicalClient()) {
-			fromAnimation.getJointMaskEntry(entitypatch, false).ifPresent(entry ->
-					joint1.removeIf(jointName -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == LayerType.BASE_LAYER ?
-							entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName)));
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
 
-			this.getJointMaskEntry(entitypatch, true).ifPresent(entry2 ->
-					joint2.removeIf(jointName -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == LayerType.BASE_LAYER ?
-							entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName)));
+			if (entry != null) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+
+			if (entry2 != null) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
 		}
 
 		joint1.addAll(joint2);
@@ -371,12 +375,24 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 
 	public boolean in(StaticAnimation[] animations) {
-		return Arrays.stream(animations).collect(Collectors.toSet()).contains(this);
+		for (StaticAnimation animation : animations) {
+			if (this.equals(animation)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	@SuppressWarnings("rawtypes")
 	public boolean in(AnimationProvider[] animationProviders) {
-		return Arrays.stream(animationProviders).map(AnimationProvider::get).collect(Collectors.toSet()).contains(this);
+		for (AnimationProvider animationProvider : animationProviders) {
+			if (this.equals(animationProvider.get())) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public StaticAnimation setResourceLocation(String path) {

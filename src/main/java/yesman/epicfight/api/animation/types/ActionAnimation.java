@@ -189,13 +189,18 @@ public class ActionAnimation extends MainFrameAnimation {
 		Set<String> joint2 = new HashSet<> (data2.keySet());
 
 		if (entitypatch.isLogicalClient()) {
-			fromAnimation.getJointMaskEntry(entitypatch, false).ifPresent(entry ->
-					joint1.removeIf(jointName -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
-							entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName)));
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
 
-			this.getJointMaskEntry(entitypatch, true).ifPresent(entry2 ->
-					joint2.removeIf(jointName -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
-							entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName)));
+			if (entry != null && entitypatch.isLogicalClient()) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+
+			if (entry2 != null && entitypatch.isLogicalClient()) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
 		}
 
 		joint1.addAll(joint2);
@@ -208,28 +213,25 @@ public class ActionAnimation extends MainFrameAnimation {
 				this.removeRootTranslation(entitypatch, pose, 0.0F);
 			}
 
-			JointTransform empty = JointTransform.empty();
 			for (String jointName : joint1) {
-				addKeyframes(dest.getAnimationClip(), jointName,
-						new Keyframe(0.0F, data1.getOrDefault(jointName, empty)),
-						new Keyframe(linkTime, poseData.get(jointName)),
-						new Keyframe(totalTime, data2.get(jointName))
-				);
+				Keyframe[] keyframes = new Keyframe[3];
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
+				keyframes[1] = new Keyframe(linkTime, poseData.get(jointName));
+				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		} else {
-			JointTransform empty = JointTransform.empty();
 			for (String jointName : joint1) {
-				addKeyframes(dest.getAnimationClip(), jointName,
-						new Keyframe(0.0F, data1.getOrDefault(jointName, empty)),
-						new Keyframe(totalTime, data2.get(jointName))
-				);
+				Keyframe[] keyframes = new Keyframe[2];
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
+				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		}
-	}
-
-	private void addKeyframes(AnimationClip clip, String jointName, Keyframe... keyframes) {
-		TransformSheet sheet = new TransformSheet(keyframes);
-		clip.addJointTransform(jointName, sheet);
 	}
 
 	public void removeRootTranslation(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {

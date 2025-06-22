@@ -11,14 +11,13 @@ import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 import java.util.List;
 import java.util.function.Function;
 
-public class Condition<T> extends ForgeRegistryEntry<Condition<?>> {
+public class Condition<T> {
 
 	public Condition<T> read(JsonElement json) throws CommandSyntaxException {
 		return this.read(JsonToNBT.parseTag(json.toString()));

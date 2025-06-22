@@ -81,7 +81,7 @@ public class CuriosCompat implements ICompatModule {
 		@Override
 		protected void renderLayer(LivingEntityPatch<LivingEntity> entitypatch, LivingEntity entityliving, CuriosLayer<LivingEntity, EntityModel<LivingEntity>> vanillaLayer, MatrixStack poseStack, IRenderTypeBuffer buffer, int packedLight,
 								   OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-			CuriosApi.getCuriosHelper().getCuriosHandler(entityliving).ifPresent((handler) -> {
+			CuriosApi.getCuriosInventory(entityliving).ifPresent((handler) -> {
 				handler.getCurios().forEach((id, stacksHandler) -> {
 					IDynamicStackHandler stackHandler = stacksHandler.getStacks();
 					IDynamicStackHandler cosmeticStacksHandler = stacksHandler.getCosmeticStacks();
