@@ -87,7 +87,6 @@ public class EpicFightSkills {
 	public static Skill ENDURANCE;
 	public static Skill FORBIDDEN_STRENGTH;
 	public static Skill HYPERVITALITY;
-//	public static Skill STAMINA_PILLAGER;
 	public static Skill SWORD_MASTER;
 	public static Skill TECHNICIAN;
 	/** Weapon innate skills**/
@@ -117,6 +116,7 @@ public class EpicFightSkills {
 
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void buildSkillEvent(final SkillBuildEvent build) {
+		System.out.println("Building skills...");
 		SkillBuildEvent.ModRegistryWorker modRegistry = build.createRegistryWorker(EpicFightMod.MODID);
 
 		BASIC_ATTACK = modRegistry.build("basic_attack", BasicAttack::new, BasicAttack.createBasicAttackBuilder());
@@ -135,7 +135,6 @@ public class EpicFightSkills {
 		ENDURANCE = modRegistry.build("endurance", EnduranceSkill::new, PassiveSkill.createPassiveBuilder().setResource(Resource.COOLDOWN).setActivateType(ActivateType.DURATION));
 		FORBIDDEN_STRENGTH = modRegistry.build("forbidden_strength", ForbiddenStrengthSkill::new, PassiveSkill.createPassiveBuilder());
 		HYPERVITALITY = modRegistry.build("hypervitality", HyperVitalitySkill::new, PassiveSkill.createPassiveBuilder().setResource(Resource.COOLDOWN).setActivateType(ActivateType.TOGGLE));
-//		STAMINA_PILLAGER = modRegistry.build("stamina_pillager", StaminaPillagerSkill::new, PassiveSkill.createPassiveBuilder());
 		SWORD_MASTER = modRegistry.build("swordmaster", SwordmasterSkill::new, PassiveSkill.createPassiveBuilder());
 		TECHNICIAN = modRegistry.build("technician", TechnicianSkill::new, PassiveSkill.createPassiveBuilder());
 
@@ -145,6 +144,7 @@ public class EpicFightSkills {
 		DEMOLITION_LEAP = modRegistry.build("demolition_leap", DemolitionLeapSkill::new, Skill.createMoverBuilder().setActivateType(ActivateType.CHARGING));
 		PHANTOM_ASCENT = modRegistry.build("phantom_ascent", PhantomAscentSkill::new, Skill.createMoverBuilder().setResource(Resource.COOLDOWN));
 
+		System.out.println("Learnable skills count: " + LEARNABLE_SKILLS.size());
 		WeaponInnateSkill sweepingEdge = modRegistry.build("sweeping_edge", SimpleWeaponInnateSkill::new, SimpleWeaponInnateSkill.createSimpleWeaponInnateBuilder().setAnimations(() -> (AttackAnimation)Animations.SWEEPING_EDGE));
 		sweepingEdge.newProperty()
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1))
@@ -316,7 +316,8 @@ public class EpicFightSkills {
 	private static Skill registerSkill(Skill skill) {
 		registerIfAbsent(SKILLS, skill);
 		
-		if (skill.getCategory().learnable()) {
+		if (skill.getRequiredXp() > 0) {
+			System.out.println("Registering learnable skill: " + skill.getRegistryName());
 			registerIfAbsent(LEARNABLE_SKILLS, skill);
 		}
 		

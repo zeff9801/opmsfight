@@ -14,9 +14,11 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.particle.*;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
+import yesman.epicfight.client.renderer.entity.EmptyRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.main.EpicFightMod;
@@ -26,6 +28,20 @@ import yesman.epicfight.world.entity.EpicFightEntities;
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID, value=Dist.CLIENT, bus=EventBusSubscriber.Bus.MOD)
 public class ClientModBusEvent {
+	@SubscribeEvent
+	public static void onClientSetup(final FMLClientSetupEvent event) {
+		event.enqueueWork(() -> {
+			EntityRendererManager entityRenderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+			ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+
+			entityRenderManager.register(EpicFightEntities.AREA_EFFECT_BREATH.get(), new AreaEffectCloudRenderer(entityRenderManager));
+			entityRenderManager.register(EpicFightEntities.DROPPED_NETHER_STAR.get(), new DroppedNetherStarRenderer(entityRenderManager, itemRenderer));
+			entityRenderManager.register(EpicFightEntities.WITHER_SKELETON_MINION.get(), new WitherSkeletonRenderer(entityRenderManager));
+			entityRenderManager.register(EpicFightEntities.WITHER_GHOST_CLONE.get(), new WitherGhostRenderer(entityRenderManager));
+			entityRenderManager.register(EpicFightEntities.DODGE_LEFT.get(), new EmptyRenderer<>(entityRenderManager));
+		});
+	}
+
 	@SubscribeEvent(priority = EventPriority.LOWEST)
 	public static void onParticleRegistry(final ParticleFactoryRegisterEvent event) {
 		Minecraft mc = Minecraft.getInstance();
@@ -53,18 +69,10 @@ public class ClientModBusEvent {
 		particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), TrailParticle.Provider::new);
 		particleEngine.register(EpicFightParticles.FEATHER.get(), FeatherParticle.Provider::new);
 		particleEngine.register(EpicFightParticles.AIR_BURST.get(), new AirBurstParticle.Provider());
-
-    	EntityRendererManager entityRenderManager = mc.getEntityRenderDispatcher();
-    	ItemRenderer itemRenderer = mc.getItemRenderer();
-    	
-    	entityRenderManager.register(EpicFightEntities.AREA_EFFECT_BREATH.get(), new AreaEffectCloudRenderer(entityRenderManager));
-    	entityRenderManager.register(EpicFightEntities.DROPPED_NETHER_STAR.get(), new DroppedNetherStarRenderer(entityRenderManager, itemRenderer));
-    	entityRenderManager.register(EpicFightEntities.WITHER_SKELETON_MINION.get(), new WitherSkeletonRenderer(entityRenderManager));
-    	entityRenderManager.register(EpicFightEntities.WITHER_GHOST_CLONE.get(), new WitherGhostRenderer(entityRenderManager));
     }
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void onParticleRegistry(final ModelBakeEvent event) {
+	public static void onModelBakeEvent(final ModelBakeEvent event) {
 		ClientEngine.getInstance().renderEngine.registerRenderer();
 		WearableItemLayer.clear();
 	}
