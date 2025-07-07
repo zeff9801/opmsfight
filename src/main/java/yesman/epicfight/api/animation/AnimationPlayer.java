@@ -8,6 +8,9 @@ import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.server.ServerWorld;
 
 public class AnimationPlayer {
 	protected float elapsedTime;
@@ -22,6 +25,12 @@ public class AnimationPlayer {
 	}
 
 	public void tick(LivingEntityPatch<?> entitypatch) {
+		if (this.play == Animations.DUMMY_ANIMATION) {
+			return;
+		}
+		if (!entitypatch.isLogicalClient() && !isVisibleToAnyPlayer(entitypatch, 256.0)) {
+			return;
+		}
 		this.prevElapsedTime = this.elapsedTime;
 
 		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch, this.getAnimation());
@@ -135,5 +144,19 @@ public class AnimationPlayer {
 	@Override
 	public String toString() {
 		return this.getAnimation() + " " + this.prevElapsedTime + " " + this.elapsedTime;
+	}
+
+	/**
+	 * Returns true if the entity is within 'distance' blocks of any player on the server.
+	 */
+	private boolean isVisibleToAnyPlayer(LivingEntityPatch<?> entitypatch, double distance) {
+		if (!(entitypatch.getOriginal().level instanceof ServerWorld)) return true;
+		ServerWorld world = (ServerWorld) entitypatch.getOriginal().level;
+		for (ServerPlayerEntity player : world.players()) {
+			if (player.distanceToSqr(entitypatch.getOriginal()) <= distance * distance) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
