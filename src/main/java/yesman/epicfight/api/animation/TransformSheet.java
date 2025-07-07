@@ -40,14 +40,13 @@ public class TransformSheet {
 	}
 
 	public TransformSheet copy(int start, int end) {
-		int len = end - start;
-		Keyframe[] newKeyframes = new Keyframe[len];
-
+		final int len = end - start;
+		final Keyframe[] newKeyframes = new Keyframe[len];
+		final Keyframe[] src = this.keyframes;
 		for (int i = 0; i < len; i++) {
-			Keyframe kf = this.keyframes[i + start];
+			final Keyframe kf = src[i + start];
 			newKeyframes[i] = new Keyframe(kf);
 		}
-
 		return new TransformSheet(newKeyframes);
 	}
 
@@ -98,27 +97,30 @@ public class TransformSheet {
 	}
 
 	public void correctAnimationByNewPosition(Vec3f startpos, Vec3f startToEnd, Vec3f modifiedStart, Vec3f modifiedStartToEnd) {
-		Keyframe[] keyframes = this.getKeyframes();
-		Keyframe startKeyframe = keyframes[0];
-		Keyframe endKeyframe = keyframes[keyframes.length - 1];
-		float pitchDeg = (float) Math.toDegrees(MathHelper.atan2(modifiedStartToEnd.y - startToEnd.y, modifiedStartToEnd.length()));
-		float yawDeg = (float) Math.toDegrees(MathUtils.getAngleBetween(modifiedStartToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise(), startToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise()));
-		OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
-		Vec3f zero = new Vec3f(0.0F, 0.0F, 0.0F);
-		Vec3f line = new Vec3f();
-		Vec3f modifiedLine = new Vec3f();
-		Vec3f animOnLine = new Vec3f();
-		Vec3f toNewKeyTransform = new Vec3f();
-
-		for (Keyframe kf : keyframes) {
-			float lerp = (kf.time() - startKeyframe.time()) / (endKeyframe.time() - startKeyframe.time());
+		final Keyframe[] keyframes = this.getKeyframes();
+		final Keyframe startKeyframe = keyframes[0];
+		final Keyframe endKeyframe = keyframes[keyframes.length - 1];
+		final float startTime = startKeyframe.time();
+		final float endTime = endKeyframe.time();
+		final float timeSpan = endTime - startTime;
+		final float pitchDeg = (float) Math.toDegrees(MathHelper.atan2(modifiedStartToEnd.y - startToEnd.y, modifiedStartToEnd.length()));
+		final float yawDeg = (float) Math.toDegrees(MathUtils.getAngleBetween(
+				modifiedStartToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise(),
+				startToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise()));
+		final OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
+		final Vec3f line = new Vec3f();
+		final Vec3f modifiedLine = new Vec3f();
+		final Vec3f animOnLine = new Vec3f();
+		final Vec3f toNewKeyTransform = new Vec3f();
+		for (int idx = 0; idx < keyframes.length; idx++) {
+			final Keyframe kf = keyframes[idx];
+			final float lerp = (kf.time() - startTime) / timeSpan;
 			line.set(startToEnd);
 			line.scale(lerp);
 			modifiedLine.set(modifiedStartToEnd);
 			modifiedLine.scale(lerp);
-			Vec3f keyTransform = kf.transform().translation();
-			Vec3f startToKeyTransform = Vec3f.sub(keyTransform, startpos, animOnLine).multiply(-1.0F, 1.0F, -1.0F);
-			animOnLine.set(startToKeyTransform);
+			final Vec3f keyTransform = kf.transform().translation();
+			Vec3f.sub(keyTransform, startpos, animOnLine).multiply(-1.0F, 1.0F, -1.0F);
 			animOnLine.sub(line);
 			toNewKeyTransform.set(modifiedLine);
 			OpenMatrix4f.transform3v(rotator, animOnLine, animOnLine);
