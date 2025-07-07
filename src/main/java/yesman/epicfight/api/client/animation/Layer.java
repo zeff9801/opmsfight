@@ -162,7 +162,7 @@ public class Layer {
 
 	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion, float partialTick) {
 		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
-		this.animationPlayer.getAnimation().getJointMaskEntry(entitypatch, useCurrentMotion).ifPresent((jointEntry) -> pose.removeJointIf((entry) -> jointEntry.isMasked(this.getLivingMotion(entitypatch, useCurrentMotion), entry.getKey())));
+		this.animationPlayer.getAnimation().getJointMaskEntry(entitypatch, useCurrentMotion).ifPresent((jointEntry) -> pose.removeJointIf((entry) -> jointEntry.isJointMasked(this.getLivingMotion(entitypatch, useCurrentMotion), entry.getKey())));
 
 		return pose;
 	}

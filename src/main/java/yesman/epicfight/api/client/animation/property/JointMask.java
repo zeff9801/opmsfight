@@ -14,19 +14,20 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMask {
-	private static final OpenMatrix4f MATRIX_HOLDER_1 = new OpenMatrix4f();
-	private static final OpenMatrix4f MATRIX_HOLDER_2 = new OpenMatrix4f();
-	private static final OpenMatrix4f MATRIX_HOLDER_3 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_1 = new OpenMatrix4f(); 
+	private static final OpenMatrix4f MATRIX_HOLDER_2 = new OpenMatrix4f(); 
+	private static final OpenMatrix4f MATRIX_HOLDER_3 = new OpenMatrix4f(); 
 	private static final OpenMatrix4f MATRIX_HOLDER_4 = new OpenMatrix4f();
-	private static final OpenMatrix4f MATRIX_HOLDER_5 = new OpenMatrix4f();
+	private static final OpenMatrix4f MATRIX_HOLDER_5 = new OpenMatrix4f(); 
 	private static final OpenMatrix4f MATRIX_HOLDER_6 = new OpenMatrix4f();
-	private static final OpenMatrix4f MATRIX_HOLDER_7 = new OpenMatrix4f();
-	private static final Vec3f VEC_HOLDER = new Vec3f();
+	private static final OpenMatrix4f MATRIX_HOLDER_7 = new OpenMatrix4f(); 
+	private static final Vec3f VEC_HOLDER = new Vec3f(); 
 	private static final JointTransform JT_HOLDER_1 = JointTransform.empty();
 	private static final JointTransform JT_HOLDER_2 = JointTransform.empty();
 
@@ -48,7 +49,7 @@ public class JointMask {
 		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(MATRIX_HOLDER_1, lowestMatrix, MATRIX_HOLDER_2);
 
 		for (Joint subJoint : joint.getSubJoints()) {
-			if (wholeEntry.isMasked(livingMotion, subJoint.getName())) {
+			if (wholeEntry.isJointMasked(livingMotion, subJoint.getName())) {
 				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, MATRIX_HOLDER_3);
 				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, MATRIX_HOLDER_4);
 				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), MATRIX_HOLDER_5);
@@ -80,34 +81,34 @@ public class JointMask {
 
 	@OnlyIn(Dist.CLIENT)
 	public static class JointMaskSet {
-		final Map<String, BindModifier> masks = Maps.newHashMap();
+		private final Map<String, BindModifier> masks;
+
+		private JointMaskSet(Map<String, BindModifier> masks) {
+			this.masks = Collections.unmodifiableMap(masks);
+		}
 
 		public boolean contains(String name) {
 			return this.masks.containsKey(name);
 		}
 
 		public BindModifier getBindModifier(String jointName) {
-			return this.masks.get(jointName);
+			return this.masks.getOrDefault(jointName, null);
 		}
 
 		public static JointMaskSet of(JointMask... masks) {
-			JointMaskSet jointMaskSet = new JointMaskSet();
-
+			Map<String, BindModifier> map = Maps.newHashMap();
 			for (JointMask jointMask : masks) {
-				jointMaskSet.masks.put(jointMask.jointName, jointMask.bindModifier);
+				map.put(jointMask.jointName, jointMask.bindModifier);
 			}
-
-			return jointMaskSet;
+			return new JointMaskSet(map);
 		}
 
 		public static JointMaskSet of(Set<JointMask> jointMasks) {
-			JointMaskSet jointMaskSet = new JointMaskSet();
-
+			Map<String, BindModifier> map = Maps.newHashMap();
 			for (JointMask jointMask : jointMasks) {
-				jointMaskSet.masks.put(jointMask.jointName, jointMask.bindModifier);
+				map.put(jointMask.jointName, jointMask.bindModifier);
 			}
-
-			return jointMaskSet;
+			return new JointMaskSet(map);
 		}
 	}
 }

@@ -291,7 +291,7 @@ public class ClientAnimator extends Animator {
 			if (jointMaskEntry != null) {
 				LivingMotion livingMotion = this.getCompositeLayer(priority).getLivingMotion(this.entitypatch, useCurrentMotion);
 
-				if (nowPlaying.hasTransformFor(joint.getName()) && !jointMaskEntry.isMasked(livingMotion, joint.getName())) {
+				if (nowPlaying.hasTransformFor(joint.getName()) && !jointMaskEntry.isJointMasked(livingMotion, joint.getName())) {
 					JointMask.JointMaskSet set = jointMaskEntry.getMask(livingMotion);
 					JointMask.BindModifier bindModifier = set.getBindModifier(joint.getName());
 

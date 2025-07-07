@@ -187,12 +187,12 @@ public class ActionAnimation extends MainFrameAnimation {
 			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
 
 			if (entry != null && entitypatch.isLogicalClient()) {
-				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint1.removeIf((jointName) -> entry.isJointMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
 			}
 
 			if (entry2 != null && entitypatch.isLogicalClient()) {
-				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint2.removeIf((jointName) -> entry2.isJointMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
 			}
 		}

@@ -24,6 +24,7 @@ public class Joint {
 
 	public void addSubJoint(Joint... joints) {
 		Collections.addAll(this.subJoints, joints);
+		// If subJoints are immutable after construction, consider wrapping with Collections.unmodifiableList
 	}
 
 	public List<Joint> getAllJoints() {
@@ -34,8 +35,8 @@ public class Joint {
 	}
 
 	private void getAllJoints(List<Joint> list) {
+		// Recursive; could be replaced with iterative for deep hierarchies
 		list.add(this);
-
 		for (Joint joint : this.subJoints) {
 			joint.getAllJoints(list);
 		}

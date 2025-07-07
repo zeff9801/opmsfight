@@ -20,8 +20,8 @@ import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMaskReloadListener extends JsonReloadListener {
-	private static final BiMap<ResourceLocation, JointMask.JointMaskSet> JOINT_MASKS = HashBiMap.create();
-	private static final Map<String, JointMask.BindModifier> BIND_MODIFIERS = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, JointMask.JointMaskSet> JOINT_MASKS = HashBiMap.create(); 
+	private static final Map<String, JointMask.BindModifier> BIND_MODIFIERS = Maps.newHashMap(); 
 	
 	static {
 		BIND_MODIFIERS.put("keep_child_locrot", JointMask.KEEP_CHILD_LOCROT);
@@ -46,7 +46,7 @@ public class JointMaskReloadListener extends JsonReloadListener {
 	
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManager, IProfiler profileFiller) {
-		JOINT_MASKS.clear();
+		JOINT_MASKS.clear(); // Clear to avoid memory leaks
 		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			Set<JointMask> masks = Sets.newHashSet();

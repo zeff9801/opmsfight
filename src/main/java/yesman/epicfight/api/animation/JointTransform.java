@@ -31,6 +31,8 @@ public class JointTransform {
 	private final Vec3f translation;
 	private final Vec3f scale;
 	private final Quaternionf rotation;
+	private transient OpenMatrix4f cachedMatrix = null;
+	private transient boolean matrixDirty = true;
 
 	public JointTransform(Vec3f translation, Quaternionf rotation, Vec3f scale) {
 		this.translation = translation;
@@ -61,30 +63,35 @@ public class JointTransform {
 		this.translation.set(newV);
 		this.rotation.set(newQ);
 		this.scale.set(newS);
-
+		this.entries.clear();
 		this.entries.putAll(jt.entries);
-
+		this.matrixDirty = true;
 		return this;
 	}
 
 	public void jointLocal(JointTransform transform, MatrixOperation multiplyFunction) {
 		this.entries.put(JOINT_LOCAL_TRANSFORM, new TransformEntry(multiplyFunction, this.mergeIfExist(JOINT_LOCAL_TRANSFORM, transform)));
+		this.matrixDirty = true;
 	}
 
 	public void parent(JointTransform transform, MatrixOperation multiplyFunction) {
 		this.entries.put(PARENT, new TransformEntry(multiplyFunction, this.mergeIfExist(PARENT, transform)));
+		this.matrixDirty = true;
 	}
 
 	public void animationTransform(JointTransform transform, MatrixOperation multiplyFunction) {
 		this.entries.put(ANIMATION_TRANSFORM, new TransformEntry(multiplyFunction, this.mergeIfExist(ANIMATION_TRANSFORM, transform)));
+		this.matrixDirty = true;
 	}
 
 	public void frontResult(JointTransform transform, MatrixOperation multiplyFunction) {
 		this.entries.put(RESULT1, new TransformEntry(multiplyFunction, this.mergeIfExist(RESULT1, transform)));
+		this.matrixDirty = true;
 	}
 
 	public void overwriteRotation(JointTransform transform) {
 		this.entries.put(RESULT2, new TransformEntry(OpenMatrix4f::mul, this.mergeIfExist(RESULT2, transform)));
+		this.matrixDirty = true;
 	}
 
 	public JointTransform mergeIfExist(String entryName, JointTransform transform) {
@@ -111,8 +118,12 @@ public class JointTransform {
 	}
 
 	public OpenMatrix4f toMatrix() {
-		OpenMatrix4f matrix = new OpenMatrix4f().translate(this.translation).mulBack(OpenMatrix4f.fromQuaternion(this.rotation)).scale(this.scale);
-		return matrix;
+		if (!matrixDirty && cachedMatrix != null) {
+			return cachedMatrix;
+		}
+		cachedMatrix = new OpenMatrix4f().translate(this.translation).mulBack(OpenMatrix4f.fromQuaternion(this.rotation)).scale(this.scale);
+		matrixDirty = false;
+		return cachedMatrix;
 	}
 
 	@Override

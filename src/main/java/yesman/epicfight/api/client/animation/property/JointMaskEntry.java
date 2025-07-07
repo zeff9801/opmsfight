@@ -54,7 +54,7 @@ public class JointMaskEntry {
 		return this.masks.getOrDefault(livingmotion, this.defaultMask);
 	}
 
-	public boolean isMasked(LivingMotion livingmotion, String jointName) {
+	public boolean isJointMasked(LivingMotion livingmotion, String jointName) {
 		return !this.masks.getOrDefault(livingmotion, this.defaultMask).contains(jointName);
 	}
 
@@ -76,7 +76,7 @@ public class JointMaskEntry {
 
 	@OnlyIn(Dist.CLIENT)
 	public static class Builder {
-		private final List<Pair<LivingMotion, JointMaskSet>> masks = Lists.newArrayList();
+		private final List<Pair<LivingMotion, JointMaskSet>> masks = Lists.newArrayListWithCapacity(4);
 		private JointMaskSet defaultMask = null;
 
 		public JointMaskEntry.Builder mask(LivingMotion motion, JointMaskSet masks) {

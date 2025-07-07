@@ -66,7 +66,7 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
         JointMaskEntry maskEntry = this.nextAnimation.getJointMaskEntry(entitypatch, true).orElse(null);
 
         if (maskEntry != null && entitypatch.isLogicalClient()) {
-            interpolatedPose.getJointTransformData().entrySet().removeIf((entry) -> maskEntry.isMasked(this.nextAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+            interpolatedPose.getJointTransformData().entrySet().removeIf((entry) -> maskEntry.isJointMasked(this.nextAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
                     entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), entry.getKey()));
         }
 
