@@ -68,15 +68,15 @@ public class SkillDataKey<T> extends ForgeRegistryEntry<SkillDataKey<?>> {
     }
 
     public static SkillDataKey<Integer> createIntKey(int defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
-        return createSkillDataKey((buffer, val) -> buffer.writeInt(val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers, skillClass);
+        return createSkillDataKey((buffer, val) -> buffer.writeInt(val == null ? 0 : val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers, skillClass);
     }
 
     public static SkillDataKey<Float> createFloatKey(float defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
-        return createSkillDataKey((buffer, val) -> buffer.writeFloat(val), (buffer) -> buffer.readFloat(), defaultValue, syncronizeTrackingPlayers, skillClass);
+        return createSkillDataKey((buffer, val) -> buffer.writeFloat(val == null ? 0.0F : val), (buffer) -> buffer.readFloat(), defaultValue, syncronizeTrackingPlayers, skillClass);
     }
 
     public static SkillDataKey<Double> createDoubleKey(double defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
-        return createSkillDataKey((buffer, val) -> buffer.writeDouble(val), (buffer) -> buffer.readDouble(), defaultValue, syncronizeTrackingPlayers, skillClass);
+        return createSkillDataKey((buffer, val) -> buffer.writeDouble(val == null ? 0.0 : val), (buffer) -> buffer.readDouble(), defaultValue, syncronizeTrackingPlayers, skillClass);
     }
 
     public static SkillDataKey<Boolean> createBooleanKey(boolean defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
