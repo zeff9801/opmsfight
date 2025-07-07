@@ -179,6 +179,7 @@ public class MathUtils {
 	}
 
 	public static Vector3d projectVector(Vector3d from, Vector3d to) {
+		if (from == null || to == null) return Vector3d.ZERO;
 		double dot = to.dot(from);
 		double normalScale = 1.0D / ((to.x * to.x) + (to.y * to.y) + (to.z * to.z));
 		return new Vector3d(dot * to.x * normalScale, dot * to.y * normalScale, dot * to.z * normalScale);
