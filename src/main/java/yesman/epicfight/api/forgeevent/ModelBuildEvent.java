@@ -33,7 +33,7 @@ public abstract class ModelBuildEvent<T> extends Event implements IModBusEvent {
 		}
 
 		public <T extends Armature> T get(String modid, String path, ArmatureContructor<T> constructor) {
-			return Armatures.getOrCreateArmature(this.resourceManager, new ResourceLocation(modid, path), constructor);
+			return Armatures.getOrCreate(new ResourceLocation(modid, path), constructor).get();
 		}
 	}
 

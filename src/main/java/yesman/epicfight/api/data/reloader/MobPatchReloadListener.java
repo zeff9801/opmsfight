@@ -29,6 +29,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.asset.AssetAccessor;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
@@ -39,6 +40,7 @@ import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.main.EpicFightSharedConstants;
 import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -267,41 +269,39 @@ public class MobPatchReloadListener extends JsonReloadListener {
 		} else if (tag.contains("preset")) {
 			String presetName = tag.getString("preset");
 			Function<Entity, Supplier<EntityPatch<?>>> preset = EntityPatchProvider.get(presetName);
-			EntityType<?> presetEntityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(presetName));
-
-			Armatures.registerEntityTypeArmature(entityType, Armatures.getRegistry(presetEntityType));
-
+			Armatures.registerEntityTypeArmatureByPreset(entityType, presetName);
 			MobPatchPresetProvider provider = new MobPatchPresetProvider(preset);
-
 			return provider;
 		} else {
 			boolean humanoid = tag.getBoolean("isHumanoid");
 			CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
 			provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
-			ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
-			ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
+			ResourceLocation modelLocation = ResourceLocation.tryParse(tag.getString("model"));
+			ResourceLocation armatureId = ResourceLocation.tryParse(tag.getString("armature"));
 
-			if (EpicFightMod.isPhysicalClient()) {
+			if (EpicFightSharedConstants.isPhysicalClient()) {
 				Meshes.getOrCreateAnimatedMesh(Minecraft.getInstance().getResourceManager(), modelLocation, humanoid ? AnimatedMesh::new : HumanoidMesh::new);
+				//Meshes.getOrCreateAnimatedMesh(modelLocation, (jsonAssetLoader) -> jsonAssetLoader.loadSkinnedMesh(humanoid ? SkinnedMesh::new : HumanoidMesh::new));
 			}
 
-			Armature armature = Armatures.getOrCreateArmature(resourceManager, armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
-			Armatures.registerEntityTypeArmature(entityType, armature);
+			Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreate(armatureId, Armature::new));
 
 			provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
+			//provider.faction = Faction.ENUM_MANAGER.getOrThrow(tag.getString("faction"));
 			provider.faction = Faction.valueOf(tag.getString("faction").toUpperCase(Locale.ROOT));
+
 			provider.scale = tag.getCompound("attributes").contains("scale") ? (float)tag.getCompound("attributes").getDouble("scale") : 1.0F;
 
 			if (tag.contains("swing_sound")) {
-				provider.swingSound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound")));
+				provider.swingSound = ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.tryParse(tag.getString("swing_sound")));
 			}
 
 			if (tag.contains("hit_sound")) {
-				provider.hitSound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("hit_sound")));
+				provider.hitSound = ForgeRegistries.SOUND_EVENTS.getValue(ResourceLocation.tryParse(tag.getString("hit_sound")));
 			}
 
 			if (tag.contains("hit_particle")) {
-				provider.hitParticle = (HitParticleType)ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));
+				provider.hitParticle = (HitParticleType)ForgeRegistries.PARTICLE_TYPES.getValue(ResourceLocation.tryParse(tag.getString("hit_particle")));
 			}
 
 			if (!clientSide) {
@@ -528,18 +528,17 @@ public class MobPatchReloadListener extends JsonReloadListener {
 				disabled = tag.getBoolean("disabled");
 			}
 
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
+			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(ResourceLocation.tryParse(tag.getString("id")));
 			MOB_PATCH_PROVIDERS.put(entityType, deserialize(entityType, tag, true, Minecraft.getInstance().getResourceManager()));
 			EntityPatchProvider.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 
 			if (!disabled) {
 				if (tag.contains("preset")) {
-					Armatures.registerEntityTypeArmature(entityType, tag.getString("preset"));
+					Armatures.registerEntityTypeArmatureByPreset(entityType, tag.getString("preset"));
 				} else {
-					Minecraft mc = Minecraft.getInstance();
-					ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
+					ResourceLocation armatureLocation = ResourceLocation.tryParse(tag.getString("armature"));
 					boolean humanoid = tag.getBoolean("isHumanoid");
-					Armature armature = Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
+					AssetAccessor<? extends Armature> armature = Armatures.getOrCreate(armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
 					Armatures.registerEntityTypeArmature(entityType, armature);
 				}
 

@@ -14,6 +14,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.main.EpicFightMod;
 
 import java.util.Map;
 import java.util.Set;
@@ -21,15 +22,10 @@ import java.util.Set;
 @OnlyIn(Dist.CLIENT)
 public class JointMaskReloadListener extends JsonReloadListener {
 	private static final BiMap<ResourceLocation, JointMask.JointMaskSet> JOINT_MASKS = HashBiMap.create(); 
-	private static final Map<String, JointMask.BindModifier> BIND_MODIFIERS = Maps.newHashMap(); 
-	
+	private static final Map<String, JointMask.BindModifier> BIND_MODIFIERS = Maps.newHashMap();
+	private static final ResourceLocation NONE_MASK = new ResourceLocation(EpicFightMod.MODID, "none");
 	static {
 		BIND_MODIFIERS.put("keep_child_locrot", JointMask.KEEP_CHILD_LOCROT);
-	}
-
-	public static JointMask.JointMaskSet getJointMaskEntry(String type) {
-		ResourceLocation rl = new ResourceLocation(type);
-		return JOINT_MASKS.getOrDefault(rl, JointMaskEntry.ALL);
 	}
 	
 	public static ResourceLocation getKey(JointMask.JointMaskSet type) {
@@ -43,8 +39,17 @@ public class JointMaskReloadListener extends JsonReloadListener {
 	public JointMaskReloadListener() {
 		super((new GsonBuilder()).create(), "animmodels/joint_mask");
 	}
-	
-	@Override
+
+	public static JointMask.JointMaskSet getJointMaskEntry(String type) {
+		ResourceLocation rl = ResourceLocation.tryParse(type);
+		return JOINT_MASKS.getOrDefault(rl, JOINT_MASKS.get(NONE_MASK));
+	}
+
+	public static JointMask.JointMaskSet getNoneMask() {
+		return JOINT_MASKS.get(NONE_MASK);
+	}
+
+    @Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManager, IProfiler profileFiller) {
 		JOINT_MASKS.clear(); // Clear to avoid memory leaks
 		

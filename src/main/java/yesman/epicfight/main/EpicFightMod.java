@@ -36,6 +36,7 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
 import yesman.epicfight.events.*;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -173,6 +174,7 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightCapabilities::registerCapabilities);
 		event.enqueueWork(ProviderProjectile::registerPatches);//old
 		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);//old
+		event.enqueueWork(Armatures::registerEntityTypes);
 
 
 		event.enqueueWork(SkillArgument::registerArgumentTypes);
@@ -197,6 +199,7 @@ public class EpicFightMod {
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent  event) {
 		event.registerReloadListener(new JointMaskReloadListener());
 		event.registerReloadListener(Meshes.INSTANCE);
+		event.registerReloadListener(Armatures.INSTANCE);
 		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}

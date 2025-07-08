@@ -44,12 +44,12 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<ClientPlaye
 	}
 	
 	@Override
-	public void 	render(ClientPlayerEntity entityIn, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack matStackIn, int packedLightIn, float partialTicks) {
+	public void render(ClientPlayerEntity entityIn, LocalPlayerPatch entitypatch, LivingRenderer<ClientPlayerEntity, PlayerModel<ClientPlayerEntity>> renderer, IRenderTypeBuffer buffer, MatrixStack matStackIn, int packedLightIn, float partialTicks) {
 		Armature armature = entitypatch.getArmature();
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
 		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
 		matStackIn.pushPose();
-		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.head);
+		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.get().head);
 		mat.translate(0, 0.2F, 0);
 
 		Vec3f translateVectorOfHead = mat.toTranslationVector();

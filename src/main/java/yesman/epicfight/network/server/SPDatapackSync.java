@@ -1,15 +1,14 @@
 package yesman.epicfight.network.server;
 
-import java.util.function.Supplier;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
-import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.exception.DatapackException;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
+
+import java.util.function.Supplier;
 
 public class SPDatapackSync {
 	protected int count;
@@ -51,10 +50,12 @@ public class SPDatapackSync {
 		try {
 			switch (msg.getType()) {
 				case MOB -> MobPatchReloadListener.processServerPacket(msg);
-				case SKILL_PARAMS -> SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
+				case SKILL_PARAMS -> {/** Processed on {@link SPDatapackSyncSkill} **/}
 				case WEAPON -> ItemCapabilityReloadListener.processServerPacket(msg);
 				case ARMOR -> ItemCapabilityReloadListener.processServerPacket(msg);
 				case WEAPON_TYPE -> WeaponTypeReloadListener.processServerPacket(msg);
+				//case ITEM_KEYWORD -> ItemKeywordReloadListener.handleClientBoundSyncPacket(msg);
+				//case MANDATORY_RESOURCE_PACK_ANIMATION, RESOURCE_PACK_ANIMATION -> AnimationManager.getInstance().processServerPacket(msg, msg.getType() == Type.MANDATORY_RESOURCE_PACK_ANIMATION);
 			}
 		} catch (Exception e) {
 			throw new DatapackException(e.getMessage());

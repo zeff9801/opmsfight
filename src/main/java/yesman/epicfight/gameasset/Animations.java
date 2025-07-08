@@ -289,7 +289,7 @@ public class Animations {
 
 
 	private static void build() {
-		HumanoidArmature biped = Armatures.BIPED;
+		HumanoidArmature biped = Armatures.BIPED.get();
 
 		//Map
 		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
@@ -548,7 +548,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false)
-				.addEvents(AnimationEvent.TimeStampedEvent.create(0.4F, Animations.ReusableSources.FRACTURE_GROUND_SIMPLE, AnimationEvent.Side.CLIENT).params(new Vec3f(0.0F, -0.24F, -2.0F), Armatures.BIPED.toolR, 1.1D, 0.55F));
+				.addEvents(AnimationEvent.TimeStampedEvent.create(0.4F, Animations.ReusableSources.FRACTURE_GROUND_SIMPLE, AnimationEvent.Side.CLIENT).params(new Vec3f(0.0F, -0.24F, -2.0F), Armatures.BIPED.get().toolR, 1.1D, 0.55F));
 
 		SPEAR_ONEHAND_AUTO = new BasicAttackAnimation(0.1F, 0.35F, 0.45F, 0.75F, null, biped.toolR, "biped/combat/spear_onehand_auto", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);

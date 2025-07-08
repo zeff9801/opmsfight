@@ -19,7 +19,6 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
-import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 
 import java.io.IOException;
@@ -166,7 +165,6 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(IResourceManager resourceManager, IProfiler profilerIn) {
 		reloadResourceManager(resourceManager);
-		Armatures.build(resourceManager);
 
 		this.animationClips.clear();
 		this.animationIdMap.clear();
@@ -185,6 +183,7 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 		SkillManager.reloadAllSkillsAnimations();
 		return prepareAnimationMap(resourceManager);
 	}
+
 
 	private Map<ResourceLocation, JsonElement> prepareAnimationMap(IResourceManager resourceManager) {
         // Your logic to populate the map goes here
