@@ -35,7 +35,6 @@ import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlots;
@@ -59,17 +58,17 @@ import java.util.function.Consumer;
 public class Animations {
 	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation() {
 
-		AnimationClip animatinoClip = new AnimationClip();
-
 		@Override
 		public void loadAnimation(IResourceManager resourceManager) {
 		}
 
+
 		@Override
 		public AnimationClip getAnimationClip() {
-			return this.animatinoClip;
+			return AnimationClip.EMPTY_CLIP;
 		}
 	};
+
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
 	public static StaticAnimation BIPED_RUN;
@@ -276,7 +275,7 @@ public class Animations {
 	public static StaticAnimation BIPED_STAFF_IDLE;
 	public static StaticAnimation BIPED_STAFF_RUN;
 	public static StaticAnimation STAFF_AUTO1;
-	public static StaticAnimation STAFF_AUTO2;
+	public static StaticAnimation  STAFF_AUTO2;
 	public static StaticAnimation STAFF_AUTO3;
 
 	public static StaticAnimation BIPED_PHANTOM_ASCENT_FORWARD;
@@ -285,35 +284,35 @@ public class Animations {
 	@SubscribeEvent
 	public static void registerAnimations(AnimationRegistryEvent event) {
 		event.getRegistryMap().put(EpicFightMod.MODID, Animations::build);
+
 	}
 
 
 	private static void build() {
-		HumanoidArmature biped = Armatures.BIPED.get();
 
 		//Map
-		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
+		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", biped)
+		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", biped)
+		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", biped)
+		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", biped)
+		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
-		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped)
+		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
 
 		//Biped Animations
-		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
-		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
-		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
-		BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", biped);
-		BIPED_CREATIVE_FLYING_FORWARD = new MovementAnimation(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, true, "biped/living/creative_fly_forward", biped, true)
+		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", Armatures.BIPED.get());
+		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", Armatures.BIPED.get());
+		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", Armatures.BIPED.get());
+		BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", Armatures.BIPED.get());
+		BIPED_CREATIVE_FLYING_FORWARD = new MovementAnimation(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, true, "biped/living/creative_fly_forward", Armatures.BIPED.get(), true)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION);
 
-		BIPED_CREATIVE_FLYING_BACKWARD = new MovementAnimation(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, true, "biped/living/creative_fly_backward", biped, true)
+		BIPED_CREATIVE_FLYING_BACKWARD = new MovementAnimation(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, true, "biped/living/creative_fly_backward", Armatures.BIPED.get(), true)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION2);
 
 		BIPED_CREATIVE_FLYING = new SelectiveAnimation((entitypatch) -> {
@@ -324,7 +323,7 @@ public class Animations {
 
 			return dot < 0.0D ? 1 : 0;
 		}, "biped/living/creative_fly", BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
-		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_mainhand", "biped/living/spyglass_offhand", biped)
+		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_mainhand", "biped/living/spyglass_offhand", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 					if (self.isLinkAnimation()) {
 						return speed;
@@ -357,111 +356,117 @@ public class Animations {
 					}
 				})
 				.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
-		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
-		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
-		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
-		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);
-		BIPED_FLOAT = new StaticAnimation(true, "biped/living/float", biped);
-		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
-		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
-		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
-		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
-		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig_mainhand", biped);
-		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
+		BIPED_RUN = new MovementAnimation(true, "biped/living/run", Armatures.BIPED.get());
+		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", Armatures.BIPED.get());
+		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", Armatures.BIPED.get());
+		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", Armatures.BIPED.get());
+		BIPED_FLOAT = new StaticAnimation(true, "biped/living/float", Armatures.BIPED.get());
+		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", Armatures.BIPED.get());
+		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", Armatures.BIPED.get());
+		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", Armatures.BIPED.get());
+		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", Armatures.BIPED.get());
+		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig_mainhand", Armatures.BIPED.get());
+		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", Armatures.BIPED.get());
 		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == Hand.OFF_HAND ? 1 : 0, "biped/living/dig", BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);
-		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
-		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", biped);
-		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_mainhand", "biped/living/drink_offhand", biped).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
-		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_mainhand", "biped/living/eat_offhand", biped).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
-		BIPED_JUMP = new StaticAnimation(0.083F, false, "biped/living/jump", biped);
-		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", biped);
-		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mainhand", "biped/living/shield_offhand", biped);
+		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", Armatures.BIPED.get());
+		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", Armatures.BIPED.get());
+		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_mainhand", "biped/living/drink_offhand", Armatures.BIPED.get()).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
+		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_mainhand", "biped/living/eat_offhand", Armatures.BIPED.get()).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
+		BIPED_JUMP = new StaticAnimation(0.083F, false, "biped/living/jump", Armatures.BIPED.get());
+		BIPED_RUN_SPEAR = new MovementAnimation(true, "biped/living/run_spear", Armatures.BIPED.get());
+		BIPED_BLOCK = new MirrorAnimation(0.25F, true, "biped/living/shield", "biped/living/shield_mainhand", "biped/living/shield_offhand", Armatures.BIPED.get());
 
-		BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", biped);
-		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", biped);
-		BIPED_HOLD_UCHIGATANA = new StaticAnimation(true, "biped/living/hold_uchigatana", biped);
-		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);
-		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
-		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
-		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
-		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
+		BIPED_HOLD_GREATSWORD = new StaticAnimation(true, "biped/living/hold_greatsword", Armatures.BIPED.get());
+		BIPED_HOLD_UCHIGATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_uchigatana_sheath", Armatures.BIPED.get());
+		BIPED_HOLD_UCHIGATANA = new StaticAnimation(true, "biped/living/hold_uchigatana", Armatures.BIPED.get());
+		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", Armatures.BIPED.get());
+		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", Armatures.BIPED.get());
+		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", Armatures.BIPED.get());
+		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", Armatures.BIPED.get());
+		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", Armatures.BIPED.get());
 
-		BIPED_WALK_GREATSWORD = new MovementAnimation(true, "biped/living/walk_greatsword", biped);
-		BIPED_WALK_SPEAR = new MovementAnimation(true, "biped/living/walk_spear", biped);
-		BIPED_WALK_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", biped);
-		BIPED_WALK_UCHIGATANA = new MovementAnimation(true, "biped/living/walk_uchigatana", biped);
-		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
-		BIPED_WALK_LONGSWORD = new MovementAnimation(true, "biped/living/walk_longsword", biped);
-		BIPED_WALK_LIECHTENAUER = new MovementAnimation(true, "biped/living/walk_liechtenauer", biped);
+		BIPED_WALK_GREATSWORD = new MovementAnimation(true, "biped/living/walk_greatsword", Armatures.BIPED.get());
+		BIPED_WALK_SPEAR = new MovementAnimation(true, "biped/living/walk_spear", Armatures.BIPED.get());
+		BIPED_WALK_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", Armatures.BIPED.get());
+		BIPED_WALK_UCHIGATANA = new MovementAnimation(true, "biped/living/walk_uchigatana", Armatures.BIPED.get());
+		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", Armatures.BIPED.get());
+		BIPED_WALK_LONGSWORD = new MovementAnimation(true, "biped/living/walk_longsword", Armatures.BIPED.get());
+		BIPED_WALK_LIECHTENAUER = new MovementAnimation(true, "biped/living/walk_liechtenauer", Armatures.BIPED.get());
 
-		BIPED_RUN_GREATSWORD = new MovementAnimation(true, "biped/living/run_greatsword", biped);
-		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", biped);
-		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", biped);
-		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
+		BIPED_RUN_GREATSWORD = new MovementAnimation(true, "biped/living/run_greatsword", Armatures.BIPED.get());
+		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", Armatures.BIPED.get());
+		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", Armatures.BIPED.get());
+		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", Armatures.BIPED.get());
 
-		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", biped);
+		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", Armatures.BIPED.get());
 
-		BIPED_UCHIGATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", biped)
+		BIPED_UCHIGATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", Armatures.BIPED.get())
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN));
-		BIPED_LIECHTENAUER_READY = new StaticAnimation(0.1F, false, "biped/living/liechtenauer_ready", biped);
+		BIPED_LIECHTENAUER_READY = new StaticAnimation(0.1F, false, "biped/living/liechtenauer_ready", Armatures.BIPED.get());
 
-		BIPED_HIT_SHIELD = new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mainhand", "biped/combat/hit_shield_offhand", biped);
+		BIPED_HIT_SHIELD = new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mainhand", "biped/combat/hit_shield_offhand", Armatures.BIPED.get());
 
-		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
+		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
-				.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
-		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
+				.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true)
+				.newTimePair(0.0F, 10000.0F)
+				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false)
+				.addStateRemoveOld(EntityState.TURNING_LOCKED, true)
+				.addStateRemoveOld(EntityState.INACTION, true);
 
-		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
-		BIPED_JAVELIN_THROW = new ReboundAnimation(0.08F, false, "biped/combat/javelin_throw_mid", "biped/combat/javelin_throw_up", "biped/combat/javelin_throw_down", "biped/combat/javelin_throw_lying", biped);
+		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", Armatures.BIPED.get());
+
+		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", Armatures.BIPED.get());
+		BIPED_JAVELIN_THROW = new ReboundAnimation(0.08F, false, "biped/combat/javelin_throw_mid", "biped/combat/javelin_throw_up", "biped/combat/javelin_throw_down", "biped/combat/javelin_throw_lying", Armatures.BIPED.get());
 
 		OFF_ANIMATION_HIGHEST = new OffAnimation("common/off_highest");
 		OFF_ANIMATION_MIDDLE = new OffAnimation("common/off_middle");
 		OFF_ANIMATION_LOWEST = new OffAnimation("common/off_lowest");
 
-		SPEAR_GUARD = new StaticAnimation(true, "biped/skill/guard_spear", biped);
-		SWORD_GUARD = new StaticAnimation(true, "biped/skill/guard_sword", biped);
-		SWORD_DUAL_GUARD = new StaticAnimation(true, "biped/skill/guard_dualsword", biped);
-		GREATSWORD_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_greatsword", biped);
-		UCHIGATANA_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_uchigatana", biped);
-		LONGSWORD_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_longsword", biped);
+		SPEAR_GUARD = new StaticAnimation(true, "biped/skill/guard_spear", Armatures.BIPED.get());
+		SWORD_GUARD = new StaticAnimation(true, "biped/skill/guard_sword", Armatures.BIPED.get());
+		SWORD_DUAL_GUARD = new StaticAnimation(true, "biped/skill/guard_dualsword", Armatures.BIPED.get());
+		GREATSWORD_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_greatsword", Armatures.BIPED.get());
+		UCHIGATANA_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_uchigatana", Armatures.BIPED.get());
+		LONGSWORD_GUARD = new StaticAnimation(0.25F, true, "biped/skill/guard_longsword", Armatures.BIPED.get());
 
-		STEEL_WHIRLWIND_CHARGING = new StaticAnimation(0.15F, false, "biped/skill/steel_whirlwind_charging", biped)
+		STEEL_WHIRLWIND_CHARGING = new StaticAnimation(0.15F, false, "biped/skill/steel_whirlwind_charging", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CHARGING);
 
 		/**
 		 * Main Frame Animations
 		 **/
-		BIPED_ROLL_FORWARD = new DodgeAnimation(0.1F, "biped/skill/roll_forward", 0.6F, 0.8F, biped)
+		BIPED_ROLL_FORWARD = new DodgeAnimation(0.1F, "biped/skill/roll_forward", 0.6F, 0.8F, Armatures.BIPED.get())
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL));
-		BIPED_ROLL_BACKWARD = new DodgeAnimation(0.1F, "biped/skill/roll_backward", 0.6F, 0.8F, biped)
+		BIPED_ROLL_BACKWARD = new DodgeAnimation(0.1F, "biped/skill/roll_backward", 0.6F, 0.8F, Armatures.BIPED.get())
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL));
 
-		BIPED_STEP_FORWARD = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_forward", 0.6F, 1.65F, biped)
+		BIPED_STEP_FORWARD = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_forward", 0.6F, 1.65F, Armatures.BIPED.get())
 				.addState(EntityState.LOCKON_ROTATE, true)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
-		BIPED_STEP_BACKWARD = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_backward", 0.6F, 1.65F, biped)
+		BIPED_STEP_BACKWARD = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_backward", 0.6F, 1.65F, Armatures.BIPED.get())
 				.addState(EntityState.LOCKON_ROTATE, true)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
-		BIPED_STEP_LEFT = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_left", 0.6F, 1.65F, biped)
+		BIPED_STEP_LEFT = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_left", 0.6F, 1.65F, Armatures.BIPED.get())
 				.addState(EntityState.LOCKON_ROTATE, true)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
-		BIPED_STEP_RIGHT = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_right", 0.6F, 1.65F, biped)
+		BIPED_STEP_RIGHT = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_right", 0.6F, 1.65F, Armatures.BIPED.get())
 				.addState(EntityState.LOCKON_ROTATE, true)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BIPED_KNOCKDOWN_WAKEUP_LEFT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_left", 0.8F, 0.6F, biped);
-		BIPED_KNOCKDOWN_WAKEUP_RIGHT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_right", 0.8F, 0.6F, biped);
+		BIPED_KNOCKDOWN_WAKEUP_LEFT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_left", 0.8F, 0.6F, Armatures.BIPED.get());
+		BIPED_KNOCKDOWN_WAKEUP_RIGHT = new DodgeAnimation(0.1F, "biped/skill/knockdown_wakeup_right", 0.8F, 0.6F, Armatures.BIPED.get());
 
-		BIPED_DEMOLITION_LEAP_CHARGING = new ActionAnimation(0.15F, "biped/skill/demolition_leap_charge", biped)
+		BIPED_DEMOLITION_LEAP_CHARGING = new ActionAnimation(0.15F, "biped/skill/demolition_leap_charge", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.STOP_MOVEMENT, true)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CHARGING)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, (self, pose, entitypatch, time, partialTicks) -> {
@@ -481,7 +486,7 @@ public class Animations {
 				.newTimePair(0.0F, Float.MAX_VALUE)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, true)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, true);
-		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
+		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", Armatures.BIPED.get())
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
@@ -491,7 +496,7 @@ public class Animations {
 					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
 					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, AnimationEvent.Side.CLIENT));
-		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
+		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", Armatures.BIPED.get())
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
@@ -501,8 +506,8 @@ public class Animations {
 					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
 					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, AnimationEvent.Side.CLIENT));
-		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", biped);
-		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
+		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", Armatures.BIPED.get());
+		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", Armatures.BIPED.get())
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
@@ -512,7 +517,7 @@ public class Animations {
 					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
 					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, AnimationEvent.Side.CLIENT));
-		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
+		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", Armatures.BIPED.get())
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
@@ -523,199 +528,209 @@ public class Animations {
 					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, AnimationEvent.Side.CLIENT));
 
-		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
-				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, biped.toolR, "biped/combat/fist_auto2", biped)
-				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_AUTO3 = new BasicAttackAnimation(0.08F, 0.05F, 0.16F, 0.5F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto3", biped)
-				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, biped.shoulderR, "biped/combat/fist_dash", biped)
+		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.15F, Hand.OFF_HAND, null, Armatures.BIPED.get().toolL, "biped/combat/fist_auto1", Armatures.BIPED.get())
+				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F);
+		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.15F, null, Armatures.BIPED.get().toolR, "biped/combat/fist_auto2", Armatures.BIPED.get())
+				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F);
+		FIST_AUTO3 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.5F, Hand.OFF_HAND, null, Armatures.BIPED.get().toolL, "biped/combat/fist_auto3", Armatures.BIPED.get())
+				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F);
+		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, Armatures.BIPED.get().shoulderR, "biped/combat/fist_dash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
-		SWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.0F, 0.1F, 0.4F, null, biped.toolR, "biped/combat/sword_auto1", biped)
+		SWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.0F, 0.1F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.05F, 0.15F, 0.4F, null, biped.toolR, "biped/combat/sword_auto2", biped)
+		SWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.05F, 0.15F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_AUTO3 = new BasicAttackAnimation(0.1F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/sword_auto3", biped)
+		SWORD_AUTO3 = new BasicAttackAnimation(0.1F, 0.05F, 0.15F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.1F, 0.2F, 0.65F, null, biped.toolR, "biped/combat/sword_dash", biped, true)
+		SWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.1F, 0.2F, 0.65F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.25F, 0.15F, 0.25F, 0.65F, null, biped.toolR, "biped/combat/greatsword_auto1", biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
-		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.5F, 0.65F, 1.5F, null, biped.toolR, "biped/combat/greatsword_auto2", biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
-		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", biped, false)
+		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.25F, 0.15F, 0.25F, 0.65F, null, Armatures.BIPED.get().toolR, "biped/combat/greatsword_auto1", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.5F, 0.65F, 1.5F, null, Armatures.BIPED.get().toolR, "biped/combat/greatsword_auto2", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, Armatures.BIPED.get().toolR, "biped/combat/greatsword_dash", Armatures.BIPED.get(), false)
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, false)
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.4F, Animations.ReusableSources.FRACTURE_GROUND_SIMPLE, AnimationEvent.Side.CLIENT).params(new Vec3f(0.0F, -0.24F, -2.0F), Armatures.BIPED.get().toolR, 1.1D, 0.55F));
 
-		SPEAR_ONEHAND_AUTO = new BasicAttackAnimation(0.1F, 0.35F, 0.45F, 0.75F, null, biped.toolR, "biped/combat/spear_onehand_auto", biped)
+		SPEAR_ONEHAND_AUTO = new BasicAttackAnimation(0.1F, 0.35F, 0.45F, 0.75F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_onehand_auto", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		SPEAR_TWOHAND_AUTO1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, biped.toolR, "biped/combat/spear_twohand_auto1", biped)
+		SPEAR_TWOHAND_AUTO1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_twohand_auto1", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
+				.newTimePair(0.0F, 0.55F)
+				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
+		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.7F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_twohand_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.7F, null, biped.toolR, "biped/combat/spear_twohand_auto2", biped)
+		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/combat/spear_dash", biped, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, biped.toolR, "biped/combat/tool_auto1", biped)
+		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/tool_auto1", Armatures.BIPED.get())
 				.setResourceLocation("biped/combat/sword_auto1");
-		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, biped.toolR, "biped/combat/sword_auto4", biped);
-		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, biped.toolR, "biped/combat/tool_dash", biped, true)
+		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_auto4", Armatures.BIPED.get());
+		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, Armatures.BIPED.get().toolR, "biped/combat/tool_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1));
-		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, biped.toolR, "biped/combat/axe_dash", biped, true);
-		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.08F, 0.1F, 0.2F, 0.3F, null, biped.toolR, "biped/combat/sword_dual_auto1", biped)
+		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, Armatures.BIPED.get().toolR, "biped/combat/axe_dash", Armatures.BIPED.get(), true);
+		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.08F, 0.1F, 0.2F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_dual_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.1F, 0.1F, 0.2F, 0.3F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/sword_dual_auto2", biped)
+		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.1F, 0.1F, 0.2F, 0.3F, Hand.OFF_HAND, null, Armatures.BIPED.get().toolL, "biped/combat/sword_dual_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, "biped/combat/sword_dual_auto3", biped,
-				new Phase(0.0F, 0.25F, 0.25F, 0.35F, 0.6F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
+		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, "biped/combat/sword_dual_auto3", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.25F, 0.25F, 0.35F, 0.6F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolR, null), AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", biped,
-				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
+		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolR, null), AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, null);
-		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto1", biped)
+		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto2", biped)
+		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_AUTO3 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/uchigatana_auto3", biped)
+		UCHIGATANA_AUTO3 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/uchigatana_dash", biped, true)
+		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/combat/uchigatana_sheath_auto", biped)
+		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.65F, ColliderPreset.BATTOJUTSU, Armatures.BIPED.get().rootJoint, "biped/combat/uchigatana_sheath_auto", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, biped.rootJoint, "biped/combat/uchigatana_sheath_dash", biped)
+		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, Armatures.BIPED.get().rootJoint, "biped/combat/uchigatana_sheath_dash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 
-		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
-		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
+		AXE_AUTO1 = new BasicAttackAnimation(0.15F, 0.05F, 0.15F, 0.7F, null, Armatures.BIPED.get().toolR, "biped/combat/axe_auto1", Armatures.BIPED.get());
+		AXE_AUTO2 = new BasicAttackAnimation(0.15F, 0.05F, 0.15F, 0.85F, null, Armatures.BIPED.get().toolR, "biped/combat/axe_auto2", Armatures.BIPED.get());
 
-		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, biped.toolR, "biped/combat/longsword_auto1", biped)
+		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.45F, null, biped.toolR, "biped/combat/longsword_auto2", biped)
+		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.45F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 1.0F, null, biped.toolR, "biped/combat/longsword_auto3", biped)
+		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 1.0F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.4F, 0.75F, null, biped.toolR, "biped/combat/longsword_dash", biped, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-
-		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto1", biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto2", biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto3", biped)
+		LONGSWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.4F, 0.75F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 
-		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null, biped.toolR, "biped/combat/tachi_auto1", biped)
+		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_liechtenauer_auto1", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_liechtenauer_auto2", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_liechtenauer_auto3", Armatures.BIPED.get())
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
+
+		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/tachi_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 3);
-		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, biped.toolR, "biped/combat/tachi_auto2", biped)
+		TACHI_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/tachi_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, biped.toolR, "biped/combat/tachi_auto3", biped)
+		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, Armatures.BIPED.get().toolR, "biped/combat/tachi_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_DASH = new DashAttackAnimation(0.1F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, true)
+		TACHI_DASH = new DashAttackAnimation(0.1F, 0.3F, 0.3F, 0.4F, 1.0F, null, Armatures.BIPED.get().toolR, "biped/combat/tachi_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
+		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.25F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto2", biped)
+		DAGGER_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.25F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.4F, null, biped.toolR, "biped/combat/dagger_auto3", biped)
+		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/combat/dagger_dash", biped, true)
+		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_dash", Armatures.BIPED.get(), true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.newTimePair(0.0F, 0.4F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
 				.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
 				.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
 				.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
-		DAGGER_DUAL_AUTO1 = new BasicAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, null, biped.toolR, "biped/combat/dagger_dual_auto1", biped)
+		DAGGER_DUAL_AUTO1 = new BasicAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_dual_auto1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.16F, Hand.OFF_HAND, null, biped.toolL, "biped/combat/dagger_dual_auto2", biped)
+		DAGGER_DUAL_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.16F, Hand.OFF_HAND, null, Armatures.BIPED.get().toolL, "biped/combat/dagger_dual_auto2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AUTO3 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.2F, null, biped.toolR, "biped/combat/dagger_dual_auto3", biped)
+		DAGGER_DUAL_AUTO3 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.2F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_dual_auto3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AUTO4 = new BasicAttackAnimation(0.15F, "biped/combat/dagger_dual_auto4", biped,
-				new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, Hand.OFF_HAND, biped.toolL, null)
-				, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
+		DAGGER_DUAL_AUTO4 = new BasicAttackAnimation(0.15F, "biped/combat/dagger_dual_auto4", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, Hand.OFF_HAND, Armatures.BIPED.get().toolL, null)
+				, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, Armatures.BIPED.get().toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
-		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, "biped/combat/dagger_dual_dash", biped,
-				new Phase(0.0F, 0.1F, 0.2F, 0.3F, 0.65F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
+		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, "biped/combat/dagger_dual_dash", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.1F, 0.2F, 0.3F, 0.65F, Float.MAX_VALUE, Hand.MAIN_HAND, AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolR, null), AttackAnimation.JointColliderPair.of(Armatures.BIPED.get().toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true);
 
-		TRIDENT_AUTO1 = new BasicAttackAnimation(0.3F, 0.05F, 0.16F, 0.45F, null, biped.toolR, "biped/combat/trident_auto1", biped);
-		TRIDENT_AUTO2 = new BasicAttackAnimation(0.05F, 0.25F, 0.36F, 0.55F, null, biped.toolR, "biped/combat/trident_auto2", biped);
-		TRIDENT_AUTO3 = new BasicAttackAnimation(0.2F, 0.3F, 0.46F, 0.9F, null, biped.toolR, "biped/combat/trident_auto3", biped);
+		TRIDENT_AUTO1 = new BasicAttackAnimation(0.3F, 0.05F, 0.16F, 0.45F, null, Armatures.BIPED.get().toolR, "biped/combat/trident_auto1", Armatures.BIPED.get());
+		TRIDENT_AUTO2 = new BasicAttackAnimation(0.05F, 0.25F, 0.36F, 0.55F, null, Armatures.BIPED.get().toolR, "biped/combat/trident_auto2", Armatures.BIPED.get());
+		TRIDENT_AUTO3 = new BasicAttackAnimation(0.2F, 0.3F, 0.46F, 0.9F, null, Armatures.BIPED.get().toolR, "biped/combat/trident_auto3", Armatures.BIPED.get());
 
-		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, biped.toolR, "biped/combat/sword_airslash", biped);
-		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, biped.torso, "biped/combat/sword_dual_airslash", biped);
-		UCHIGATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_airslash", biped);
-		UCHIGATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_sheath_airslash", biped)
+		SWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_airslash", Armatures.BIPED.get());
+		SWORD_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.5F, ColliderPreset.DUAL_SWORD_AIR_SLASH, Armatures.BIPED.get().torso, "biped/combat/sword_dual_airslash", Armatures.BIPED.get());
+		UCHIGATANA_AIR_SLASH = new AirSlashAnimation(0.1F, 0.05F, 0.16F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_airslash", Armatures.BIPED.get());
+		UCHIGATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, Armatures.BIPED.get().toolR, "biped/combat/uchigatana_sheath_airslash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/spear_onehand_airslash", biped);
-		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped)
+		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_onehand_airslash", Armatures.BIPED.get());
+		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_twohand_airslash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER));
-		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, biped.toolR, "biped/combat/longsword_airslash", biped);
-		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, biped.toolR, "biped/combat/greatsword_airslash", biped)
+		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, Armatures.BIPED.get().toolR, "biped/combat/longsword_airslash", Armatures.BIPED.get());
+		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, Armatures.BIPED.get().toolR, "biped/combat/greatsword_airslash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.FINISHER));
-		FIST_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/fist_airslash", biped)
+		FIST_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/combat/fist_airslash", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
-		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, biped.toolR, "biped/combat/dagger_airslash", biped)
+		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, Armatures.BIPED.get().toolR, "biped/combat/dagger_airslash", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, biped.torso, "biped/combat/dagger_dual_airslash", biped)
+		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, Armatures.BIPED.get().torso, "biped/combat/dagger_dual_airslash", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F)
 				.setResourceLocation("biped/combat/sword_dual_airslash");
-		AXE_AIRSLASH = new AirSlashAnimation(0.1F, 0.3F, 0.4F, 0.65F, null, biped.toolR, "biped/combat/axe_airslash", biped);
+		AXE_AIRSLASH = new AirSlashAnimation(0.1F, 0.3F, 0.4F, 0.65F, null, Armatures.BIPED.get().toolR, "biped/combat/axe_airslash", Armatures.BIPED.get());
 
-		SWORD_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.1F, 0.2F, 0.25F, 0.7F, null, biped.toolR, "biped/combat/sword_mount_attack", biped);
-		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, biped.toolR, "biped/combat/spear_mount_attack", biped)
+		SWORD_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.1F, 0.2F, 0.25F, 0.7F, null, Armatures.BIPED.get().toolR, "biped/combat/sword_mount_attack", Armatures.BIPED.get());
+		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, Armatures.BIPED.get().toolR, "biped/combat/spear_mount_attack", Armatures.BIPED.get())
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
-		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active1", biped);
-		SWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active2", biped);
-		SWORD_GUARD_ACTIVE_HIT3 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active3", biped);
+		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", Armatures.BIPED.get());
+		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active1", Armatures.BIPED.get());
+		SWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active2", Armatures.BIPED.get());
+		SWORD_GUARD_ACTIVE_HIT3 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active3", Armatures.BIPED.get());
 
-		LONGSWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_longsword_hit_active1", biped);
-		LONGSWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_longsword_hit_active2", biped);
+		LONGSWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_longsword_hit_active1", Armatures.BIPED.get());
+		LONGSWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_longsword_hit_active2", Armatures.BIPED.get());
 
-		SWORD_DUAL_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_dualsword_hit", biped);
-		BIPED_COMMON_NEUTRALIZED = new LongHitAnimation(0.05F, "biped/skill/guard_break1", biped);
-		GREATSWORD_GUARD_BREAK = new LongHitAnimation(0.05F, "biped/skill/guard_break2", biped);
+		SWORD_DUAL_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_dualsword_hit", Armatures.BIPED.get());
+		BIPED_COMMON_NEUTRALIZED = new LongHitAnimation(0.05F, "biped/skill/guard_break1", Armatures.BIPED.get());
+		GREATSWORD_GUARD_BREAK = new LongHitAnimation(0.05F, "biped/skill/guard_break2", Armatures.BIPED.get());
 
-		LONGSWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_longsword_hit", biped);
-		SPEAR_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_spear_hit", biped);
-		GREATSWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_greatsword_hit", biped);
-		UCHIGATANA_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_uchigatana_hit", biped);
+		LONGSWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_longsword_hit", Armatures.BIPED.get());
+		SPEAR_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_spear_hit", Armatures.BIPED.get());
+		GREATSWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_greatsword_hit", Armatures.BIPED.get());
+		UCHIGATANA_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_uchigatana_hit", Armatures.BIPED.get());
 
-		METEOR_SLAM = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.3F, 1.0F, ColliderPreset.GREATSWORD, biped.toolR, "biped/skill/greatsword_slam", biped)
+		METEOR_SLAM = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.3F, 1.0F, ColliderPreset.GREATSWORD, Armatures.BIPED.get().toolR, "biped/skill/greatsword_slam", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.NO_SOUND)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
 				.addProperty(AnimationProperty.ActionAnimationProperty.STOP_MOVEMENT, true)
+				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
+					if (self.isLinkAnimation()) {
+						return;
+					}
 					RayTraceResult hitResult = entitypatch.getOriginal().pick(50.0D, 1.0F, false);
 					Vector3d to = hitResult.getLocation();
-
-
 					Vector3d from = entitypatch.getOriginal().position();
-					Vector3d correction = to.subtract(from).normalize().scale(2.0D);
-
+					Vector3d correction = to.subtract(from).normalize().scale(5.0D);
 					TransformSheet correctedCoord = self.getCoord().getCorrectedModelCoord(entitypatch, from, to.add(correction), 0, 2);
 					transformSheet.readFrom(correctedCoord);
 				})
@@ -724,22 +739,20 @@ public class Animations {
 					if (0.2F > elapsedTime) {
 						if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 							SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
-
 							if (skill != null) {
 								return (float)Math.sqrt(7.0F / MeteorSlamSkill.getFallDistance(skill));
 							}
 						}
 					}
-
 					return 1.0F;
 				})
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					entitypatch.playSound(EpicFightSounds.ENTITY_MOVE, 1.0F, 0.0F, 0.0F);
 				}, AnimationEvent.Side.CLIENT));
-//				.addEvents(AnimationEvent.TimeStampedEvent.create(0.25F, Animations.ReusableSources.FRACTURE_METEOR_STRIKE, AnimationEvent.Side.SERVER)
-//						.params(new Vec3f(0.0F, -0.2F, -1.8F), Armatures.BIPED.toolR, 0.3F));
+				//.addEvents(AnimationEvent.TimeStampedEvent.create(0.25F, Animations.ReusableSources.FRACTURE_METEOR_STRIKE, AnimationEvent.Side.SERVER)
+					//	.params(new Vec3f(0.0F, -0.2F, -1.8F), Armatures.BIPED.get().toolR, 0.3F));
 
-		REVELATION_ONEHAND = new AttackAnimation(0.05F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST, biped.legR, "biped/skill/revelation_normal", biped)
+		REVELATION_ONEHAND = new AttackAnimation(0.05F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST, Armatures.BIPED.get().legR, "biped/skill/revelation_normal", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
@@ -749,11 +762,12 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(0.5F))
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.setter(0.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.setter(2.0F))
-				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_LOCROT_TARGET)
-				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_LOCROT_TARGET)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, null)
+				//.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_TARGET_LOCATION_ROTATION)
+				//.addProperty(AnimationProperty.ActionAnimationProperty.ENTITY_YROT_PROVIDER, MoveCoordFunctions.LOOK_DEST)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 
-		REVELATION_TWOHAND = new AttackAnimation(0.1F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST_FIXED, biped.rootJoint, "biped/skill/revelation_twohand", biped)
+		REVELATION_TWOHAND = new AttackAnimation(0.1F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST_FIXED, Armatures.BIPED.get().rootJoint, "biped/skill/revelation_twohand", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
@@ -763,39 +777,43 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(0.5F))
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.setter(0.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.setter(2.0F))
-				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_LOCROT_TARGET)
-				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_LOCROT_TARGET)
+				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, null)
+				//.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_TARGET_LOCATION_ROTATION)
+				//.addProperty(AnimationProperty.ActionAnimationProperty.ENTITY_YROT_PROVIDER, MoveCoordFunctions.LOOK_DEST)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 
-		BIPED_HIT_SHORT = new HitAnimation(0.05F, "biped/combat/hit_short", biped);
-		BIPED_HIT_LONG = new LongHitAnimation(0.08F, "biped/combat/hit_long", biped);
-		BIPED_HIT_ON_MOUNT = new LongHitAnimation(0.08F, "biped/combat/hit_on_mount", biped);
-		BIPED_LANDING = new LongHitAnimation(0.03F, "biped/living/landing", biped);
-		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, "biped/combat/knockdown", biped);
-		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
+		BIPED_HIT_SHORT = new HitAnimation(0.05F, "biped/combat/hit_short", Armatures.BIPED.get());
+		BIPED_HIT_LONG = new LongHitAnimation(0.08F, "biped/combat/hit_long", Armatures.BIPED.get());
+		BIPED_HIT_ON_MOUNT = new LongHitAnimation(0.08F, "biped/combat/hit_on_mount", Armatures.BIPED.get());
+				//.addProperty(StaticAnimationProperty.ON_ITEM_CHANGE_EVENT, Animations.ReusableSources.SET_TOOLS_BACK_WHEN_MOUNT_AND_ITEM_CHANGED)
+				//.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, Animations.ReusableSources.SET_TOOLS_BACK_WHEN_MOUNT)
+				//.addEvents(StaticAnimationProperty.ON_END_EVENTS, Animations.ReusableSources.REVERT_TO_HANDS);
+		BIPED_LANDING = new LongHitAnimation(0.03F, "biped/living/landing", Armatures.BIPED.get());
+		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, "biped/combat/knockdown", Armatures.BIPED.get());
+		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", Armatures.BIPED.get());
 
-		SWEEPING_EDGE = new AttackAnimation(0.1F, 0.0F, 0.15F, 0.3F, 0.8F, null, biped.toolR, "biped/skill/sweeping_edge", biped)
+		SWEEPING_EDGE = new AttackAnimation(0.1F, 0.0F, 0.15F, 0.3F, 0.8F, null, Armatures.BIPED.get().toolR, "biped/skill/sweeping_edge", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 1)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		DANCING_EDGE = new AttackAnimation(0.1F, "biped/skill/dancing_edge", biped,
-				new Phase(0.0F, 0.25F, 0.4F, 0.4F, 0.4F, biped.toolR, null), new Phase(0.4F, 0.4F, 0.5F, 0.55F, 0.6F, Hand.OFF_HAND, biped.toolL, null),
-				new Phase(0.6F, 0.6F, 0.7F, 1.15F, Float.MAX_VALUE, biped.toolR, null))
+		DANCING_EDGE = new AttackAnimation(0.1F, "biped/skill/dancing_edge", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.25F, 0.4F, 0.4F, 0.4F, Armatures.BIPED.get().toolR, null), new Phase(0.4F, 0.4F, 0.5F, 0.55F, 0.6F, Hand.OFF_HAND, Armatures.BIPED.get().toolL, null),
+				new Phase(0.6F, 0.6F, 0.7F, 1.15F, Float.MAX_VALUE, Armatures.BIPED.get().toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true);
 
-		THE_GUILLOTINE = new AttackAnimation(0.15F, 0.2F, 0.7F, 0.75F, 1.1F, null, biped.toolR, "biped/skill/the_guillotine", biped)
+		THE_GUILLOTINE = new AttackAnimation(0.15F, 0.2F, 0.7F, 0.75F, 1.1F, null, Armatures.BIPED.get().toolR, "biped/skill/the_guillotine", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 
-		HEARTPIERCER = new AttackAnimation(0.11F, "biped/skill/heartpiercer", biped,
-				new Phase(0.0F, 0.3F, 0.36F, 0.5F, 0.5F, biped.toolR, null), new Phase(0.5F, 0.5F, 0.56F, 0.75F, 0.75F, biped.toolR, null),
-				new Phase(0.75F, 0.75F, 0.81F, 1.05F, Float.MAX_VALUE, biped.toolR, null))
+		HEARTPIERCER = new AttackAnimation(0.11F, "biped/skill/heartpiercer", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.3F, 0.36F, 0.5F, 0.5F, Armatures.BIPED.get().toolR, null), new Phase(0.5F, 0.5F, 0.56F, 0.75F, 0.75F, Armatures.BIPED.get().toolR, null),
+				new Phase(0.75F, 0.75F, 0.81F, 1.05F, Float.MAX_VALUE, Armatures.BIPED.get().toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		GRASPING_SPIRAL_FIRST = new AttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/skill/grasping_spire_first", biped)
+		GRASPING_SPIRAL_FIRST = new AttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, Armatures.BIPED.get().toolR, "biped/skill/grasping_spire_first", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER)
 				.setResourceLocation("biped/combat/spear_dash")
@@ -831,13 +849,13 @@ public class Animations {
 						}, AnimationEvent.Side.SERVER)
 				);
 
-		GRASPING_SPIRAL_SECOND = new AttackAnimation(0.1F, 0.0F, 0.5F, 0.6F, 0.95F, null, biped.toolR, "biped/skill/grasping_spire_second", biped)
+		GRASPING_SPIRAL_SECOND = new AttackAnimation(0.1F, 0.0F, 0.5F, 0.6F, 0.95F, null, Armatures.BIPED.get().toolR, "biped/skill/grasping_spire_second", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 
-		STEEL_WHIRLWIND = new AttackAnimation(0.15F, "biped/skill/steel_whirlwind", biped,
-				new Phase(0.0F, 0.0F, 0.0F, 0.2F, 0.45F, 0.45F, biped.toolR, null), new Phase(0.45F, 0.45F, 0.45F, 0.65F, 1.0F, 1.0F, biped.toolR, null),
-				new Phase(1.0F, 1.0F, 1.0F, 1.2F, 2.55F, Float.MAX_VALUE, biped.toolR, null))
+		STEEL_WHIRLWIND = new AttackAnimation(0.15F, "biped/skill/steel_whirlwind", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.0F, 0.0F, 0.2F, 0.45F, 0.45F, Armatures.BIPED.get().toolR, null), new Phase(0.45F, 0.45F, 0.45F, 0.65F, 1.0F, 1.0F, Armatures.BIPED.get().toolR, null),
+				new Phase(1.0F, 1.0F, 1.0F, 1.2F, 2.55F, Float.MAX_VALUE, Armatures.BIPED.get().toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 4)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, (animation, entitypatch, transformSheet) -> {
@@ -864,12 +882,12 @@ public class Animations {
 				.newTimePair(0.0F, 2.55F)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BATTOJUTSU = new AttackAnimation(0.15F, 0.0F, 0.75F, 0.8F, 1.2F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/skill/battojutsu", biped)
+		BATTOJUTSU = new AttackAnimation(0.15F, 0.0F, 0.75F, 0.8F, 1.2F, ColliderPreset.BATTOJUTSU, Armatures.BIPED.get().rootJoint, "biped/skill/battojutsu", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN));
 
-		BATTOJUTSU_DASH = new AttackAnimation(0.15F, 0.43F, 0.7F, 0.8F, 1.4F, ColliderPreset.BATTOJUTSU_DASH, biped.rootJoint, "biped/skill/battojutsu_dash", biped)
+		BATTOJUTSU_DASH = new AttackAnimation(0.15F, 0.43F, 0.7F, 0.8F, 1.4F, ColliderPreset.BATTOJUTSU_DASH, Armatures.BIPED.get().rootJoint, "biped/skill/battojutsu_dash", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, null)
@@ -887,43 +905,43 @@ public class Animations {
 						}, AnimationEvent.Side.CLIENT)
 				);
 
-		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo1", biped)
+		RUSHING_TEMPO1 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/skill/rushing_tempo1", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo2", biped)
+		RUSHING_TEMPO2 = new AttackAnimation(0.05F, 0.0F, 0.15F, 0.25F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/skill/rushing_tempo2", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/skill/rushing_tempo3", biped)
+		RUSHING_TEMPO3 = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.25F, 0.6F, null, Armatures.BIPED.get().toolR, "biped/skill/rushing_tempo3", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 2)
 				.addProperty(AnimationProperty.ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER, false)
 				.newTimePair(0.0F, 0.25F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 
-		RELENTLESS_COMBO = new AttackAnimation(0.05F, "biped/skill/relentless_combo", biped,
-				new Phase(0.0F, 0.016F, 0.066F, 0.133F, 0.133F, Hand.OFF_HAND, biped.rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, 0.25F, biped.rootJoint, ColliderPreset.FIST_FIXED),
-				new Phase(0.25F, 0.25F, 0.3F, 0.366F, 0.366F, Hand.OFF_HAND, biped.rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, 0.483F, biped.rootJoint, ColliderPreset.FIST_FIXED),
-				new Phase(0.483F, 0.483F, 0.533F, 0.6F, 0.6F, Hand.OFF_HAND, biped.rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, 0.716F, biped.rootJoint, ColliderPreset.FIST_FIXED),
-				new Phase(0.716F, 0.716F, 0.766F, 0.833F, 0.833F, Hand.OFF_HAND, biped.rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, 1.1F, biped.rootJoint, ColliderPreset.FIST_FIXED))
+		RELENTLESS_COMBO = new AttackAnimation(0.05F, "biped/skill/relentless_combo", Armatures.BIPED.get(),
+				new Phase(0.0F, 0.016F, 0.066F, 0.133F, 0.133F, Hand.OFF_HAND, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, 0.25F, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED),
+				new Phase(0.25F, 0.25F, 0.3F, 0.366F, 0.366F, Hand.OFF_HAND, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, 0.483F, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED),
+				new Phase(0.483F, 0.483F, 0.533F, 0.6F, 0.6F, Hand.OFF_HAND, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, 0.716F, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED),
+				new Phase(0.716F, 0.716F, 0.766F, 0.833F, 0.833F, Hand.OFF_HAND, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, 1.1F, Armatures.BIPED.get().rootJoint, ColliderPreset.FIST_FIXED))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
 
-		EVISCERATE_FIRST = new AttackAnimation(0.08F, 0.0F, 0.05F, 0.15F, 0.45F, null, biped.toolR, "biped/skill/eviscerate_first", biped)
+		EVISCERATE_FIRST = new AttackAnimation(0.08F, 0.0F, 0.05F, 0.15F, 0.45F, null, Armatures.BIPED.get().toolR, "biped/skill/eviscerate_first", Armatures.BIPED.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_LOCROT_TARGET)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_LOCROT_TARGET);
 
-		EVISCERATE_SECOND = new AttackAnimation(0.15F, 0.0F, 0.04F, 0.05F, 0.4F, null, biped.toolR, "biped/skill/eviscerate_second", biped)
+		EVISCERATE_SECOND = new AttackAnimation(0.15F, 0.0F, 0.04F, 0.05F, 0.4F, null, Armatures.BIPED.get().toolR, "biped/skill/eviscerate_second", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.EVISCERATE)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.EVISCERATE)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
-		BLADE_RUSH_COMBO1 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo1", biped)
+		BLADE_RUSH_COMBO1 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/blade_rush_combo1", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
@@ -936,7 +954,7 @@ public class Animations {
 				.newTimePair(0.0F, 0.65F)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BLADE_RUSH_COMBO2 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo2", biped)
+		BLADE_RUSH_COMBO2 = new AttackAnimation(0.1F, 0.0F, 0.2F, 0.25F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/blade_rush_combo2", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
@@ -949,7 +967,7 @@ public class Animations {
 				.newTimePair(0.0F, 0.65F)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BLADE_RUSH_COMBO3 = new AttackAnimation(0.1F, 0.0F, 0.25F, 0.35F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_combo3", biped)
+		BLADE_RUSH_COMBO3 = new AttackAnimation(0.1F, 0.0F, 0.25F, 0.35F, 0.85F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/blade_rush_combo3", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_ON_LINK, false)
@@ -962,10 +980,10 @@ public class Animations {
 				.newTimePair(0.0F, 0.6F)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 
-		BLADE_RUSH_HIT = new LongHitAnimation(0.1F, "biped/interact/blade_rush_hit", biped)
+		BLADE_RUSH_HIT = new LongHitAnimation(0.1F, "biped/interact/blade_rush_hit", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.IS_DEATH_ANIMATION, true);
 
-		BLADE_RUSH_EXECUTE_BIPED = new GrapplingAttackAnimation(0.5F, 1.5F, "biped/skill/blade_rush_execute", biped)
+		BLADE_RUSH_EXECUTE_BIPED = new GrapplingAttackAnimation(0.5F, 1.5F, "biped/skill/blade_rush_execute", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageSources.TYPE.EXECUTION))
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_UPDATE_TIME, TimePairList.create(0.0F, 0.5F))
 				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.95F))
@@ -985,21 +1003,21 @@ public class Animations {
 							}
 						}, AnimationEvent.Side.CLIENT)
 				);
-		BLADE_RUSH_FAILED = new ActionAnimation(0.0F, 0.85F, "biped/skill/blade_rush_failed", biped)
+		BLADE_RUSH_FAILED = new ActionAnimation(0.0F, 0.85F, "biped/skill/blade_rush_failed", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.0F));
 
-		BLADE_RUSH_TRY = new GrapplingTryAnimation(0.1F, 0.0F, 0.4F, 0.4F, 0.45F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/blade_rush_try", BLADE_RUSH_HIT, BLADE_RUSH_EXECUTE_BIPED, BLADE_RUSH_FAILED, biped)
+		BLADE_RUSH_TRY = new GrapplingTryAnimation(0.1F, 0.0F, 0.4F, 0.4F, 0.45F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/blade_rush_try", BLADE_RUSH_HIT, BLADE_RUSH_EXECUTE_BIPED, BLADE_RUSH_FAILED, Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.15F, 0.35F))
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, null);
 
-		WRATHFUL_LIGHTING = new AttackAnimation(0.15F, "biped/skill/wrathful_lighting", biped
-				,new Phase(0.0F, 0.0F, 0.3F, 0.36F, 1.0F, Float.MAX_VALUE, biped.toolR, null)
-				,new Phase(Hand.MAIN_HAND, biped.rootJoint, null))
+		WRATHFUL_LIGHTING = new AttackAnimation(0.15F, "biped/skill/wrathful_lighting", Armatures.BIPED.get()
+				,new Phase(0.0F, 0.0F, 0.3F, 0.36F, 1.0F, Float.MAX_VALUE, Armatures.BIPED.get().toolR, null)
+				,new Phase(Hand.MAIN_HAND, Armatures.BIPED.get().rootJoint, null))
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
 				.addEvents(AnimationEvent.TimeStampedEvent.create(0.35F, ReusableSources.SUMMON_THUNDER, AnimationEvent.Side.SERVER));
 
-		TSUNAMI = new AttackAnimation(0.2F, 0.2F, 0.35F, 1.0F, 1.8F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/tsunami", biped)
+		TSUNAMI = new AttackAnimation(0.2F, 0.2F, 0.35F, 1.0F, 1.8F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/tsunami", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(10))
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, null)
@@ -1024,7 +1042,7 @@ public class Animations {
 					entitypatch.setAirborneState(true);
 				}, AnimationEvent.Side.SERVER));
 
-		TSUNAMI_REINFORCED = new AttackAnimation(0.2F, 0.2F, 0.35F, 0.65F, 1.3F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/tsunami_reinforced", biped)
+		TSUNAMI_REINFORCED = new AttackAnimation(0.2F, 0.2F, 0.35F, 0.65F, 1.3F, ColliderPreset.BIPED_BODY_COLLIDER, Armatures.BIPED.get().rootJoint, "biped/skill/tsunami_reinforced", Armatures.BIPED.get())
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(10))
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(AnimationProperty.ActionAnimationProperty.COORD_SET_TICK, null)
@@ -1052,12 +1070,12 @@ public class Animations {
 					entitypatch.setAirborneState(true);
 				}, AnimationEvent.Side.SERVER));
 
-		EVERLASTING_ALLEGIANCE_CALL = new ActionAnimation(0.1F, 0.55F, "biped/skill/everlasting_allegiance_call", biped)
+		EVERLASTING_ALLEGIANCE_CALL = new ActionAnimation(0.1F, 0.55F, "biped/skill/everlasting_allegiance_call", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.STOP_MOVEMENT, true);
-		EVERLASTING_ALLEGIANCE_CATCH = new ActionAnimation(0.05F, 0.8F, "biped/skill/everlasting_allegiance_catch", biped)
+		EVERLASTING_ALLEGIANCE_CATCH = new ActionAnimation(0.05F, 0.8F, "biped/skill/everlasting_allegiance_catch", Armatures.BIPED.get())
 				.addProperty(AnimationProperty.ActionAnimationProperty.STOP_MOVEMENT, true);
 
-		SHARP_STAB = new AttackAnimation(0.15F, 0.05F, 0.1F, 0.15F, 0.7F, ColliderPreset.LONGSWORD, biped.toolR, "biped/skill/sharp_stab", biped);
+		SHARP_STAB = new AttackAnimation(0.15F, 0.05F, 0.1F, 0.15F, 0.7F, ColliderPreset.LONGSWORD, Armatures.BIPED.get().toolR, "biped/skill/sharp_stab", Armatures.BIPED.get());
 	}
 
 	private static class ReuseableEvents {
