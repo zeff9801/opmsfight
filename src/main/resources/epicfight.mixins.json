@@ -11,6 +11,7 @@
     "MixinMinecraft",
     "MixinMinecraftInvoker",
     "MixinMovementInputFromOptions",
+    "MixinMouseHelper",
     "MixinResourceLoadProgressGui"
   ],
   "mixins": [
