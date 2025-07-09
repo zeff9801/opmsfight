@@ -30,5 +30,13 @@ public class GsonHelper {
     public static ClientAnimationDataReader fromJson(Gson gson, Reader reader, TypeToken<ClientAnimationDataReader> type) {
         return gson.fromJson(reader, type.getType());
     }
+
+    public static boolean getAsBoolean(JsonObject jObject, String memberName, boolean defaultValue) {
+        if (jObject.has(memberName)) {
+            return jObject.get(memberName).getAsBoolean();
+        } else {
+            return defaultValue;
+        }
+    }
 }
 

@@ -259,4 +259,13 @@ public class ParseUtil {
     }
 
     private ParseUtil() {}
+
+    public static String toLowerCase(String s) {
+        return s.toLowerCase(Locale.ROOT);
+    }
+
+    public static String toUpperCase(String s) {
+        return s.toUpperCase(Locale.ROOT);
+    }
+
 }

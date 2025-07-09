@@ -4,6 +4,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.client.animation.AnimationSubFileReader;
 import yesman.epicfight.api.client.animation.Layer;
 
 import java.util.List;
@@ -39,4 +40,14 @@ public class ClientAnimationProperties {
 	 * Multilayer for living animations (e.g. Greatsword holding animation should be played simultaneously with jumping animation)
 	 */
 	public static final StaticAnimationProperty<StaticAnimation> MULTILAYER_ANIMATION = new StaticAnimationProperty<StaticAnimation> ();
+	/**
+	 * An animation clip being played in first person.
+	 */
+	public static final StaticAnimationProperty<StaticAnimation> POV_ANIMATION = new StaticAnimationProperty<StaticAnimation> ();
+
+	/**
+	 * An animation clip being played in first person.
+	 */
+	public static final StaticAnimationProperty<AnimationSubFileReader.PovSettings> POV_SETTINGS = new StaticAnimationProperty<AnimationSubFileReader.PovSettings> ();
+
 }
