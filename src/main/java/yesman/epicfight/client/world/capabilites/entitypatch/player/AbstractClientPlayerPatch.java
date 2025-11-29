@@ -2,11 +2,13 @@ package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.IRideable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.util.MovementInput;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -34,6 +36,7 @@ import yesman.epicfight.api.utils.VectorUtils;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -46,12 +49,20 @@ import javax.annotation.Nonnull;
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> extends PlayerPatch<T> {
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
+	private int lastFlyDirectionInput;
+	private boolean prevForwardKey;
+	private boolean prevBackwardKey;
+	private int appliedFlyDirection;
 	
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.prevHeldItem = Items.AIR;
 		this.prevHeldItemOffHand = Items.AIR;
+		this.lastFlyDirectionInput = 0;
+		this.prevForwardKey = false;
+		this.prevBackwardKey = false;
+		this.appliedFlyDirection = 0;
 	}
 
 	@Override
@@ -62,6 +73,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
+			boolean flyingAbility = this.hasFlyingAbility();
+			this.updateFlyInputDirection();
 
 			if (original.isFallFlying() || original.isAutoSpinAttack()) {
 				currentLivingMotion = LivingMotions.FLY;
@@ -85,7 +98,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 
 					animator.baseLayer.animationPlayer.setReversed(y < 0);
 				}
-			} else if (!original.abilities.flying) {
+			} else if (!flyingAbility) {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
 					currentLivingMotion = LivingMotions.FLOAT;
 				else if (original.yCloak - original.yCloakO < -0.4F || this.isAirborneState())
@@ -109,10 +122,18 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 						currentLivingMotion = LivingMotions.IDLE;
 				}
 			} else {
-				if (this.isMoving())
+				if (this.isFlyingMoving()) {
 					currentLivingMotion = LivingMotions.CREATIVE_FLY;
-				else
+
+					// Force re-select animation immediately when intent flips to keep the pose in sync with input.
+					if (this.lastFlyDirectionInput != 0 && this.lastFlyDirectionInput != this.appliedFlyDirection) {
+						this.getClientAnimator().playAnimation(Animations.BIPED_CREATIVE_FLYING, 0.0F);
+						this.appliedFlyDirection = this.lastFlyDirectionInput;
+					}
+				} else {
 					currentLivingMotion = LivingMotions.CREATIVE_IDLE;
+					this.appliedFlyDirection = 0;
+				}
 			}
 		}
 
@@ -188,8 +209,61 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		}
 	}
 
+	private void updateFlyInputDirection() {
+		if (!(this.original instanceof ClientPlayerEntity clientPlayer)) {
+			float impulse = this.original.zza;
+
+			if (Math.abs(impulse) > 0.0001F) {
+				this.lastFlyDirectionInput = impulse > 0.0F ? 1 : -1;
+			} else {
+				this.lastFlyDirectionInput = 0;
+			}
+			return;
+		}
+
+		MovementInput input = clientPlayer.input;
+		if (input == null) {
+			return;
+		}
+
+		boolean forward = input.up;
+		boolean backward = input.down;
+
+		if (forward && !this.prevForwardKey) {
+			this.lastFlyDirectionInput = 1;
+		} else if (backward && !this.prevBackwardKey) {
+			this.lastFlyDirectionInput = -1;
+		} else if (forward != backward) {
+			this.lastFlyDirectionInput = forward ? 1 : -1;
+		} else if (!forward && !backward) {
+			this.lastFlyDirectionInput = 0;
+		}
+
+		this.prevForwardKey = forward;
+		this.prevBackwardKey = backward;
+	}
+
+	/**
+	 * Creative-flight movement should stay active while conflicting inputs are held so the animation can flip immediately.
+	 */
+	protected boolean isFlyingMoving() {
+		if (this.lastFlyDirectionInput != 0) {
+			return true;
+		}
+
+		return this.isMoving();
+	}
+
 	protected boolean isMoving() {
 		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
+	}
+
+	private boolean hasFlyingAbility() {
+		if (this.original.isLocalPlayer()) {
+			return this.original.abilities.flying;
+		}
+
+		return this.original.getEntityData().get(PlayerPatch.FLYING);
 	}
 
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
@@ -395,4 +469,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		return Direction.UP;
 	}
 
+	@Override
+	public int getFlyInputDirection() {
+		if (this.lastFlyDirectionInput != 0) {
+			return this.lastFlyDirectionInput;
+		}
+
+		return super.getFlyInputDirection();
+	}
 }

@@ -46,6 +46,8 @@ import java.util.UUID;
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
 	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final DataParameter<Float> STAMINA = new DataParameter<Float> (253, DataSerializers.FLOAT);
+	// Keep within 0-254 range and avoid collisions with other custom params (250-254 already used).
+	public static final DataParameter<Boolean> FLYING = new DataParameter<Boolean>(249, DataSerializers.BOOLEAN);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
 
@@ -69,6 +71,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
 		entityIn.getEntityData().define(STAMINA, Float.valueOf(0.0F));
+		entityIn.getEntityData().define(FLYING, Boolean.FALSE);
 	}
 	
 	@Override
@@ -177,6 +180,10 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public void serverTick(LivingUpdateEvent event) {
 		super.serverTick(event);
 
+		if (!this.original.level.isClientSide()) {
+			this.original.getEntityData().set(FLYING, this.original.abilities.flying);
+		}
+
 		if (!this.state.canBasicAttack()) {
 			this.tickSinceLastAction++;
 		}
@@ -251,6 +258,20 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 	public SkillContainer getSkill(int slotIndex) {
 		return this.getSkillCapability().skillContainers[slotIndex];
+	}
+
+	/**
+	 * Returns the last intended forward/backward input for flight-related animation selection.
+	 * Default implementation uses the stored forward impulse; client patches may override with key-aware data.
+	 */
+	public int getFlyInputDirection() {
+		float forwardImpulse = this.original.zza;
+
+		if (Math.abs(forwardImpulse) > 0.0001F) {
+			return forwardImpulse > 0.0F ? 1 : -1;
+		}
+
+		return 0;
 	}
 
 	public CapabilitySkill getSkillCapability() {

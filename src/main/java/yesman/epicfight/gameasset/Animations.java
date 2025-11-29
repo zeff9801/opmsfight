@@ -316,8 +316,20 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION2);
 
 		BIPED_CREATIVE_FLYING = new SelectiveAnimation((entitypatch) -> {
-			Vector3d view = entitypatch.getOriginal().getViewVector(1.0F);
-			Vector3d move = entitypatch.getOriginal().getDeltaMovement();
+			int inputDir = 0;
+
+			if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+				inputDir = playerpatch.getFlyInputDirection();
+			}
+
+			// Prefer direct input so swapping happens immediately even if momentum is still carrying the player.
+			if (inputDir != 0) {
+				return inputDir < 0 ? 1 : 0;
+			}
+
+			LivingEntity entity = entitypatch.getOriginal();
+			Vector3d view = entity.getViewVector(1.0F);
+			Vector3d move = entity.getDeltaMovement();
 
 			double dot = view.dot(move);
 
