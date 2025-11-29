@@ -21,25 +21,25 @@ public class BattojutsuPassive extends Skill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
             container.getSkill().setConsumptionSynchronize(event.getPlayerPatch(), 0.0F);
             container.getSkill().setStackSynchronize(event.getPlayerPatch(), 0);
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
             this.onReset(container);
         });
     }
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
     }
 
     @Override
     public void onReset(SkillContainer container) {
-        PlayerPatch<?> executer = container.getExecuter();
+        PlayerPatch<?> executer = container.getExecutor();
 
         if (!executer.isLogicalClient()) {
             if (container.getDataManager().getDataValue(SkillDataKeys.SHEATH.get())) {
@@ -53,13 +53,13 @@ public class BattojutsuPassive extends Skill {
 
     @Override
     public void setConsumption(SkillContainer container, float value) {
-        PlayerPatch<?> executer = container.getExecuter();
+        PlayerPatch<?> executer = container.getExecutor();
 
         if (!executer.isLogicalClient()) {
             if (container.getMaxResource() < value) {
                 ServerPlayerEntity serverPlayer = (ServerPlayerEntity) executer.getOriginal();
                 container.getDataManager().setDataSync(SkillDataKeys.SHEATH.get(), true, serverPlayer);
-                ((ServerPlayerPatch)container.getExecuter()).modifyLivingMotionByCurrentItem();
+                ((ServerPlayerPatch)container.getExecutor()).modifyLivingMotionByCurrentItem();
                 SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_UCHIGATANA_SCRAP, serverPlayer.getId(), 0.0F);
                 EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
             }

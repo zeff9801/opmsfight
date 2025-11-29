@@ -10,7 +10,6 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
-import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
@@ -44,7 +43,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 
     @Override
     public void onInitiate(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
             if (event.getPlayerPatch().isChargingSkill(this)) {
@@ -63,7 +62,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
 
-        container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
     }
 
     @Override

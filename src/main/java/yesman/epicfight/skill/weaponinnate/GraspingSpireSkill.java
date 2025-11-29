@@ -29,13 +29,13 @@ public class GraspingSpireSkill extends WeaponInnateSkill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
             if (this.first.get().equals(event.getAnimation())) {
                 container.getDataManager().setDataSync(SkillDataKeys.LAST_HIT_COUNT.get(), event.getPlayerPatch().getCurrenltyHurtEntities().size(), event.getPlayerPatch().getOriginal());
             }
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID, (event) -> {
             if (this.second.get().equals(event.getDamageSource().getAnimation())) {
                 float impact = event.getDamageSource().getImpact();
                 event.getDamageSource().setImpact(impact + container.getDataManager().getDataValue(SkillDataKeys.LAST_HIT_COUNT.get()) * 0.4F);
@@ -45,7 +45,7 @@ public class GraspingSpireSkill extends WeaponInnateSkill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID);
     }
 
     @Override

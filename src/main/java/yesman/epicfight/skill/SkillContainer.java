@@ -42,7 +42,7 @@ public class SkillContainer {
 		this.executor = executor;
 	}
 
-	public PlayerPatch<?> getExecuter() {
+	public PlayerPatch<?> getExecutor() {
 		return this.executor;
 	}
 

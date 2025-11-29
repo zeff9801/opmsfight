@@ -79,44 +79,44 @@ public class MeteorSlamSkill extends Skill {
 
     @Override
     public void onInitiate(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID, (event) -> {
-            if (container.getExecuter() instanceof ServerPlayerPatch serverPlayerPatch) {
+            if (container.getExecutor() instanceof ServerPlayerPatch serverPlayerPatch) {
                 Skill skill = event.getSkillContainer().getSkill();
 
                 if (skill.getCategory() != SkillCategories.BASIC_ATTACK && skill.getCategory() != SkillCategories.AIR_ATTACK) {
                     return;
                 }
 
-                if (container.getExecuter().getOriginal().isOnGround() || container.getExecuter().getOriginal().xRot < 40.0F) {
+                if (container.getExecutor().getOriginal().isOnGround() || container.getExecutor().getOriginal().xRot < 40.0F) {
                     return;
                 }
 
-                CapabilityItem holdingItem = container.getExecuter().getHoldingItemCapability(Hand.MAIN_HAND);
+                CapabilityItem holdingItem = container.getExecutor().getHoldingItemCapability(Hand.MAIN_HAND);
 
                 if (!this.slamMotions.containsKey(holdingItem.getWeaponCategory())) {
                     return;
                 }
 
-                StaticAnimation slamAnimation = this.slamMotions.get(holdingItem.getWeaponCategory()).apply(holdingItem, container.getExecuter());
+                StaticAnimation slamAnimation = this.slamMotions.get(holdingItem.getWeaponCategory()).apply(holdingItem, container.getExecutor());
 
                 if (slamAnimation == null) {
                     return;
                 }
 
-                Vector3d vec3 = container.getExecuter().getOriginal().getEyePosition(1.0F);
-                Vector3d vec31 = container.getExecuter().getOriginal().getViewVector(1.0F);
+                Vector3d vec3 = container.getExecutor().getOriginal().getEyePosition(1.0F);
+                Vector3d vec31 = container.getExecutor().getOriginal().getViewVector(1.0F);
                 Vector3d vec32 = vec3.add(vec31.x * 50.0D, vec31.y * 50.0D, vec31.z * 50.0D);
-                RayTraceResult hitResult = container.getExecuter().getOriginal().level.clip(new RayTraceContext(vec3, vec32, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, container.getExecuter().getOriginal()));
+                RayTraceResult hitResult = container.getExecutor().getOriginal().level.clip(new RayTraceContext(vec3, vec32, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, container.getExecutor().getOriginal()));
 
                 if (hitResult.getType() != RayTraceResult.Type.MISS) {
                     Vector3d to = hitResult.getLocation();
-                    Vector3d from = container.getExecuter().getOriginal().position();
+                    Vector3d from = container.getExecutor().getOriginal().position();
                     double distance = to.distanceTo(from);
 
                     if (distance > this.minDistance) {
-                        container.getExecuter().playAnimationSynchronized(slamAnimation, 0.0F);
+                        container.getExecutor().playAnimationSynchronized(slamAnimation, 0.0F);
                         container.getDataManager().setDataSync(SkillDataKeys.FALL_DISTANCE.get(), (float)distance, serverPlayerPatch.getOriginal());
                         container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), true);
                         event.setCanceled(true);
@@ -127,11 +127,11 @@ public class MeteorSlamSkill extends Skill {
 
         listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
             if (DamageSourceHelper.is(event.getDamageSource(), EpicFightDamageSources.TYPE.FALL_DAMAGE) && container.getDataManager().getDataValue(SkillDataKeys.PROTECT_NEXT_FALL.get())) {
-                float stamina = container.getExecuter().getStamina();
+                float stamina = container.getExecutor().getStamina();
                 float damage = event.getAmount();
                 event.setAmount(damage - stamina);
                 event.setCanceled(true);
-                container.getExecuter().setStamina(stamina - damage);
+                container.getExecutor().setStamina(stamina - damage);
                 container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
             }
         });
@@ -146,9 +146,9 @@ public class MeteorSlamSkill extends Skill {
     @Override
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
-        container.getExecuter().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
     }
 
     @Override

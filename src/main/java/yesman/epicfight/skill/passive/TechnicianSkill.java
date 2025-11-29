@@ -18,9 +18,9 @@ public class TechnicianSkill extends PassiveSkill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        container.getExecuter().getEventListener().addEventListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID, (event) -> {
-            float consumption = container.getExecuter().getModifiedStaminaConsume(container.getExecuter().getSkill(SkillSlots.DODGE).getSkill().getConsumption());
-            container.getExecuter().setStamina(container.getExecuter().getStamina() + consumption);
+        container.getExecutor().getEventListener().addEventListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID, (event) -> {
+            float consumption = container.getExecutor().getModifiedStaminaConsume(container.getExecutor().getSkill(SkillSlots.DODGE).getSkill().getConsumption());
+            container.getExecutor().setStamina(container.getExecutor().getStamina() + consumption);
         });
     }
 
@@ -28,7 +28,7 @@ public class TechnicianSkill extends PassiveSkill {
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
 
-        container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID);
     }
 }

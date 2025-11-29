@@ -28,7 +28,7 @@ public class EviscerateSkill extends WeaponInnateSkill {
     @Override
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
-        container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
             if (Animations.EVISCERATE_FIRST.equals(event.getAnimation())) {
                 List<LivingEntity> hurtEntities = event.getPlayerPatch().getCurrenltyHurtEntities();
 
@@ -43,7 +43,7 @@ public class EviscerateSkill extends WeaponInnateSkill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID);
     }
 
     @Override

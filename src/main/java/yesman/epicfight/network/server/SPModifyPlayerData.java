@@ -6,10 +6,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.gameasset.EpicFightSkills;
-import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
@@ -146,8 +142,8 @@ public class SPModifyPlayerData {
         })
         ;
 
-        BiConsumer<SPModifyPlayerData, PacketBuffer > encoder;
-        BiConsumer<SPModifyPlayerData, PacketBuffer > decoder;
+        BiConsumer<SPModifyPlayerData, PacketBuffer> encoder;
+        BiConsumer<SPModifyPlayerData, PacketBuffer> decoder;
 
         PacketType(BiConsumer<SPModifyPlayerData, PacketBuffer> encoder, BiConsumer<SPModifyPlayerData, PacketBuffer> decoder) {
             this.encoder = encoder;

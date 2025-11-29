@@ -62,14 +62,14 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 
     @Override
     public void onInitiate(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID, (event) -> {
             if (event.getSkillContainer().getSkill().getCategory() == SkillCategories.DODGE && !event.isStateExecutable()
-                    && this.availableWeapons.contains(container.getExecuter().getHoldingItemCapability(Hand.MAIN_HAND).getWeaponCategory())) {
+                    && this.availableWeapons.contains(container.getExecutor().getHoldingItemCapability(Hand.MAIN_HAND).getWeaponCategory())) {
 
-                EntityState state = container.getExecuter().getEntityState();
-                DynamicAnimation animation = container.getExecuter().getAnimator().getPlayerFor(null).getAnimation().getRealAnimation();
+                EntityState state = container.getExecutor().getEntityState();
+                DynamicAnimation animation = container.getExecutor().getAnimator().getPlayerFor(null).getAnimation().getRealAnimation();
 
                 if (!state.hurt() && !state.knockDown() && animation instanceof AttackAnimation) {
                     event.setStateExecutable(true);
@@ -79,9 +79,9 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 
         listener.addEventListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID, (event) -> {
             if (event.getSkill().getCategory() == SkillCategories.DODGE) {
-                if (!container.getExecuter().getOriginal().isCreative() && event.getSkill().getConsumption() > container.getExecuter().getStamina() && container.getStack() > 0) {
-                    if (!container.getExecuter().isLogicalClient()) {
-                        this.setStackSynchronize((ServerPlayerPatch)container.getExecuter(), container.getStack() - 1);
+                if (!container.getExecutor().getOriginal().isCreative() && event.getSkill().getConsumption() > container.getExecutor().getStamina() && container.getStack() > 0) {
+                    if (!container.getExecutor().isLogicalClient()) {
+                        this.setStackSynchronize((ServerPlayerPatch)container.getExecutor(), container.getStack() - 1);
                     }
 
                     event.setResourceType(Skill.Resource.NONE);
@@ -92,8 +92,8 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID);
     }
 
     @OnlyIn(Dist.CLIENT)

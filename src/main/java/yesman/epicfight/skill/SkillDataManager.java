@@ -34,8 +34,8 @@ public class SkillDataManager {
 
 		this.data.put(key, key.defaultValue());
 
-		if (key.syncronizeTrackingPlayers() && !this.container.getExecuter().isLogicalClient()) {
-			PlayerEntity owner = this.container.getExecuter().getOriginal();
+		if (key.syncronizeTrackingPlayers() && !this.container.getExecutor().isLogicalClient()) {
+			PlayerEntity owner = this.container.getExecutor().getOriginal();
 
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(
 					new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), key.defaultValue(), SPAddOrRemoveSkillData.AddRemove.ADD, owner.getId()),
@@ -46,8 +46,8 @@ public class SkillDataManager {
 	public <T> void removeData(SkillDataKey<T> key) {
 		this.data.remove(key);
 
-		if (key.syncronizeTrackingPlayers() && !this.container.getExecuter().isLogicalClient()) {
-			PlayerEntity owner = this.container.getExecuter().getOriginal();
+		if (key.syncronizeTrackingPlayers() && !this.container.getExecutor().isLogicalClient()) {
+			PlayerEntity owner = this.container.getExecutor().getOriginal();
 
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(
 					new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), null, SPAddOrRemoveSkillData.AddRemove.REMOVE, owner.getId()),

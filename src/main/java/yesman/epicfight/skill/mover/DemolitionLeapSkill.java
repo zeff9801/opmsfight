@@ -40,7 +40,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 
     @Override
     public void onInitiate(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
             if (event.getPlayerPatch().isChargingSkill(this)) {
@@ -69,9 +69,9 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
 
-        container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
-        container.getExecuter().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
+        container.getExecutor().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class PhantomAscentSkill extends Skill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
             if (event.getPlayerPatch().getOriginal().getVehicle() != null || !event.getPlayerPatch().isBattleMode() || event.getPlayerPatch().getOriginal().abilities.flying
@@ -92,13 +92,13 @@ public class PhantomAscentSkill extends Skill {
                         int horizon = left + right;
                         int degree = -(90 * horizon * (1 - Math.abs(vertic)) + 45 * vertic * horizon);
                         int scale = forward == 0 && backward == 0 && left == 0 && right == 0 ? 0 : (vertic < 0 ? -1 : 1);
-                        Vector3d forwardHorizontal = Vector3d.directionFromRotation(new Vector2f(0, container.getExecuter().getOriginal().getViewYRot(1.0F)));
+                        Vector3d forwardHorizontal = Vector3d.directionFromRotation(new Vector2f(0, container.getExecutor().getOriginal().getViewYRot(1.0F)));
                         Vector3d jumpDir = OpenMatrix4f.transform(OpenMatrix4f.createRotatorDeg(-degree, Vec3f.Y_AXIS), forwardHorizontal.scale(0.15D * scale));
-                        Vector3d deltaMove = container.getExecuter().getOriginal().getDeltaMovement();
+                        Vector3d deltaMove = container.getExecutor().getOriginal().getDeltaMovement();
 
                         //TODO Jump Boost Power doesn't exist. It's a 1.20 attribute modifier.
 //                        container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D + container.getExecuter().getOriginal().getJumpBoostPower(), deltaMove.z + jumpDir.z);
-                        container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D + 0.0, deltaMove.z + jumpDir.z);
+                        container.getExecutor().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D + 0.0, deltaMove.z + jumpDir.z);
 
 
                         event.getPlayerPatch().playAnimationClientPreemptive(this.animations[vertic < 0 ? 1 : 0].get(), 0.0F);
@@ -136,7 +136,7 @@ public class PhantomAscentSkill extends Skill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
         listener.removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);

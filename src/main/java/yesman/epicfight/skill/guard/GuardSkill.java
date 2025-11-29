@@ -119,7 +119,7 @@ public class GuardSkill extends Skill {
 
     @Override
     public void onInitiate(SkillContainer container) {
-        container.getExecuter().getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
             CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(Hand.MAIN_HAND);
 
             if (this.isHoldingWeaponAvailable(event.getPlayerPatch(), itemCapability, BlockType.GUARD) && this.isExecutableState(event.getPlayerPatch())) {
@@ -127,7 +127,7 @@ public class GuardSkill extends Skill {
             }
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
             CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(Hand.MAIN_HAND);
 
             if (this.isHoldingWeaponAvailable(event.getPlayerPatch(), itemCapability, BlockType.GUARD) && this.isExecutableState(event.getPlayerPatch())) {
@@ -135,17 +135,17 @@ public class GuardSkill extends Skill {
             }
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID, (event) -> {
             ServerPlayerEntity serverplayer = event.getPlayerPatch().getOriginal();
             container.getDataManager().setDataSync(SkillDataKeys.PENALTY_RESTORE_COUNTER.get(), serverplayer.tickCount, serverplayer);
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
             container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, event.getPlayerPatch().getOriginal());
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
-            if (container.getExecuter().getOriginal().isUsingItem() && this.guardMotions.containsKey(container.getExecuter().getHoldingItemCapability(Hand.MAIN_HAND).getWeaponCategory())) {
+        container.getExecutor().getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
+            if (container.getExecutor().getOriginal().isUsingItem() && this.guardMotions.containsKey(container.getExecutor().getHoldingItemCapability(Hand.MAIN_HAND).getWeaponCategory())) {
                 ClientPlayerEntity clientPlayer = event.getPlayerPatch().getOriginal();
                 clientPlayer.setSprinting(false);
                 clientPlayer.sprintTriggerTime = -1;
@@ -154,7 +154,7 @@ public class GuardSkill extends Skill {
             }
         });
 
-        container.getExecuter().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
             CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(event.getPlayerPatch().getOriginal().getUsedItemHand());
 
             if (this.isHoldingWeaponAvailable(event.getPlayerPatch(), itemCapability, BlockType.GUARD) && event.getPlayerPatch().getOriginal().isUsingItem() && this.isExecutableState(event.getPlayerPatch())) {
@@ -301,29 +301,29 @@ public class GuardSkill extends Skill {
     public void updateContainer(SkillContainer container) {
         super.updateContainer(container);
 
-        if (!container.getExecuter().isLogicalClient() && !container.getExecuter().getOriginal().isUsingItem()) {
+        if (!container.getExecutor().isLogicalClient() && !container.getExecutor().getOriginal().isUsingItem()) {
             float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get());
 
             if (penalty > 0) {
                 int hitTick = container.getDataManager().getDataValue(SkillDataKeys.PENALTY_RESTORE_COUNTER.get());
 
-                if (container.getExecuter().getOriginal().tickCount - hitTick > 40) {
-                    container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, (ServerPlayerEntity) container.getExecuter().getOriginal());
+                if (container.getExecutor().getOriginal().tickCount - hitTick > 40) {
+                    container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, (ServerPlayerEntity) container.getExecutor().getOriginal());
                 }
             }
         } else {
-            container.getExecuter().resetActionTick();
+            container.getExecutor().resetActionTick();
         }
     }
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
-        container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
+        container.getExecutor().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
     }
 
     @Override

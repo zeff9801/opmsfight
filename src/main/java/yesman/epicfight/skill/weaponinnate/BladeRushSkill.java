@@ -87,7 +87,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
+        container.getExecutor().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
             if (event.getDamageSource().getAnimation().idBetween(Animations.BLADE_RUSH_COMBO1, Animations.BLADE_RUSH_COMBO3) && this.tryAnimations.containsKey(event.getTarget().getType())) {
                 EffectInstance effectInstance = event.getTarget().getEffect(EpicFightMobEffects.INSTABILITY.get());
                 int amp = effectInstance == null ? 0 : effectInstance.getAmplifier() + 1;
@@ -98,7 +98,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
     }
 
     @Override

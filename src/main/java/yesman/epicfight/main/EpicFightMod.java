@@ -63,6 +63,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @Mod("epicfight")
@@ -143,6 +144,26 @@ public class EpicFightMod {
 
 		//ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
 	}
+
+	public static void logAndStacktraceIfDevSide(BiConsumer<Logger, String> logFunction, String message, Function<String, Throwable> exceptionProvider) {
+		logAndStacktraceIfDevSide(logFunction, message, exceptionProvider, message);
+	}
+
+	public static void logAndStacktraceIfDevSide(BiConsumer<Logger, String> logFunction, String message, Function<String, Throwable> exceptionProvider, String stackTraceMessage) {
+		logFunction.accept(LOGGER, message);
+		stacktraceIfDevSide(message, exceptionProvider, stackTraceMessage);
+	}
+
+	public static void stacktraceIfDevSide(String message, Function<String, Throwable> exceptionProvider) {
+		stacktraceIfDevSide(message, exceptionProvider, message);
+	}
+
+	public static void stacktraceIfDevSide(String message, Function<String, Throwable> exceptionProvider, String stackTraceMessage) {
+		if (exceptionProvider != null && EpicFightSharedConstants.IS_DEV_ENV) {
+			exceptionProvider.apply(stackTraceMessage).printStackTrace();
+		}
+	}
+
 
 	/**
 	 * FML Lifecycle Events
