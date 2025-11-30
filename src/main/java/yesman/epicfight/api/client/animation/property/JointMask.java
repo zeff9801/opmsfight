@@ -39,8 +39,8 @@ public class JointMask {
 
 	public static final BindModifier KEEP_CHILD_LOCROT = (entitypatch, baseLayerPose, result, livingMotion, wholeEntry, priority, joint, poses) -> {
 		Pose currentPose = poses.get(priority).getSecond();
-		JointTransform lowestTransform = baseLayerPose.getOrDefaultTransform(joint.getName());
-		JointTransform currentTransform = currentPose.getOrDefaultTransform(joint.getName());
+		JointTransform lowestTransform = baseLayerPose.orElseEmpty(joint.getName());
+		JointTransform currentTransform = currentPose.orElseEmpty(joint.getName());
 		result.getJointTransformData().getOrDefault(joint.getName(), JointTransform.empty()).translation().y = lowestTransform.translation().y;
 
 		OpenMatrix4f lowestMatrix = lowestTransform.toMatrix();
@@ -49,10 +49,10 @@ public class JointMask {
 		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(MATRIX_HOLDER_1, lowestMatrix, MATRIX_HOLDER_2);
 
 		for (Joint subJoint : joint.getSubJoints()) {
-			if (wholeEntry.isJointMasked(livingMotion, subJoint.getName())) {
-				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, MATRIX_HOLDER_3);
-				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, MATRIX_HOLDER_4);
-				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), MATRIX_HOLDER_5);
+			if (wholeEntry.isMasked(livingMotion, subJoint.getName())) {
+				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTransform(), lowestMatrix, MATRIX_HOLDER_3);
+				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTransform(), currentMatrix, MATRIX_HOLDER_4);
+				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTransform(), result.orElseEmpty(subJoint.getName()).toMatrix(), MATRIX_HOLDER_5);
 				OpenMatrix4f lowestFinal = OpenMatrix4f.mul(lowestLocalTransform, childTransform, MATRIX_HOLDER_6);
 				OpenMatrix4f currentFinal = OpenMatrix4f.mul(currentLocalTransform, childTransform, MATRIX_HOLDER_7);
 				VEC_HOLDER.set((currentFinal.m30 - lowestFinal.m30) * 0.5F, currentFinal.m31 - lowestFinal.m31, currentFinal.m32 - lowestFinal.m32);

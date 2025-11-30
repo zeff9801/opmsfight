@@ -113,7 +113,7 @@ public class CapabilitySkill {
 			nbt.put("learned:" + entry.getKey().toString().toLowerCase(Locale.ROOT), learnedNBT);
 		}
 
-		nbt.putString("playerMode", this.skillContainers[0].getExecuter().getPlayerMode().toString());
+		nbt.putString("playerMode", this.skillContainers[0].getExecutor().getPlayerMode().toString());
 
 		return nbt;
 	}
@@ -147,9 +147,18 @@ public class CapabilitySkill {
 		}
 
 		if (nbt.contains("playerMode")) {
-			this.skillContainers[0].getExecuter().toMode(PlayerPatch.PlayerMode.valueOf(nbt.getString("playerMode").toUpperCase(Locale.ROOT)), true);
+			String playerMode = nbt.getString("playerMode");
+
+			// Parse old name
+			if ("MINING".equals(playerMode)) {
+				playerMode = "VANILLA";
+			} else if ("BATTLE".equals(playerMode)) {
+				playerMode = "EPICFIGHT";
+			}
+
+			this.skillContainers[0].getExecutor().toMode(PlayerPatch.PlayerMode.valueOf(playerMode.toUpperCase(Locale.ROOT)), true);
 		} else {
-			this.skillContainers[0].getExecuter().toMiningMode(true);
+			this.skillContainers[0].getExecutor().toEpicFightMode(true);
 		}
 	}
 }

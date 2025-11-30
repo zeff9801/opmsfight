@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation.property;
 
-import com.joml.Quaternionf;
 import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -50,7 +49,7 @@ public class MoveCoordFunctions {
         VEC4F_HOLDER_1.set(jt.translation());
         VEC4F_HOLDER_2.set(prevJt.translation());
         OpenMatrix4f rotationTransform = entitypatch.getModelMatrix(1.0F).removeTranslation();
-        OpenMatrix4f localTransform = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+        OpenMatrix4f localTransform = entitypatch.getArmature().searchJointByName("Root").getLocalTransform().removeTranslation();
         rotationTransform.mulBack(localTransform);
         VEC4F_HOLDER_1.transform(rotationTransform);
         VEC4F_HOLDER_2.transform(rotationTransform);
@@ -246,25 +245,6 @@ public class MoveCoordFunctions {
 
         for (Keyframe kf : TRANSFORM_SHEET_HOLDER.getKeyframes()) {
             kf.transform().translation().rotate(-xRot, Vec3f.X_AXIS);
-        }
-
-        transformSheet.readFrom(TRANSFORM_SHEET_HOLDER);
-    };
-
-    public static final MoveCoordSetter VEX_TRACE = (self, entitypatch, transformSheet) -> {
-        TRANSFORM_SHEET_HOLDER.readFrom(self.getCoord());
-        Keyframe[] keyframes = TRANSFORM_SHEET_HOLDER.getKeyframes();
-        int startFrame = 0;
-        int endFrame = 6;
-        Vector3d pos = entitypatch.getOriginal().position();
-        Vector3d targetpos = entitypatch.getTarget().position();
-        float verticalDistance = (float) (targetpos.y - pos.y);
-        VEC3F_HOLDER_2.set(0.0F, -verticalDistance, (float)VectorUtils.horizontalDistance(targetpos.subtract(pos)));
-        VEC3F_HOLDER_3.set(0.0F, 0.0F, 1.0F);
-        Quaternionf rotator = Vec3f.getRotatorBetween(VEC3F_HOLDER_2, VEC3F_HOLDER_3);
-
-        for (int i = startFrame; i <= endFrame; i++) {
-            keyframes[i].transform().rotation().mul(rotator);
         }
 
         transformSheet.readFrom(TRANSFORM_SHEET_HOLDER);

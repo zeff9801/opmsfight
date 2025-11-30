@@ -54,7 +54,7 @@ public class JointMaskEntry {
 		return this.masks.getOrDefault(livingmotion, this.defaultMask);
 	}
 
-	public boolean isJointMasked(LivingMotion livingmotion, String jointName) {
+	public boolean isMasked(LivingMotion livingmotion, String jointName) {
 		return !this.masks.getOrDefault(livingmotion, this.defaultMask).contains(jointName);
 	}
 

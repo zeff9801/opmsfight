@@ -7,6 +7,7 @@ import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.*;
+import yesman.epicfight.api.asset.AssetAccessor;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -247,7 +248,7 @@ public class Layer {
 		}
 
 		public void offCompositeLayerLowerThan(LivingEntityPatch<?> entitypatch, StaticAnimation nextAnimation) {
-			for (Priority p : nextAnimation.getPriority().lowerEquals()) {
+			for (Priority p : nextAnimation.getPriority().lowersAndEqual()) {
 				if (p == Priority.LOWEST && !nextAnimation.isMainFrameAnimation()) {
 					continue;
 				}
@@ -294,23 +295,34 @@ public class Layer {
 	@OnlyIn(Dist.CLIENT)
 	public enum Priority {
 		/**
-		 * LOWEST: Common living motions (Composite layer having this priority will be overrided if base layer is {@link MainFrameAnimation})
-		 * MIDDLE: Composite living motions
-		 * HIGHEST: Not repeating composite motions (Shield hits, Katana sheath)
-		 * BASE: Base layer (not used)
-		 */
-		LOWEST, MIDDLE, HIGHEST;
+		 * The common usage of each layer
+		 *
+		 * LOWEST: Most of living cycle animations. Also a default value for animations doesn't inherit {@link MainFrameAnimation.class}
+		 * LOW: A few {@link ActionAnimation.class} that allows showing living cycle animations. e.g. step
+		 * MIDDLE: Most of composite living cycle animations. e.g. weapon holding animations
+		 * HIGH: A few composite animations that doesn't repeat. e.g. Uchigatana sheathing, Shield hit
+		 * HIGHEST: Most of {@link MainFrameAnimation.class} and a few living cycle animations. e.g. ladder animation
+		 **/
+		LOWEST, LOW, MIDDLE, HIGH, HIGHEST;
 
 		public Priority[] lowers() {
 			return Arrays.copyOfRange(Priority.values(), 0, this.ordinal());
 		}
 
-		public Priority[] uppers() {
-			return Arrays.copyOfRange(Priority.values(), this == LOWEST ? this.ordinal() : this.ordinal() + 1, 3);
+		public Priority[] lowersAndEqual() {
+			return Arrays.copyOfRange(Priority.values(), 0, this.ordinal() + 1);
 		}
 
-		public Priority[] lowerEquals() {
-			return Arrays.copyOfRange(Priority.values(), 0, this.ordinal() + 1);
+		public Priority[] highers() {
+			return Arrays.copyOfRange(Priority.values(), this.ordinal(), Priority.values().length);
+		}
+
+		public boolean isHigherThan(Priority priority) {
+			return this.ordinal() > priority.ordinal();
+		}
+
+		public boolean isHigherOrEqual(Priority priority) {
+			return this.ordinal() >= priority.ordinal();
 		}
 	}
 }

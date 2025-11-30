@@ -328,7 +328,7 @@ public class JsonModelLoader {
 
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
-				Joint joint = armature.getRootJoint();
+				Joint joint = armature.rootJoint;
 
 				for (AttackAnimation.JointColliderPair colliderInfo : phase.getColliders()) {
 					int pathIndex = armature.searchPathIndex(colliderInfo.getFirst().getName());
@@ -416,7 +416,7 @@ public class JsonModelLoader {
 				}
 			}
 
-			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
+			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTransform(), null), root);
 
 			if (!noTransformData) {
 				clip.addJointTransform(name, sheet);
@@ -467,7 +467,7 @@ public class JsonModelLoader {
 				}
 			}
 
-			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
+			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTransform(), null), root);
 			clip.addJointTransform(name, sheet);
 
 			if (clip.getClipTime() < times[times.length - 1]) {
@@ -517,7 +517,7 @@ public class JsonModelLoader {
 				}
 			}
 
-			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
+			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTransform(), null), root);
 			clip.addJointTransform(name, sheet);
 
 			if (clip.getClipTime() < times[times.length - 1]) {

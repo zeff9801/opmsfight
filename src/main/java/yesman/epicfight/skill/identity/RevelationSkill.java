@@ -106,21 +106,21 @@ public class RevelationSkill extends Skill {
 
     @Override
     public void onInitiate(SkillContainer container) {
-        PlayerEventListener listener = container.getExecuter().getEventListener();
+        PlayerEventListener listener = container.getExecutor().getEventListener();
 
         listener.addEventListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID, (event) -> {
-            if (container.getExecuter().isLogicalClient()) {
+            if (container.getExecutor().isLogicalClient()) {
                 Skill skill = event.getSkillContainer().getSkill();
 
                 if (skill.getCategory() != SkillCategories.WEAPON_INNATE) {
                     return;
                 }
 
-                if (container.getExecuter().getTarget() != null) {
-                    LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(container.getExecuter().getTarget(), LivingEntityPatch.class);
+                if (container.getExecutor().getTarget() != null) {
+                    LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(container.getExecutor().getTarget(), LivingEntityPatch.class);
 
                     if (entitypatch != null && container.isActivated()) {
-                        if (container.sendExecuteRequest((LocalPlayerPatch)container.getExecuter(), ClientEngine.getInstance().controllEngine).isExecutable()) {
+                        if (container.sendExecuteRequest((LocalPlayerPatch)container.getExecutor(), ClientEngine.getInstance().controllEngine).isExecutable()) {
                             container.setDuration(0);
                             event.setCanceled(true);
                         }
@@ -134,7 +134,7 @@ public class RevelationSkill extends Skill {
         });
 
         listener.addEventListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID, (event) -> {
-            LivingEntity target = container.getExecuter().getTarget();
+            LivingEntity target = container.getExecutor().getTarget();
 
             if (target != null && target.is(event.getDamageSource().getDirectEntity())) {
                 this.checkStackAndActivate(container, event.getPlayerPatch(), target, container.getDataManager().getDataValue(SkillDataKeys.STACKS.get()), this.dodgeStack);
@@ -144,7 +144,7 @@ public class RevelationSkill extends Skill {
 
         listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
             if (event.getResult() == ResultType.BLOCKED) {
-                LivingEntity target = container.getExecuter().getTarget();
+                LivingEntity target = container.getExecutor().getTarget();
 
                 if (target != null && target.is(event.getDamageSource().getDirectEntity())) {
                     int stacks = event.isParried() ? this.parryStack : this.blockStack;
@@ -163,11 +163,11 @@ public class RevelationSkill extends Skill {
 
     @Override
     public void onRemoved(SkillContainer container) {
-        container.getExecuter().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.SET_TARGET_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
-        container.getExecuter().getEventListener().removeListener(EventType.TARGET_INDICATOR_ALERT_CHECK_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.SET_TARGET_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.TARGET_INDICATOR_ALERT_CHECK_EVENT, EVENT_UUID);
     }
 
     @Override
@@ -199,6 +199,6 @@ public class RevelationSkill extends Skill {
     @OnlyIn(Dist.CLIENT)
     @Override
     public boolean shouldDraw(SkillContainer container) {
-        return container.getExecuter().getTarget() != null;
+        return container.getExecutor().getTarget() != null;
     }
 }

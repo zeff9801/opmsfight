@@ -23,8 +23,8 @@ public class DeathHarvestSkill extends PassiveSkill {
     public void onInitiate(SkillContainer container) {
         super.onInitiate(container);
 
-        container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
-            PlayerPatch<?> playerpatch = container.getExecuter();
+        container.getExecutor().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
+            PlayerPatch<?> playerpatch = container.getExecutor();
             PlayerEntity original = playerpatch.getOriginal();
             LivingEntity target = event.getTarget();
 
@@ -42,6 +42,6 @@ public class DeathHarvestSkill extends PassiveSkill {
     public void onRemoved(SkillContainer container) {
         super.onRemoved(container);
 
-        container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
+        container.getExecutor().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
     }
 }

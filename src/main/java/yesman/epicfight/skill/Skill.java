@@ -211,7 +211,7 @@ public abstract class Skill extends ForgeRegistryEntry<Skill> {
 		container.maxDuration = this.maxDuration;
 
 		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
-			ModifiableAttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			ModifiableAttributeInstance attr = container.getExecutor().getOriginal().getAttribute(stat.getKey());
 
 			if (!attr.hasModifier(stat.getValue())) {
 				attr.addTransientModifier(stat.getValue());
@@ -225,7 +225,7 @@ public abstract class Skill extends ForgeRegistryEntry<Skill> {
 	 */
 	public void onRemoved(SkillContainer container) {
 		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
-			ModifiableAttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			ModifiableAttributeInstance attr = container.getExecutor().getOriginal().getAttribute(stat.getKey());
 
 			if (attr.hasModifier(stat.getValue())) {
 				attr.removeModifier(stat.getValue());
@@ -258,7 +258,7 @@ public abstract class Skill extends ForgeRegistryEntry<Skill> {
 	}
 
 	public void updateContainer(SkillContainer container) {
-		PlayerPatch<?> executer = container.getExecuter();
+		PlayerPatch<?> executer = container.getExecutor();
 		container.prevResource = container.resource;
 		container.prevDuration = container.duration;
 
@@ -286,7 +286,7 @@ public abstract class Skill extends ForgeRegistryEntry<Skill> {
 			}
 
 			if (isEnd) {
-				if (!container.getExecuter().isLogicalClient() && this.activateType != ActivateType.CHARGING) {
+				if (!container.getExecutor().isLogicalClient() && this.activateType != ActivateType.CHARGING) {
 					this.cancelOnServer((ServerPlayerPatch)executer, null);
 				}
 
@@ -294,20 +294,20 @@ public abstract class Skill extends ForgeRegistryEntry<Skill> {
 			}
 		}
 
-		if (this.activateType == Skill.ActivateType.CHARGING && container.getExecuter().getChargingSkill() == this) {
+		if (this.activateType == Skill.ActivateType.CHARGING && container.getExecutor().getChargingSkill() == this) {
 			ChargeableSkill chargingSkill = (ChargeableSkill)this;
 			chargingSkill.chargingTick(executer);
 
-			if (!container.getExecuter().isLogicalClient()) {
-				container.getExecuter().resetActionTick();
+			if (!container.getExecutor().isLogicalClient()) {
+				container.getExecutor().resetActionTick();
 
-				if (container.getExecuter().getSkillChargingTicks(1.0F) > chargingSkill.getAllowedMaxChargingTicks()) {
+				if (container.getExecutor().getSkillChargingTicks(1.0F) > chargingSkill.getAllowedMaxChargingTicks()) {
 					SPSkillExecutionFeedback feedbackPacket = SPSkillExecutionFeedback.executed(executer.getSkill(this).getSlotId());
 					feedbackPacket.getBuffer().writeInt(executer.getAccumulatedChargeAmount());
-					chargingSkill.castSkill((ServerPlayerPatch)executer, container, container.getExecuter().getAccumulatedChargeAmount(), feedbackPacket, true);
-					container.getExecuter().resetSkillCharging();
+					chargingSkill.castSkill((ServerPlayerPatch)executer, container, container.getExecutor().getAccumulatedChargeAmount(), feedbackPacket, true);
+					container.getExecutor().resetSkillCharging();
 
-					EpicFightNetworkManager.sendToPlayer(feedbackPacket, (ServerPlayerEntity) container.getExecuter().getOriginal());
+					EpicFightNetworkManager.sendToPlayer(feedbackPacket, (ServerPlayerEntity) container.getExecutor().getOriginal());
 				}
 			}
 		}

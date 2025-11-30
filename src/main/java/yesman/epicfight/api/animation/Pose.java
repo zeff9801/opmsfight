@@ -1,11 +1,12 @@
 package yesman.epicfight.api.animation;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Maps;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
+import java.util.function.BiConsumer;
 
 public class Pose {
 	public static final Pose EMPTY_POSE = new Pose();
@@ -26,13 +27,19 @@ public class Pose {
 	public Map<String, JointTransform> getJointTransformData() {
 		return this.jointTransformData;
 	}
-
-	public JointTransform getOrDefaultTransform(String jointName) {
-		return this.jointTransformData.getOrDefault(jointName, JointTransform.empty());
+	public void disableJoint(Predicate<? super Map.Entry<String, JointTransform>> predicate) {
+		this.jointTransformData.entrySet().removeIf(predicate);
 	}
 
-	public void removeJointIf(Predicate<? super Map.Entry<String, JointTransform>> predicate) {
-		this.jointTransformData.entrySet().removeIf(predicate);
+	public void disableAllJoints() {
+		this.jointTransformData.clear();
+	}
+
+	public boolean hasTransform(String jointName) {
+		return this.jointTransformData.containsKey(jointName);
+	}
+	public JointTransform orElseEmpty(String jointName) {
+		return this.jointTransformData.getOrDefault(jointName, JointTransform.empty());
 	}
 
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
@@ -42,7 +49,7 @@ public class Pose {
 		mergedSet.addAll(pose2.jointTransformData.keySet());
 
 		for (String jointName : mergedSet) {
-			pose.putJointData(jointName, JointTransform.interpolate(pose1.getOrDefaultTransform(jointName), pose2.getOrDefaultTransform(jointName), pregression));
+			pose.putJointData(jointName, JointTransform.interpolate(pose1.orElseEmpty(jointName), pose2.orElseEmpty(jointName), pregression));
 		}
 
 		return pose;
@@ -54,10 +61,33 @@ public class Pose {
 		mergedSet.addAll(pose2.jointTransformData.keySet());
 
 		for (String jointName : mergedSet) {
-			dest.putJointData(jointName, JointTransform.interpolate(pose1.getOrDefaultTransform(jointName), pose2.getOrDefaultTransform(jointName), pregression));
+			dest.putJointData(jointName, JointTransform.interpolate(pose1.orElseEmpty(jointName), pose2.orElseEmpty(jointName), pregression));
 		}
 
 		return dest;
+	}
+
+	public void forEachEnabledTransforms(BiConsumer<String, JointTransform> task) {
+		this.jointTransformData.forEach(task);
+	}
+
+	public void load(Pose pose, LoadOperation operation) {
+		switch (operation) {
+			case SET -> {
+				this.disableAllJoints();
+				pose.forEachEnabledTransforms(this::putJointData);
+			}
+			case OVERWRITE -> {
+				pose.forEachEnabledTransforms(this::putJointData);
+			}
+			case APPEND_ABSENT -> {
+				pose.forEachEnabledTransforms((name, transform) -> {
+					if (!this.hasTransform(name)) {
+						this.putJointData(name, transform);
+					}
+				});
+			}
+		}
 	}
 
 	public String toString() {
@@ -69,5 +99,8 @@ public class Pose {
 		}
 
 		return sb.toString();
+	}
+	public enum LoadOperation {
+		SET, OVERWRITE, APPEND_ABSENT
 	}
 }

@@ -22,7 +22,7 @@ public class BerserkerSkill extends PassiveSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		PlayerEventListener listener = container.getExecuter().getEventListener();
+		PlayerEventListener listener = container.getExecutor().getEventListener();
 		listener.addEventListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID, (event) -> {
 			PlayerEntity player = event.getPlayerPatch().getOriginal();
 			float health = player.getHealth();
@@ -46,14 +46,14 @@ public class BerserkerSkill extends PassiveSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.getExecuter().getEventListener().removeListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID);
-		container.getExecuter().getEventListener().removeListener(EventType.MODIFY_DAMAGE_EVENT, EVENT_UUID);
+		container.getExecutor().getEventListener().removeListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID);
+		container.getExecutor().getEventListener().removeListener(EventType.MODIFY_DAMAGE_EVENT, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public boolean shouldDraw(SkillContainer container) {
-		PlayerEntity player = container.getExecuter().getOriginal();
+		PlayerEntity player = container.getExecutor().getOriginal();
 		float health = player.getHealth();
 		float maxHealth = player.getMaxHealth();
 		return (maxHealth - health) > 0.0F;
@@ -73,7 +73,7 @@ public class BerserkerSkill extends PassiveSkill {
 		gui.drawTexturedModalRectFixCoord(matStackIn.last().pose(), (width - x) * scaleMultiply, (height - y) * scaleMultiply, 0, 0, 255, 255);
 		matStackIn.scale(scaleMultiply, scaleMultiply, 1.0F);
 		
-		PlayerEntity player = container.getExecuter().getOriginal();
+		PlayerEntity player = container.getExecutor().getOriginal();
 		float health = player.getHealth();
 		float maxHealth = player.getMaxHealth();
 		float lostHealthPercentage = (maxHealth - health) / maxHealth;

@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ActionAnimation extends MainFrameAnimation {
+public  class ActionAnimation extends MainFrameAnimation {
 	public ActionAnimation(float convertTime, String path, Armature armature) {
 		this(convertTime, Float.MAX_VALUE, path, armature);
 	}
@@ -131,9 +131,9 @@ public class ActionAnimation extends MainFrameAnimation {
 
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		JointTransform jt = pose.getOrDefaultTransform("Root");
+		JointTransform jt = pose.orElseEmpty("Root");
 		Vec3f jointPosition = jt.translation();
-		OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+		OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTransform().removeTranslation();
 		OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
 		Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
 		worldPosition.x = 0.0F;
@@ -161,7 +161,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		playTime = Math.abs(playTime);
 		playTime *= EpicFightOptions.A_TICK;
 
-		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.transitionTime : this.transitionTime;
 		float totalTime = playTime * (int)Math.ceil(linkTime / playTime);
 		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
 		nextStartTime += totalTime - linkTime;
@@ -187,12 +187,12 @@ public class ActionAnimation extends MainFrameAnimation {
 			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
 
 			if (entry != null && entitypatch.isLogicalClient()) {
-				joint1.removeIf((jointName) -> entry.isJointMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
 			}
 
 			if (entry2 != null && entitypatch.isLogicalClient()) {
-				joint2.removeIf((jointName) -> entry2.isJointMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
 			}
 		}
@@ -229,7 +229,7 @@ public class ActionAnimation extends MainFrameAnimation {
 	}
 
 	public void removeRootTranslation(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {
-		JointTransform jt = pose.getOrDefaultTransform("Root");
+		JointTransform jt = pose.orElseEmpty("Root");
 
 		if (this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isEmpty()) {
 			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);

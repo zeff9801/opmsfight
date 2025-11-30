@@ -32,7 +32,7 @@ public class BasicAttack extends Skill {
 	public static void setComboCounterWithEvent(ComboCounterHandleEvent.Causal reason, ServerPlayerPatch playerpatch, SkillContainer container, StaticAnimation causalAnimation, int value) {
 		int prevValue = container.getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get());
 		ComboCounterHandleEvent comboResetEvent = new ComboCounterHandleEvent(reason, playerpatch, causalAnimation, prevValue, value);
-		container.getExecuter().getEventListener().triggerEvents(EventType.COMBO_COUNTER_HANDLE_EVENT, comboResetEvent);
+		container.getExecutor().getEventListener().triggerEvents(EventType.COMBO_COUNTER_HANDLE_EVENT, comboResetEvent);
 		container.getDataManager().setData(SkillDataKeys.COMBO_COUNTER.get(), comboResetEvent.getNextValue());
 	}
 
@@ -42,7 +42,7 @@ public class BasicAttack extends Skill {
 
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
+		container.getExecutor().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
 			if (!event.getAnimation().isBasicAttackAnimation() && event.getAnimation().getProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER).orElse(true)) {
 				CapabilityItem item = event.getPlayerPatch().getHoldingItemCapability(Hand.MAIN_HAND);
 
@@ -55,7 +55,7 @@ public class BasicAttack extends Skill {
 
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
+		container.getExecutor().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
 	}
 
 	@Override
@@ -120,8 +120,8 @@ public class BasicAttack extends Skill {
 
 	@Override
 	public void updateContainer(SkillContainer container) {
-		if (!container.getExecuter().isLogicalClient() && container.getExecuter().getTickSinceLastAction() > 16 && container.getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get()) > 0) {
-			setComboCounterWithEvent(ComboCounterHandleEvent.Causal.TIME_EXPIRED_RESET, (ServerPlayerPatch)container.getExecuter(), container, null, 0);
+		if (!container.getExecutor().isLogicalClient() && container.getExecutor().getTickSinceLastAction() > 16 && container.getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get()) > 0) {
+			setComboCounterWithEvent(ComboCounterHandleEvent.Causal.TIME_EXPIRED_RESET, (ServerPlayerPatch)container.getExecutor(), container, null, 0);
 		}
 	}
 }

@@ -36,7 +36,7 @@ public class ClientAnimator extends Animator {
 	public final Layer.BaseLayer baseLayer;
 	private LivingMotion currentMotion;
 	private LivingMotion currentCompositeMotion;
-	
+
 	// Static object holders for performance optimization
 	private static final Map<Layer.Priority, Pair<DynamicAnimation, Pose>> LAYER_POSES_HOLDER = Maps.newLinkedHashMap();
 	private static final List<Priority> PRIORITY_LIST_HOLDER = Lists.newArrayList();
@@ -56,7 +56,9 @@ public class ClientAnimator extends Animator {
 		this.baseLayer = layerSupplier.get();
 	}
 
-	/** Play an animation by animation instance **/
+	/**
+	 * Play an animation by animation instance
+	 **/
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float convertTimeModifier) {
 		Layer layer = nextAnimation.getLayerType() == Layer.LayerType.BASE_LAYER ? this.baseLayer : this.baseLayer.compositeLayers.get(nextAnimation.getPriority());
@@ -66,7 +68,7 @@ public class ClientAnimator extends Animator {
 
 	@Override
 	public void playAnimationInstantly(StaticAnimation nextAnimation) {
-		this.baseLayer.paused  = false;
+		this.baseLayer.paused = false;
 		this.baseLayer.playAnimationInstant(nextAnimation, this.entitypatch);
 	}
 
@@ -229,7 +231,7 @@ public class ClientAnimator extends Animator {
 		LAYER_POSES_HOLDER.clear();
 		composedPose.putJointData(baseLayerPose);
 
-		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.uppers()) {
+		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.highers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
 
 			if (priority == Layer.Priority.LOWEST && this.baseLayer.animationPlayer.getAnimation().isMainFrameAnimation()) {
@@ -389,11 +391,11 @@ public class ClientAnimator extends Animator {
 	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
 			if (animationType.isAssignableFrom(layer.animationPlayer.getAnimation().getClass())) {
-				return Pair.of(layer.animationPlayer, (T)layer.animationPlayer.getAnimation());
+				return Pair.of(layer.animationPlayer, (T) layer.animationPlayer.getAnimation());
 			}
 		}
 
-		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T)this.baseLayer.animationPlayer.getAnimation()) : null;
+		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T) this.baseLayer.animationPlayer.getAnimation()) : null;
 	}
 
 	public LivingEntityPatch<?> getOwner() {
@@ -406,10 +408,15 @@ public class ClientAnimator extends Animator {
 		STATE_MAP_HOLDER.clear();
 
 		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (this.baseLayer.baseLayerPriority.isHigherThan(layer.priority)) {
+				continue;
+			}
+
 			if (!layer.disabled) {
 				STATE_MAP_HOLDER.putAll(layer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, layer.animationPlayer.getElapsedTime()));
 			}
 
+			// put base layer states
 			if (layer.priority == this.baseLayer.baseLayerPriority) {
 				STATE_MAP_HOLDER.putAll(this.baseLayer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, this.baseLayer.animationPlayer.getElapsedTime()));
 			}
