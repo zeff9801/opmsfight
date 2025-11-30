@@ -149,7 +149,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
 				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
 				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.xRot, xAxis).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, yAxis));
-				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+				pose.orElseEmpty("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		}
 	}
@@ -378,20 +378,19 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		float prevYRot;
+		float yRotO;
 		float yRot;
 		float scale = this.original.isBaby() ? 0.5F : 1.0F;
 
-		if (this.original.getVehicle() instanceof LivingEntity) {
-			LivingEntity ridingEntity = (LivingEntity) this.original.getVehicle();
-			prevYRot = ridingEntity.yBodyRotO;
+		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
+			yRotO = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			prevYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.original.yRot;
+			yRotO = this.isLogicalClient() ? this.original.yBodyRotO : this.original.yRot;
 			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.yRot;
 		}
 
-		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevYRot, yRot, partialTicks, scale, scale, scale);
+		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRotO, yRot, partialTicks, scale, scale, scale);
 	}
 
 	public void reserveAnimation(StaticAnimation animation) {

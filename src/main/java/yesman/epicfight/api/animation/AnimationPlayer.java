@@ -1,6 +1,8 @@
 package yesman.epicfight.api.animation;
 
 import com.ibm.icu.impl.Pair;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.world.server.ServerWorld;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
@@ -8,9 +10,8 @@ import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
+
+import java.text.MessageFormat;
 
 public class AnimationPlayer {
 	protected float elapsedTime;
@@ -34,6 +35,7 @@ public class AnimationPlayer {
 		this.prevElapsedTime = this.elapsedTime;
 
 		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch, this.getAnimation());
+
 		PlaybackSpeedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 
 		if (playSpeedModifier != null) {
@@ -121,12 +123,19 @@ public class AnimationPlayer {
 		return this.play;
 	}
 
+	//public AssetAccessor<? extends StaticAnimation> getRealAnimation() {
+	//	return this.play.get().getRealAnimation();
+	//}
+
 	public void markToDoNotReset() {
 		this.doNotResetNext = true;
 	}
 
 	public boolean isEnd() {
 		return this.isEnd;
+	}
+	public void terminate() {
+		this.isEnd = true;
 	}
 
 	public boolean isReversed() {
@@ -143,7 +152,7 @@ public class AnimationPlayer {
 
 	@Override
 	public String toString() {
-		return this.getAnimation() + " " + this.prevElapsedTime + " " + this.elapsedTime;
+		return MessageFormat.format("{0} {1} {2}", this.getAnimation(), this.prevElapsedTime, this.elapsedTime);
 	}
 
 	/**

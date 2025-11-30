@@ -1,10 +1,10 @@
 package yesman.epicfight.api.animation.types;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -19,18 +19,24 @@ public class MainFrameAnimation extends StaticAnimation {
 	public MainFrameAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
 		super(convertTime, false, path, armature, noRegister);
 	}
-	
+
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		
+
 		entitypatch.updateEntityState();
-		
+
 		if (entitypatch.isLogicalClient()) {
-			entitypatch.getClientAnimator().resetMotion();
-			entitypatch.getClientAnimator().resetCompositeMotion();
+			entitypatch.updateMotion(false);
+
+			this.getProperty(AnimationProperty.StaticAnimationProperty.RESET_LIVING_MOTION).ifPresentOrElse(livingMotion -> {
+			}, () -> {
+				entitypatch.getClientAnimator().resetMotion();
+				entitypatch.getClientAnimator().resetCompositeMotion();
+			});
 			entitypatch.getClientAnimator().getPlayerFor(this).setReversed(false);
 		}
+		super.begin(entitypatch);
 
 		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 			if (playerpatch.isLogicalClient()) {
@@ -42,7 +48,7 @@ public class MainFrameAnimation extends StaticAnimation {
 			}
 		}
 	}
-	
+
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);

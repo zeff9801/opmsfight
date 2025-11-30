@@ -32,8 +32,8 @@ public class FABRIK {
 
 	private void addChainInternal(Pose pose, OpenMatrix4f parentTransform, Joint joint, int pathIndex) {
 		Joint nextJoint = joint.getSubJoints().get((pathIndex % 10) - 1);
-		JointTransform jt = pose.getOrDefaultTransform(nextJoint.getName());
-		OpenMatrix4f result = jt.getAnimationBindedMatrix(nextJoint, parentTransform);
+		JointTransform jt = pose.orElseEmpty(nextJoint.getName());
+		OpenMatrix4f result = jt.getAnimationBoundMatrix(nextJoint, parentTransform);
 		this.chains.add(new Chain(joint.getName(), parentTransform.toTranslationVector(), result.toTranslationVector()));
 		int remainPath = pathIndex / 10;
 
@@ -57,12 +57,12 @@ public class FABRIK {
 			tailToHeadM.transform(parentQuaternion.toVanillaQuaternion());
 			Vec3f tailToHead = Vec3f.fromMojangVector(tailToHeadM);
 			Vec3f tailToNewHead = chain.head.copy().sub(chain.tail);
-			Vec3f axis = Vec3f.cross(tailToNewHead, tailToHead, null).normalise();
+			Vec3f axis = Vec3f.cross(tailToNewHead, tailToHead, null).normalize();
 			float radian = Vec3f.getAngleBetween(tailToNewHead, tailToHead);
 			Quaternionf rotationQuat = QuaternionUtils.rotation(axis.toMojangVector(), radian);
 			parentQuaternion = QuaternionUtils.rotation(axis.scale(-1.0F).toMojangVector(), radian);
 
-			JointTransform jt = this.pose.getOrDefaultTransform(chain.jointName);
+			JointTransform jt = this.pose.orElseEmpty(chain.jointName);
 			jt.frontResult(JointTransform.getRotation(rotationQuat), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}

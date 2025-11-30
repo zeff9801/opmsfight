@@ -32,20 +32,26 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	protected static Method shouldShowName;
 	protected static Method renderNameTag;
 	private ResourceLocation overridingTexture;
-	
+
 	static {
 		shouldShowName = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "func_177070_b", Entity.class);
-		renderNameTag = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "func_225629_a_", Entity.class, ITextComponent.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
+		renderNameTag = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "func_225629_a_", Entity.class,
+				ITextComponent.class, MatrixStack.class, IRenderTypeBuffer.class, int.class);
 	}
 
-
-	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
+	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack,
+			int packedLight, float partialTicks) {
 		try {
-			RenderNameplateEvent renderNameplateEvent = new RenderNameplateEvent(entityIn, entityIn.getDisplayName(), renderer, poseStack, buffer, packedLight, partialTicks);
+			RenderNameplateEvent renderNameplateEvent = new RenderNameplateEvent(entityIn, entityIn.getDisplayName(),
+					renderer, poseStack, buffer, packedLight, partialTicks);
 			MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
-			
-			if (((boolean)shouldShowName.invoke(renderer, entityIn) || renderNameplateEvent.getResult() == Result.ALLOW) && renderNameplateEvent.getResult() != Result.DENY) {
-				renderNameTag.invoke(renderer, entityIn, renderNameplateEvent.getContent(), poseStack, buffer, packedLight);
+
+			if (((boolean) shouldShowName.invoke(renderer, entityIn)
+					|| renderNameplateEvent.getResult() == Result.ALLOW)
+					&& renderNameplateEvent.getResult() != Result.DENY) {
+				renderNameTag.invoke(renderer, entityIn, renderNameplateEvent.getContent(), poseStack, buffer,
+						packedLight);
+
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
@@ -54,11 +60,10 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 
 	public void mulPoseStack(MatrixStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
-		OpenMatrix4f transpose = modelMatrix.transpose(null);
 		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F).toVanillaQuaternion());
 		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
-		MathUtils.scaleStack(poseStack, transpose);
+		MathUtils.rotateStack(poseStack, modelMatrix);
+		MathUtils.scaleStack(poseStack, modelMatrix);
 
 		if (EntityUtils.isEntityUpsideDown(entityIn)) {
 			poseStack.translate(0.0D, entityIn.getBbHeight() + 0.1F, 0.0D);
@@ -76,7 +81,8 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 
 	public abstract AM getMesh(T entitypatch);
 
-	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {}
+	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
+	}
 
 	protected ResourceLocation getEntityTexture(T entitypatch, R renderer) {
 		if (this.overridingTexture != null) {

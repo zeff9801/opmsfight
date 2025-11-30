@@ -40,7 +40,7 @@ public class HitAnimation extends MainFrameAnimation {
 		dest.resetNextStartTime();
 
 		dest.getTransfroms().clear();
-		dest.setTotalTime(convertTimeModifier + this.convertTime);
+		dest.setTotalTime(convertTimeModifier + this.transitionTime);
 		dest.setConnectedAnimations(fromAnimation, this);
 
 		Map<String, JointTransform> data1 = startPose.getJointTransformData();
@@ -57,9 +57,9 @@ public class HitAnimation extends MainFrameAnimation {
 			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
 				Keyframe[] keyframes = new Keyframe[4];
 				keyframes[0] = new Keyframe(0, data1.get(jointName));
-				keyframes[1] = new Keyframe(this.convertTime, data2.get(jointName));
-				keyframes[2] = new Keyframe(this.convertTime + 0.033F, data3.get(jointName));
-				keyframes[3] = new Keyframe(convertTimeModifier + this.convertTime, data3.get(jointName));
+				keyframes[1] = new Keyframe(this.transitionTime, data2.get(jointName));
+				keyframes[2] = new Keyframe(this.transitionTime + 0.033F, data3.get(jointName));
+				keyframes[3] = new Keyframe(convertTimeModifier + this.transitionTime, data3.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}

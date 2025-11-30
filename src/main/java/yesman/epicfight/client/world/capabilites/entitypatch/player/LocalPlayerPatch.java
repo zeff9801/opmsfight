@@ -205,11 +205,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			}
 	}
 
-	@Override
-	protected boolean isMoving() {
-		return Math.abs(this.original.xxa) > 0.0004F || Math.abs(this.original.zza) > 0.0004F;
-	}
-
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
 		this.animator.playAnimation(animation, convertTimeModifier);
 		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, false));
@@ -225,18 +220,33 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		super.updateHeldItem(mainHandCap, offHandCap);
 
 		if (EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
-			this.toBattleMode(true);
+			this.toEpicFightMode(true);
 		} else if (EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
 			this.toMiningMode(true);
 		}
 	}
+
+	/*public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
+		this.cancelAnyAction(); //this.cancelItemUse();
+
+		this.getClientAnimator().iterAllLayers((layer) -> {
+			if (layer.isOff()) {
+				return;
+			}
+
+			layer.animationPlayer.getRealAnimation().get().getProperty(AnimationProperty.StaticAnimationProperty.ON_ITEM_CHANGE_EVENT).ifPresent((event) -> {
+				event.params(mainHandCap, offHandCap);
+				event.execute(this, layer.animationPlayer.getRealAnimation(), layer.animationPlayer.getPrevElapsedTime(), layer.animationPlayer.getElapsedTime());
+			});
+		});
+	}*/
 
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		AttackResult result = super.tryHurt(damageSource, amount);
 
 		if (EpicFightMod.CLIENT_CONFIGS.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
-			this.toBattleMode(true);
+			this.toEpicFightMode(true);
 		}
 
 		return result;
@@ -249,14 +259,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 	@Override
 	public void toMiningMode(boolean synchronize) {
-		if (this.playerMode != PlayerMode.MINING) {
+		if (this.playerMode != PlayerMode.VANILLA) {
 			ClientEngine.getInstance().renderEngine.downSlideSkillUI();
 			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(PointOfView.FIRST_PERSON);
 			}
 
 			if (synchronize) {
-				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.MINING));
+				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.VANILLA));
 			}
 		}
 
@@ -264,8 +274,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	@Override
-	public void toBattleMode(boolean synchronize) {
-		if (this.playerMode != PlayerMode.BATTLE) {
+	public void toEpicFightMode(boolean synchronize) {
+		if (this.playerMode != PlayerMode.EPICFIGHT) {
 			ClientEngine.getInstance().renderEngine.upSlideSkillUI();
 
 			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
@@ -273,11 +283,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			}
 
 			if (synchronize) {
-				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.BATTLE));
+				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.EPICFIGHT));
 			}
 		}
 
-		super.toBattleMode(synchronize);
+		super.toEpicFightMode(synchronize);
 	}
 
 	@Override

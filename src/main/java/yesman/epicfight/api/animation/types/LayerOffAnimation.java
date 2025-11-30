@@ -6,8 +6,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.client.animation.property.JointMaskEntry;
+import yesman.epicfight.api.asset.AssetAccessor;
 import yesman.epicfight.api.client.animation.Layer.Priority;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -15,21 +16,25 @@ import java.util.Optional;
 
 @OnlyIn(Dist.CLIENT)
 public class LayerOffAnimation extends DynamicAnimation {
-	private final AnimationClip animationClip = new AnimationClip();
+	private AnimationClip animationClip;
+	//private AssetAccessor<? extends DynamicAnimation> lastAnimation;
 	private DynamicAnimation lastAnimation;
+
 	private Pose lastPose;
 	private final Priority layerPriority;
-	
+
+
 	public LayerOffAnimation(Priority layerPriority) {
 		this.layerPriority = layerPriority;
+		this.animationClip = new AnimationClip();
 	}
-	
+
 	public void setLastPose(Pose pose) {
 		this.lastPose = pose;
 	}
 
 	@Override
-	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
+	public void end(LivingEntityPatch<?> entitypatch, AssetAccessor<? extends DynamicAnimation> nextAnimation, boolean isEnd) {
 		if (entitypatch.isLogicalClient() && isEnd) {
 			entitypatch.getClientAnimator().baseLayer.disableLayer(this.layerPriority);
 		}
@@ -39,7 +44,7 @@ public class LayerOffAnimation extends DynamicAnimation {
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
 		Pose interpolatedPose = Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.getTotalTime());
-		interpolatedPose.removeJointIf((joint) -> !this.lastPose.getJointTransformData().containsKey(joint.getKey()));
+		interpolatedPose.disableJoint((joint) -> !this.lastPose.hasTransform(joint.getKey()));
 
 		return interpolatedPose;
 	}
@@ -54,11 +59,14 @@ public class LayerOffAnimation extends DynamicAnimation {
 		return this.lastAnimation.getProperty(propertyType);
 	}
 
+	//public void setLastAnimation(AssetAccessor<? extends DynamicAnimation> animation) {
+	//	this.lastAnimation = animation;
+	//}
 	public void setLastAnimation(DynamicAnimation animation) {
 		this.lastAnimation = animation;
 	}
 
-	@Override
+		@Override
 	public boolean doesHeadRotFollowEntityHead() {
 		return this.lastAnimation.doesHeadRotFollowEntityHead();
 	}
@@ -75,11 +83,36 @@ public class LayerOffAnimation extends DynamicAnimation {
 
 	@Override
 	public boolean hasTransformFor(String joint) {
-		return this.lastPose.getJointTransformData().containsKey(joint);
+		return this.lastPose.hasTransform(joint);
 	}
 
 	@Override
 	public boolean isLinkAnimation() {
 		return true;
 	}
+
+	/*@Override
+	public LayerOffAnimation get() {
+		return this;
+	}
+
+	@Override
+	public ResourceLocation registryName() {
+		return null;
+	}
+
+	@Override
+	public boolean isPresent() {
+		return true;
+	}
+
+	@Override
+	public int id() {
+		return -1;
+	}
+
+	@Override
+	public boolean inRegistry() {
+		return false;
+	}*/
 }

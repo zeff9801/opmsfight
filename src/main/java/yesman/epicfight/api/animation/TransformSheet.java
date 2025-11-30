@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation;
 
-import net.minecraft.util.math.MathHelper;
 import com.joml.Quaternionf;
 import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.api.utils.VectorUtils;
@@ -11,9 +10,15 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TransformSheet {
 	private Keyframe[] keyframes;
+	public static final TransformSheet EMPTY_SHEET = new TransformSheet(List.of(new Keyframe(0.0F, JointTransform.empty()), new Keyframe(Float.MAX_VALUE, JointTransform.empty())));
+
+	public static final Function<Vector3d, TransformSheet> EMPTY_SHEET_PROVIDER = (translation) -> {
+		return new TransformSheet(List.of(new Keyframe(0.0F, JointTransform.translation(new Vec3f(translation))), new Keyframe(Float.MAX_VALUE, JointTransform.empty())));
+	};
 
 	public TransformSheet(List<Keyframe> keyframeList) {
 		this(keyframeList.toArray(new Keyframe[0]));
@@ -97,39 +102,24 @@ public class TransformSheet {
 	}
 
 	public void correctAnimationByNewPosition(Vec3f startpos, Vec3f startToEnd, Vec3f modifiedStart, Vec3f modifiedStartToEnd) {
-		final Keyframe[] keyframes = this.getKeyframes();
-		final Keyframe startKeyframe = keyframes[0];
-		final Keyframe endKeyframe = keyframes[keyframes.length - 1];
-		final float startTime = startKeyframe.time();
-		final float endTime = endKeyframe.time();
-		final float timeSpan = endTime - startTime;
-		final float pitchDeg = (float) Math.toDegrees(MathHelper.atan2(modifiedStartToEnd.y - startToEnd.y, modifiedStartToEnd.length()));
-		final float yawDeg = (float) Math.toDegrees(MathUtils.getAngleBetween(
-				modifiedStartToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise(),
-				startToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalise()));
-		final OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
-		final Vec3f line = new Vec3f();
-		final Vec3f modifiedLine = new Vec3f();
-		final Vec3f animOnLine = new Vec3f();
-		final Vec3f toNewKeyTransform = new Vec3f();
-		for (int idx = 0; idx < keyframes.length; idx++) {
-			final Keyframe kf = keyframes[idx];
-			final float lerp = (kf.time() - startTime) / timeSpan;
-			line.set(startToEnd);
-			line.scale(lerp);
-			modifiedLine.set(modifiedStartToEnd);
-			modifiedLine.scale(lerp);
-			final Vec3f keyTransform = kf.transform().translation();
-			Vec3f.sub(keyTransform, startpos, animOnLine).multiply(-1.0F, 1.0F, -1.0F);
-			animOnLine.sub(line);
-			toNewKeyTransform.set(modifiedLine);
-			OpenMatrix4f.transform3v(rotator, animOnLine, animOnLine);
-			toNewKeyTransform.add(animOnLine);
-			keyTransform.set(modifiedStart);
-			keyTransform.add(toNewKeyTransform);
+		Keyframe[] keyframes = this.getKeyframes();
+		Keyframe startKeyframe = keyframes[0];
+		Keyframe endKeyframe = keyframes[keyframes.length - 1];
+		float pitchDeg = (float) Math.toDegrees(Math.atan2(modifiedStartToEnd.y - startToEnd.y, modifiedStartToEnd.length()));
+		float yawDeg = (float) Math.toDegrees(MathUtils.getAngleBetween(modifiedStartToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalize(), startToEnd.copy().multiply(1.0F, 0.0F, 1.0F).normalize()));
+
+		for (Keyframe kf : keyframes) {
+			float lerp = (kf.time() - startKeyframe.time()) / (endKeyframe.time() - startKeyframe.time());
+			Vec3f line = MathUtils.lerpVector(new Vec3f(0F, 0F, 0F), startToEnd, lerp);
+			Vec3f modifiedLine = MathUtils.lerpVector(new Vec3f(0F, 0F, 0F), modifiedStartToEnd, lerp);
+			Vec3f keyTransform = kf.transform().translation();
+			Vec3f startToKeyTransform = keyTransform.copy().sub(startpos).multiply(-1.0F, 1.0F, -1.0F);
+			Vec3f animOnLine = startToKeyTransform.copy().sub(line);
+			OpenMatrix4f rotator = OpenMatrix4f.createRotatorDeg(pitchDeg, Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(yawDeg, Vec3f.Y_AXIS));
+			Vec3f toNewKeyTransform = modifiedLine.add(OpenMatrix4f.transform3v(rotator, animOnLine, null));
+			keyTransform.set(modifiedStart.copy().add((toNewKeyTransform)));
 		}
 	}
-
 	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vector3d start, Vector3d dest, int startFrame, int endFrame) {
 		TransformSheet transform = this.copyAll();
 		float horizontalDistance = (float) VectorUtils.horizontalDistance(dest.subtract(start));

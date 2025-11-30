@@ -31,7 +31,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 
 	@SafeVarargs
 	public MultiCollider(T... colliders) {
-		super(null, null);
+		super(new Vector3d(colliders[0].modelCenter.x, colliders[0].modelCenter.y, colliders[0].modelCenter.z), null);
 
 		Collections.addAll(this.colliders, colliders);
 		this.numberOfColliders = colliders.length;
@@ -61,16 +61,15 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		for (Collider collider : colliders) {
 			OpenMatrix4f transformMatrix;
 			Armature armature = entitypatch.getArmature();
-			int pathIndex = armature.searchPathIndex(joint.getName());
 
-			if (pathIndex == -1) {
+			if (armature.rootJoint.equals(joint)) {
 				Pose rootPose = new Pose();
 				rootPose.putJointData("Root", JointTransform.empty());
 				attackAnimation.modifyPose(attackAnimation, rootPose, entitypatch, elapsedTime, 1.0F);
-				transformMatrix = rootPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(entitypatch.getArmature().rootJoint, new OpenMatrix4f()).removeTranslation();
+				transformMatrix = rootPose.orElseEmpty("Root").getAnimationBoundMatrix(entitypatch.getArmature().rootJoint, new OpenMatrix4f()).removeTranslation();
 			} else {
 				float interpolateTime = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
-				transformMatrix = armature.getBindedTransformByJointIndex(attackAnimation.getPoseByTime(entitypatch, interpolateTime, 1.0F), pathIndex);
+				transformMatrix = armature.getBindedTransformFor(attackAnimation.getPoseByTime(entitypatch, interpolateTime, 1.0F), joint);
 			}
 
 			double x = entitypatch.getXOld() + (original.getX() - entitypatch.getXOld()) * interpolation;

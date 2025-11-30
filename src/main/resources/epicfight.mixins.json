@@ -19,8 +19,7 @@
     "MixinLivingEntity",
     "MixinLivingEntityAccessor",
     "MixinMob",
-    "MixinPlayer",
-    "MixinServerPlayer"
+    "MixinPlayer"
   ],
   "injectors": {
     "defaultRequire": 1

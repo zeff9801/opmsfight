@@ -11,6 +11,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import javax.annotation.Nullable;
@@ -58,7 +59,13 @@ public abstract class Animator {
 		this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.BIPED_DEATH), 0);
 	}
 
+
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
+		if (!AnimationManager.checkNonNull(animation)) {
+			EpicFightMod.LOGGER.warn("Unable to put an empty animation for " + livingMotion);
+			return;
+		}
+
 		this.livingAnimations.put(livingMotion, animation);
 	}
 

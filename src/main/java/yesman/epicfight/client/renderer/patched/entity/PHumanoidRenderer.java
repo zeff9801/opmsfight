@@ -22,7 +22,8 @@ import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends BipedModel<E>, R extends LivingRenderer<E, M>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
+public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends BipedModel<E>, R extends LivingRenderer<E, M>, AM extends HumanoidMesh>
+		extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
 
 	private final AM mesh;
 
@@ -36,9 +37,10 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 
 	@Override
-	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
+	public void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
 		if (entitypatch.getOriginal().isBaby()) {
-			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getScale(new Vec3f(1.25F, 1.25F, 1.25F)), OpenMatrix4f::mul);
+			pose.orElseEmpty("Head").frontResult(JointTransform.scale(new Vec3f(1.25F, 1.25F, 1.25F)),
+					OpenMatrix4f::mul);
 		}
 	}
 

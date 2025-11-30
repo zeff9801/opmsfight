@@ -5,30 +5,36 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.*;
+import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
+import yesman.epicfight.api.asset.AssetAccessor;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.main.EpicFightSharedConstants;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Optional;
 
 public abstract class DynamicAnimation {
 	protected final boolean isRepeat;
-	protected final float convertTime;
-	
+	protected final float transitionTime;
+	protected AnimationClip animationClip;
+
 	public DynamicAnimation() {
-		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
-	}
-	
-	public DynamicAnimation(float convertTime, boolean isRepeat) {
-		this.isRepeat = isRepeat;
-		this.convertTime = convertTime;
+		this(EpicFightSharedConstants.GENERAL_ANIMATION_TRANSITION_TIME, false);
 	}
 
+	public DynamicAnimation(float transitionTime, boolean isRepeat) {
+		this.isRepeat = isRepeat;
+		this.transitionTime = transitionTime;
+	}
 
 	public final Pose getRawPose(float time) {
 		return this.getAnimationClip().getPoseInTime(time);
@@ -47,15 +53,37 @@ public abstract class DynamicAnimation {
 
 	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
 		animationPlayer.setPlayAnimation(this);
+		//animationPlayer.setPlayAnimation(this.getAccessor(), this.getRealAnimation(), this.getTotalTime(), this.isRepeat, this.getTransitionTime());
 		animationPlayer.tick(entitypatch);
 		animationPlayer.begin(this, entitypatch);
 	}
 
+	/**
+	 * Called when the animation put on the {@link AnimationPlayer}
+	 * @param entitypatch
+	 */
 	public void begin(LivingEntityPatch<?> entitypatch) {}
-	public void tick(LivingEntityPatch<?> entitypatch) {}
-	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
-	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
 
+	/**
+	 * Called each tick when the animation is played
+	 * @param entitypatch
+	 */
+	public void tick(LivingEntityPatch<?> entitypatch) {}
+
+	/**
+	 * Called when both the animation finished or stopped by other animation.
+	 * @param entitypatch
+	 * @param nextAnimation the next animation to play after the animation ends
+	 * @param isEnd whether the animation completed or not
+	 *
+	 * if @param isEnd true, nextAnimation is null
+	 * if @param isEnd false, nextAnimation is not null
+	 */
+	public void end(LivingEntityPatch<?> entitypatch, @Nullable AssetAccessor<? extends DynamicAnimation> nextAnimation, boolean isEnd) {}
+	public void linkTick(LivingEntityPatch<?> entitypatch, AssetAccessor<? extends DynamicAnimation> linkAnimation) {};
+
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}//old
+	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {}//old
 	public boolean hasTransformFor(String joint) {
 		return this.getTransfroms().containsKey(joint);
 	}
@@ -69,15 +97,17 @@ public abstract class DynamicAnimation {
 		return EntityState.DEFAULT_STATE;
 	}
 
-	public TypeFlexibleHashMap<EntityState.StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		return new TypeFlexibleHashMap<> (false);
 	}
 
-	public <T> T getState(EntityState.StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
 		return stateFactor.defaultValue();
 	}
 
-	public abstract AnimationClip getAnimationClip();
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
+	}
 
 	public Map<String, TransformSheet> getTransfroms() {
 		return this.getAnimationClip().getJointTransforms();
@@ -88,11 +118,7 @@ public abstract class DynamicAnimation {
 	}
 
 	public TransformSheet getCoord() {
-		return this.getTransfroms().get("Root");
-	}
-
-	public DynamicAnimation getRealAnimation() {
-		return this;
+		return this.getTransfroms().containsKey("Root") ? this.getTransfroms().get("Root") : TransformSheet.EMPTY_SHEET;
 	}
 
 	public void setTotalTime(float totalTime) {
@@ -103,8 +129,8 @@ public abstract class DynamicAnimation {
 		return this.getAnimationClip().getClipTime();
 	}
 
-	public float getConvertTime() {
-		return this.convertTime;
+	public float getTransitionTime() {
+		return this.transitionTime;
 	}
 
 	public boolean isRepeat() {
@@ -151,6 +177,11 @@ public abstract class DynamicAnimation {
 		return false;
 	}
 
+	//public abstract AssetAccessor<? extends StaticAnimation> getRealAnimation();
+
+	public DynamicAnimation getRealAnimation() {
+		return this;
+	}
 	public boolean isLinkAnimation() {
 		return false;
 	}
@@ -158,13 +189,11 @@ public abstract class DynamicAnimation {
 	public boolean doesHeadRotFollowEntityHead() {
 		return false;
 	}
-
 	public DynamicAnimation getThis() {
 		return this;
 	}
 
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
-
 	}
 }

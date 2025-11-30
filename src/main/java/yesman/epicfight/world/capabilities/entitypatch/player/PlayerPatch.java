@@ -45,13 +45,24 @@ import java.util.UUID;
 
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
 	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
+	protected static final float PLAYER_SCALE = 0.9375F;
 	public static final DataParameter<Float> STAMINA = new DataParameter<Float> (253, DataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
-	protected PlayerMode playerMode = PlayerMode.MINING;
+	protected PlayerMode playerMode = PlayerMode.VANILLA;
 
+	public static void createSyncedEntityData(LivingEntity livingentity) {
+		livingentity.getEntityData().define(STAMINA, Float.valueOf(0.0F));
+	}
+
+	// Manage the previous position here because playerpatch#tick called before entity#travel method.
 	protected double xo;
 	protected double yo;
 	protected double zo;
+
+	// Manage the player's horizontal delta movement here instead of directly modifying entity#xxa, entity#zza (it causes potential issues in terms of mod compatibility)
+	public double dx;
+	public double dz;
+
 	protected float modelYRotO;
 	protected float modelYRot;
 	protected boolean useModelYRot;
@@ -160,7 +171,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
 		float oYRot;
 		float yRot;
-		float scale = (this.original.isBaby() ? 0.5F : 1.0F) * 0.9375F;
+		float scale = (this.original.isBaby() ? 0.5F : 1.0F) * PLAYER_SCALE;
 
 		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
 			oYRot = ridingEntity.yBodyRotO;
@@ -177,32 +188,42 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public void serverTick(LivingUpdateEvent event) {
 		super.serverTick(event);
 
-		if (!this.state.canBasicAttack()) {
+		if (this.state.canBasicAttack()) {
 			this.tickSinceLastAction++;
 		}
 
 		float stamina = this.getStamina();
 		float maxStamina = this.getMaxStamina();
-
 		float staminaRegen = (float)this.original.getAttributeValue(EpicFightAttributes.STAMINA_REGEN.get());
 		int regenStandbyTime = 900 / (int)(30 * staminaRegen);
 
-		if (stamina < maxStamina && this.tickSinceLastAction > 30) {
+		if (stamina < maxStamina && this.tickSinceLastAction > regenStandbyTime) {
 			float staminaFactor = 1.0F + (float)Math.pow((stamina / (maxStamina - stamina * 0.5F)), 2);
-			this.setStamina(stamina + maxStamina * 0.01F * staminaFactor);
+			this.setStamina(stamina + maxStamina * 0.01F * staminaFactor * staminaRegen);
 		}
 
 		if (maxStamina < stamina) {
 			this.setStamina(maxStamina);
 		}
-
-		this.xo = this.original.getX();
-		this.yo = this.original.getY();
-		this.zo = this.original.getZ();
 	}
 
 	@Override
 	public void tick(LivingUpdateEvent event) {
+		if (this.playerMode == PlayerMode.EPICFIGHT) {
+
+			/*if (battleModeSustainableEvent.isCanceled()) {
+				if (this.playerMode == PlayerMode.EPICFIGHT) {
+					this.toVanillaMode(false);
+					this.battleModeRestricted = true;
+				}
+			} else {
+				if (this.battleModeRestricted) {
+					this.battleModeRestricted = false;
+					this.toEpicFightMode(false);
+				}
+			}
+		}*/
+
 		if (this.original.getVehicle() == null) {
 			for (SkillContainer container : this.getSkillCapability().skillContainers) {
 				if (container != null) {
@@ -211,10 +232,16 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 			}
 		}
 
-		super.tick(event);
-
 		this.modelYRotO = this.modelYRot;
 
+		super.tick(event);
+
+		// Cancel using item depending on player state
+		//if (!this.state.canUseItem()) {
+		//	this.cancelItemUse();
+		//}
+
+		// When turning is locked, stop synching the entity patch's y rotation to the original entity
 		if (this.getEntityState().turningLocked()) {
 			if (!this.useModelYRot) {
 				this.setModelYRot(this.original.yRot, false);
@@ -225,7 +252,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 			}
 		}
 
-		if (this.getEntityState().inaction()) {
+		if (this.getEntityState().inaction() && this.original.getVehicle() == null) {
 			this.original.yBodyRot = this.original.yRot;
 			this.original.yHeadRot = this.original.yRot;
 		}
@@ -235,6 +262,10 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 			this.modelYRot += MathHelper.clamp(MathHelper.wrapDegrees(originalYRot - this.modelYRot), -45.0F, 45.0F);
 		}
 
+		this.xo = this.original.getX();
+		this.yo = this.original.getY();
+		this.zo = this.original.getZ();
+	}
 	}
 
 	public SkillContainer getSkill(Skill skill) {
@@ -331,6 +362,10 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, Hand hand) {
 		float fallDist = this.original.fallDistance;
 		boolean onGround = this.original.isOnGround();
+		boolean offhandValid = this.isOffhandItemValid();
+
+		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		ItemStack offHandItem = this.getOriginal().getOffhandItem();
 		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE);
 		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
 
@@ -516,10 +551,10 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 	public void toggleMode() {
 		switch (this.playerMode) {
-			case MINING:
-				this.toBattleMode(true);
+			case VANILLA:
+				this.toEpicFightMode(true);
 				break;
-			case BATTLE:
+			case EPICFIGHT:
 				this.toMiningMode(true);
 				break;
 		}
@@ -527,11 +562,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 	public void toMode(PlayerMode playerMode, boolean synchronize) {
 		switch (playerMode) {
-			case MINING:
+			case VANILLA:
 				this.toMiningMode(synchronize);
 				break;
-			case BATTLE:
-				this.toBattleMode(synchronize);
+			case EPICFIGHT:
+				this.toEpicFightMode(synchronize);
 				break;
 		}
 	}
@@ -541,15 +576,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	}
 
 	public void toMiningMode(boolean synchronize) {
-		this.playerMode = PlayerMode.MINING;
+		this.playerMode = PlayerMode.VANILLA;
 	}
 
-	public void toBattleMode(boolean synchronize) {
-		this.playerMode = PlayerMode.BATTLE;
+	public void toEpicFightMode(boolean synchronize) {
+		this.playerMode = PlayerMode.EPICFIGHT;
 	}
 
 	public boolean isBattleMode() {
-		return this.playerMode == PlayerMode.BATTLE;
+		return this.playerMode == PlayerMode.EPICFIGHT;
 	}
 
 	@Override
@@ -611,7 +646,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return null;
 	}
 
-	public static enum PlayerMode {
-		MINING, BATTLE
+	public enum PlayerMode {
+		VANILLA, EPICFIGHT
 	}
 }

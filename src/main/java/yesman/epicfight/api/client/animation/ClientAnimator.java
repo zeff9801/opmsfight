@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @OnlyIn(Dist.CLIENT)
@@ -218,6 +220,7 @@ public class ClientAnimator extends Animator {
 		return layerList;
 	}
 
+
 	@Override
 	public Pose getPose(float partialTicks) {
 		return this.getPose(partialTicks, true);
@@ -227,26 +230,21 @@ public class ClientAnimator extends Animator {
 		Pose composedPose = new Pose();
 		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, useCurrentMotion, partialTicks);
 
-		// Reuse Map object to avoid allocation
-		LAYER_POSES_HOLDER.clear();
-		composedPose.putJointData(baseLayerPose);
+		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
+		composedPose.load(baseLayerPose, Pose.LoadOperation.OVERWRITE);
 
 		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.highers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
 
-			if (priority == Layer.Priority.LOWEST && this.baseLayer.animationPlayer.getAnimation().isMainFrameAnimation()) {
-				continue;
-			}
-
 			if (!compositeLayer.isDisabled() && !compositeLayer.animationPlayer.isEmpty()) {
 				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, useCurrentMotion, partialTicks);
-				LAYER_POSES_HOLDER.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
-				composedPose.putJointData(layerPose);
+				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
+				composedPose.load(layerPose, Pose.LoadOperation.OVERWRITE);
 			}
 		}
 
-		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
-		this.applyBindModifier(baseLayerPose, composedPose, rootJoint, LAYER_POSES_HOLDER, useCurrentMotion);
+		Joint rootJoint = this.entitypatch.getArmature().rootJoint;
+		this.applyBindModifier(baseLayerPose, composedPose, rootJoint, layerPoses, useCurrentMotion);
 
 		return composedPose;
 	}
@@ -271,7 +269,7 @@ public class ClientAnimator extends Animator {
 			}
 		}
 
-		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
+		Joint rootJoint = this.entitypatch.getArmature().rootJoint;
 
 		if (!LAYER_POSES_HOLDER.isEmpty()) {
 			this.applyBindModifier(baseLayerPose, composedPose, rootJoint, LAYER_POSES_HOLDER, true);
@@ -293,7 +291,7 @@ public class ClientAnimator extends Animator {
 			if (jointMaskEntry != null) {
 				LivingMotion livingMotion = this.getCompositeLayer(priority).getLivingMotion(this.entitypatch, useCurrentMotion);
 
-				if (nowPlaying.hasTransformFor(joint.getName()) && !jointMaskEntry.isJointMasked(livingMotion, joint.getName())) {
+				if (nowPlaying.hasTransformFor(joint.getName()) && !jointMaskEntry.isMasked(livingMotion, joint.getName())) {
 					JointMask.JointMaskSet set = jointMaskEntry.getMask(livingMotion);
 					JointMask.BindModifier bindModifier = set.getBindModifier(joint.getName());
 
@@ -402,6 +400,60 @@ public class ClientAnimator extends Animator {
 		return this.entitypatch;
 	}
 
+	/**
+	 * Iterates all layers
+	 * @param task
+	 */
+	public void iterAllLayers(Consumer<Layer> task) {
+		task.accept(this.baseLayer);
+		this.baseLayer.compositeLayers.values().forEach(task);
+	}
+	/**
+	 * Iterate layers that is visible by priority
+	 * @param task
+	 * @return
+	 */
+	public void iterVisibleLayers(Consumer<Layer> task) {
+		task.accept(this.baseLayer);
+		this.baseLayer.compositeLayers.values().stream()
+				.filter(layer -> layer.isDisabled() || layer.animationPlayer.isEmpty() || !layer.priority.isHigherOrEqual(this.baseLayer.baseLayerPriority))
+				.forEach(task);
+	}
+	/**
+	 * Iterates all activated layers from the highest layer
+	 * when base layer = highest, iterates only base layer
+	 * when base layer = middle, iterates base layer and highest composite layer
+	 * when base layer = lowest, iterates base layer and all composite layers
+	 *
+	 * @param task
+	 * @return true if all layers didn't return false by @param task
+	 */
+	public boolean iterVisibleLayersUntilFalse(Function<Layer, Boolean> task) {
+		Layer.Priority[] highers = this.baseLayer.baseLayerPriority.highers();
+
+		for (int i = highers.length - 1; i >= 0; i--) {
+			Layer layer = this.baseLayer.getLayer(highers[i]);
+
+			if (layer.isDisabled() || layer.animationPlayer.isEmpty()) {
+				if (highers[i] == this.baseLayer.baseLayerPriority) {
+					return task.apply(this.baseLayer);
+				}
+
+				continue;
+			}
+
+			if (!task.apply(layer)) {
+				return false;
+			}
+
+			if (highers[i] == this.baseLayer.baseLayerPriority) {
+				return task.apply(this.baseLayer);
+			}
+		}
+
+		return true;
+	}
+	
 	@Override
 	public EntityState getEntityState() {
 		// Reuse TypeFlexibleHashMap to avoid allocation
@@ -412,7 +464,7 @@ public class ClientAnimator extends Animator {
 				continue;
 			}
 
-			if (!layer.disabled) {
+			if (!layer.isOff()) {
 				STATE_MAP_HOLDER.putAll(layer.animationPlayer.getAnimation().getStatesMap(this.entitypatch, layer.animationPlayer.getElapsedTime()));
 			}
 

@@ -9,14 +9,12 @@ import net.minecraft.item.*;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -46,7 +44,7 @@ import javax.annotation.Nonnull;
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> extends PlayerPatch<T> {
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
-	
+
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
@@ -61,8 +59,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		} else if (!this.state.updateLivingMotion() && considerInaction) {
 			currentLivingMotion = LivingMotions.INACTION;
 		} else {
-			ClientAnimator animator = this.getClientAnimator();
-
 			if (original.isFallFlying() || original.isAutoSpinAttack()) {
 				currentLivingMotion = LivingMotions.FLY;
 			} else if (original.getVehicle() != null) {
@@ -76,19 +72,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentLivingMotion = LivingMotions.SLEEP;
 			} else if (!original.isOnGround() && original.onClimbable()) {
 				currentLivingMotion = LivingMotions.CLIMB;
-				double y = original.yCloak - original.yCloakO;
-
-				if (Math.abs(y) < 0.04D) {
-					animator.baseLayer.pause();
-				} else {
-					animator.baseLayer.resume();
-
-					animator.baseLayer.animationPlayer.setReversed(y < 0);
-				}
 			} else if (!original.abilities.flying) {
-				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
+				ClientAnimator animator = this.getClientAnimator();
+
+				if (original.isUnderWater() && (original.getY() - this.yo) < -0.005)
 					currentLivingMotion = LivingMotions.FLOAT;
-				else if (original.yCloak - original.yCloakO < -0.4F || this.isAirborneState())
+				else if (original.getY() - this.yo < -0.4F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
 				else if (this.isMoving()) {
 					if (original.isCrouching())
@@ -98,7 +87,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 					else
 						currentLivingMotion = LivingMotions.WALK;
 
-					animator.baseLayer.animationPlayer.setReversed(original.zza < 0);
+					animator.baseLayer.animationPlayer.setReversed(this.dz < 0);
 
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
@@ -119,6 +108,184 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.BaseLayer(this, this.currentLivingMotion));
 		CapabilityItem activeItemCap = this.getHoldingItemCapability(this.original.getUsedItemHand());
 
+		this.updateCompositeMotionState(activeItemCap);
+
+		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.CompositeLayer(this, this.currentCompositeMotion));
+	}
+
+	@Override
+	protected void clientTick(LivingUpdateEvent event) {
+		super.clientTick(event);
+
+		if (!this.getEntityState().updateLivingMotion()) {
+			this.original.yBodyRot = this.original.yRot;
+		}
+
+		boolean isMainHandChanged = this.prevHeldItem != this.original.inventory.getSelected().getItem();
+		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.inventory.offhand.get(0).getItem();
+
+		if (isMainHandChanged || isOffHandChanged) {
+			this.updateHeldItem(this.getHoldingItemCapability(Hand.MAIN_HAND),
+					this.getHoldingItemCapability(Hand.OFF_HAND));
+
+			if (isMainHandChanged) {
+				this.prevHeldItem = this.original.inventory.getSelected().getItem();
+			}
+
+			if (isOffHandChanged) {
+				this.prevHeldItemOffHand = this.original.inventory.offhand.get(0).getItem();
+			}
+		}
+
+		if (this.original.deathTime == 1) {
+			this.getClientAnimator().playDeathAnimation();
+		}
+	}
+
+	protected boolean isMoving() {
+		return Math.abs(this.dx) > 0.01F || Math.abs(this.dz) > 0.01F;
+	}
+
+	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
+		this.cancelAnyAction();
+	}
+
+	@Override
+	public void reserveAnimation(StaticAnimation animation) {
+		this.animator.reserveAnimation(animation);
+	}
+
+	@Override
+	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier,
+			AnimationPacketProvider packetProvider) {
+	}
+
+	@Override
+	public boolean overrideRender() {
+		boolean originalShouldRender = this.isBattleMode() || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
+
+		RenderEpicFightPlayerEvent renderepicfightplayerevent = new RenderEpicFightPlayerEvent(this,
+				originalShouldRender);
+		MinecraftForge.EVENT_BUS.post(renderepicfightplayerevent);
+
+		return renderepicfightplayerevent.getShouldRender();
+	}
+
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return false;
+	}
+
+	@Override
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		if (pose.hasTransform("Head") && this.armature.hasJoint("Head")) {
+			if (animation.doesHeadRotFollowEntityHead()) {
+				float headRelativeRot = MathHelper.rotLerp(partialTicks,
+						MathHelper.wrapDegrees(this.modelYRotO - this.original.yHeadRotO),
+						MathHelper.wrapDegrees(this.modelYRot - this.original.yHeadRot));
+				OpenMatrix4f headTransform = this.armature.getBindedTransformFor(pose,
+						this.armature.searchJointByName("Head"));
+				OpenMatrix4f toOriginalRotation = headTransform.removeScale().removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(headRelativeRot, yAxis)
+						.rotateDeg(-MathHelper.rotLerp(partialTicks, this.original.xRotO, this.original.xRot), xAxis);
+				pose.orElseEmpty("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+			}
+		}
+	}
+
+	@Override
+	public OpenMatrix4f getModelMatrix(float partialTick) {
+
+		if (this.original.isAutoSpinAttack()) {
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0,
+					partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
+			float yRot = MathUtils.lerpBetween(this.original.yRotO, this.original.yRot, partialTick);
+			float xRot = MathUtils.lerpBetween(this.original.xRotO, this.original.xRot, partialTick);
+
+			mat.rotateDeg(-yRot, Vec3f.Y_AXIS)
+					.rotateDeg(-xRot, Vec3f.X_AXIS)
+					.rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS)
+					.translate(0F, -0.39F, 0F);
+
+			return mat;
+		} else if (this.original.isFallFlying()) {
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0,
+					partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
+			float f1 = (float) this.original.getFallFlyingTicks() + partialTick;
+			float f2 = MathHelper.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+
+			mat.rotateDeg(-MathHelper.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot),
+					Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.xRot), Vec3f.X_AXIS);
+
+			Vector3d vec3d = this.original.getViewVector(partialTick);
+			Vector3d prevDelta = new Vector3d(this.original.xOld, this.original.yOld, this.original.zOld);
+			Vector3d currDelta = this.original.getDeltaMovement();
+			Vector3d vec3d1 = VectorUtils.lerp(prevDelta, currDelta, partialTick);
+			double d0 = VectorUtils.horizontalDistanceSqr(vec3d1);
+			double d1 = VectorUtils.horizontalDistanceSqr(vec3d);
+
+			if (d0 > 0.0D && d1 > 0.0D) {
+				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
+				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
+				mat.rotate((float) -((Math.signum(d3) * Math.acos(d2))), Vec3f.Z_AXIS);
+			}
+
+			return mat;
+
+		} else if (this.original.isSleeping()) {
+			BlockState blockstate = this.original.getFeetBlockState();
+			float yRot = 0.0F;
+
+			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
+				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+					switch (blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
+						case EAST:
+							yRot = 90.0F;
+							break;
+						case WEST:
+							yRot = -90.0F;
+							break;
+						case SOUTH:
+							yRot = 180.0F;
+							break;
+						default:
+							break;
+					}
+				}
+			}
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0,
+					PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
+		} else {
+			float yRotO;
+			float yRot;
+			float xRotO = 0;
+			float xRot = 0;
+
+			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
+				yRotO = ridingEntity.yBodyRotO;
+				yRot = ridingEntity.yBodyRot;
+			} else {
+				yRotO = this.modelYRotO;
+				yRot = this.modelYRot;
+			}
+
+			if (!this.getEntityState().inaction()
+					&& this.original.getPose() == net.minecraft.entity.Pose.SWIMMING) {
+				float f = this.original.getSwimAmount(partialTick);
+				float f3 = this.original.isInWater() ? this.original.xRot : 0;
+				float f4 = MathHelper.lerp(f, 0.0F, f3);
+				xRotO = f4;
+				xRot = f4;
+			}
+
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot,
+					partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
+		}
+	}
+
+	private void updateCompositeMotionState(CapabilityItem activeItemCap) {
 		if (this.original.isUsingItem()) {
 			UseAction useAnim = this.original.getUseItem().getUseAnimation();
 			UseAction capUseAnim = activeItemCap.getUseAnimation(this);
@@ -136,263 +303,28 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayerEntity> ext
 				currentCompositeMotion = LivingMotions.DRINK;
 			else if (useAnim == UseAction.EAT)
 				currentCompositeMotion = LivingMotions.EAT;
-		//	else if (useAnim == UseAction.SPYGLASS) TODO extend and add spyglass action with a custom goggle
-		//		currentCompositeMotion = LivingMotions.SPECTATE;
+			// else if (useAnim == UseAction.SPYGLASS) TODO extend and add spyglass action
+			// with a custom goggle
+			// currentCompositeMotion = LivingMotions.SPECTATE;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
-			if (this.original.getMainHandItem().getItem() instanceof ShootableItem  && CrossbowItem.isCharged(this.original.getMainHandItem()))
+			if (this.original.getMainHandItem().getItem() instanceof ShootableItem
+					&& CrossbowItem.isCharged(this.original.getMainHandItem()))
 				currentCompositeMotion = LivingMotions.AIM;
-			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation().isReboundAnimation())
+			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation()
+					.getRealAnimation().isReboundAnimation())
 				currentCompositeMotion = LivingMotions.NONE;
 			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
 				currentCompositeMotion = LivingMotions.DIGGING;
 			else
 				currentCompositeMotion = currentLivingMotion;
 
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItemCap instanceof RangedWeaponCapability) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM
+					&& activeItemCap instanceof RangedWeaponCapability) {
 				this.playReboundAnimation();
 			}
 		}
-
-		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.CompositeLayer(this, this.currentCompositeMotion));
-	}
-
-	@Override
-	protected void clientTick(LivingUpdateEvent event) {
-		super.clientTick(event);
-
-		if (!this.getEntityState().updateLivingMotion()) {
-			this.original.yBodyRot = this.original.yRot;
-		}
-
-		boolean isMainHandChanged = this.prevHeldItem != this.original.inventory.getSelected().getItem();
-		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.inventory.offhand.get(0).getItem();
-
-
-		if (isMainHandChanged || isOffHandChanged) {
-			this.updateHeldItem(this.getHoldingItemCapability(Hand.MAIN_HAND), this.getHoldingItemCapability(Hand.OFF_HAND));
-
-			if (isMainHandChanged) {
-				this.prevHeldItem = this.original.inventory.getSelected().getItem();
-			}
-
-			if (isOffHandChanged) {
-				this.prevHeldItemOffHand = this.original.inventory.offhand.get(0).getItem();
-			}
-		}
-
-		/** {@link LivingDeathEvent} never fired for client players **/
-		if (this.original.deathTime == 1) {
-			this.getClientAnimator().playDeathAnimation();
-		}
-	}
-
-	protected boolean isMoving() {
-		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
-	}
-
-	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
-		this.cancelAnyAction();
-	}
-
-	@Override
-	public void reserveAnimation(StaticAnimation animation) {
-		this.animator.reserveAnimation(animation);
-	}
-
-	@Override
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-	}
-
-	@Override
-	public boolean overrideRender() {
-		boolean originalShouldRender = this.isBattleMode() || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
-
-		RenderEpicFightPlayerEvent renderepicfightplayerevent = new RenderEpicFightPlayerEvent(this, originalShouldRender);
-		MinecraftForge.EVENT_BUS.post(renderepicfightplayerevent);
-
-		return renderepicfightplayerevent.getShouldRender();
-	}
-
-	@Override
-	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
-		return false;
-	}
-
-	@Override
-	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
-		if (pose.getJointTransformData().containsKey("Head")) {
-			if (animation.doesHeadRotFollowEntityHead()) {
-				float headRotO = this.modelYRotO - this.original.yHeadRotO;
-				float headRot = this.modelYRot - this.original.yHeadRot;
-				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
-				OpenMatrix4f toOriginalRotation = this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head")).removeScale().removeTranslation().invert();
-				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
-				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
-				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.xRot, xAxis).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, yAxis));
-				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
-			}
-		}
-	}
-
-	@Override
-	public OpenMatrix4f getModelMatrix(float partialTick) {
-		Direction direction;
-
-		if (this.original.isAutoSpinAttack()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
-			float yRot = MathUtils.lerpBetween(this.original.yRotO, this.original.yRot, partialTick);
-			float xRot = MathUtils.lerpBetween(this.original.xRotO, this.original.xRot, partialTick);
-
-			mat.rotateDeg(-yRot, Vec3f.Y_AXIS)
-					.rotateDeg(-xRot, Vec3f.X_AXIS)
-					.rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS)
-					.translate(0F, -0.39F, 0F);
-
-			return mat;
-		} else if (this.original.isFallFlying()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
-			float f1 = (float)this.original.getFallFlyingTicks() + partialTick;
-			float f2 = MathHelper.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
-
-			mat.rotateDeg(-MathHelper.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.xRot), Vec3f.X_AXIS);
-
-			Vector3d vec3d = this.original.getViewVector(partialTick);
-			Vector3d vec3d1 = this.original.getDeltaMovement();
-			double d0 = VectorUtils.horizontalDistanceSqr(vec3d1);
-			double d1 = VectorUtils.horizontalDistanceSqr(vec3d);
-
-			if (d0 > 0.0D && d1 > 0.0D) {
-				double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
-				double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
-				mat.rotate((float)-((Math.signum(d3) * Math.acos(d2))), Vec3f.Z_AXIS);
-			}
-
-			return mat;
-		} else if (this.original.isSleeping()) {
-			BlockState blockstate = this.original.getFeetBlockState();
-			float yRot = 0.0F;
-
-			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
-				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-					switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
-						case EAST:
-							yRot = 90.0F;
-							break;
-						case WEST:
-							yRot = -90.0F;
-							break;
-						case SOUTH:
-							yRot = 180.0F;
-							break;
-						default:
-							break;
-					}
-				}
-			}
-
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0, 0.9375F, 0.9375F, 0.9375F);
-		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
-			float yRot = 0.0F;
-
-			switch(direction) {
-				case EAST:
-					yRot = 90.0F;
-					break;
-				case WEST:
-					yRot = -90.0F;
-					break;
-				case SOUTH:
-					yRot = 180.0F;
-					break;
-				default:
-					break;
-			}
-
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, 0.9375F, 0.9375F, 0.9375F);
-		} else {
-			float yRotO;
-			float yRot;
-			float xRotO = 0;
-			float xRot = 0;
-
-			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
-				yRotO = ridingEntity.yBodyRotO;
-				yRot = ridingEntity.yBodyRot;
-			} else {
-				yRotO = this.modelYRotO;
-				yRot = this.modelYRot;
-			}
-
-			if (!this.getEntityState().inaction() && this.original.getPose() == net.minecraft.entity.Pose.SWIMMING) {
-				float f = this.original.getSwimAmount(partialTick);
-				float f3 = this.original.isInWater() ? this.original.xRot : 0;
-				float f4 = MathHelper.lerp(f, 0.0F, f3);
-				xRotO = f4;
-				xRot = f4;
-			}
-
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
-		}
-	}
-
-	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
-		boolean isSpectator = (entity instanceof PlayerEntity && ((PlayerEntity)entity).isSpectator());
-		if (isSpectator || this.original.isOnGround() || !this.original.isAlive()) {
-			return Direction.UP;
-		}
-
-		if (ForgeConfig.SERVER.fullBoundingBoxLadders.get()) {
-			if (state.isLadder(world, pos, entity)) {
-				if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-					return state.getValue(BlockStateProperties.HORIZONTAL_FACING);
-				}
-
-				if (state.hasProperty(BlockStateProperties.UP) && state.getValue(BlockStateProperties.UP)) {
-					return Direction.UP;
-				} else if (state.hasProperty(BlockStateProperties.NORTH) && state.getValue(BlockStateProperties.NORTH)) {
-					return Direction.SOUTH;
-				} else if (state.hasProperty(BlockStateProperties.WEST) && state.getValue(BlockStateProperties.WEST)) {
-					return Direction.EAST;
-				} else if (state.hasProperty(BlockStateProperties.SOUTH) && state.getValue(BlockStateProperties.SOUTH)) {
-					return Direction.NORTH;
-				} else if (state.hasProperty(BlockStateProperties.EAST) && state.getValue(BlockStateProperties.EAST)) {
-					return Direction.WEST;
-				}
-			}
-		} else {
-			AxisAlignedBB bb = entity.getBoundingBox();
-			int mX = MathHelper.floor(bb.minX);
-			int mY = MathHelper.floor(bb.minY);
-			int mZ = MathHelper.floor(bb.minZ);
-
-			for (int y2 = mY; y2 < bb.maxY; y2++) {
-				for (int x2 = mX; x2 < bb.maxX; x2++) {
-					for (int z2 = mZ; z2 < bb.maxZ; z2++) {
-						BlockPos tmp = new BlockPos(x2, y2, z2);
-						state = world.getBlockState(tmp);
-						if (state.isLadder(world, tmp, entity)) {
-							if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-								return state.getValue(BlockStateProperties.HORIZONTAL_FACING);
-							}
-							if (state.hasProperty(BlockStateProperties.UP) && state.getValue(BlockStateProperties.UP)) {
-								return Direction.UP;
-							} else if (state.hasProperty(BlockStateProperties.NORTH) && state.getValue(BlockStateProperties.NORTH)) {
-								return Direction.SOUTH;
-							} else if (state.hasProperty(BlockStateProperties.WEST) && state.getValue(BlockStateProperties.WEST)) {
-								return Direction.EAST;
-							} else if (state.hasProperty(BlockStateProperties.SOUTH) && state.getValue(BlockStateProperties.SOUTH)) {
-								return Direction.NORTH;
-							} else if (state.hasProperty(BlockStateProperties.EAST) && state.getValue(BlockStateProperties.EAST)) {
-								return Direction.WEST;
-							}
-						}
-					}
-				}
-			}
-		}
-		return Direction.UP;
 	}
 
 }

@@ -10,4 +10,7 @@ public interface MixinLivingEntityAccessor {
     @Accessor(value = "attackStrengthTicker")
     void setAttackStrengthTicker(int value);
 
+    @Accessor("jumping")
+    boolean isJumping();
+
 }

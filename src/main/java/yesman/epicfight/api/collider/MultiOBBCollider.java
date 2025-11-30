@@ -25,7 +25,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import java.util.List;
 
 public class MultiOBBCollider extends MultiCollider<OBBCollider> {
-	public MultiOBBCollider(int arrayLength, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+	public MultiOBBCollider(int arrayLength, double vertexX, double vertexY, double vertexZ, double centerX,
+			double centerY, double centerZ) {
 		super(arrayLength, centerX, centerY, centerZ, null);
 
 		AxisAlignedBB aabb = OBBCollider.getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
@@ -42,21 +43,27 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
-		int colliderCount = Math.max(Math.round((this.numberOfColliders + animation.getProperty(AttackAnimationProperty.EXTRA_COLLIDERS).orElse(0)) * attackSpeed), this.numberOfColliders);
+	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch,
+			AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks,
+			float attackSpeed) {
+		int colliderCount = Math.max(
+				Math.round((this.numberOfColliders
+						+ animation.getProperty(AttackAnimationProperty.EXTRA_COLLIDERS).orElse(0)) * attackSpeed),
+				this.numberOfColliders);
 		float partialScale = 1.0F / (colliderCount - 1);
 		float interpolation = 0.0F;
 		Armature armature = entitypatch.getArmature();
-		int pathIndex =  armature.searchPathIndex(joint.getName());
+		int pathIndex = armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
-		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
+		boolean attacking = prevState.attacking() || state.attacking()
+				|| (prevState.getLevel() < 2 && state.getLevel() > 2);
 		List<OBBCollider> colliders = Lists.newArrayList();
 		float index = 0.0F;
-		float interIndex = Math.min((float)(this.numberOfColliders - 1) / (colliderCount - 1), 1.0F);
+		float interIndex = Math.min((float) (this.numberOfColliders - 1) / (colliderCount - 1), 1.0F);
 
 		for (int i = 0; i < colliderCount; i++) {
-			colliders.add(this.colliders.get((int)index).deepCopy());
+			colliders.add((OBBCollider) this.colliders.get((int) index).deepCopy());
 			index += interIndex;
 		}
 
@@ -81,7 +88,8 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 				pose = animation.getPoseByTime(entitypatch, pt2, 1.0F);
 			}
 
-			obbCollider.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, pose, pose, 1.0F, attacking ? 0xFFFF0000 : -1);
+			obbCollider.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, pose, pose,
+					1.0F, attacking ? 0xFFFF0000 : -1);
 			poseStack.popPose();
 
 			interpolation += partialScale;

@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
+import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
@@ -105,6 +106,11 @@ public abstract class AnimationProperty<T> {
 		public static final StaticAnimationProperty<AnimationEvent[]> ON_END_EVENTS = new StaticAnimationProperty<>();
 
 		/**
+		 * An event triggered when entity changes an item in hand.
+		 */
+		//public static final StaticAnimationProperty<SimpleEvent<AnimationEvent.E2<CapabilityItem, CapabilityItem>>> ON_ITEM_CHANGE_EVENT = new StaticAnimationProperty<SimpleEvent<AnimationEvent.E2<CapabilityItem, CapabilityItem>>> ();
+
+		/**
 		 * You can modify the playback speed of the animation.
 		 */
 		public static final StaticAnimationProperty<PlaybackSpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<>();
@@ -123,10 +129,38 @@ public abstract class AnimationProperty<T> {
 		 * Fix the head rotation to the player's body rotation
 		 */
 		public static final StaticAnimationProperty<Boolean> FIXED_HEAD_ROTATION = new StaticAnimationProperty<Boolean> ();
+		/**
+		 * Defines static animations as link animation when the animation is followed by a specific animation
+		 */
+		//public static final StaticAnimationProperty<Map<ResourceLocation, AnimationAccessor<? extends StaticAnimation>>> TRANSITION_ANIMATIONS_FROM = new StaticAnimationProperty<Map<ResourceLocation, AnimationAccessor<? extends StaticAnimation>>> ();
 
+		/**
+		 * Defines static animations as link animation when the animation is following a specific animation
+		 */
+		//public static final StaticAnimationProperty<Map<ResourceLocation, AnimationAccessor<? extends StaticAnimation>>> TRANSITION_ANIMATIONS_TO = new StaticAnimationProperty<Map<ResourceLocation, AnimationAccessor<? extends StaticAnimation>>> ();
+
+		/**
+		 * Disable physics while playing animation
+		 */
+		public static final StaticAnimationProperty<Boolean> NO_PHYSICS = new StaticAnimationProperty<Boolean> ("no_physics", Codec.BOOL);
+
+		/**
+		 * Inverse kinematics information
+		 */
+		//public static final StaticAnimationProperty<List<InverseKinematicsDefinition>> IK_DEFINITION = new StaticAnimationProperty<List<InverseKinematicsDefinition>> ();
+
+		/**
+		 * This property automatically baked when animation is loaded
+		 */
+		//public static final StaticAnimationProperty<List<BakedInverseKinematicsDefinition>> BAKED_IK_DEFINITION = new StaticAnimationProperty<List<BakedInverseKinematicsDefinition>> ();
+
+		/**
+		 * This property reset the entity's living motion
+		 */
+		public static final StaticAnimationProperty<LivingMotion> RESET_LIVING_MOTION = new StaticAnimationProperty<LivingMotion> ();
 	}
 
-	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
+	public static class ActionAnimationProperty<T> extends StaticAnimationProperty<T> {
 		public ActionAnimationProperty(String rl, @Nullable Codec<T> codecs) {
 			super(rl, codecs);
 		}
@@ -140,6 +174,10 @@ public abstract class AnimationProperty<T> {
 		 */
 		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ("stop_movements", Codec.BOOL);
 
+		/**
+		 * This property will set the entity's delta movement to (0, 0, 0) at the beginning of an animation if true.
+		 */
+		public static final ActionAnimationProperty<Boolean> REMOVE_DELTA_MOVEMENT = new ActionAnimationProperty<Boolean> ("revmoe_delta_move", Codec.BOOL);
 		/**
 		 * This property will move entity's coord also as y axis if true.
 		 * Don't recommend using this property because it's old system. Use the coord joint instead.
@@ -205,55 +243,77 @@ public abstract class AnimationProperty<T> {
 		 * This property determines if it reset the player basic attack combo counter or not {@link BasicAttack}
 		 */
 		public static final ActionAnimationProperty<Boolean> RESET_PLAYER_COMBO_COUNTER = new ActionAnimationProperty<Boolean> ("reset_combo_attack_counter", Codec.BOOL);
+
+		/**
+		 * Provide destination of action animation {@link MoveCoordFunctions}
+		 */
+		public static final ActionAnimationProperty<DestLocationProvider> DEST_LOCATION_PROVIDER = new ActionAnimationProperty<DestLocationProvider> ();
+
+		/**
+		 * Provide y rotation of entity {@link MoveCoordFunctions}
+		 */
+		public static final ActionAnimationProperty<YRotProvider> ENTITY_YROT_PROVIDER = new ActionAnimationProperty<YRotProvider> ();
+
+		/**
+		 * Provide y rotation of tracing coord {@link MoveCoordFunctions}
+		 */
+		public static final ActionAnimationProperty<YRotProvider> DEST_COORD_YROT_PROVIDER = new ActionAnimationProperty<YRotProvider> ();
+
+		/**
+		 * Decides the index of start key frame for coord transform, See also with {@link MoveCoordFunctions#TRACE_ORIGIN_AS_DESTINATION}
+		 */
+		public static final ActionAnimationProperty<Integer> COORD_START_KEYFRAME_INDEX = new ActionAnimationProperty<Integer> ();
+
+		/**
+		 * Decides the index of destination key frame for coord transform, See also with {@link MoveCoordFunctions#TRACE_ORIGIN_AS_DESTINATION}
+		 */
+		public static final ActionAnimationProperty<Integer> COORD_DEST_KEYFRAME_INDEX = new ActionAnimationProperty<Integer> ();
+
+		/**
+		 * Determines if an entity should look where a camera is looking at the beginning of an animation (player only)
+		 */
+		public static final ActionAnimationProperty<Boolean> SYNC_CAMERA = new ActionAnimationProperty<Boolean> ("sync_camera", Codec.BOOL);
+
 	}
 
-	public static class AttackAnimationProperty<T> extends AnimationProperty<T> {
+	public static class AttackAnimationProperty<T> extends ActionAnimationProperty<T> {
 		public AttackAnimationProperty(String rl, @Nullable Codec<T> codecs) {
 			super(rl, codecs);
 		}
 
 		public AttackAnimationProperty() {
 			this(null, null);
-		}		/**
-		 * This property determines if the player's camera is fixed during the attacking phase.
-		 */
-		public static final AttackAnimationProperty<Boolean> LOCK_ROTATION = new AttackAnimationProperty<Boolean> ();
-
-		/**
-		 * This property determines the animation can be rotated vertically based on the player's view.
-		 */
-		public static final AttackAnimationProperty<Boolean> ROTATE_X = new AttackAnimationProperty<Boolean> ();
+		}
 
 		/**
 		 * This property determines if the animation has a fixed amount of move distance not depending on the distance between attacker and target entity
 		 */
-		public static final AttackAnimationProperty<Boolean> FIXED_MOVE_DISTANCE = new AttackAnimationProperty<Boolean> ();
-		
-		/**
-		 * This property determines how much the play speed affect by entity's attack speed.
-		 */
-		public static final AttackAnimationProperty<Float> ATTACK_SPEED_FACTOR = new AttackAnimationProperty<Float> ();
-		
-		/**
-		 * This property determines the basis of the speed factor. Without this value, the basis is the total animation time.
-		 */
-		public static final AttackAnimationProperty<Float> BASIS_ATTACK_SPEED = new AttackAnimationProperty<Float> ();
+		public static final AttackAnimationProperty<Boolean> FIXED_MOVE_DISTANCE = new AttackAnimationProperty<Boolean> ("fixed_movement_distance", Codec.BOOL);
 
 		/**
-		 * This property adds colliders when detecting hit entity by @MultiCollider.
+		 * This property determines how much the playback speed will be affected by entity's attack speed.
 		 */
-		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ();
+		public static final AttackAnimationProperty<Float> ATTACK_SPEED_FACTOR = new AttackAnimationProperty<Float> ("attack_speed_factor", Codec.FLOAT);
+		/**
+		 * This property determines the basis of the speed factor. Default basis is the total animation time.
+		 */
+		public static final AttackAnimationProperty<Float> BASIS_ATTACK_SPEED = new AttackAnimationProperty<Float> ("basis_attack_speed", Codec.FLOAT);
 
-		public static final MoveCoordFunctions.MoveCoordSetter RAW_COORD = (self, entitypatch, transformSheet) -> {
-			transformSheet.readFrom(self.getCoord());
-		};
+		/**
+		 * This property adds interpolated colliders when detecting colliding entities by using @MultiCollider.
+		 */
+		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ("extra_colliders", Codec.INT);
+
+		/**
+		 * This property determines a minimal distance between attacker and target.
+		 */
+		public static final AttackAnimationProperty<Double> REACH = new AttackAnimationProperty<Double> ("reach", Codec.DOUBLE);
 	}
 
 
-	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {
-
+	public static class AttackPhaseProperty<T> {
 		public AttackPhaseProperty(String rl, @Nullable Codec<T> codecs) {
-			super(rl, codecs);
+			//super(rl, codecs);
 		}
 
 		public AttackPhaseProperty() {
@@ -280,6 +340,9 @@ public abstract class AnimationProperty<T> {
 		void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
 	}
 
+	/**
+	 * Static Animation Property
+	 */
 	@FunctionalInterface
 	public interface PoseModifier {
 		void modify(DynamicAnimation self, Pose pose, LivingEntityPatch<?> entitypatch, float elapsedTime, float partialTicks);
@@ -293,5 +356,15 @@ public abstract class AnimationProperty<T> {
 	@FunctionalInterface
 	public interface PlaybackTimeModifier {
 		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
+	}
+
+	@FunctionalInterface
+	public interface DestLocationProvider {
+		Vector3d get(DynamicAnimation self, LivingEntityPatch<?> entitypatch);
+	}
+
+	@FunctionalInterface
+	public interface YRotProvider {
+		float get(DynamicAnimation self, LivingEntityPatch<?> entitypatch);
 	}
 }
