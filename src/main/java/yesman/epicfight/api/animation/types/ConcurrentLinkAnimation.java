@@ -22,7 +22,7 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
         this.currentAnimation = currentAnimation;
         this.nextAnimation = nextAnimation;
         this.startsAt = time;
-        this.setTotalTime(nextAnimation.getConvertTime());
+        this.setTotalTime(nextAnimation.getTransitionTime());
     }
 
     @Override
@@ -66,8 +66,10 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
         JointMaskEntry maskEntry = this.nextAnimation.getJointMaskEntry(entitypatch, true).orElse(null);
 
         if (maskEntry != null && entitypatch.isLogicalClient()) {
-            interpolatedPose.getJointTransformData().entrySet().removeIf((entry) -> maskEntry.isJointMasked(this.nextAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
-                    entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), entry.getKey()));
+            interpolatedPose.disableJoint((entry) ->
+                    maskEntry.isMasked(
+                            this.nextAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER
+                                    ? entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), entry.getKey()));
         }
 
         return interpolatedPose;

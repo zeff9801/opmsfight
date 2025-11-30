@@ -135,7 +135,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		playTime = Math.abs(playTime);
 		playTime *= EpicFightOptions.A_TICK;
 
-		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.transitionTime : this.transitionTime;
 		float totalTime = playTime * (int)Math.ceil(linkTime / playTime);
 		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
 		nextStartTime += totalTime - linkTime;
@@ -155,12 +155,12 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
 
 			if (entry != null) {
-				joint1.removeIf((jointName) -> entry.isJointMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
 			}
 
 			if (entry2 != null) {
-				joint2.removeIf((jointName) -> entry2.isJointMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
 						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
 			}
 		}

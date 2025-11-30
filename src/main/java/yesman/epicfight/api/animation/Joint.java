@@ -1,11 +1,9 @@
 package yesman.epicfight.api.animation;
 
-import java.util.Collections;
-import java.util.List;
-
 import com.google.common.collect.Lists;
-
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+
+import java.util.*;
 
 public class Joint {
 	public static final Joint EMPTY = new Joint("empty", -1, new OpenMatrix4f());
@@ -51,7 +49,7 @@ public class Joint {
 		}
 	}
 
-	public OpenMatrix4f getLocalTrasnform() {
+	public OpenMatrix4f getLocalTransform() {
 		return this.localTransform;
 	}
 
@@ -105,20 +103,89 @@ public class Joint {
 			return null;
 		}
 	}
+	public static class HierarchicalJointAccessor {
+		private Queue<Integer> indicesToTerminal;
+		private final String signature;
 
-	/**
-	 public void showInfo() {
-	 System.out.println("id = " + this.jointId);
-	 System.out.println("name = " + this.jointName);
-	 System.out.println("local = " + this.localTransform);
-	 System.out.print("children = ");
-	 for (Joint joint : subJoints) {
-	 System.out.print(joint.jointName + " ");
-	 }
-	 System.out.println();
-	 for (Joint joint : subJoints) {
-	 joint.showInfo();
-	 }
-	 }
-	 **/
+		private HierarchicalJointAccessor(Builder builder) {
+			this.indicesToTerminal = builder.indicesToTerminal;
+			this.signature = builder.signature;
+		}
+
+		public AccessTicket createAccessTicket(Joint rootJoint) {
+			return new AccessTicket(this.indicesToTerminal, rootJoint);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof HierarchicalJointAccessor accessor) {
+				this.signature.equals(accessor.signature);
+			}
+
+			return super.equals(o);
+		}
+
+		@Override
+		public int hashCode() {
+			return this.signature.hashCode();
+		}
+
+		public static Builder builder() {
+			return new Builder(new LinkedList<>(), "");
+		}
+
+		public static class Builder {
+			private Queue<Integer> indicesToTerminal;
+			private String signature;
+
+			private Builder(Queue<Integer> indicesToTerminal, String signature) {
+				this.indicesToTerminal = indicesToTerminal;
+				this.signature = signature;
+			}
+
+			public Builder append(int index) {
+				String signatureNext;
+
+				if (this.indicesToTerminal.isEmpty()) {
+					signatureNext = this.signature + String.valueOf(index);
+				} else {
+					signatureNext = this.signature + "-" + String.valueOf(index);
+				}
+
+				Queue<Integer> nextQueue = new LinkedList<> (this.indicesToTerminal);
+				nextQueue.add(index);
+
+				return new Builder(nextQueue, signatureNext);
+			}
+
+			public HierarchicalJointAccessor build() {
+				return new HierarchicalJointAccessor(this);
+			}
+		}
+	}
+
+	public static class AccessTicket implements Iterator<Joint> {
+		Queue<Integer> accecssStack;
+		Joint joint;
+
+		private AccessTicket(Queue<Integer> indicesToTerminal, Joint rootJoint) {
+			this.accecssStack = new LinkedList<> (indicesToTerminal);
+			this.joint = rootJoint;
+		}
+
+		public boolean hasNext() {
+			return !this.accecssStack.isEmpty();
+		}
+
+		public Joint next() {
+			if (this.hasNext()) {
+				int nextIndex = this.accecssStack.poll();
+				this.joint = this.joint.subJoints.get(nextIndex);
+			} else {
+				throw new NoSuchElementException();
+			}
+
+			return this.joint;
+		}
+	}
 }

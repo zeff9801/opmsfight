@@ -75,9 +75,9 @@ public class LinkAnimation extends DynamicAnimation {
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		// Bad implementation: Add root joint as coord in loading animation
 		if (this.toAnimation instanceof ActionAnimation) {
-			JointTransform jt = pose.getOrDefaultTransform("Root");
+			JointTransform jt = pose.orElseEmpty("Root");
 			Vec3f jointPosition = jt.translation();
-			OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+			OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTransform().removeTranslation();
 			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
 			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
 			worldPosition.x = 0.0F;

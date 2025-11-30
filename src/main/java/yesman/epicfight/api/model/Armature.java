@@ -57,7 +57,7 @@ public class Armature {
 	}
 
 	private void getPoseTransform(Joint joint, OpenMatrix4f parentTransform, Pose pose, OpenMatrix4f[] jointMatrices) {
-		OpenMatrix4f result = pose.getOrDefaultTransform(joint.getName()).getAnimationBindedMatrix(joint, parentTransform);
+		OpenMatrix4f result = pose.orElseEmpty(joint.getName()).getAnimationBoundMatrix(joint, parentTransform);
 		jointMatrices[joint.getId()] = result;
 
 		for (Joint joints : joint.getSubJoints()) {
@@ -75,8 +75,8 @@ public class Armature {
 	}
 
 	private OpenMatrix4f getBindedJointTransformByIndexInternal(Pose pose, Joint joint, OpenMatrix4f parentTransform, int pathIndex) {
-		JointTransform jt = pose.getOrDefaultTransform(joint.getName());
-		OpenMatrix4f result = jt.getAnimationBindedMatrix(joint, parentTransform);
+		JointTransform jt = pose.orElseEmpty(joint.getName());
+		OpenMatrix4f result = jt.getAnimationBoundMatrix(joint, parentTransform);
 		int nextIndex = pathIndex % 10;
 		return nextIndex > 0 ? this.getBindedJointTransformByIndexInternal(pose, joint.getSubJoints().get(nextIndex - 1), result, pathIndex / 10) : result;
 	}
@@ -148,7 +148,7 @@ public class Armature {
 			return Joint.EMPTY;
 		}
 
-		Joint newJoint = new Joint(joint.getName(), joint.getId(), joint.getLocalTrasnform());
+		Joint newJoint = new Joint(joint.getName(), joint.getId(), joint.getLocalTransform());
 		oldToNewJoint.put(joint.getName(), newJoint);
 
 		for (Joint subJoint : joint.getSubJoints()) {
@@ -181,7 +181,7 @@ public class Armature {
 		jointJson.addProperty("name", joint.getName());
 
 		JsonArray transformMatrix = new JsonArray();
-		OpenMatrix4f localMatrixInBlender = new OpenMatrix4f(joint.getLocalTrasnform());
+		OpenMatrix4f localMatrixInBlender = new OpenMatrix4f(joint.getLocalTransform());
 
 		if (root) {
 			localMatrixInBlender.mulFront(OpenMatrix4f.invert(JsonModelLoader.BLENDER_TO_MINECRAFT_COORD, null));
@@ -197,5 +197,9 @@ public class Armature {
 			jointJson.add("children", children);
 			joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
 		}
+	}
+
+	public boolean hasJoint(String name) {
+		return this.jointByName.containsKey(name);
 	}
 }

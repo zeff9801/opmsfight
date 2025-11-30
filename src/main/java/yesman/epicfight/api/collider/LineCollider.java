@@ -139,7 +139,7 @@ public class LineCollider extends Collider {
 		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
 
 		if (pathIndex == -1) {
-			poseMatrix = interpolatedPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+			poseMatrix = interpolatedPose.orElseEmpty("Root").getAnimationBoundMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
 			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
 		}

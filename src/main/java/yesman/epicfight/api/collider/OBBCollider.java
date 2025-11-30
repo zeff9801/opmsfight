@@ -237,13 +237,13 @@ public class OBBCollider extends Collider {
 		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
 
 		if (pathIndex == -1) {
-			JointTransform jt = interpolatedPose.getOrDefaultTransform("Root");
+			JointTransform jt = interpolatedPose.orElseEmpty("Root");
 			jt.rotation().x = 0.0F;
 			jt.rotation().y = 0.0F;
 			jt.rotation().z = 0.0F;
 			jt.rotation().w = 1.0F;
 
-			poseMatrix = jt.getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+			poseMatrix = jt.getAnimationBoundMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
 			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
 		}
