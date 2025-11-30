@@ -68,7 +68,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.RespawnEvent event) {
-		this.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
+		this.onJoinWorld(event.getNewPlayer(),
+				new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			if (this.currentCompositeMotion == LivingMotions.AIM) {
 				this.original.getUseItemRemainingTicks();
 				ClientEngine.getInstance().renderEngine.zoomIn();
-				}
+			}
 		}
 	}
 
@@ -128,81 +129,82 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 			}
 		}
 
-			if (this.rayTarget != null) {
-				if (this.targetLockedOn) {
-					Vector3d playerPosition = this.original.getEyePosition(1.0F);
-					Vector3d targetPosition = this.rayTarget.getEyePosition(1.0F);
-					Vector3d toTarget = targetPosition.subtract(playerPosition);
-					float yaw = (float)MathUtils.getYRotOfVector(toTarget);
-					float pitch = (float)MathUtils.getXRotOfVector(toTarget);
-					PointOfView cameraType = this.minecraft.options.getCameraType();
-					this.lockOnXRotO = this.lockOnXRot;
-					this.lockOnYRotO = this.lockOnYRot;
-					float lockOnXRotDst = pitch + (cameraType.isFirstPerson() ? 0.0F : 30.0F);
-					lockOnXRotDst = MathHelper.clamp(lockOnXRotDst, 0.0F, 60.0F);
+		if (this.rayTarget != null) {
+			if (this.targetLockedOn) {
+				Vector3d playerPosition = this.original.getEyePosition(1.0F);
+				Vector3d targetPosition = this.rayTarget.getEyePosition(1.0F);
+				Vector3d toTarget = targetPosition.subtract(playerPosition);
+				float yaw = (float) MathUtils.getYRotOfVector(toTarget);
+				float pitch = (float) MathUtils.getXRotOfVector(toTarget);
+				PointOfView cameraType = this.minecraft.options.getCameraType();
+				this.lockOnXRotO = this.lockOnXRot;
+				this.lockOnYRotO = this.lockOnYRot;
+				float lockOnXRotDst = pitch + (cameraType.isFirstPerson() ? 0.0F : 30.0F);
+				lockOnXRotDst = MathHelper.clamp(lockOnXRotDst, 0.0F, 60.0F);
 
-					if (cameraType.isMirrored()) {
-						lockOnXRotDst = -lockOnXRotDst;
-					}
-
-					float lockOnYRotDst = yaw + (cameraType.isMirrored() ? 180.0F : 0.0F);
-					float xDiff = MathHelper.wrapDegrees(lockOnXRotDst - this.lockOnXRotO);
-					float yDiff = MathHelper.wrapDegrees(lockOnYRotDst - this.lockOnYRotO);
-					float xLerp = MathHelper.clamp(xDiff * 0.4F, -30.0F, 30.0F);
-					float yLerp = MathHelper.clamp(yDiff * 0.4F, -30.0F, 30.0F);
-
-					this.lockOnXRot = this.lockOnXRotO + xLerp;
-					this.lockOnYRot = this.lockOnYRotO + yLerp;
-
-					if (!this.getEntityState().turningLocked() || this.getEntityState().lockonRotate()) {
-						this.original.xRot = (lockOnXRotDst);
-						this.original.yRot = (lockOnYRotDst);
-					}
-				} else {
-					this.lockOnXRot = this.original.xRot;
-					this.lockOnYRot = this.original.yRot;
-					this.lockOnXRotO = this.lockOnXRot;
-					this.lockOnYRotO = this.lockOnYRot;
+				if (cameraType.isMirrored()) {
+					lockOnXRotDst = -lockOnXRotDst;
 				}
 
-				if (!this.rayTarget.isAlive() || this.getOriginal().distanceToSqr(this.rayTarget) > 400.0D || (this.getAngleTo(this.rayTarget) > 100.0D && !this.targetLockedOn)) {
-					this.rayTarget = null;
-					EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(-1));
+				float lockOnYRotDst = yaw + (cameraType.isMirrored() ? 180.0F : 0.0F);
+				float xDiff = MathHelper.wrapDegrees(lockOnXRotDst - this.lockOnXRotO);
+				float yDiff = MathHelper.wrapDegrees(lockOnYRotDst - this.lockOnYRotO);
+				float xLerp = MathHelper.clamp(xDiff * 0.4F, -30.0F, 30.0F);
+				float yLerp = MathHelper.clamp(yDiff * 0.4F, -30.0F, 30.0F);
+
+				this.lockOnXRot = this.lockOnXRotO + xLerp;
+				this.lockOnYRot = this.lockOnYRotO + yLerp;
+
+				if (!this.getEntityState().turningLocked() || this.getEntityState().lockonRotate()) {
+					this.original.xRot = (lockOnXRotDst);
+					this.original.yRot = (lockOnYRotDst);
 				}
 			} else {
 				this.lockOnXRot = this.original.xRot;
 				this.lockOnYRot = this.original.yRot;
-				this.targetLockedOn = false;
+				this.lockOnXRotO = this.lockOnXRot;
+				this.lockOnYRotO = this.lockOnYRot;
 			}
 
-			CapabilityItem itemCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
+			if (!this.rayTarget.isAlive() || this.getOriginal().distanceToSqr(this.rayTarget) > 400.0D
+					|| (this.getAngleTo(this.rayTarget) > 100.0D && !this.targetLockedOn)) {
+				this.rayTarget = null;
+				EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(-1));
+			}
+		} else {
+			this.lockOnXRot = this.original.xRot;
+			this.lockOnYRot = this.original.yRot;
+			this.targetLockedOn = false;
+		}
 
-			switch (itemCap.getZoomInType()) {
-				case ALWAYS:
+		CapabilityItem itemCap = this.getHoldingItemCapability(Hand.MAIN_HAND);
+
+		switch (itemCap.getZoomInType()) {
+			case ALWAYS:
+				ClientEngine.getInstance().renderEngine.zoomIn();
+				break;
+			case USE_TICK:
+				if (this.original.getUseItemRemainingTicks() > 0) {
 					ClientEngine.getInstance().renderEngine.zoomIn();
-					break;
-				case USE_TICK:
-					if (this.original.getUseItemRemainingTicks() > 0) {
-						ClientEngine.getInstance().renderEngine.zoomIn();
-					} else {
-						ClientEngine.getInstance().renderEngine.zoomOut(40);
-					}
+				} else {
+					ClientEngine.getInstance().renderEngine.zoomOut(40);
+				}
 
-					break;
-				case AIMING:
-					if (this.getClientAnimator().isAiming()) {
-						ClientEngine.getInstance().renderEngine.zoomIn();
-					} else {
-						ClientEngine.getInstance().renderEngine.zoomOut(40);
-					}
+				break;
+			case AIMING:
+				if (this.getClientAnimator().isAiming()) {
+					ClientEngine.getInstance().renderEngine.zoomIn();
+				} else {
+					ClientEngine.getInstance().renderEngine.zoomOut(40);
+				}
 
-					break;
-				case CUSTOM:
-					//Zoom manually handled
-					break;
-				default:
-					ClientEngine.getInstance().renderEngine.zoomOut(0);
-			}
+				break;
+			case CUSTOM:
+				// Zoom manually handled
+				break;
+			default:
+				ClientEngine.getInstance().renderEngine.zoomOut(0);
+		}
 	}
 
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
@@ -211,7 +213,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	@Override
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
+	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier,
+			AnimationPacketProvider packetProvider) {
 		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, true));
 	}
 
@@ -221,31 +224,39 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 		if (EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
 			this.toEpicFightMode(true);
-		} else if (EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
+		} else if (EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems
+				.contains(this.original.getMainHandItem().getItem())) {
 			this.toMiningMode(true);
 		}
 	}
 
-	/*public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
-		this.cancelAnyAction(); //this.cancelItemUse();
-
-		this.getClientAnimator().iterAllLayers((layer) -> {
-			if (layer.isOff()) {
-				return;
-			}
-
-			layer.animationPlayer.getRealAnimation().get().getProperty(AnimationProperty.StaticAnimationProperty.ON_ITEM_CHANGE_EVENT).ifPresent((event) -> {
-				event.params(mainHandCap, offHandCap);
-				event.execute(this, layer.animationPlayer.getRealAnimation(), layer.animationPlayer.getPrevElapsedTime(), layer.animationPlayer.getElapsedTime());
-			});
-		});
-	}*/
+	/*
+	 * public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem
+	 * offHandCap) {
+	 * this.cancelAnyAction(); //this.cancelItemUse();
+	 * 
+	 * this.getClientAnimator().iterAllLayers((layer) -> {
+	 * if (layer.isOff()) {
+	 * return;
+	 * }
+	 * 
+	 * layer.animationPlayer.getRealAnimation().get().getProperty(AnimationProperty.
+	 * StaticAnimationProperty.ON_ITEM_CHANGE_EVENT).ifPresent((event) -> {
+	 * event.params(mainHandCap, offHandCap);
+	 * event.execute(this, layer.animationPlayer.getRealAnimation(),
+	 * layer.animationPlayer.getPrevElapsedTime(),
+	 * layer.animationPlayer.getElapsedTime());
+	 * });
+	 * });
+	 * }
+	 */
 
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		AttackResult result = super.tryHurt(damageSource, amount);
 
-		if (EpicFightMod.CLIENT_CONFIGS.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
+		if (EpicFightMod.CLIENT_CONFIGS.autoPreparation.getValue()
+				&& result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
 			this.toEpicFightMode(true);
 		}
 
@@ -318,11 +329,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 	}
 
 	public float getLerpedLockOnX(double partial) {
-		return MathHelper.rotLerp((float)partial, this.lockOnXRotO, this.lockOnXRot);
+		return MathHelper.rotLerp((float) partial, this.lockOnXRotO, this.lockOnXRot);
 	}
 
 	public float getLerpedLockOnY(double partial) {
-		return MathHelper.rotLerp((float)partial, this.lockOnYRotO, this.lockOnYRot);
+		return MathHelper.rotLerp((float) partial, this.lockOnYRotO, this.lockOnYRot);
 	}
 
 	public boolean isTargetLockedOn() {
@@ -384,8 +395,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 				Vector3d playerPosition = this.original.position();
 				Vector3d targetPosition = this.rayTarget.position();
 				Vector3d toTarget = targetPosition.subtract(playerPosition);
-				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
-				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
+				float yaw = (float) MathUtils.getYRotOfVector(toTarget);
+				float pitch = (float) MathUtils.getXRotOfVector(toTarget);
 				this.original.yRot = (yaw);
 				this.original.xRot = (pitch);
 			} else {
@@ -400,5 +411,10 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		if (itemstack.hasTag() && itemstack.getTag().contains("skill")) {
 			Minecraft.getInstance().setScreen(new SkillBookScreen(this.original, itemstack, hand));
 		}
+	}
+
+	@Override
+	public int getFlyInputDirection() {
+		return (int) Math.signum(this.original.input.forwardImpulse);
 	}
 }

@@ -337,4 +337,9 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayerEntity> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 	}
+
+	@Override
+	public int getFlyInputDirection() {
+		return this.lastZza > 0.0F ? 1 : (this.lastZza < 0.0F ? -1 : 0);
+	}
 }

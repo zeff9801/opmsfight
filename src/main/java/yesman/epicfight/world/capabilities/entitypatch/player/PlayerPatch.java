@@ -46,7 +46,7 @@ import java.util.UUID;
 public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPatch<T> {
 	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	protected static final float PLAYER_SCALE = 0.9375F;
-	public static final DataParameter<Float> STAMINA = new DataParameter<Float> (253, DataSerializers.FLOAT);
+	public static final DataParameter<Float> STAMINA = new DataParameter<Float>(253, DataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.VANILLA;
 
@@ -54,12 +54,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		livingentity.getEntityData().define(STAMINA, Float.valueOf(0.0F));
 	}
 
-	// Manage the previous position here because playerpatch#tick called before entity#travel method.
+	// Manage the previous position here because playerpatch#tick called before
+	// entity#travel method.
 	protected double xo;
 	protected double yo;
 	protected double zo;
 
-	// Manage the player's horizontal delta movement here instead of directly modifying entity#xxa, entity#zza (it causes potential issues in terms of mod compatibility)
+	// Manage the player's horizontal delta movement here instead of directly
+	// modifying entity#xxa, entity#zza (it causes potential issues in terms of mod
+	// compatibility)
 	public double dx;
 	public double dz;
 
@@ -71,25 +74,26 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	protected int chargingAmount;
 	protected ChargeableSkill chargingSkill;
 
-	
 	public PlayerPatch() {
 		this.eventListeners = new PlayerEventListener(this);
 	}
-	
+
 	@Override
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
 		entityIn.getEntityData().define(STAMINA, Float.valueOf(0.0F));
 	}
-	
+
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		skillCapability.skillContainers[SkillSlots.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
+		skillCapability.skillContainers[SkillSlots.BASIC_ATTACK.universalOrdinal()]
+				.setSkill(EpicFightSkills.BASIC_ATTACK);
 		skillCapability.skillContainers[SkillSlots.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
-		skillCapability.skillContainers[SkillSlots.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
+		skillCapability.skillContainers[SkillSlots.KNOCKDOWN_WAKEUP.universalOrdinal()]
+				.setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
 		this.tickSinceLastAction = 0;
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, PLAYER_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
@@ -181,7 +185,8 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 			yRot = this.modelYRot;
 		}
 
-		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oYRot, yRot, partialTicks, scale, scale, scale);
+		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oYRot, yRot,
+				partialTicks, scale, scale, scale);
 	}
 
 	@Override
@@ -194,11 +199,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 		float stamina = this.getStamina();
 		float maxStamina = this.getMaxStamina();
-		float staminaRegen = (float)this.original.getAttributeValue(EpicFightAttributes.STAMINA_REGEN.get());
-		int regenStandbyTime = 900 / (int)(30 * staminaRegen);
+		float staminaRegen = (float) this.original.getAttributeValue(EpicFightAttributes.STAMINA_REGEN.get());
+		int regenStandbyTime = 900 / (int) (30 * staminaRegen);
 
 		if (stamina < maxStamina && this.tickSinceLastAction > regenStandbyTime) {
-			float staminaFactor = 1.0F + (float)Math.pow((stamina / (maxStamina - stamina * 0.5F)), 2);
+			float staminaFactor = 1.0F + (float) Math.pow((stamina / (maxStamina - stamina * 0.5F)), 2);
 			this.setStamina(stamina + maxStamina * 0.01F * staminaFactor * staminaRegen);
 		}
 
@@ -211,61 +216,65 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	public void tick(LivingUpdateEvent event) {
 		if (this.playerMode == PlayerMode.EPICFIGHT) {
 
-			/*if (battleModeSustainableEvent.isCanceled()) {
-				if (this.playerMode == PlayerMode.EPICFIGHT) {
-					this.toVanillaMode(false);
-					this.battleModeRestricted = true;
+			/*
+			 * if (battleModeSustainableEvent.isCanceled()) {
+			 * if (this.playerMode == PlayerMode.EPICFIGHT) {
+			 * this.toVanillaMode(false);
+			 * this.battleModeRestricted = true;
+			 * }
+			 * } else {
+			 * if (this.battleModeRestricted) {
+			 * this.battleModeRestricted = false;
+			 * this.toEpicFightMode(false);
+			 * }
+			 * }
+			 * }
+			 */
+
+			if (this.original.getVehicle() == null) {
+				for (SkillContainer container : this.getSkillCapability().skillContainers) {
+					if (container != null) {
+						container.update();
+					}
+				}
+			}
+
+			this.modelYRotO = this.modelYRot;
+
+			super.tick(event);
+
+			// Cancel using item depending on player state
+			// if (!this.state.canUseItem()) {
+			// this.cancelItemUse();
+			// }
+
+			// When turning is locked, stop synching the entity patch's y rotation to the
+			// original entity
+			if (this.getEntityState().turningLocked()) {
+				if (!this.useModelYRot) {
+					this.setModelYRot(this.original.yRot, false);
 				}
 			} else {
-				if (this.battleModeRestricted) {
-					this.battleModeRestricted = false;
-					this.toEpicFightMode(false);
+				if (this.useModelYRot) {
+					this.disableModelYRot(false);
 				}
 			}
-		}*/
 
-		if (this.original.getVehicle() == null) {
-			for (SkillContainer container : this.getSkillCapability().skillContainers) {
-				if (container != null) {
-					container.update();
-				}
+			if (this.getEntityState().inaction() && this.original.getVehicle() == null) {
+				this.original.yBodyRot = this.original.yRot;
+				this.original.yHeadRot = this.original.yRot;
 			}
-		}
 
-		this.modelYRotO = this.modelYRot;
-
-		super.tick(event);
-
-		// Cancel using item depending on player state
-		//if (!this.state.canUseItem()) {
-		//	this.cancelItemUse();
-		//}
-
-		// When turning is locked, stop synching the entity patch's y rotation to the original entity
-		if (this.getEntityState().turningLocked()) {
 			if (!this.useModelYRot) {
-				this.setModelYRot(this.original.yRot, false);
+				float originalYRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.yRot;
+				this.modelYRot += MathHelper.clamp(MathHelper.wrapDegrees(originalYRot - this.modelYRot), -45.0F,
+						45.0F);
 			}
-		} else {
-			if (this.useModelYRot) {
-				this.disableModelYRot(false);
-			}
-		}
 
-		if (this.getEntityState().inaction() && this.original.getVehicle() == null) {
-			this.original.yBodyRot = this.original.yRot;
-			this.original.yHeadRot = this.original.yRot;
+			this.xo = this.original.getX();
+			this.yo = this.original.getY();
+			this.zo = this.original.getZ();
 		}
-
-		if (!this.useModelYRot) {
-			float originalYRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.yRot;
-			this.modelYRot += MathHelper.clamp(MathHelper.wrapDegrees(originalYRot - this.modelYRot), -45.0F, 45.0F);
-		}
-
-		this.xo = this.original.getX();
-		this.yo = this.original.getY();
-		this.zo = this.original.getZ();
-	}
 	}
 
 	public SkillContainer getSkill(Skill skill) {
@@ -304,18 +313,23 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		float baseSpeed;
 
 		if (hand == Hand.MAIN_HAND) {
-			baseSpeed = (float)this.original.getAttributeValue(Attributes.ATTACK_SPEED);
+			baseSpeed = (float) this.original.getAttributeValue(Attributes.ATTACK_SPEED);
 		} else {
-			baseSpeed = (float) (this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get()) : this.original.getAttributeBaseValue(Attributes.ATTACK_SPEED));
+			baseSpeed = (float) (this.isOffhandItemValid()
+					? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())
+					: this.original.getAttributeBaseValue(Attributes.ATTACK_SPEED));
 		}
 
 		return this.getModifiedAttackSpeed(this.getAdvancedHoldingItemCapability(hand), baseSpeed);
 	}
 
 	public double getWeaponAttribute(Attribute attribute, ItemStack itemstack) {
-		ModifiableAttributeInstance attrInstance = new ModifiableAttributeInstance(attribute, (ai)->{});
-		Collection<AttributeModifier> itemModifiers = itemstack.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(attribute);
-		double baseValue = this.original.getAttribute(attribute) == null ? attribute.getDefaultValue() : this.original.getAttribute(attribute).getBaseValue();
+		ModifiableAttributeInstance attrInstance = new ModifiableAttributeInstance(attribute, (ai) -> {
+		});
+		Collection<AttributeModifier> itemModifiers = itemstack.getAttributeModifiers(EquipmentSlotType.MAINHAND)
+				.get(attribute);
+		double baseValue = this.original.getAttribute(attribute) == null ? attribute.getDefaultValue()
+				: this.original.getAttribute(attribute).getBaseValue();
 		attrInstance.setBaseValue(baseValue);
 
 		for (AttributeModifier modifier : this.original.getAttribute(attribute).getModifiers()) {
@@ -333,7 +347,8 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapabilityOr(itemstack, null);
 
 		if (itemCapability != null) {
-			for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlotType.MAINHAND, this).get(attribute)) {
+			for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlotType.MAINHAND, this)
+					.get(attribute)) {
 				if (!attrInstance.hasModifier(modifier)) {
 					attrInstance.addTransientModifier(modifier);
 				}
@@ -350,9 +365,11 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		float weight = this.getWeight();
 
 		if (weight > 40.0F) {
-			float attenuation = MathHelper.clamp(this.getOriginal().level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
+			float attenuation = MathHelper.clamp(
+					this.getOriginal().level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
 
-			return event.getAttackSpeed() + (-0.1F * (weight / 40.0F) * (Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * 1.5F) * attenuation);
+			return event.getAttackSpeed()
+					+ (-0.1F * (weight / 40.0F) * (Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * 1.5F) * attenuation);
 		} else {
 			return event.getAttackSpeed();
 		}
@@ -366,12 +383,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
-		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE);
-		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
+		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem()
+				.getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE);
+		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal()
+				.getOffhandItem().getAttributeModifiers(EquipmentSlotType.MAINHAND).get(Attributes.ATTACK_DAMAGE)
+				: Set.of();
 
 		// Prevents crit and sweeping edge effect
 		this.epicFightDamageSource = damageSource;
-		((MixinLivingEntityAccessor)this.original).setAttackStrengthTicker(Integer.MAX_VALUE);
+		((MixinLivingEntityAccessor) this.original).setAttackStrengthTicker(Integer.MAX_VALUE);
 		this.original.fallDistance = 0.0F;
 		this.original.setOnGround(false);
 		this.setOffhandDamage(hand, mainHandAttributes, offHandAttributes);
@@ -394,15 +414,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return damagesource;
 	}
 
-//	@Override
-//	public void cancelAnyAction() {
-//		super.cancelAnyAction();
-//		this.resetSkillCharging();
-//	}
+	// @Override
+	// public void cancelAnyAction() {
+	// super.cancelAnyAction();
+	// this.resetSkillCharging();
+	// }
 
 	public float getMaxStamina() {
-		ModifiableAttributeInstance maxStamina  = this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get());
-		return (float)(maxStamina  == null ? 0 : maxStamina .getValue());
+		ModifiableAttributeInstance maxStamina = this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get());
+		return (float) (maxStamina == null ? 0 : maxStamina.getValue());
 	}
 
 	public float getStamina() {
@@ -410,7 +430,8 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	}
 
 	public float getModifiedStaminaConsume(float amount) {
-		float attenuation = MathHelper.clamp(this.original.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
+		float attenuation = MathHelper
+				.clamp(this.original.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
 		float weight = this.getWeight();
 
 		return ((weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;
@@ -425,7 +446,6 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		this.original.getEntityData().set(STAMINA, f1);
 	}
 
-
 	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
 		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumptionAmount(this));
 	}
@@ -434,15 +454,16 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		return this.consumeForSkill(skill, consumeResource, amount, false);
 	}
 
-
 	/**
 	 * Client : Checks if a player has enough resource
 	 * Server : Checks and consumes the resource if it meets the condition
+	 * 
 	 * @param amount
 	 * @return check result
-	 * Use this
+	 *         Use this
 	 */
-	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount, boolean activateConsumeForce) {
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount,
+			boolean activateConsumeForce) {
 		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
 		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
 
@@ -452,13 +473,13 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 		if (skillConsumeEvent.getResourceType().predicate.canExecute(skill, this, amount)) {
 			if (!this.isLogicalClient()) {
-				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch) this, amount);
 			}
 
 			return true;
 		} else if (activateConsumeForce) {
 			if (!this.isLogicalClient()) {
-				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch) this, amount);
 			}
 		}
 
@@ -512,11 +533,15 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 	}
 
 	public float getSkillChargingTicks(float partialTicks) {
-		return this.isChargingSkill() ? (this.original.tickCount - this.getLastChargingTick() - 1.0F) + partialTicks : 0;
+		return this.isChargingSkill() ? (this.original.tickCount - this.getLastChargingTick() - 1.0F) + partialTicks
+				: 0;
 	}
 
 	public int getSkillChargingTicks() {
-		return this.isChargingSkill() ? Math.min(this.original.tickCount - this.getLastChargingTick(), this.chargingSkill.getMaxChargingTicks()) : 0;
+		return this.isChargingSkill()
+				? Math.min(this.original.tickCount - this.getLastChargingTick(),
+						this.chargingSkill.getMaxChargingTicks())
+				: 0;
 	}
 
 	public int getAccumulatedChargeAmount() {
@@ -626,7 +651,7 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 		if (this.original.getVehicle() != null) {
 			return Animations.BIPED_HIT_ON_MOUNT;
 		} else {
-			switch(stunType) {
+			switch (stunType) {
 				case LONG:
 					return Animations.BIPED_HIT_LONG;
 				case SHORT:
@@ -648,5 +673,9 @@ public abstract class PlayerPatch<T extends PlayerEntity> extends LivingEntityPa
 
 	public enum PlayerMode {
 		VANILLA, EPICFIGHT
+	}
+
+	public int getFlyInputDirection() {
+		return 0;
 	}
 }
