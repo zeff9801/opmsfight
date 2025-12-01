@@ -9,6 +9,7 @@ public class TipPointAnimation {
 	public final IKInfo ikSetter;
 	private final TransformSheet animation;
 	private Vec3f targetpos;
+	private final Vec3f tipPosHolder = new Vec3f();
 	private float time;
 	private float startTime;
 	private float totalTime;
@@ -90,7 +91,7 @@ public class TipPointAnimation {
 	}
 	
 	public Vec3f getTipPosition(float partialTicks) {
-		return this.animation.getInterpolatedTranslation(this.getTime(partialTicks));
+		return this.animation.getInterpolatedTranslation(this.getTime(partialTicks), this.tipPosHolder);
 	}
 	
 	public JointTransform getTipTransform(float partialTicks) {

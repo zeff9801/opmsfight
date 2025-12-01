@@ -84,9 +84,12 @@ public class TransformSheet {
 	}
 
 	public Vec3f getInterpolatedTranslation(float currentTime) {
+		return this.getInterpolatedTranslation(currentTime, null);
+	}
+
+	public Vec3f getInterpolatedTranslation(float currentTime, Vec3f dest) {
 		InterpolationInfo interpolInfo = this.getInterpolationInfo(currentTime);
-		Vec3f vec3f = MathUtils.lerpVector(this.keyframes[interpolInfo.prev].transform().translation(), this.keyframes[interpolInfo.next].transform().translation(), interpolInfo.zero2One);
-		return vec3f;
+		return MathUtils.lerpVector(this.keyframes[interpolInfo.prev].transform().translation(), this.keyframes[interpolInfo.next].transform().translation(), interpolInfo.zero2One, dest);
 	}
 
 	public Quaternionf getInterpolatedRotation(float currentTime) {

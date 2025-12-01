@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 public class Pose {
 	public static final Pose EMPTY_POSE = new Pose();
 	private final Map<String, JointTransform> jointTransformData = Maps.newHashMap();
+	private static final Set<String> MERGED_SET_HOLDER = new HashSet<>();
 
 	public void putJointData(String name, JointTransform transform) {
 		this.jointTransformData.put(name, transform);
@@ -43,19 +44,11 @@ public class Pose {
 	}
 
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
-		Pose pose = new Pose();
-
-		Set<String> mergedSet = new HashSet<>(pose1.jointTransformData.keySet());
-		mergedSet.addAll(pose2.jointTransformData.keySet());
-
-		for (String jointName : mergedSet) {
-			pose.putJointData(jointName, JointTransform.interpolate(pose1.orElseEmpty(jointName), pose2.orElseEmpty(jointName), pregression));
-		}
-
-		return pose;
+		return interpolatePose(pose1, pose2, pregression, new Pose(), MERGED_SET_HOLDER);
 	}
 
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression, Pose dest, Set<String> mergedSet) {
+		dest.clear();
 		mergedSet.clear();
 		mergedSet.addAll(pose1.jointTransformData.keySet());
 		mergedSet.addAll(pose2.jointTransformData.keySet());

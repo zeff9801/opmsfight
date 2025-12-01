@@ -41,6 +41,9 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		super(colliders);
 	}
 
+	private static final Vec3f TRANSLATION_HOLDER_1 = new Vec3f();
+	private static final Vec3f TRANSLATION_HOLDER_2 = new Vec3f();
+
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch,
@@ -71,8 +74,8 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 			float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
 			TransformSheet coordTransform = animation.getCoord();
-			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1);
-			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2);
+			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1, TRANSLATION_HOLDER_1);
+			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2, TRANSLATION_HOLDER_2);
 			Vector3f gap = new Vector3f(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
 
 			poseStack.pushPose();

@@ -40,6 +40,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	private static final double SHIFT_TRANSLATION = 0.15D;
 	private static final float MAX_HEAD_ROTATION = 85.0F;
 	private static final float MAX_ROTATION_DIFF = 2500.0F;
+	private static final List<LayerRenderer<?, ?>> LAYER_LIST_HOLDER = new ArrayList<>();
 
 	@Override
 	public void render(E entityIn, T entitypatch, R renderer, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLight, float partialTicks) {
@@ -147,7 +148,10 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	protected void renderLayer(LivingRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack poseStack, int packedLightIn, float partialTicks) {
-		List<LayerRenderer<E, M>> layers = new ArrayList<>(renderer.layers);
+		@SuppressWarnings("unchecked")
+		List<LayerRenderer<E, M>> layers = (List<LayerRenderer<E, M>>)(List<?>)LAYER_LIST_HOLDER;
+		layers.clear();
+		layers.addAll(renderer.layers);
 		Iterator<LayerRenderer<E, M>> iter = layers.iterator();
 
 
@@ -191,6 +195,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		});
 		
 		poseStack.popPose();
+		layers.clear();
 	}
 
 

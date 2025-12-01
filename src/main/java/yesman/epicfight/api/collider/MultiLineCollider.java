@@ -23,6 +23,9 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		super(arrayLength, posX, posY, posZ, LineCollider.getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ));
 	}
 
+	private static final Vec3f TRANSLATION_HOLDER_1 = new Vec3f();
+	private static final Vec3f TRANSLATION_HOLDER_2 = new Vec3f();
+
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void draw(MatrixStack poseStack, IRenderTypeBuffer buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
@@ -41,8 +44,8 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 
 		for (LineCollider lineCollider : colliders) {
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
-			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1);
-			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2);
+			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1, TRANSLATION_HOLDER_1);
+			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2, TRANSLATION_HOLDER_2);
 			Vector3f gap = new Vector3f(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
 
 			poseStack.pushPose();

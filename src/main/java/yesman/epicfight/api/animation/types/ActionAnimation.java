@@ -232,7 +232,7 @@ public  class ActionAnimation extends MainFrameAnimation {
 		JointTransform jt = pose.orElseEmpty("Root");
 
 		if (this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).isEmpty()) {
-			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime);
+			Vec3f withPosition = entitypatch.getArmature().getActionAnimationCoord().getInterpolatedTranslation(poseTime, jt.translation());
 			jt.translation().set(withPosition);
 		} else {
 			TransformSheet coordTransform = this.getProperty(AnimationProperty.ActionAnimationProperty.COORD).get();
