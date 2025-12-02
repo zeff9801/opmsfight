@@ -10,7 +10,7 @@ import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
+import yesman.epicfight.api.neoevent.playerpatch.SkillConsumeEvent;
 import yesman.epicfight.world.entity.eventlistener.SkillExecuteEvent;
 
 import java.util.Set;

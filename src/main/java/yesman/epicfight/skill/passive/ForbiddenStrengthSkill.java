@@ -1,7 +1,7 @@
 package yesman.epicfight.skill.passive;
 
 import net.minecraft.entity.player.PlayerEntity;
-import yesman.epicfight.gameasset.EpicFightSounds;
+import yesman.epicfight.registry.entries.EpicFightSounds;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;

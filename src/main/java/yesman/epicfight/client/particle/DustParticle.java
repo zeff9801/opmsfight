@@ -11,7 +11,7 @@ import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.registry.entries.EpicFightParticles;
 
 @OnlyIn(Dist.CLIENT)
 public class DustParticle extends SpriteTexturedParticle {

@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
-import yesman.epicfight.client.gui.widget.ColorSlider;
+import yesman.epicfight.client.gui.widgets.ColorSlider;
 import yesman.epicfight.config.Option.DoubleOption;
 import yesman.epicfight.config.Option.IntegerOption;
 

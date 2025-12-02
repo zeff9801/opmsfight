@@ -22,7 +22,7 @@ import yesman.epicfight.client.renderer.entity.EmptyRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.registry.entries.EpicFightParticles;
 import yesman.epicfight.world.entity.EpicFightEntities;
 
 @OnlyIn(Dist.CLIENT)

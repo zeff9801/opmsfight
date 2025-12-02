@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.world.entity.eventlistener.ComboCounterHandleEvent;
+import yesman.epicfight.api.neoevent.playerpatch.ComboCounterHandleEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 import java.util.UUID;

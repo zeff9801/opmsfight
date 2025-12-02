@@ -7,7 +7,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.skill.ChargeableSkill;
+import yesman.epicfight.skill.modules.ChargeableSkill;
 import yesman.epicfight.skill.SkillContainer;
 
 public class SPSkillExecutionFeedback {

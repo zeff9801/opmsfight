@@ -15,8 +15,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import yesman.epicfight.config.ConfigManager;
-import yesman.epicfight.gameasset.EpicFightSkills;
-import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.registry.entries.EpicFightSkills;
+import yesman.epicfight.registry.entries.EpicFightItems;
 import yesman.epicfight.world.item.SkillBookItem;
 
 public class SkillBookModifier extends LootModifier {

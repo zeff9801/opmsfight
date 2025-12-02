@@ -34,7 +34,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
-import yesman.epicfight.world.entity.eventlistener.SkillCancelEvent;
+import yesman.epicfight.api.neoevent.playerpatch.SkillCancelEvent;
 
 import java.util.List;
 import java.util.Map;

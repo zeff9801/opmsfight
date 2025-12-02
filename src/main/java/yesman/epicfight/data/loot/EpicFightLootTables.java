@@ -7,7 +7,7 @@ import net.minecraft.loot.LootTables;
 import net.minecraft.loot.RandomValueRange;
 import net.minecraftforge.event.LootTableLoadEvent;
 import yesman.epicfight.data.loot.function.SetRandomSkillFunction;
-import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.registry.entries.EpicFightItems;
 
 public class EpicFightLootTables {
 	public static void modifyVanillaLootPools(final LootTableLoadEvent event) {

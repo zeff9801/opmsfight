@@ -10,7 +10,7 @@ import net.minecraft.loot.LootFunction;
 import net.minecraft.loot.LootFunctionType;
 import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.loot.functions.LootFunctionManager;
-import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.registry.entries.EpicFightSkills;
 
 public class SetRandomSkillFunction extends LootFunction {
 	protected SetRandomSkillFunction(ILootCondition[] p_i51231_1_) {

@@ -17,7 +17,7 @@ import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
 
 public abstract class HurtableEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
     private boolean stunReductionDecreases;

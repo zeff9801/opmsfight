@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.joml.Quaternionf;
 import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.utils.math.FABRIK;
+import yesman.epicfight.api.physics.ik.FABRIK;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 

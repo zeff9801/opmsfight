@@ -26,7 +26,7 @@ import yesman.epicfight.api.forgeevent.SkillBuildEvent;
 import yesman.epicfight.api.utils.RegistryUtils;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.registry.entries.EpicFightSkills;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSyncSkill;
 import yesman.epicfight.skill.Skill;

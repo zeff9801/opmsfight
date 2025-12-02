@@ -27,13 +27,13 @@ import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.data.conditions.Condition;
-import yesman.epicfight.data.conditions.EpicFightConditions;
+import yesman.epicfight.registry.entries.EpicFightConditions;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.world.capabilities.item.*;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
 
 import java.util.List;
 import java.util.Map;

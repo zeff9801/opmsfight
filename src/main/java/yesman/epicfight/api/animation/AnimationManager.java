@@ -17,7 +17,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
-import yesman.epicfight.api.utils.ClearableIdMapper;
+import yesman.epicfight.api.utils.datastructure.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
 import yesman.epicfight.main.EpicFightMod;
 

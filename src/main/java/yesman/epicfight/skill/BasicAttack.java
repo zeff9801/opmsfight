@@ -15,9 +15,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.BasicAttackEvent;
-import yesman.epicfight.world.entity.eventlistener.ComboCounterHandleEvent;
+import yesman.epicfight.api.neoevent.playerpatch.ComboCounterHandleEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
+import yesman.epicfight.api.neoevent.playerpatch.SkillConsumeEvent;
 
 import java.util.List;
 import java.util.UUID;

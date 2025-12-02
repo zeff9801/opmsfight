@@ -49,10 +49,10 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
-import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
+import yesman.epicfight.api.neoevent.playerpatch.TargetIndicatorCheckEvent;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
