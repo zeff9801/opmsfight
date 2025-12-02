@@ -373,14 +373,19 @@ public class TrailParticle extends SpriteTexturedParticle {
 				Optional<List<TrailInfo>> trailInfos = animation.getProperty(ClientAnimationProperties.TRAIL_EFFECT);
 
 				if (trailInfos.isPresent()) {
-					TrailInfo result = trailInfos.get().get((int)index);
+					TrailInfo base = trailInfos.get().get((int)index);
+					TrailInfo result = base.copy().build();
 					ItemStack itemstack = entitypatch.getOriginal().getItemInHand(result.hand);
 					ItemSkin itemSkin = ItemSkins.getItemSkin(itemstack.getItem());
 					
 					if (itemSkin != null) {
-						result = itemSkin.trailInfo.copy().build();
+						itemSkin.trailInfo.copy().build(result);
 					}
 					
+					if (!result.playable()) {
+						return null;
+					}
+
 					Armature armature = animation.getArmature();
 					Joint joint = armature.searchJointById((int)jointId);
 					TrailParticle particle = new TrailParticle(level, entitypatch, joint, animation, result, this.IAnimatedSprite);

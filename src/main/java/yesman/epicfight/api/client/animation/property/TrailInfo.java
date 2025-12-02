@@ -54,6 +54,9 @@ public class TrailInfo {
     public float bCol;
     public int interpolateCount;
     public int trailLifetime;
+    public int updateInterval;
+    public int blockLight;
+    public int skyLight;
     public ResourceLocation texturePath;
     public Hand hand;
 
@@ -70,6 +73,9 @@ public class TrailInfo {
         this.bCol = builder.bCol;
         this.interpolateCount = builder.interpolateCount;
         this.trailLifetime = builder.trailLifetime;
+        this.updateInterval = builder.updateInterval;
+        this.blockLight = builder.blockLight;
+        this.skyLight = builder.skyLight;
         this.texturePath = builder.texturePath;
         this.hand = builder.hand;
     }
@@ -83,7 +89,17 @@ public class TrailInfo {
     }
 
     public boolean playable() {
-        return this.start != null && this.end != null && this.particle != null && !StringUtil.isNullOrEmpty(this.joint) && isValidTime(this.startTime) && isValidTime(this.endTime) && this.interpolateCount > 0 && this.trailLifetime > 0 && this.texturePath != null;
+        boolean baseValid = this.start != null && this.end != null && this.particle != null && this.interpolateCount > 0 && this.trailLifetime > 0 && this.texturePath != null && this.updateInterval > 0;
+        if (!baseValid) {
+            return false;
+        }
+
+        // SWING_TRAIL needs joint/time metadata; other particles just need positions
+        if (this.particle == EpicFightParticles.SWING_TRAIL.get()) {
+            return !StringUtil.isNullOrEmpty(this.joint) && isValidTime(this.startTime) && isValidTime(this.endTime);
+        }
+
+        return true;
     }
 
     public static TrailInfo.Builder builder() {
@@ -125,6 +141,18 @@ public class TrailInfo {
             String particleTypeName = GsonHelper.getAsString(trailObj, "particle_type");
             IParticleData particleType = (IParticleData)ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(particleTypeName));
             trailBuilder.type(particleType);
+        }
+
+        if (trailObj.has("update_interval")) {
+            trailBuilder.updateInterval(GsonHelper.getAsInt(trailObj, "update_interval"));
+        }
+
+        if (trailObj.has("block_light")) {
+            trailBuilder.blockLight(GsonHelper.getAsInt(trailObj, "block_light"));
+        }
+
+        if (trailObj.has("sky_light")) {
+            trailBuilder.skyLight(GsonHelper.getAsInt(trailObj, "sky_light"));
         }
 
         if (trailObj.has("color")) {
@@ -192,6 +220,18 @@ public class TrailInfo {
             trailBuilder.type(particleType);
         }
 
+        if (compoundTag.contains("update_interval")) {
+            trailBuilder.updateInterval(compoundTag.getInt("update_interval"));
+        }
+
+        if (compoundTag.contains("block_light")) {
+            trailBuilder.blockLight(compoundTag.getInt("block_light"));
+        }
+
+        if (compoundTag.contains("sky_light")) {
+            trailBuilder.skyLight(compoundTag.getInt("sky_light"));
+        }
+
         if (compoundTag.contains("color")) {
             ListNBT color = compoundTag.getList("color", Constants.NBT.TAG_INT);
             trailBuilder.r(color.getInt(0) / 255F);
@@ -220,19 +260,22 @@ public class TrailInfo {
 
     @OnlyIn(Dist.CLIENT)
     public static class Builder {
-        private Vector3d start;
-        private Vector3d end;
-        private IParticleData particle;
+        private Vector3d start = new Vector3d(0.0D, 0.0D, 0.0D);
+        private Vector3d end = new Vector3d(0.0D, 0.0D, -1.0D);
+        private IParticleData particle = EpicFightParticles.SWING_TRAIL.get();
         private String joint;
         private float startTime = Float.NaN;
         private float endTime = Float.NaN;
         private float fadeTime = Float.NaN;
-        private float rCol = -1.0F;
-        private float gCol = -1.0F;
-        private float bCol = -1.0F;
-        private int interpolateCount = -1;
-        private int trailLifetime = -1;
-        private ResourceLocation texturePath;
+        private float rCol = 0.75F;
+        private float gCol = 0.75F;
+        private float bCol = 0.75F;
+        private int interpolateCount = 4;
+        private int trailLifetime = 4;
+        private int updateInterval = 1;
+        private int blockLight = 0;
+        private int skyLight = 0;
+        private ResourceLocation texturePath = new ResourceLocation(EpicFightMod.MODID, "textures/particle/swing_trail.png");
         private Hand hand = Hand.MAIN_HAND;
 
         public Builder() {}
@@ -252,7 +295,10 @@ public class TrailInfo {
             this.trailLifetime = trailInfo.trailLifetime;
             this.texturePath = trailInfo.texturePath;
             this.hand = trailInfo.hand;
-		}
+            this.updateInterval = trailInfo.updateInterval;
+            this.blockLight = trailInfo.blockLight;
+            this.skyLight = trailInfo.skyLight;
+        }
 
 		public TrailInfo.Builder startPos(Vector3d start) {
             this.start = start;
@@ -310,6 +356,21 @@ public class TrailInfo {
             return this;
         }
 
+        public TrailInfo.Builder updateInterval(int updateInterval) {
+            this.updateInterval = updateInterval;
+            return this;
+        }
+
+        public TrailInfo.Builder blockLight(int blockLight) {
+            this.blockLight = blockLight;
+            return this;
+        }
+
+        public TrailInfo.Builder skyLight(int skyLight) {
+            this.skyLight = skyLight;
+            return this;
+        }
+
         public TrailInfo.Builder texture(String texturePath) {
             this.texturePath = new ResourceLocation(texturePath);
             return this;
@@ -345,6 +406,9 @@ public class TrailInfo {
             trailInfo.bCol = !(validColor) ? trailInfo.bCol : this.bCol;
             trailInfo.interpolateCount = (this.interpolateCount < 0) ? trailInfo.interpolateCount : this.interpolateCount;
             trailInfo.trailLifetime = (this.trailLifetime < 0) ? trailInfo.trailLifetime : this.trailLifetime;
+            trailInfo.updateInterval = this.updateInterval <= 0 ? trailInfo.updateInterval : this.updateInterval;
+            trailInfo.blockLight = this.blockLight;
+            trailInfo.skyLight = this.skyLight;
             trailInfo.texturePath = (this.texturePath == null) ? trailInfo.texturePath : this.texturePath;
             trailInfo.hand = (this.hand == null) ? trailInfo.hand : this.hand;
         }

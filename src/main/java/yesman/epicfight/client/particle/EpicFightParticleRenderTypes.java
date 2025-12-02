@@ -4,7 +4,9 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -128,6 +130,51 @@ public class EpicFightParticleRenderTypes {
 			return "EPICFIGHT:TRAIL";
 		}
 	};
+
+	public static IParticleRenderType trailEffect(ResourceLocation texture) {
+		return new IParticleRenderType() {
+			@Override
+			public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
+				RenderSystem.enableBlend();
+				RenderSystem.disableCull();
+
+				Minecraft mc = Minecraft.getInstance();
+				mc.gameRenderer.lightTexture().turnOnLightLayer();
+
+				RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+				RenderSystem.enableDepthTest();
+				RenderSystem.depthMask(true);
+
+				if (texture != null && textureManager.getTexture(texture) != null) {
+					int textureId = textureManager.getTexture(texture).getId();
+					RenderSystem.bindTexture(textureId);
+					RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+					RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+				} else {
+					textureManager.bind(AtlasTexture.LOCATION_PARTICLES);
+				}
+
+				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.PARTICLE);
+			}
+
+			@Override
+			public void end(Tessellator tessellator) {
+				tessellator.end();
+
+				RenderSystem.disableBlend();
+				RenderSystem.defaultBlendFunc();
+				RenderSystem.enableCull();
+
+				Minecraft mc = Minecraft.getInstance();
+				mc.gameRenderer.lightTexture().turnOffLightLayer();
+			}
+
+			@Override
+			public String toString() {
+				return "EPICFIGHT:TRAIL_EFFECT";
+			}
+		};
+	}
 
 	public static final IParticleRenderType TRANSLUCENT_GLOWING = new IParticleRenderType() {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {

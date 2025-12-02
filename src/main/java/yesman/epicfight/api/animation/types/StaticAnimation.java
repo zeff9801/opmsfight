@@ -214,32 +214,34 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
         });
 
         if (entitypatch.isLogicalClient()) {
-            this.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent((trailInfos) -> {
-                int idx = 0;
+			this.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent((trailInfos) -> {
+				int idx = 0;
 
-                for (TrailInfo trailInfo : trailInfos) {
-                    double eid = Double.longBitsToDouble((long) entitypatch.getOriginal().getId());
-                    double animid = Double.longBitsToDouble((long) this.animationId);
-                    double jointId = Double
-                            .longBitsToDouble((long) this.armature.searchJointByName(trailInfo.joint).getId());
-                    double index = Double.longBitsToDouble((long) idx++);
+				for (TrailInfo trailInfo : trailInfos) {
+					double eid = Double.longBitsToDouble((long) entitypatch.getOriginal().getId());
+					double animid = Double.longBitsToDouble((long) this.animationId);
+					double jointId = Double
+							.longBitsToDouble((long) this.armature.searchJointByName(trailInfo.joint).getId());
+					double index = Double.longBitsToDouble((long) idx++);
 
-                    if (trailInfo.hand != null) {
-                        ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
-                        ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
+					TrailInfo result = trailInfo.copy().build();
 
-                        if (itemSkin != null) {
-                            trailInfo = itemSkin.trailInfo.copy().build();
-                        }
-                    }
+					if (trailInfo.hand != null) {
+						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
+						ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 
-                    if (!trailInfo.playable()) {
-                        continue;
-                    }
+						if (itemSkin != null) {
+							itemSkin.trailInfo.copy().build(result);
+						}
+					}
 
-                    entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, 0, animid, jointId, index, 0);
-                }
-            });
+					if (!result.playable()) {
+						continue;
+					}
+
+					entitypatch.getOriginal().level.addParticle(result.particle, eid, 0, animid, jointId, index, 0);
+				}
+			});
         }
     }
 

@@ -17,6 +17,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.particle.*;
+import yesman.epicfight.client.particle.AnimationTrailParticle;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
 import yesman.epicfight.client.renderer.entity.EmptyRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
@@ -66,7 +67,7 @@ public class ClientModBusEvent {
     	particleEngine.register(EpicFightParticles.BOSS_CASTING.get(), new DustParticle.ContractiveMetaParticle.Provider());
 
 		particleEngine.register(EpicFightParticles.TSUNAMI_SPLASH.get(), TsunamiSplashParticle.Provider::new);
-		particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), TrailParticle.Provider::new);
+		particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), AnimationTrailParticle.Provider::new);
 		particleEngine.register(EpicFightParticles.FEATHER.get(), FeatherParticle.Provider::new);
 		particleEngine.register(EpicFightParticles.AIR_BURST.get(), new AirBurstParticle.Provider());
     }
