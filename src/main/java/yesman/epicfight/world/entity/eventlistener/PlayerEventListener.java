@@ -1,17 +1,17 @@
 package yesman.epicfight.world.entity.eventlistener;
 
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Consumer;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
-
 import net.minecraftforge.fml.LogicalSide;
+import yesman.epicfight.api.neoevent.playerpatch.*;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+
+import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 public class PlayerEventListener {
 	private Map<EventType<? extends PlayerEvent<?>>, TreeMultimap<Integer, EventTrigger<? extends PlayerEvent<?>>>> events;

@@ -36,6 +36,8 @@ import yesman.epicfight.api.utils.math.*;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.registry.entries.EpicFightParticles;
+import yesman.epicfight.registry.entries.EpicFightSkills;
+import yesman.epicfight.registry.entries.EpicFightSounds;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.skill.identity.MeteorSlamSkill;

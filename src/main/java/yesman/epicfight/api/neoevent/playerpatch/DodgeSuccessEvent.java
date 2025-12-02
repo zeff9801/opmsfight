@@ -3,6 +3,7 @@ package yesman.epicfight.api.neoevent.playerpatch;
 
 import net.minecraft.util.DamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEvent;
 
 public class DodgeSuccessEvent extends PlayerEvent<ServerPlayerPatch> {
     private final DamageSource damageSource;

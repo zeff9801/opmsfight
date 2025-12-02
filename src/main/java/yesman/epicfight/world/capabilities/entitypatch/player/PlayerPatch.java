@@ -25,7 +25,7 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.registry.entries.EpicFightSkills;
-import yesman.epicfight.mixin.common.MixinLivingEntityAccessor;
+import yesman.epicfight.mixin.MixinLivingEntityAccessor;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.skill.modules.ChargeableSkill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;

@@ -14,6 +14,7 @@ import yesman.epicfight.skill.identity.MeteorSlamSkill;
 import yesman.epicfight.skill.identity.RevelationSkill;
 import yesman.epicfight.skill.mover.DemolitionLeapSkill;
 import yesman.epicfight.skill.mover.PhantomAscentSkill;
+import yesman.epicfight.skill.weapon_passive.BattojutsuPassive;
 import yesman.epicfight.skill.weaponinnate.BattojutsuSkill;
 import yesman.epicfight.skill.weaponinnate.BladeRushSkill;
 import yesman.epicfight.skill.weaponinnate.GraspingSpireSkill;

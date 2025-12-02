@@ -7,6 +7,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
+import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 

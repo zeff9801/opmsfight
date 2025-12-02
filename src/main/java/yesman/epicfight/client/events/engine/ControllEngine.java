@@ -23,7 +23,7 @@ import yesman.epicfight.client.gui.screen.SkillEditScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.mixin.client.MixinMinecraftInvoker;
+import yesman.epicfight.mixin.MixinMinecraftInvoker;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.skill.modules.ChargeableSkill;
 import yesman.epicfight.skill.SkillContainer;

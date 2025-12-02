@@ -9,6 +9,16 @@ import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.item.DaggerItem;
+import yesman.epicfight.world.item.EpicFightItemGroup;
+import yesman.epicfight.world.item.EpicFightItemTier;
+import yesman.epicfight.world.item.GreatswordItem;
+import yesman.epicfight.world.item.KatanaItem;
+import yesman.epicfight.world.item.KnuckleItem;
+import yesman.epicfight.world.item.LongswordItem;
+import yesman.epicfight.world.item.SkillBookItem;
+import yesman.epicfight.world.item.SpearItem;
+import yesman.epicfight.world.item.TachiItem;
 
 public class EpicFightItems {
 	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, EpicFightMod.MODID);

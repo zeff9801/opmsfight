@@ -32,7 +32,6 @@ import yesman.epicfight.api.neoevent.playerpatch.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.api.neoevent.playerpatch.SetTargetEvent;
-import yesman.epicfight.mixin.common.MixinLivingEntityAccessor;
 
 import java.util.HashMap;
 import java.util.List;

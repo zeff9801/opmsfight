@@ -5,10 +5,10 @@
   "package": "yesman.epicfight.mixin",
   "client": [
     "MixinBufferBuilder",
-    "MixinKeyboardHandler",
-    "MixinLightTexture",
-    "MixinLocalPlayer",
-    "MixinMinecraft",
+    "client.MixinKeyboardHandler",
+    "client.MixinLightTexture",
+    "client.MixinLocalPlayer",
+    "client.MixinMinecraft",
     "MixinMinecraftInvoker",
     "MixinMovementInputFromOptions",
     "MixinMouseHelper",
@@ -16,10 +16,10 @@
   ],
   "mixins": [
     "MixinCapabilityProviderInvoker",
-    "MixinLivingEntity",
+    "common.MixinLivingEntity",
     "MixinLivingEntityAccessor",
-    "MixinMob",
-    "MixinPlayer"
+    "common.MixinMob",
+    "common.MixinPlayer"
   ],
   "injectors": {
     "defaultRequire": 1

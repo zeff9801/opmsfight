@@ -3,6 +3,7 @@ package yesman.epicfight.api.neoevent.playerpatch;
 
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEvent;
 
 public class AttackEndEvent extends PlayerEvent<ServerPlayerPatch> {
 	private AttackAnimation animation;

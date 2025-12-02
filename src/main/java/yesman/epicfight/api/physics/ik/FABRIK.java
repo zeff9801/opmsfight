@@ -7,6 +7,9 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
+import yesman.epicfight.api.utils.math.Vec3f;
 
 import java.util.List;
 

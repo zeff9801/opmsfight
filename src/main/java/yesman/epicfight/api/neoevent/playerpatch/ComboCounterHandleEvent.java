@@ -2,6 +2,7 @@ package yesman.epicfight.api.neoevent.playerpatch;
 
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEvent;
 
 public class ComboCounterHandleEvent extends PlayerEvent<ServerPlayerPatch> {
     private final ComboCounterHandleEvent.Causal causal;

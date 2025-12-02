@@ -2,6 +2,7 @@ package yesman.epicfight.api.neoevent.playerpatch;
 
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEvent;
 
 /**
  * Canceling this event will make skill failed to predicate resource check

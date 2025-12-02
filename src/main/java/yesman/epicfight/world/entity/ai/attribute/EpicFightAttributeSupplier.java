@@ -6,6 +6,7 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import yesman.epicfight.registry.entries.EpicFightAttributes;
 
 public class EpicFightAttributeSupplier extends AttributeModifierMap {
 	private final AttributeModifierMap epicfightInstances;

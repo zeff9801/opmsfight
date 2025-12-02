@@ -3,6 +3,7 @@ package yesman.epicfight.api.neoevent.playerpatch;
 
 import net.minecraft.entity.LivingEntity;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEvent;
 
 public class SetTargetEvent extends PlayerEvent<ServerPlayerPatch> {
     private final LivingEntity target;

@@ -9,6 +9,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProp
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.forgeevent.SkillBuildEvent;
 import yesman.epicfight.api.utils.math.ValueModifier;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.registry.entries.EpicFightParticles;
 import yesman.epicfight.skill.*;

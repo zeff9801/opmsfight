@@ -29,6 +29,7 @@ import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.server.SPSetSkillValue;
 import yesman.epicfight.network.server.SPSetSkillValue.Target;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
+import yesman.epicfight.skill.modules.ChargeableSkill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;

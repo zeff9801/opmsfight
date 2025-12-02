@@ -6,6 +6,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryManager;
 import yesman.epicfight.api.utils.RegistryUtils;
+import yesman.epicfight.data.conditions.Condition;
 import yesman.epicfight.data.conditions.entity.*;
 import yesman.epicfight.data.conditions.itemstack.TagValueCondition;
 import yesman.epicfight.main.EpicFightMod;
