@@ -44,6 +44,7 @@ public abstract class AbstractTrailParticle<T extends EntityPatch<?>> extends Sp
         this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
         this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
         this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
+        this.alpha = 1.0F;
     }
 
     protected abstract boolean canContinue();

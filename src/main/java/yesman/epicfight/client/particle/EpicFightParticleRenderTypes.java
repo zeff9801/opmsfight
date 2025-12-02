@@ -143,11 +143,11 @@ public class EpicFightParticleRenderTypes {
 
 				RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 				RenderSystem.enableDepthTest();
-				RenderSystem.depthMask(true);
+				RenderSystem.depthMask(false);
 
-				if (texture != null && textureManager.getTexture(texture) != null) {
-					int textureId = textureManager.getTexture(texture).getId();
-					RenderSystem.bindTexture(textureId);
+				if (texture != null) {
+					// Ensure the texture is actually bound/loaded, not the missing texture
+					textureManager.bind(texture);
 					RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 					RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
 				} else {
@@ -164,6 +164,7 @@ public class EpicFightParticleRenderTypes {
 				RenderSystem.disableBlend();
 				RenderSystem.defaultBlendFunc();
 				RenderSystem.enableCull();
+				RenderSystem.depthMask(true);
 
 				Minecraft mc = Minecraft.getInstance();
 				mc.gameRenderer.lightTexture().turnOffLightLayer();
