@@ -22,14 +22,23 @@ import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import java.util.function.Consumer;
+
 
 @OnlyIn(Dist.CLIENT)
 public class EntityAfterImageParticle extends CustomModelParticle {
 	private final OpenMatrix4f[] poseMatrices;
 	private final Matrix4f modelMatrix;
+	private final Consumer<EntityAfterImageParticle> tickTask;
 	private float alphaO;
 
 	public EntityAfterImageParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, AnimatedMesh particleMesh, OpenMatrix4f[] matrices, Matrix4f modelMatrix) {
+		this(level, x, y, z, xd, yd, zd, particleMesh, matrices, modelMatrix, (particle) -> {
+			particle.alpha = (float)(particle.lifetime - particle.age) / (float)particle.lifetime * 0.8F;
+		});
+	}
+
+	public EntityAfterImageParticle(ClientWorld level, double x, double y, double z, double xd, double yd, double zd, AnimatedMesh particleMesh, OpenMatrix4f[] matrices, Matrix4f modelMatrix, Consumer<EntityAfterImageParticle> tickTask) {
 		super(level, x, y, z, xd, yd, zd, particleMesh);
 		this.poseMatrices = matrices;
 		this.modelMatrix = modelMatrix;
@@ -39,13 +48,14 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 		this.bCol = 1.0F;
 		this.alphaO = 0.3F;
 		this.alpha = 0.3F;
+		this.tickTask = tickTask;
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
 		this.alphaO = this.alpha;
-		this.alpha = (float)(this.lifetime - this.age) / (float)this.lifetime * 0.8F;
+		this.tickTask.accept(this);
 	}
 
 	@Override
@@ -67,27 +77,73 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		@Override
 		public Particle createParticle(BasicParticleType typeIn, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			Entity entity = level.getEntity((int)Double.doubleToLongBits(xSpeed));
-			LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
+			return createCommon(level, x, y, z, xSpeed, ySpeed, zSpeed, null);
+		}
+	}
 
-			if (entitypatch != null && ClientEngine.getInstance().renderEngine.hasRendererFor(entitypatch.getOriginal())) {
-				PatchedEntityRenderer renderer = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal());
-				Armature armature = entitypatch.getArmature();
-				MatrixStack poseStack = new MatrixStack();
-				OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);
-				renderer.mulPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);
+	@OnlyIn(Dist.CLIENT)
+	public static class AdrenalineProvider implements IParticleFactory<BasicParticleType> {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public Particle createParticle(BasicParticleType typeIn, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+			EntityAfterImageParticle particle = createCommon(level, x, y, z, xSpeed, ySpeed, zSpeed, (self) -> {
+				self.alpha -= 0.025F;
+				self.scale += (-0.0025F * self.age * self.age + 1.0F) * 0.1F;
+			});
 
-				for (int i = 0; i < matrices.length; i++) {
-					matrices[i] = OpenMatrix4f.mul(matrices[i], armature.searchJointById(i).getToOrigin(), null);
-				}
-
-				AnimatedMesh mesh = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal()).getMesh(entitypatch);
-				EntityAfterImageParticle particle = new EntityAfterImageParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, mesh, matrices, poseStack.last().pose());
-
-				return particle;
+			if (particle != null) {
+				particle.setLifetime(20);
+				particle.setAlpha(0.6F);
 			}
 
-			return null;
+			return particle;
 		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public static class WhiteAfterImageProvider implements IParticleFactory<BasicParticleType> {
+		@SuppressWarnings({ "rawtypes", "unchecked" })
+		@Override
+		public Particle createParticle(BasicParticleType typeIn, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
+			EntityAfterImageParticle particle = createCommon(level, x, y, z, xSpeed, ySpeed, zSpeed, (self) -> {
+				self.alpha = (float)(self.lifetime - self.age) / (float)self.lifetime;
+			});
+
+			if (particle != null) {
+				particle.setLifetime(20);
+				particle.rCol = 1.0F;
+				particle.gCol = 1.0F;
+				particle.bCol = 1.0F;
+			}
+
+			return particle;
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static EntityAfterImageParticle createCommon(ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, Consumer<EntityAfterImageParticle> tickTask) {
+		Entity entity = level.getEntity((int)Double.doubleToLongBits(xSpeed));
+		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
+
+		if (entitypatch != null && ClientEngine.getInstance().renderEngine.hasRendererFor(entitypatch.getOriginal())) {
+			PatchedEntityRenderer renderer = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal());
+			Armature armature = entitypatch.getArmature();
+			MatrixStack poseStack = new MatrixStack();
+			OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);
+			renderer.mulPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);
+
+			for (int i = 0; i < matrices.length; i++) {
+				matrices[i] = OpenMatrix4f.mul(matrices[i], armature.searchJointById(i).getToOrigin(), null);
+			}
+
+			AnimatedMesh mesh = ClientEngine.getInstance().renderEngine.getEntityRenderer(entitypatch.getOriginal()).getMesh(entitypatch);
+			EntityAfterImageParticle particle = tickTask == null ?
+					new EntityAfterImageParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, mesh, matrices, poseStack.last().pose())
+					: new EntityAfterImageParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, mesh, matrices, poseStack.last().pose(), tickTask);
+
+			return particle;
+		}
+
+		return null;
 	}
 }

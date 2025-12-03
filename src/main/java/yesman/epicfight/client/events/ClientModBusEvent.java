@@ -61,15 +61,20 @@ public class ClientModBusEvent {
     	particleEngine.register(EpicFightParticles.BREATH_FLAME.get(), EnderParticle.BreathFlameProvider::new);
     	particleEngine.register(EpicFightParticles.FORCE_FIELD.get(), new ForceFieldParticle.Provider());
     	particleEngine.register(EpicFightParticles.FORCE_FIELD_END.get(), new ForceFieldEndParticle.Provider());
+    	particleEngine.register(EpicFightParticles.ADRENALINE_PLAYER_BEATING.get(), new EntityAfterImageParticle.AdrenalineProvider());
+    	particleEngine.register(EpicFightParticles.WHITE_AFTERIMAGE.get(), new EntityAfterImageParticle.WhiteAfterImageProvider());
     	particleEngine.register(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), new EntityAfterImageParticle.Provider());
     	particleEngine.register(EpicFightParticles.LASER.get(), new LaserParticle.Provider());
     	particleEngine.register(EpicFightParticles.NEUTRALIZE.get(), new DustParticle.ExpansiveMetaParticle.Provider());
     	particleEngine.register(EpicFightParticles.BOSS_CASTING.get(), new DustParticle.ContractiveMetaParticle.Provider());
 
 		particleEngine.register(EpicFightParticles.TSUNAMI_SPLASH.get(), TsunamiSplashParticle.Provider::new);
-		particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), AnimationTrailParticle.Provider::new);
-		particleEngine.register(EpicFightParticles.FEATHER.get(), FeatherParticle.Provider::new);
-		particleEngine.register(EpicFightParticles.AIR_BURST.get(), new AirBurstParticle.Provider());
+    	particleEngine.register(EpicFightParticles.SWING_TRAIL.get(), AnimationTrailParticle.Provider::new);
+    	particleEngine.register(EpicFightParticles.PROJECTILE_TRAIL.get(), new ProjectileTrailParticle.Provider());
+    	particleEngine.register(EpicFightParticles.FEATHER.get(), FeatherParticle.Provider::new);
+    	particleEngine.register(EpicFightParticles.AIR_BURST.get(), new AirBurstParticle.Provider());
+    	particleEngine.register(EpicFightParticles.ASH_DIRECTIONAL.get(), AshDirectionalParticle.Provider::new);
+    	particleEngine.register(EpicFightParticles.CATHARSIS.get(), CatharsisParticle.Provider::new);
     }
 	
 	@SubscribeEvent(priority = EventPriority.LOWEST)

@@ -28,6 +28,7 @@ public abstract class ProjectilePatch<T extends ProjectileEntity> extends Entity
 	protected float impact;
 	protected float armorNegation;
 	protected Vector3d initialFirePosition;
+	protected boolean hasHit;
 
 	@Override
 	public void onJoinWorld(T projectileEntity, EntityJoinWorldEvent event) {
@@ -61,6 +62,11 @@ public abstract class ProjectilePatch<T extends ProjectileEntity> extends Entity
 			this.armorNegation = 0.0F;
 			this.impact = 0.0F;
 		}
+
+		if (event.getWorld().isClientSide()) {
+			double entityId = Double.longBitsToDouble((long)projectileEntity.getId());
+			event.getWorld().addParticle(yesman.epicfight.registry.entries.EpicFightParticles.PROJECTILE_TRAIL.get(), entityId, 0, 0, 0, 0, 0);
+		}
 	}
 
 	@Override
@@ -72,6 +78,7 @@ public abstract class ProjectilePatch<T extends ProjectileEntity> extends Entity
 	protected final void serverTick(LivingEvent.LivingUpdateEvent event) {}
 
 	public boolean onProjectileImpact(ProjectileImpactEvent event) {
+		this.hasHit = true;
 		return false;
 	}
 
@@ -95,6 +102,10 @@ public abstract class ProjectilePatch<T extends ProjectileEntity> extends Entity
 
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		return null;
+		return this.getMatrix(partialTicks);
+	}
+	
+	public boolean hit() {
+		return this.hasHit;
 	}
 }

@@ -11,7 +11,10 @@ import yesman.epicfight.particle.HitParticleType;
 public class EpicFightParticles {
 	public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, EpicFightMod.MODID);
 	
+	public static final RegistryObject<BasicParticleType> ADRENALINE_PLAYER_BEATING = PARTICLES.register("adrenaline_player_beating", () -> new BasicParticleType(true));
+	public static final RegistryObject<BasicParticleType> ASH_DIRECTIONAL = PARTICLES.register("ash_directional", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> BLOOD = PARTICLES.register("blood", () -> new BasicParticleType(true));
+	public static final RegistryObject<BasicParticleType> CATHARSIS = PARTICLES.register("catharsis", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> CUT = PARTICLES.register("cut", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> DUST_EXPANSIVE = PARTICLES.register("dust_expansive", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> DUST_CONTRACTIVE = PARTICLES.register("dust_contractive", () -> new BasicParticleType(true));
@@ -31,7 +34,8 @@ public class EpicFightParticles {
 	public static final RegistryObject<BasicParticleType> BOSS_CASTING = PARTICLES.register("boss_casting", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> TSUNAMI_SPLASH = PARTICLES.register("tsunami_splash", () -> new BasicParticleType(true));
 	public static final RegistryObject<BasicParticleType> FEATHER = PARTICLES.register("feather", () -> new BasicParticleType(true));
-
+	public static final RegistryObject<BasicParticleType> WHITE_AFTERIMAGE = PARTICLES.register("white_afterimage", () -> new BasicParticleType(true));
 	public static final RegistryObject<HitParticleType> AIR_BURST = PARTICLES.register("air_burst", () -> new HitParticleType(true, HitParticleType.MIDDLE_OF_ENTITIES, HitParticleType.ATTACKER_Y_ROTATION));
 	public static final RegistryObject<BasicParticleType> SWING_TRAIL = PARTICLES.register("swing_trail", () -> new BasicParticleType(true));
+	public static final RegistryObject<BasicParticleType> PROJECTILE_TRAIL = PARTICLES.register("projectile_trail", () -> new BasicParticleType(true));
 }
