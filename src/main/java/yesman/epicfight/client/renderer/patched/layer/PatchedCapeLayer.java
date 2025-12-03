@@ -34,11 +34,9 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayerEntity, A
 			if (itemstack.getItem() != Items.ELYTRA) {
 				OpenMatrix4f modelMatrix = new OpenMatrix4f();
 				modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(poses[8]);
-				OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 
 				matrixStackIn.pushPose();
-				MathUtils.translateStack(matrixStackIn, modelMatrix);
-				MathUtils.rotateStack(matrixStackIn, transpose);
+				MathUtils.mulStack(matrixStackIn, modelMatrix);
 				matrixStackIn.translate(0.0D, -0.4D, -0.025D);
 				originalRenderer.render(matrixStackIn, buffer, packedLightIn, entityliving, entityliving.animationPosition, entityliving.animationSpeed, partialTicks, entityliving.tickCount, yRot, xRot);
 				matrixStackIn.popPose();
