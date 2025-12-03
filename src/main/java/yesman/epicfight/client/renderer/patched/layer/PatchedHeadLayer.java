@@ -40,8 +40,11 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 			model.xRot = 0;
 			model.yRot = 0;
 			model.zRot = 0;
+			OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 			matrixStackIn.pushPose();
-			MathUtils.mulStack(matrixStackIn, modelMatrix);
+
+			MathUtils.translateStack(matrixStackIn, modelMatrix);
+			MathUtils.rotateStack(matrixStackIn, transpose);
 
 			if (entitypatch.getOriginal().isBaby()) {
 				matrixStackIn.translate(0.0F, -1.2F, 0.0F);

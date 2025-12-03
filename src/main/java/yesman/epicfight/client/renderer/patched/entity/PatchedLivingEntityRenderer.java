@@ -177,6 +177,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		}
 
 		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
+		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 
 		//Very bootleg but i need Head Layers to render separately from the other layers
 		layers.forEach((layer) -> {
@@ -184,7 +185,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		});
 
 		poseStack.pushPose();
-		MathUtils.mulStack(poseStack, modelMatrix);
+		MathUtils.translateStack(poseStack, modelMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
 		poseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		

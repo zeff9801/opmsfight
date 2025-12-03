@@ -69,7 +69,9 @@ public class RenderItemBase {
 	}
 
 	protected void mulPoseStack(MatrixStack poseStack, OpenMatrix4f pose) {
-		MathUtils.mulStack(poseStack, pose);
+		MathUtils.translateStack(poseStack, pose);
+		MathUtils.rotateStack(poseStack, pose);
+		MathUtils.scaleStack(poseStack, pose);
 	}
 
 	public OpenMatrix4f getCorrectionMatrix(ItemStack stack, LivingEntityPatch<?> itemHolder, Hand hand) {
