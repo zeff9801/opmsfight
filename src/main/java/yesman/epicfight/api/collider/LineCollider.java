@@ -134,20 +134,17 @@ public class LineCollider extends Collider {
 
 	@Override
 	public void drawInternal(MatrixStack poseStack, IVertexBuilder vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
-		int pathIndex = armature.searchPathIndex(joint.getName());
 		OpenMatrix4f poseMatrix;
 		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
 
-		if (pathIndex == -1) {
+		if (armature.rootJoint.equals(joint)) {
 			poseMatrix = interpolatedPose.orElseEmpty("Root").getAnimationBoundMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
+			int pathIndex = armature.searchPathIndex(joint.getName());
 			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
 		}
 
-		OpenMatrix4f transpose = new OpenMatrix4f();
-		OpenMatrix4f.transpose(poseMatrix, transpose);
-		MathUtils.translateStack(poseStack, poseMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
+		MathUtils.mulStack(poseStack, poseMatrix);
 		Matrix4f matrix = poseStack.last().pose();
 		float startX = (float)this.modelCenter.x;
 		float startY = (float)this.modelCenter.y;

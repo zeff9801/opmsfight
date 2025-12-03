@@ -250,6 +250,10 @@ public class MathUtils {
 	 * poseStack.mulPoseMatrix(BUFFER);
 	 * }
 	 */
+	public static void mulStack(MatrixStack poseStack, OpenMatrix4f mat) {
+		OpenMatrix4f.exportToMojangMatrix(mat, BUFFER);
+		poseStack.last().pose().multiply(BUFFER);
+	}
 
 	public static double getAngleBetween(Vec3f a, Vec3f b) {
 		double cos = (a.x * b.x + a.y * b.y + a.z * b.z);

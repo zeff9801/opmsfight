@@ -117,9 +117,9 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 
 		ListNBT size = new ListNBT();
 
-		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].x));
-		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].y));
-		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertex[1].z));
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertices[1].x));
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertices[1].y));
+		size.add(DoubleNBT.valueOf(this.colliders.get(0).modelVertices[1].z));
 
 		resultTag.put("size", size);
 
