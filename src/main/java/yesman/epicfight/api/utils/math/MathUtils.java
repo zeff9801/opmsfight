@@ -9,7 +9,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MathUtils {
@@ -150,6 +149,27 @@ public class MathUtils {
 
 		return MathHelper.lerp(progression, from, to);
 	}
+	
+	public static float findNearestRotation(float src, float rotation) {
+		float diff = Math.abs(src - rotation);
+		float idealRotation = rotation;
+		int sign = (int)Math.signum(src - rotation);
+
+		if (sign == 0) {
+			return rotation;
+		}
+
+		while (true) {
+			float next = idealRotation + sign * 360.0F;
+
+			if (Math.abs(src - next) > diff) {
+				return idealRotation;
+			}
+
+			idealRotation = next;
+			diff = Math.abs(src - next);
+		}
+	}
 
 	public static Vector3d getNearestVector(Vector3d from, Vector3d... vectors) {
 		double minLength = 1000000.0D;
@@ -193,6 +213,30 @@ public class MathUtils {
 		for (float d : dList) {
 			if (min > d) {
 				min = d;
+			}
+		}
+
+		return min;
+	}
+	
+	public static int greatest(int... iList) {
+		int max = Integer.MIN_VALUE;
+
+		for (int i : iList) {
+			if (max < i) {
+				max = i;
+			}
+		}
+
+		return max;
+	}
+
+	public static int least(int... iList) {
+		int min = Integer.MAX_VALUE;
+
+		for (int i : iList) {
+			if (min > i) {
+				min = i;
 			}
 		}
 
@@ -244,12 +288,6 @@ public class MathUtils {
 		poseStack.scale(vector.x(), vector.y(), vector.z());
 	}
 
-	/*
-	 * public static void mulStack(MatrixStack poseStack, OpenMatrix4f mat) {
-	 * OpenMatrix4f.exportToMojangMatrix(mat, BUFFER);
-	 * poseStack.mulPoseMatrix(BUFFER);
-	 * }
-	 */
 	public static void mulStack(MatrixStack poseStack, OpenMatrix4f mat) {
 		OpenMatrix4f.exportToMojangMatrix(mat, BUFFER);
 		poseStack.last().pose().multiply(BUFFER);
@@ -468,7 +506,7 @@ public class MathUtils {
 		int current = 0;
 		float maxDot = -10000.0F;
 
-		for (Vec3f normzlizedVec : Stream.of(candidates).map((vec) -> vec.normalize()).collect(Collectors.toList())) {
+		for (Vec3f normzlizedVec : Stream.of(candidates).map(Vec3f::normalize).toList()) {
 			float dot = Vec3f.dot(src, normzlizedVec);
 
 			if (maxDot < dot) {

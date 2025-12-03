@@ -23,6 +23,9 @@ public class JointMaskEntry {
 			JointMask.of("Arm_L"), JointMask.of("Hand_L"),
 			JointMask.of("Elbow_L"), JointMask.of("Tool_L")
 	);
+	
+	// 1.21 naming alias for combo attack masks (same content as BASIC_ATTACK_MASK)
+	public static final JointMaskEntry COMBO_ATTACK_MASK = JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create();
 
 	public static final JointMaskSet ALL = JointMaskSet.of(
 			JointMask.of("Root"), JointMask.of("Thigh_R"),

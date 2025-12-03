@@ -27,10 +27,13 @@ import java.util.List;
 public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 	public MultiOBBCollider(int arrayLength, double vertexX, double vertexY, double vertexZ, double centerX,
 			double centerY, double centerZ) {
-		super(arrayLength, centerX, centerY, centerZ, null);
+		this(arrayLength, vertexX, vertexY, vertexZ, centerX, centerY, centerZ, OBBCollider.getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ));
+	}
 
-		AxisAlignedBB aabb = OBBCollider.getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
-		OBBCollider colliderForAll = new OBBCollider(aabb, vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
+	private MultiOBBCollider(int arrayLength, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ, AxisAlignedBB outerAABB) {
+		super(arrayLength, centerX, centerY, centerZ, outerAABB);
+
+		OBBCollider colliderForAll = new OBBCollider(outerAABB, vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
 
 		for (int i = 0; i < arrayLength; i++) {
 			this.colliders.add(colliderForAll);
@@ -56,6 +59,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		float partialScale = 1.0F / (colliderCount - 1);
 		float interpolation = 0.0F;
 		Armature armature = entitypatch.getArmature();
+		int pathIndex = armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean attacking = prevState.attacking() || state.attacking()
@@ -73,12 +77,22 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 			float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
 			TransformSheet coordTransform = animation.getCoord();
-			Vector3f gap = this.getGap(coordTransform, pt1, pt2, TRANSLATION_HOLDER_1, TRANSLATION_HOLDER_2);
+			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1, TRANSLATION_HOLDER_1);
+			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2, TRANSLATION_HOLDER_2);
+			Vector3f gap = new Vector3f(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
 
 			poseStack.pushPose();
 			poseStack.translate(gap.x(), gap.y(), gap.z());
 
-			Pose pose = this.getPoseForCollider(animation, joint, armature, entitypatch, pt2, 1.0F);
+			Pose pose;
+
+			if (pathIndex == -1) {
+				pose = new Pose();
+				pose.putJointData("Root", JointTransform.empty());
+				animation.modifyPose(animation, pose, entitypatch, elapsedTime, 1.0F);
+			} else {
+				pose = animation.getPoseByTime(entitypatch, pt2, 1.0F);
+			}
 
 			obbCollider.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, pose, pose,
 					1.0F, attacking ? 0xFFFF0000 : -1);

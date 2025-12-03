@@ -16,6 +16,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.entity.PartEntity;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -34,7 +35,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	public AxisAlignedBB entityCallAABB;
 
 	public MultiCollider(int arrayLength, double centerX, double centerY, double centerZ, AxisAlignedBB entityCallAABB) {
-		super(new Vector3d(centerX, centerY, centerZ), null);
+		super(new Vector3d(centerX, centerY, centerZ), entityCallAABB);
 		this.entityCallAABB = entityCallAABB;
 		this.numberOfColliders = arrayLength;
 		this.colliders = Lists.newArrayList();
@@ -58,7 +59,17 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	@Override
 	public List<Entity> getCollideEntities(Entity entity) {
 		List<Entity> collidedEntities = Lists.newArrayList();
-		List<Entity> list = entity.level.getEntities(entity, this.entityCallAABB == null ? this.getHitboxAABB() : this.entityCallAABB, (e) -> e != entity && !e.isSpectator());
+		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB(), (e) -> {
+			if (e == entity || e.isSpectator()) {
+				return false;
+			}
+
+			if (e instanceof PartEntity<?> part && part.getParent().is(entity)) {
+				return false;
+			}
+
+			return true;
+		});
 
 		for (Entity opponent : list) {
 			for (T collider : this.colliders) {
@@ -79,7 +90,33 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 
 	@Override
 	protected AxisAlignedBB getHitboxAABB() {
-		return this.outerAABB.move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
+		AxisAlignedBB combined = null;
+
+		for (Collider collider : this.colliders) {
+			AxisAlignedBB box = collider.getHitboxAABB();
+
+			if (combined == null) {
+				combined = box;
+			} else {
+				double minX = Math.min(combined.minX, box.minX);
+				double minY = Math.min(combined.minY, box.minY);
+				double minZ = Math.min(combined.minZ, box.minZ);
+				double maxX = Math.max(combined.maxX, box.maxX);
+				double maxY = Math.max(combined.maxY, box.maxY);
+				double maxZ = Math.max(combined.maxZ, box.maxZ);
+				combined = new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+			}
+		}
+
+		if (combined != null) {
+			return combined;
+		}
+
+		if (this.outerAABB != null) {
+			return this.outerAABB.move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
+		}
+
+		return new AxisAlignedBB(this.worldCenter.x, this.worldCenter.y, this.worldCenter.z, this.worldCenter.x, this.worldCenter.y, this.worldCenter.z);
 	}
 
 	@Override
