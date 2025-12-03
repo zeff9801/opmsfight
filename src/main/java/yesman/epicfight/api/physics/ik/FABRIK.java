@@ -23,7 +23,8 @@ public class FABRIK {
 	public FABRIK(Pose pose, Armature armature, Joint startJoint, Joint endJoint) {
 		this.armature = armature;
 		this.pose = pose;
-		this.addChain(pose, this.armature.searchJointByName(startJoint.getName()), this.armature.searchJointByName(endJoint.getName()));
+		this.addChain(pose, this.armature.searchJointByName(startJoint.getName()),
+				this.armature.searchJointByName(endJoint.getName()));
 	}
 
 	public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
@@ -37,7 +38,8 @@ public class FABRIK {
 		Joint nextJoint = joint.getSubJoints().get((pathIndex % 10) - 1);
 		JointTransform jt = pose.orElseEmpty(nextJoint.getName());
 		OpenMatrix4f result = jt.getAnimationBoundMatrix(nextJoint, parentTransform);
-		this.chains.add(new Chain(joint.getName(), parentTransform.toTranslationVector(), result.toTranslationVector()));
+		this.chains
+				.add(new Chain(joint.getName(), parentTransform.toTranslationVector(), result.toTranslationVector()));
 		int remainPath = pathIndex / 10;
 
 		if (remainPath > 0) {
@@ -116,7 +118,7 @@ public class FABRIK {
 			this.tail = tail;
 			this.head = head;
 			this.tailToHead = head.copy().sub(tail);
-			this.length = (float)Math.sqrt(tail.distanceSqr(head));
+			this.length = (float) Math.sqrt(tail.distanceSqr(head));
 		}
 
 		public void forwardAlign(Vec3f newHeadPos) {
@@ -140,7 +142,7 @@ public class FABRIK {
 			this.tail.set(tail);
 			this.head.set(head);
 			this.tailToHead.set(head.copy().sub(tail));
-			this.length = (float)Math.sqrt(tail.distanceSqr(head));
+			this.length = (float) Math.sqrt(tail.distanceSqr(head));
 		}
 	}
 }

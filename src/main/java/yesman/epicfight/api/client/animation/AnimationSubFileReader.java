@@ -1,5 +1,6 @@
 package yesman.epicfight.api.client.animation;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -7,28 +8,43 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import com.ibm.icu.impl.Pair;
+import com.joml.Quaternionf;
 import net.minecraft.resources.IResource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.Keyframe;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.animation.types.ActionAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.*;
+import yesman.epicfight.api.exception.AssetLoadingException;
+import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
 public class AnimationSubFileReader {
+	public static final SubFileType<ClientProperty> SUBFILE_CLIENT_PROPERTY = new ClientPropertyType();
+	public static final SubFileType<PovSettings> SUBFILE_POV_ANIMATION = new PovAnimationType();
 
 	public static void readAndApply(StaticAnimation animation, IResource iresource, SubFileType<?> subFileType) {
-
 		InputStream inputstream = iresource.getInputStream();
         try {
 			subFileType.apply(inputstream, animation);
@@ -74,6 +90,54 @@ public class AnimationSubFileReader {
 	private record ClientProperty(LayerInfo layerInfo, LayerInfo multilayerInfo, List<TrailInfo> trailInfo) {
 	}
 
+	@OnlyIn(Dist.CLIENT)
+	private static class ClientPropertyType extends SubFileType<ClientProperty> {
+		private ClientPropertyType() {
+			super("data", new AnimationSubFileReader.ClientAnimationPropertyDeserializer());
+		}
+
+		@Override
+		protected void applySubFileInfo(ClientProperty deserialized, StaticAnimation animation) {
+			if (deserialized.layerInfo() != null) {
+				if (deserialized.layerInfo().jointMaskEntry.isValid()) {
+					animation.addProperty(ClientAnimationProperties.JOINT_MASK, deserialized.layerInfo().jointMaskEntry);
+				}
+
+				animation.addProperty(ClientAnimationProperties.LAYER_TYPE, deserialized.layerInfo().layerType);
+				animation.addProperty(ClientAnimationProperties.PRIORITY, deserialized.layerInfo().priority);
+			}
+
+			if (deserialized.multilayerInfo() != null) {
+				StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getTransitionTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_multilayer", animation.getArmature(), true);
+
+				if (deserialized.multilayerInfo().jointMaskEntry.isValid()) {
+					multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, deserialized.multilayerInfo().jointMaskEntry);
+				}
+
+				multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, deserialized.multilayerInfo().layerType);
+				multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, deserialized.multilayerInfo().priority);
+				multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+					Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
+
+					if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
+						return Pair.of(prevElapsedTime, elapsedTime);
+					}
+
+					if (!self.isStaticAnimation() && baseLayer.animationPlayer.getAnimation().isStaticAnimation()) {
+						return Pair.of(prevElapsedTime + speed, elapsedTime + speed);
+					}
+
+					return Pair.of(baseLayer.animationPlayer.getPrevElapsedTime(), baseLayer.animationPlayer.getElapsedTime());
+				});
+
+				animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
+			}
+
+			if (!deserialized.trailInfo().isEmpty()) {
+				animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, deserialized.trailInfo());
+			}
+		}
+	}
 	
 	@OnlyIn(Dist.CLIENT)
 	private static class ClientAnimationPropertyDeserializer implements AnimationSubFileDeserializer<ClientProperty> {
@@ -158,6 +222,132 @@ public class AnimationSubFileReader {
 		}
 
 	}
+
+	@OnlyIn(Dist.CLIENT)
+	private static class PovAnimationType extends SubFileType<PovSettings> {
+		private PovAnimationType() {
+			super("pov", new AnimationSubFileReader.PovAnimationDeserializer());
+		}
+
+		@Override
+		protected void applySubFileInfo(PovSettings deserialized, StaticAnimation animation) {
+			ResourceLocation povAnimationLocation = deserialized.hasUniqueAnimation() ? AnimationManager.getSubAnimationFileLocation(animation.getLocation(), SUBFILE_POV_ANIMATION) : animation.getLocation();
+			StaticAnimation povAnimation = new StaticAnimation(povAnimationLocation, animation.getTransitionTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_pov", animation.getArmature(), true) {
+				@Override
+				public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation pAnimation) {
+					return animation.getPlaySpeed(entitypatch, pAnimation);
+				}
+			};
+
+			animation.getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).ifPresent(speedModifier -> {
+				povAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, speedModifier);
+			});
+
+			if (deserialized.syncFrame()) {
+				animation.getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).ifPresent(elapsedTimeModifier -> {
+					povAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, elapsedTimeModifier);
+				});
+			}
+
+			animation.addProperty(ClientAnimationProperties.POV_ANIMATION, povAnimation);
+			animation.addProperty(ClientAnimationProperties.POV_SETTINGS, deserialized);
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	private static class PovAnimationDeserializer implements AnimationSubFileDeserializer<PovSettings> {
+		@Override
+		public PovSettings deserialize(StaticAnimation animation, JsonElement json) throws AssetLoadingException, JsonParseException {
+			JsonObject jObject = json.getAsJsonObject();
+			TransformSheet cameraTransform = null;
+			PovSettings.ViewLimit viewLimit = null;
+			PovSettings.RootTransformation rootTrasnformation = null;
+			
+			if (jObject.has("root")) {
+				rootTrasnformation = PovSettings.RootTransformation.valueOf(ParseUtil.toUpperCase(GsonHelper.getAsString(jObject, "root")));
+			} else {
+				if (animation instanceof ActionAnimation) {
+					rootTrasnformation = PovSettings.RootTransformation.WORLD;
+				} else {
+					rootTrasnformation = PovSettings.RootTransformation.CAMERA;
+				}
+			}
+			
+			if (jObject.has("camera")) {
+				JsonObject cameraTransformJObject = jObject.getAsJsonObject("camera");
+				cameraTransform = readTransformSheet(cameraTransformJObject);
+			}
+			
+			ImmutableMap.Builder<String, Boolean> visibilitiesBuilder = ImmutableMap.builder();
+			boolean others = false;
+			
+			if (jObject.has("visibilities")) {
+				JsonObject visibilitiesObject = jObject.getAsJsonObject("visibilities");
+				visibilitiesObject.entrySet().stream().filter((e) -> !"others".equals(e.getKey())).forEach((entry) -> visibilitiesBuilder.put(entry.getKey(), entry.getValue().getAsBoolean()));
+				others = visibilitiesObject.get("others").getAsBoolean();
+			} else {
+				visibilitiesBuilder.put("leftArm", true);
+				visibilitiesBuilder.put("leftSleeve", true);
+				visibilitiesBuilder.put("rightArm", true);
+				visibilitiesBuilder.put("rightSleeve", true);
+			}
+			
+			if (jObject.has("limited_view_degrees")) {
+				JsonObject limitedViewDegrees = jObject.getAsJsonObject("limited_view_degrees");
+				JsonArray xRot = limitedViewDegrees.get("xRot").getAsJsonArray();
+				JsonArray yRot = limitedViewDegrees.get("yRot").getAsJsonArray();
+				
+				float xRotMin = Math.min(xRot.get(0).getAsFloat(), xRot.get(1).getAsFloat());
+				float xRotMax = Math.max(xRot.get(0).getAsFloat(), xRot.get(1).getAsFloat());
+				float yRotMin = Math.min(yRot.get(0).getAsFloat(), yRot.get(1).getAsFloat());
+				float yRotMax = Math.max(yRot.get(0).getAsFloat(), yRot.get(1).getAsFloat());
+				viewLimit = new PovSettings.ViewLimit(xRotMin, xRotMax, yRotMin, yRotMax);
+			}
+			
+			return new PovSettings(cameraTransform, visibilitiesBuilder.build(), rootTrasnformation, viewLimit, others, jObject.has("animation"), GsonHelper.getAsBoolean(jObject, "sync_frame", false));
+		}
+	}
+
+	private static TransformSheet readTransformSheet(JsonObject transformObject) {
+        JsonArray timesJson = transformObject.getAsJsonArray("time");
+        JsonArray transformsJson = transformObject.getAsJsonArray("transform");
+        List<Keyframe> keyframes = new ArrayList<>();
+
+        for (int i = 0; i < timesJson.size(); i++) {
+            float time = timesJson.get(i).getAsFloat();
+            JsonObject transformEntry = transformsJson.get(i).getAsJsonObject();
+
+            Vec3f loc;
+            if (transformEntry.has("loc")) {
+                JsonArray arr = transformEntry.getAsJsonArray("loc");
+                loc = new Vec3f(arr.get(0).getAsFloat(), arr.get(1).getAsFloat(), arr.get(2).getAsFloat());
+            } else {
+                loc = new Vec3f(0.0F, 0.0F, 0.0F);
+            }
+
+            Vec3f sca;
+            if (transformEntry.has("sca")) {
+                JsonArray arr = transformEntry.getAsJsonArray("sca");
+                sca = new Vec3f(arr.get(0).getAsFloat(), arr.get(1).getAsFloat(), arr.get(2).getAsFloat());
+            } else {
+                sca = new Vec3f(1.0F, 1.0F, 1.0F);
+            }
+
+            Quaternionf rot;
+
+            if (transformEntry.has("rot")) {
+                JsonArray rotJson = transformEntry.getAsJsonArray("rot");
+                // Stored as [w, x, y, z]
+                rot = new Quaternionf(rotJson.get(1).getAsFloat(), rotJson.get(2).getAsFloat(), rotJson.get(3).getAsFloat(), rotJson.get(0).getAsFloat());
+            } else {
+                rot = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
+            }
+
+            keyframes.add(new Keyframe(time, new JointTransform(loc, rot, sca)));
+        }
+
+        return new TransformSheet(keyframes);
+    }
 	
 	@OnlyIn(Dist.CLIENT)
 	public interface AnimationSubFileDeserializer<T> {

@@ -42,7 +42,8 @@ public class Armature {
 
 	protected Joint getOrLogException(Map<String, Joint> jointMap, String name) {
 		if (!jointMap.containsKey(name)) {
-			EpicFightMod.LOGGER.debug("Cannot find the joint named " + name + " in " + this.getClass().getCanonicalName());
+			EpicFightMod.LOGGER
+					.debug("Cannot find the joint named " + name + " in " + this.getClass().getCanonicalName());
 
 			return Joint.EMPTY;
 		}
@@ -74,11 +75,13 @@ public class Armature {
 		return getBindedJointTransformByIndexInternal(pose, this.rootJoint, new OpenMatrix4f(), pathIndex);
 	}
 
-	private OpenMatrix4f getBindedJointTransformByIndexInternal(Pose pose, Joint joint, OpenMatrix4f parentTransform, int pathIndex) {
+	private OpenMatrix4f getBindedJointTransformByIndexInternal(Pose pose, Joint joint, OpenMatrix4f parentTransform,
+			int pathIndex) {
 		JointTransform jt = pose.orElseEmpty(joint.getName());
 		OpenMatrix4f result = jt.getAnimationBoundMatrix(joint, parentTransform);
 		int nextIndex = pathIndex % 10;
-		return nextIndex > 0 ? this.getBindedJointTransformByIndexInternal(pose, joint.getSubJoints().get(nextIndex - 1), result, pathIndex / 10) : result;
+		return nextIndex > 0 ? this.getBindedJointTransformByIndexInternal(pose,
+				joint.getSubJoints().get(nextIndex - 1), result, pathIndex / 10) : result;
 	}
 
 	public Joint searchJointById(int id) {
@@ -132,11 +135,13 @@ public class Armature {
 		newRoot.initOriginTransform(new OpenMatrix4f());
 		Armature newArmature = null;
 
-		//Uses reflection to keep the type of copied armature
+		// Uses reflection to keep the type of copied armature
 		try {
-			Constructor<? extends Armature> constructor = this.getClass().getConstructor(String.class, int.class, Joint.class, Map.class);
+			Constructor<? extends Armature> constructor = this.getClass().getConstructor(String.class, int.class,
+					Joint.class, Map.class);
 			newArmature = constructor.newInstance(this.name, this.jointNumber, newRoot, oldToNewJoint);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
 			throw new IllegalStateException("Armature copy failed! " + e);
 		}
 
@@ -165,7 +170,9 @@ public class Armature {
 		JsonArray jointNamesArray = new JsonArray();
 		JsonArray jointHierarchy = new JsonArray();
 
-		this.jointById.int2ObjectEntrySet().stream().sorted((entry1, entry2) -> Integer.compare(entry1.getIntKey(), entry2.getIntKey())).forEach((entry) -> jointNamesArray.add(entry.getValue().getName()));
+		this.jointById.int2ObjectEntrySet().stream()
+				.sorted((entry1, entry2) -> Integer.compare(entry1.getIntKey(), entry2.getIntKey()))
+				.forEach((entry) -> jointNamesArray.add(entry.getValue().getName()));
 		armature.add("joints", jointNamesArray);
 		armature.add("hierarchy", jointHierarchy);
 

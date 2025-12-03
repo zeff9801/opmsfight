@@ -23,6 +23,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class RenderItemBase {
 	protected final OpenMatrix4f mainhandcorrectionMatrix;
 	protected final OpenMatrix4f offhandCorrectionMatrix;
+	protected boolean forceVanillaFirstPerson;
 	protected static final OpenMatrix4f BACK_COORECTION = new OpenMatrix4f().translate(0.5F, 0.85F, 0.15F)
 			.rotateDeg(125.0F, Vec3f.Z_AXIS).rotateDeg(100.0F, Vec3f.Y_AXIS);
 	public static RenderEngine renderEngine;
@@ -35,6 +36,7 @@ public class RenderItemBase {
 	public RenderItemBase(OpenMatrix4f mainhandcorrectionMatrix, OpenMatrix4f offhandCorrectionMatrix) {
 		this.mainhandcorrectionMatrix = mainhandcorrectionMatrix;
 		this.offhandCorrectionMatrix = offhandCorrectionMatrix;
+		this.forceVanillaFirstPerson = false;
 	}
 
 	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, Hand hand,
@@ -76,5 +78,9 @@ public class RenderItemBase {
 
 	public OpenMatrix4f getCorrectionMatrix(ItemStack stack, LivingEntityPatch<?> itemHolder, Hand hand) {
 		return new OpenMatrix4f(hand == Hand.MAIN_HAND ? this.mainhandcorrectionMatrix : this.offhandCorrectionMatrix);
+	}
+
+	public boolean forceVanillaFirstPerson() {
+		return this.forceVanillaFirstPerson;
 	}
 }

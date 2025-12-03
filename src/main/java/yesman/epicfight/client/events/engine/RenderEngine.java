@@ -529,12 +529,18 @@ public class RenderEngine {
 				boolean isBattleMode = playerpatch.isBattleMode();
 
 				if (isBattleMode || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue()) {
-					if (event.getHand() == Hand.MAIN_HAND) {
-						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
-								event.getBuffers(), event.getMatrixStack(), event.getLight(), event.getPartialTicks());
+					boolean useEpicFightModel = false;
+					if (isBattleMode) {
+						RenderItemBase mainhandItemSkin = renderEngine.getItemRenderer(playerpatch.getOriginal().getMainHandItem());
+						RenderItemBase offhandItemSkin = renderEngine.getItemRenderer(playerpatch.getOriginal().getOffhandItem());
+						useEpicFightModel = (mainhandItemSkin == null || !mainhandItemSkin.forceVanillaFirstPerson()) && (offhandItemSkin == null || !offhandItemSkin.forceVanillaFirstPerson());
 					}
 
-					event.setCanceled(true);
+					if (useEpicFightModel && event.getHand() == Hand.MAIN_HAND) {
+						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
+								event.getBuffers(), event.getMatrixStack(), event.getLight(), event.getPartialTicks());
+						event.setCanceled(true);
+					}
 				}
 			}
 		}

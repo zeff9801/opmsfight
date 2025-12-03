@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
+import yesman.epicfight.api.client.animation.AnimationSubFileReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.datastructure.ClearableIdMapper;
@@ -149,15 +149,26 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 	public static void readAnimationProperties(StaticAnimation animation) {
 		if (resourceManager == null)
 			return;
-		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
+		ResourceLocation dataLocation = getSubAnimationFileLocation(animation.getLocation(), AnimationSubFileReader.SUBFILE_CLIENT_PROPERTY);
+		ResourceLocation povLocation = getSubAnimationFileLocation(animation.getLocation(), AnimationSubFileReader.SUBFILE_POV_ANIMATION);
 
 		try {
-			Optional<IResource> resourceOptional = Optional.of(resourceManager.getResource(dataLocation));
-			resourceOptional.ifPresent((rs) -> {
-				ClientAnimationDataReader.readAndApply(animation, rs);
-			});
+			if (resourceManager.hasResource(dataLocation)) {
+				IResource resource = resourceManager.getResource(dataLocation);
+				AnimationSubFileReader.readAndApply(animation, resource, AnimationSubFileReader.SUBFILE_CLIENT_PROPERTY);
+			}
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.error("Failed to get resource: " + dataLocation, e);
+			e.printStackTrace();
+		}
+
+		try {
+			if (resourceManager.hasResource(povLocation)) {
+				IResource resource = resourceManager.getResource(povLocation);
+				AnimationSubFileReader.readAndApply(animation, resource, AnimationSubFileReader.SUBFILE_POV_ANIMATION);
+			}
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.error("Failed to get resource: " + povLocation, e);
 			e.printStackTrace();
 		}
 	}
@@ -243,6 +254,17 @@ public class AnimationManager extends ReloadListener<Map<ResourceLocation, JsonE
 
 		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s",
 				location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
+	}
+
+	public static ResourceLocation getSubAnimationFileLocation(ResourceLocation location, AnimationSubFileReader.SubFileType<?> subFileType) {
+		int splitIdx = location.getPath().lastIndexOf('/');
+
+		if (splitIdx < 0) {
+			splitIdx = 0;
+		}
+
+		return new ResourceLocation(location.getNamespace(), String.format("%s/%s%s",
+				location.getPath().substring(0, splitIdx), subFileType.getDirectory(), location.getPath().substring(splitIdx)));
 	}
 
 	private static void reloadResourceManager(IResourceManager pResourceManager) {

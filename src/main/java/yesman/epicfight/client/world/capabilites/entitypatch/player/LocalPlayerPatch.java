@@ -20,13 +20,21 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.client.animation.AnimationSubFileReader;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.SkillBookScreen;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangePlayerMode;
@@ -34,18 +42,23 @@ import yesman.epicfight.network.client.CPModifyEntityModelYRot;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEntity> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("d1a1e102-1621-11ed-861d-0242ac120002");
 	private Minecraft minecraft;
+	private final FirstPersonLayer firstPersonLayer = new FirstPersonLayer();
 	private LivingEntity rayTarget;
 	private boolean targetLockedOn;
 	private float prevStamina;
 	private int prevChargingAmount;
+	private AnimationSubFileReader.PovSettings povSettings;
 
 	private float lockOnXRot;
 	private float lockOnXRotO;
@@ -102,6 +115,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		this.prevStamina = this.getStamina();
 
 		super.clientTick(event);
+		this.updateFirstPersonLayer();
+		this.applyPovViewLimit();
 
 		RayTraceResult cameraHitResult = this.minecraft.hitResult;
 
@@ -204,6 +219,70 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 				break;
 			default:
 				ClientEngine.getInstance().renderEngine.zoomOut(0);
+		}
+	}
+
+	private void updateFirstPersonLayer() {
+		yesman.epicfight.api.animation.types.DynamicAnimation currentPlaying = this.firstPersonLayer.animationPlayer.getAnimation().getRealAnimation();
+
+		boolean noPovAnimation = this.getClientAnimator().iterVisibleLayersUntilFalse(layer -> {
+			if (layer.isOff()) {
+				return true;
+			}
+
+            yesman.epicfight.api.animation.types.DynamicAnimation realAnimation = layer.animationPlayer.getAnimation().getRealAnimation();
+
+            if (!(realAnimation instanceof StaticAnimation)) {
+                return true;
+            }
+
+            StaticAnimation realStatic = (StaticAnimation)realAnimation;
+            Optional<StaticAnimation> optPovAnimation = realStatic.getProperty(ClientAnimationProperties.POV_ANIMATION);
+            Optional<AnimationSubFileReader.PovSettings> optPovSettings = realStatic.getProperty(ClientAnimationProperties.POV_SETTINGS);
+
+			optPovAnimation.ifPresent(povAnimation -> {
+				if (!povAnimation.equals(currentPlaying)) {
+                    this.firstPersonLayer.playAnimation(povAnimation, realStatic, this, 0.0F);
+                    this.povSettings = optPovSettings.orElse(null);
+                }
+            });
+
+			return !optPovAnimation.isPresent();
+		});
+
+		if (noPovAnimation && !currentPlaying.equals(Animations.EMPTY_ANIMATION) && !currentPlaying.equals(Animations.DUMMY_ANIMATION)) {
+			this.firstPersonLayer.off();
+		}
+
+		this.firstPersonLayer.update(this);
+
+		if (this.firstPersonLayer.animationPlayer.getAnimation().equals(Animations.EMPTY_ANIMATION)) {
+			this.povSettings = null;
+		}
+	}
+
+	private void applyPovViewLimit() {
+		if (this.povSettings == null || this.getFirstPersonLayer().isOff()) {
+			return;
+		}
+
+		if (!this.minecraft.options.getCameraType().isFirstPerson()) {
+			return;
+		}
+
+		AnimationSubFileReader.PovSettings.ViewLimit viewLimit = this.povSettings.viewLimit();
+
+		if (viewLimit == null) {
+			return;
+		}
+
+		this.original.xRot = MathHelper.clamp(this.original.xRot, viewLimit.xRotMin(), viewLimit.xRotMax());
+		float yCamera = MathHelper.wrapDegrees(this.original.yRot);
+		float yBody = MathUtils.findNearestRotation(yCamera, this.getYRot());
+		float yClamped = MathHelper.clamp(yCamera, yBody + viewLimit.yRotMin(), yBody + viewLimit.yRotMax());
+
+		if (yClamped != yCamera) {
+			this.original.yRot = yClamped;
 		}
 	}
 
@@ -328,6 +407,18 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 		return this.prevChargingAmount;
 	}
 
+	public FirstPersonLayer getFirstPersonLayer() {
+		return this.firstPersonLayer;
+	}
+
+	public AnimationSubFileReader.PovSettings getPovSettings() {
+		return this.povSettings;
+	}
+
+	public boolean hasCameraAnimation() {
+		return this.povSettings != null && this.povSettings.cameraTransform() != null;
+	}
+
 	public float getLerpedLockOnX(double partial) {
 		return MathHelper.rotLerp((float) partial, this.lockOnXRotO, this.lockOnXRot);
 	}
@@ -385,6 +476,59 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<ClientPlayerEnti
 
 		if (sendPacket) {
 			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot());
+		}
+	}
+
+	@OnlyIn(Dist.CLIENT)
+	public class FirstPersonLayer extends Layer {
+		private final TransformSheet linkCameraTransform = new TransformSheet(List.of(new Keyframe(0.0F, JointTransform.empty()), new Keyframe(Float.MAX_VALUE, JointTransform.empty())));
+
+		public FirstPersonLayer() {
+			super(null);
+		}
+
+		public void playAnimation(StaticAnimation nextFirstPersonAnimation, StaticAnimation originalAnimation, LivingEntityPatch<?> entitypatch, float transitionTimeModifier) {
+			Optional<AnimationSubFileReader.PovSettings> povSettings = originalAnimation.getProperty(ClientAnimationProperties.POV_SETTINGS);
+
+			boolean hasPrevCameraAnimation = LocalPlayerPatch.this.povSettings != null && LocalPlayerPatch.this.povSettings.cameraTransform() != null;
+			boolean hasNextCameraAnimation = povSettings.isPresent() && povSettings.get().cameraTransform() != null;
+
+			if (hasPrevCameraAnimation || hasNextCameraAnimation) {
+				if (hasPrevCameraAnimation) {
+					this.linkCameraTransform.getKeyframes()[0].transform().copyFrom(LocalPlayerPatch.this.povSettings.cameraTransform().getInterpolatedTransform(this.animationPlayer.getElapsedTime()));
+				} else {
+					this.linkCameraTransform.getKeyframes()[0].transform().copyFrom(JointTransform.empty());
+				}
+
+				if (hasNextCameraAnimation) {
+					this.linkCameraTransform.getKeyframes()[1].transform().copyFrom(povSettings.get().cameraTransform().getKeyframes()[0].transform());
+				} else {
+					this.linkCameraTransform.getKeyframes()[1].transform().clearTransform();
+				}
+
+				this.linkCameraTransform.getKeyframes()[1].setTime(nextFirstPersonAnimation.getTransitionTime());
+			}
+
+			super.playAnimation(nextFirstPersonAnimation, entitypatch, transitionTimeModifier);
+		}
+
+		public void off() {
+			if (LocalPlayerPatch.this.povSettings != null && LocalPlayerPatch.this.povSettings.cameraTransform() != null) {
+				this.linkCameraTransform.getKeyframes()[0].transform().copyFrom(LocalPlayerPatch.this.povSettings.cameraTransform().getInterpolatedTransform(this.animationPlayer.getElapsedTime()));
+				this.linkCameraTransform.getKeyframes()[1].transform().copyFrom(JointTransform.empty());
+				this.linkCameraTransform.getKeyframes()[1].setTime(0.2F);
+			}
+
+			super.off(LocalPlayerPatch.this);
+		}
+
+		@Override
+		protected Pose getCurrentPose(LivingEntityPatch<?> entitypatch) {
+			return this.animationPlayer.isEmpty() ? super.getCurrentPose(entitypatch) : this.animationPlayer.getCurrentPose(entitypatch, 0.0F);
+		}
+
+		public TransformSheet getLinkCameraTransform() {
+			return this.linkCameraTransform;
 		}
 	}
 
