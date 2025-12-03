@@ -7,7 +7,6 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.AttackAnimation;
@@ -53,9 +52,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 
 			Pose pose;
 			if (pathIndex == -1) {
-				pose = new Pose();
-				pose.putJointData("Root", JointTransform.empty());
-				animation.modifyPose(animation, pose, entitypatch, elapsedTime, 1.0F);
+				pose = getPoseForCollider(animation, joint, armature, entitypatch, elapsedTime, 1.0F);
 			} else {
 				pose = animation.getPoseByTime(entitypatch, pt2, 1.0F);
 			}
@@ -70,6 +67,6 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public RenderType getRenderType() {
-		return null;
+		return this.colliders.get(0).getRenderType();
 	}
 }
