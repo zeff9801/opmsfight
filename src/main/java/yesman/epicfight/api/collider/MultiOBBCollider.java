@@ -59,7 +59,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		float partialScale = 1.0F / (colliderCount - 1);
 		float interpolation = 0.0F;
 		Armature armature = entitypatch.getArmature();
-		int pathIndex = armature.searchPathIndex(joint.getName());
+		boolean isRoot = armature.rootJoint.equals(joint);
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean attacking = prevState.attacking() || state.attacking()
@@ -86,7 +86,7 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 
 			Pose pose;
 
-			if (pathIndex == -1) {
+			if (isRoot) {
 				pose = new Pose();
 				pose.putJointData("Root", JointTransform.empty());
 				animation.modifyPose(animation, pose, entitypatch, elapsedTime, 1.0F);

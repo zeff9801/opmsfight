@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.Joint.AccessTicket;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -140,8 +141,8 @@ public class LineCollider extends Collider {
 		if (armature.rootJoint.equals(joint)) {
 			poseMatrix = interpolatedPose.orElseEmpty("Root").getAnimationBoundMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
-			int pathIndex = armature.searchPathIndex(joint.getName());
-			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+			AccessTicket accessTicket = armature.searchPathIndex(joint.getName()).createAccessTicket(armature.rootJoint);
+			poseMatrix = armature.getBoundTransformByJointIndex(interpolatedPose, accessTicket);
 		}
 
 		MathUtils.mulStack(poseStack, poseMatrix);

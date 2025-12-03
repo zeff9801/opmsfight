@@ -6,8 +6,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -17,14 +15,18 @@ import yesman.epicfight.main.EpicFightMod;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 public class Armature {
 	private final String name;
 	private final Int2ObjectMap<Joint> jointById;
 	private final Map<String, Joint> jointByName;
-	private final Object2IntMap<String> pathIndexMap;
+	private final Map<String, Joint.HierarchicalJointAccessor> pathIndexMap;
 	private final int jointNumber;
+	private final OpenMatrix4f[] poseMatrices;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
 
@@ -34,10 +36,11 @@ public class Armature {
 		this.rootJoint = rootJoint;
 		this.jointByName = jointMap;
 		this.jointById = new Int2ObjectOpenHashMap<>();
-		this.pathIndexMap = new Object2IntOpenHashMap<>();
+		this.pathIndexMap = new HashMap<> ();
 		this.jointByName.values().forEach((joint) -> {
 			this.jointById.put(joint.getId(), joint);
 		});
+		this.poseMatrices = OpenMatrix4f.allocateMatrixArray(this.jointNumber);
 	}
 
 	protected Joint getOrLogException(Map<String, Joint> jointMap, String name) {
@@ -51,37 +54,61 @@ public class Armature {
 		return jointMap.get(name);
 	}
 
-	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose) {
+	public void setPose(Pose pose) {
+		this.getPoseTransform(this.rootJoint, new OpenMatrix4f(), pose, this.poseMatrices, false);
+	}
+
+	public void bakeOriginMatrices() {
+		this.rootJoint.initOriginTransform(new OpenMatrix4f());
+	}
+
+	public OpenMatrix4f[] getPoseMatrices() {
+		return this.poseMatrices;
+	}
+
+	/**
+	 * @param applyOriginTransform if you need a final pose of the animations, give it false.
+	 */
+	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose, boolean applyOriginTransform) {
 		OpenMatrix4f[] jointMatrices = new OpenMatrix4f[this.jointNumber];
-		this.getPoseTransform(this.rootJoint, new OpenMatrix4f(), pose, jointMatrices);
+		this.getPoseTransform(this.rootJoint, new OpenMatrix4f(), pose, jointMatrices, applyOriginTransform);
 		return jointMatrices;
 	}
 
-	private void getPoseTransform(Joint joint, OpenMatrix4f parentTransform, Pose pose, OpenMatrix4f[] jointMatrices) {
+	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose) {
+		return this.getPoseAsTransformMatrix(pose, false);
+	}
+
+	private void getPoseTransform(Joint joint, OpenMatrix4f parentTransform, Pose pose, OpenMatrix4f[] jointMatrices, boolean applyOriginTransform) {
 		OpenMatrix4f result = pose.orElseEmpty(joint.getName()).getAnimationBoundMatrix(joint, parentTransform);
 		jointMatrices[joint.getId()] = result;
 
 		for (Joint joints : joint.getSubJoints()) {
-			this.getPoseTransform(joints, result, pose, jointMatrices);
+			this.getPoseTransform(joints, result, pose, jointMatrices, applyOriginTransform);
+		}
+
+		if (applyOriginTransform) {
+			result.mulBack(joint.getToOrigin());
 		}
 	}
 
 	public OpenMatrix4f getBindedTransformFor(Pose pose, Joint joint) {
-		return this.getBindedTransformByJointIndex(pose, this.searchPathIndex(joint.getName()));
+		return this.getBoundTransformFor(pose, joint);
 	}
 
-	/** Get binded position of joint **/
-	public OpenMatrix4f getBindedTransformByJointIndex(Pose pose, int pathIndex) {
-		return getBindedJointTransformByIndexInternal(pose, this.rootJoint, new OpenMatrix4f(), pathIndex);
+	public OpenMatrix4f getBoundTransformFor(Pose pose, Joint joint) {
+		return this.getBoundTransformByJointIndex(pose, this.searchPathIndex(joint.getName()).createAccessTicket(this.rootJoint));
 	}
 
-	private OpenMatrix4f getBindedJointTransformByIndexInternal(Pose pose, Joint joint, OpenMatrix4f parentTransform,
-			int pathIndex) {
+	public OpenMatrix4f getBoundTransformByJointIndex(Pose pose, Joint.AccessTicket pathIndices) {
+		return this.getBoundJointTransformRecursively(pose, this.rootJoint, new OpenMatrix4f(), pathIndices);
+	}
+
+	private OpenMatrix4f getBoundJointTransformRecursively(Pose pose, Joint joint, OpenMatrix4f parentTransform, Joint.AccessTicket pathIndices) {
 		JointTransform jt = pose.orElseEmpty(joint.getName());
 		OpenMatrix4f result = jt.getAnimationBoundMatrix(joint, parentTransform);
-		int nextIndex = pathIndex % 10;
-		return nextIndex > 0 ? this.getBindedJointTransformByIndexInternal(pose,
-				joint.getSubJoints().get(nextIndex - 1), result, pathIndex / 10) : result;
+
+		return pathIndices.hasNext() ? this.getBoundJointTransformRecursively(pose, pathIndices.next(), result, pathIndices) : result;
 	}
 
 	public Joint searchJointById(int id) {
@@ -92,21 +119,38 @@ public class Armature {
 		return this.jointByName.get(name);
 	}
 
-	public int searchPathIndex(String joint) {
-		if (this.pathIndexMap.containsKey(joint)) {
-			return this.pathIndexMap.getInt(joint);
+	public Joint.HierarchicalJointAccessor searchPathIndex(String terminalJointName) {
+		return this.searchPathIndex(this.rootJoint, terminalJointName);
+	}
+
+	public Joint.HierarchicalJointAccessor searchPathIndex(Joint start, String terminalJointName) {
+		String signature = start.getName() + "-" + terminalJointName;
+
+		if (this.pathIndexMap.containsKey(signature)) {
+			return this.pathIndexMap.get(signature);
 		} else {
-			String pathIndex = this.rootJoint.searchPath("", joint);
-			int pathIndex2Int = 0;
+			String pathIndex = start.searchPath("", terminalJointName);
+			Joint.HierarchicalJointAccessor accessor;
 
 			if (pathIndex == null) {
-				throw new IllegalArgumentException("failed to get joint path index for " + joint);
+				throw new IllegalArgumentException("failed to get joint path index for " + terminalJointName);
 			} else {
-				pathIndex2Int = (pathIndex.length() == 0) ? -1 : Integer.parseInt(pathIndex);
-				this.pathIndexMap.put(joint, pathIndex2Int);
+				// Convert legacy numeric path string into HierarchicalJointAccessor
+				Joint.HierarchicalJointAccessor.Builder builder = Joint.HierarchicalJointAccessor.builder();
+				// Process digits from last to first to match legacy traversal order
+				for (int i = pathIndex.length() - 1; i >= 0; i--) {
+					int digit = Character.digit(pathIndex.charAt(i), 10);
+					if (digit < 1) {
+						throw new IllegalArgumentException("Invalid joint path digit for " + terminalJointName + ": " + pathIndex.charAt(i));
+					}
+					builder = builder.append(digit - 1);
+				}
+
+				accessor = builder.build();
+				this.pathIndexMap.put(signature, accessor);
 			}
 
-			return pathIndex2Int;
+			return accessor;
 		}
 	}
 
@@ -116,6 +160,22 @@ public class Armature {
 
 	public int getJointNumber() {
 		return this.jointNumber;
+	}
+
+	public void gatherAllJointsInPathToTerminal(String terminalJointName, Collection<String> jointsInPath) {
+		if (!this.jointByName.containsKey(terminalJointName)) {
+			throw new NoSuchElementException("No " + terminalJointName + " joint in this armature!");
+		}
+
+		Joint.HierarchicalJointAccessor pathIndices = this.searchPathIndex(terminalJointName);
+		Joint.AccessTicket accessTicket = pathIndices.createAccessTicket(this.rootJoint);
+
+		Joint joint = this.rootJoint;
+		jointsInPath.add(joint.getName());
+
+		while (accessTicket.hasNext()) {
+			jointsInPath.add(accessTicket.next().getName());
+		}
 	}
 
 	public Joint getRootJoint() {

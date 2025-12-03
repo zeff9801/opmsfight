@@ -32,7 +32,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		float partialScale = 1.0F / numberOf;
 		float interpolation = partialScale;
 		Armature armature = entitypatch.getArmature();
-		int pathIndex = armature.searchPathIndex(joint.getName());
+		boolean isRoot = armature.rootJoint.equals(joint);
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
@@ -51,7 +51,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 			poseStack.translate(gap.x(), gap.y(), gap.z());
 
 			Pose pose;
-			if (pathIndex == -1) {
+			if (isRoot) {
 				pose = getPoseForCollider(animation, joint, armature, entitypatch, elapsedTime, 1.0F);
 			} else {
 				pose = animation.getPoseByTime(entitypatch, pt2, 1.0F);

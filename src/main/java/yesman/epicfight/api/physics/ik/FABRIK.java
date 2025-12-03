@@ -5,6 +5,7 @@ import com.joml.Quaternionf;
 import net.minecraft.util.math.vector.Vector3f;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Joint.AccessTicket;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -27,25 +28,23 @@ public class FABRIK {
 				this.armature.searchJointByName(endJoint.getName()));
 	}
 
-	public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
-		OpenMatrix4f bindTransform = armature.getBindedTransformFor(pose, startJoint);
-		int pathIndex = Integer.parseInt(startJoint.searchPath("", endJoint.getName()));
-		this.startPos.set(bindTransform.toTranslationVector());
-		this.addChainInternal(pose, bindTransform, startJoint, pathIndex);
-	}
+    public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
+        OpenMatrix4f bindTransform = armature.getBoundTransformFor(pose, startJoint);
+        AccessTicket accessTicket = armature.searchPathIndex(startJoint, endJoint.getName()).createAccessTicket(startJoint);
+        this.startPos.set(bindTransform.toTranslationVector());
+        this.addChainInternal(pose, bindTransform, startJoint, accessTicket);
+    }
 
-	private void addChainInternal(Pose pose, OpenMatrix4f parentTransform, Joint joint, int pathIndex) {
-		Joint nextJoint = joint.getSubJoints().get((pathIndex % 10) - 1);
-		JointTransform jt = pose.orElseEmpty(nextJoint.getName());
-		OpenMatrix4f result = jt.getAnimationBoundMatrix(nextJoint, parentTransform);
-		this.chains
-				.add(new Chain(joint.getName(), parentTransform.toTranslationVector(), result.toTranslationVector()));
-		int remainPath = pathIndex / 10;
+    private void addChainInternal(Pose pose, OpenMatrix4f parentTransform, Joint joint, AccessTicket accessTicket) {
+        Joint nextJoint = accessTicket.next();
+        JointTransform jt = pose.orElseEmpty(nextJoint.getName());
+        OpenMatrix4f result = jt.getAnimationBoundMatrix(nextJoint, parentTransform);
+        this.chains.add(new Chain(joint.getName(), parentTransform.toTranslationVector(), result.toTranslationVector()));
 
-		if (remainPath > 0) {
-			this.addChainInternal(pose, result, nextJoint, remainPath);
-		}
-	}
+        if (accessTicket.hasNext()) {
+            this.addChainInternal(pose, result, nextJoint, accessTicket);
+        }
+    }
 
 	public void run(Vec3f target, int iteration) {
 		this.target.set(target);

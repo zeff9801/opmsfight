@@ -328,22 +328,8 @@ public class JsonModelLoader {
 
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
-				Joint joint = armature.rootJoint;
-
 				for (AttackAnimation.JointColliderPair colliderInfo : phase.getColliders()) {
-					int pathIndex = armature.searchPathIndex(colliderInfo.getFirst().getName());
-
-					while (joint != null) {
-						allowedJoints.add(joint.getName());
-						int nextJoint = pathIndex % 10;
-
-						if (nextJoint > 0) {
-							pathIndex /= 10;
-							joint = joint.getSubJoints().get(nextJoint - 1);
-						} else {
-							joint = null;
-						}
-					}
+					armature.gatherAllJointsInPathToTerminal(colliderInfo.getFirst().getName(), allowedJoints);
 				}
 			}
 		} else if (action) {
@@ -389,6 +375,10 @@ public class JsonModelLoader {
 
 					TransformSheet sheet = getTransformSheet(times, transforms, new OpenMatrix4f(), true);
 					((ActionAnimation)animation).addProperty(AnimationProperty.ActionAnimationProperty.COORD, sheet);
+					float maxFrameTime = sheet.maxFrameTime();
+					if (clip.getClipTime() < maxFrameTime) {
+						clip.setClipTime(maxFrameTime);
+					}
 					root = false;
 					continue;
 				} else {

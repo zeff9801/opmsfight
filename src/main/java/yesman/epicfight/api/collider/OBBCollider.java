@@ -16,6 +16,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.Joint.AccessTicket;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
@@ -175,8 +176,8 @@ public class OBBCollider extends Collider {
 			jt.rotation().w = 1.0F;
 			poseMatrix = jt.getAnimationBoundMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
 		} else {
-			int pathIndex = armature.searchPathIndex(joint.getName());
-			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+			AccessTicket accessTicket = armature.searchPathIndex(joint.getName()).createAccessTicket(armature.rootJoint);
+			poseMatrix = armature.getBoundTransformByJointIndex(interpolatedPose, accessTicket);
 		}
 
 		poseStack.pushPose();

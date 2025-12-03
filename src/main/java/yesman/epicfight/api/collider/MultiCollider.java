@@ -154,18 +154,14 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 
 	@OnlyIn(Dist.CLIENT)
 	protected Pose getPoseForCollider(AttackAnimation animation, Joint joint, Armature armature, LivingEntityPatch<?> entitypatch, float time, float weight) {
-		int pathIndex = armature.searchPathIndex(joint.getName());
-		Pose pose;
-
-		if (pathIndex == -1) {
-			pose = new Pose();
+		if (armature.rootJoint.equals(joint)) {
+			Pose pose = new Pose();
 			pose.putJointData("Root", JointTransform.empty());
 			animation.modifyPose(animation, pose, entitypatch, time, weight);
-		} else {
-			pose = animation.getPoseByTime(entitypatch, time, weight);
+			return pose;
 		}
 
-		return pose;
+		return animation.getPoseByTime(entitypatch, time, weight);
 	}
 
 	@OnlyIn(Dist.CLIENT)
